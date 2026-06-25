@@ -1,5 +1,15 @@
 const COCKPIT_STORAGE_KEY = "operation-cockpit-v1";
-const dailyItems = ["メール", "DM（前日分まで）", "記事（翌日分）", "ボイス（翌日分）", "Notes"];
+const dailyItems = [
+  "メール",
+  "DM（前日分まで）",
+  "記事（翌日分）",
+  "ボイス（翌日分）",
+  "Notes",
+  "おはスタック投稿",
+  "チャット投稿",
+];
+const mailCheckItems = ["朝チェック", "昼チェック", "夜チェック"];
+const communityItems = ["コメント返信", "リスタック", "Notes交流", "ライブ参加"];
 
 const $ = (selector) => document.querySelector(selector);
 let activeDate = toDateInputValue(new Date());
@@ -10,9 +20,16 @@ function toDateInputValue(date) {
   return local.toISOString().slice(0, 10);
 }
 
+function checksFrom(items) {
+  return Object.fromEntries(items.map((item) => [item, false]));
+}
+
 function blankDay() {
   return {
-    checks: Object.fromEntries(dailyItems.map((item) => [item, false])),
+    checks: checksFrom(dailyItems),
+    mailChecks: checksFrom(mailCheckItems),
+    communityChecks: checksFrom(communityItems),
+    mailLastChecked: "",
     topPriority: "",
     articleNote: "",
     todayFocus: "",
@@ -40,7 +57,21 @@ function getDay() {
     store[activeDate] = blankDay();
     localStorage.setItem(COCKPIT_STORAGE_KEY, JSON.stringify(store));
   }
-  return store[activeDate];
+  const day = store[activeDate];
+  day.checks ||= {};
+  day.mailChecks ||= {};
+  day.communityChecks ||= {};
+  dailyItems.forEach((item) => {
+    if (!(item in day.checks)) day.checks[item] = false;
+  });
+  mailCheckItems.forEach((item) => {
+    if (!(item in day.mailChecks)) day.mailChecks[item] = false;
+  });
+  communityItems.forEach((item) => {
+    if (!(item in day.communityChecks)) day.communityChecks[item] = false;
+  });
+  day.mailLastChecked ||= "";
+  return day;
 }
 
 function formatDateLabel(dateText) {
@@ -53,19 +84,17 @@ function formatDateLabel(dateText) {
   }).format(date);
 }
 
-function renderDailyChecks() {
-  const day = getDay();
-  const target = $("#dailyChecks");
+function renderCheckGroup(targetSelector, checkStore, items) {
+  const target = $(targetSelector);
   target.replaceChildren();
-  dailyItems.forEach((item) => {
-    if (!(item in day.checks)) day.checks[item] = false;
+  items.forEach((item) => {
     const label = document.createElement("label");
     label.className = "cockpit-check-row";
     label.innerHTML = `<input type="checkbox" /> <span>${item}</span>`;
     const checkbox = label.querySelector("input");
-    checkbox.checked = day.checks[item];
+    checkbox.checked = checkStore[item];
     checkbox.addEventListener("change", () => {
-      day.checks[item] = checkbox.checked;
+      checkStore[item] = checkbox.checked;
       label.classList.toggle("done", checkbox.checked);
       saveStore();
     });
@@ -74,10 +103,18 @@ function renderDailyChecks() {
   });
 }
 
+function renderChecks() {
+  const day = getDay();
+  renderCheckGroup("#dailyChecks", day.checks, dailyItems);
+  renderCheckGroup("#mailChecks", day.mailChecks, mailCheckItems);
+  renderCheckGroup("#communityChecks", day.communityChecks, communityItems);
+}
+
 function renderFields() {
   const day = getDay();
   $("#cockpitDate").value = activeDate;
   $("#cockpitDateLabel").textContent = formatDateLabel(activeDate);
+  $("#mailLastChecked").value = day.mailLastChecked || "";
   $("#topPriority").value = day.topPriority || "";
   $("#articleNote").value = day.articleNote || "";
   $("#todayFocus").value = day.todayFocus || "";
@@ -88,7 +125,7 @@ function renderFields() {
 function renderAll() {
   getDay();
   renderFields();
-  renderDailyChecks();
+  renderChecks();
 }
 
 function shiftDate(delta) {
@@ -105,7 +142,7 @@ function bindEvents() {
   });
   $("#prevDay").addEventListener("click", () => shiftDate(-1));
   $("#nextDay").addEventListener("click", () => shiftDate(1));
-  ["topPriority", "articleNote", "todayFocus", "growthTarget", "noticed"].forEach((key) => {
+  ["mailLastChecked", "topPriority", "articleNote", "todayFocus", "growthTarget", "noticed"].forEach((key) => {
     $(`#${key}`).addEventListener("input", (event) => {
       getDay()[key] = event.target.value;
       saveStore();

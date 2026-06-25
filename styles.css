@@ -371,7 +371,9 @@ textarea {
 }
 
 .cockpit-checks,
-.cockpit-today {
+.cockpit-today,
+.cockpit-mail,
+.cockpit-community {
   display: grid;
   gap: 10px;
 }
@@ -457,11 +459,27 @@ textarea {
   color: var(--green);
 }
 
-.cockpit-today label {
+.cockpit-today label,
+.cockpit-mail label {
   display: grid;
   gap: 5px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.cockpit-mail {
+  border-color: #cdd6e0;
+  background: #fbfcfd;
+}
+
+.cockpit-mail input[type="time"] {
+  min-height: 44px;
+  font-size: 18px;
+}
+
+.cockpit-community {
+  border-color: #d7c7a3;
+  background: #fffdf7;
 }
 
 .cockpit-notes ul {
