@@ -1,0 +1,400 @@
+﻿:root {
+  color-scheme: light;
+  --bg: #f5f7f4;
+  --panel: #ffffff;
+  --text: #1d2420;
+  --muted: #69736d;
+  --line: #dbe2dd;
+  --green: #15803d;
+  --green-soft: #e9f7ee;
+  --yellow: #fde68a;
+  --yellow-line: #d97706;
+  --button: #24352d;
+  --button-text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", "Yu Gothic UI", Meiryo, sans-serif;
+}
+
+button,
+input,
+textarea {
+  min-width: 0;
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+.app {
+  width: min(1480px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 18px 0 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.kicker {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+h1,
+h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 16px;
+}
+
+.date-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-switcher input,
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  padding: 8px 9px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.icon-button,
+.ghost-button,
+.inline-form button,
+.delete-button,
+.move-button,
+.priority-button {
+  min-height: 34px;
+  border-radius: 6px;
+  padding: 0 10px;
+  background: var(--button);
+  color: var(--button-text);
+}
+
+.icon-button {
+  width: 36px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.ghost-button,
+.move-button,
+.priority-button {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+}
+
+.delete-button {
+  background: #f4f0ee;
+  color: #7f1d1d;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-panel,
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.summary-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summary-cell {
+  min-height: 84px;
+  padding: 16px;
+  border-right: 1px solid var(--line);
+}
+
+.summary-cell:last-child {
+  border-right: 0;
+}
+
+.summary-cell span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary-cell strong {
+  font-size: 26px;
+}
+
+.progress-track {
+  height: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef1ee;
+}
+
+.progress-track div {
+  width: 0;
+  height: 100%;
+  background: var(--green);
+  transition: width 160ms ease;
+}
+
+.panel {
+  min-height: 180px;
+  padding: 14px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.inline-form {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) auto;
+  gap: 6px;
+  width: min(360px, 60%);
+}
+
+.inline-form.compact {
+  width: min(280px, 58%);
+}
+
+.task-list,
+.memo-list,
+.history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.task-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 34px 34px 34px auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px;
+  background: #fff;
+}
+
+.compact-list .task-row {
+  grid-template-columns: 22px minmax(0, 1fr) 34px auto;
+}
+
+.compact-list .move-button {
+  display: none;
+}
+
+.task-row.done {
+  border-color: #b8dfc3;
+  background: var(--green-soft);
+}
+
+.task-row.priority {
+  border-color: var(--yellow-line);
+  background: var(--yellow);
+}
+
+.task-row.done .task-title {
+  color: var(--green);
+  text-decoration: line-through;
+}
+
+.task-check {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  accent-color: var(--green);
+}
+
+.task-title {
+  width: 100%;
+  border-color: transparent;
+  background: transparent;
+}
+
+.priority-button.active {
+  background: #a16207;
+  color: #fff;
+}
+
+.metrics-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.metrics-panel label,
+.reflection-panel label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.check-row {
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  color: var(--text) !important;
+}
+
+.check-row input {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  accent-color: var(--green);
+}
+
+.reflection-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.memo-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.data-panel {
+  min-height: 250px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 9px;
+}
+
+.history-item strong {
+  font-size: 14px;
+}
+
+.history-item span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 1080px) {
+  .dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-cell:nth-child(2) {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .app {
+    width: min(100% - 16px, 640px);
+    padding-top: 12px;
+  }
+
+  .topbar,
+  .panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard,
+  .summary-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2 {
+    grid-column: span 1;
+  }
+
+  .summary-cell {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .summary-cell:last-child {
+    border-bottom: 0;
+  }
+
+  .inline-form,
+  .inline-form.compact {
+    width: 100%;
+  }
+
+  .task-row,
+  .compact-list .task-row {
+    grid-template-columns: 22px minmax(0, 1fr) 34px 34px;
+  }
+
+  .task-row .move-button,
+  .task-row .delete-button {
+    grid-row: 2;
+  }
+
+  .task-row .delete-button {
+    grid-column: 4;
+  }
+
+  .memo-item,
+  .history-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+

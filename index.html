@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>運営ダッシュボード</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <p class="kicker">迷わず動くための一画面</p>
+          <h1>運営ダッシュボード</h1>
+        </div>
+        <div class="date-switcher">
+          <button class="icon-button" id="prevDay" type="button" title="前日">‹</button>
+          <input id="activeDate" type="date" />
+          <button class="icon-button" id="nextDay" type="button" title="翌日">›</button>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="summary-panel">
+          <div class="summary-cell">
+            <span>今日の日付</span>
+            <strong id="dateLabel"></strong>
+          </div>
+          <div class="summary-cell">
+            <span>現在時刻</span>
+            <strong id="timeLabel"></strong>
+          </div>
+          <div class="summary-cell progress-cell">
+            <span>今日の進捗率</span>
+            <strong id="progressLabel">0%</strong>
+            <div class="progress-track"><div id="progressBar"></div></div>
+          </div>
+          <div class="summary-cell">
+            <span>完了した項目数</span>
+            <strong id="completeCount">0 / 0</strong>
+          </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <h2>毎日タスク</h2>
+            <form class="inline-form" data-add-list="dailyTasks">
+              <input type="text" placeholder="項目を追加" aria-label="毎日タスクを追加" />
+              <button type="submit">追加</button>
+            </form>
+          </div>
+          <div id="dailyTasks" class="task-list"></div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <h2>今日やること</h2>
+            <form class="inline-form" data-add-list="todayTasks">
+              <input type="text" placeholder="今日だけのタスク" aria-label="今日やることを追加" />
+              <button type="submit">追加</button>
+            </form>
+          </div>
+          <div id="todayTasks" class="task-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>育てるプロジェクト</h2>
+            <form class="inline-form compact" data-add-list="projects">
+              <input type="text" placeholder="プロジェクト追加" aria-label="プロジェクトを追加" />
+              <button type="submit">追加</button>
+            </form>
+          </div>
+          <div id="projects" class="task-list compact-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>思いつきメモ</h2>
+            <button class="ghost-button" id="addMemo" type="button">追加</button>
+          </div>
+          <div id="memoList" class="memo-list"></div>
+        </section>
+
+        <section class="panel metrics-panel">
+          <h2>メール</h2>
+          <label>未読件数<input id="mailUnread" type="number" min="0" inputmode="numeric" /></label>
+          <label>本日処理<input id="mailProcessed" type="number" min="0" inputmode="numeric" /></label>
+        </section>
+
+        <section class="panel metrics-panel">
+          <h2>DM</h2>
+          <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
+          <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
+          <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
+        </section>
+
+        <section class="panel metrics-panel">
+          <h2>コメント・交流</h2>
+          <label>コメント返信数<input id="commentReplies" type="number" min="0" inputmode="numeric" /></label>
+          <label class="check-row"><input id="restackDone" type="checkbox" /> リスタック</label>
+          <label class="check-row"><input id="liveJoined" type="checkbox" /> ライブ参加</label>
+          <label class="check-row"><input id="notesExchange" type="checkbox" /> Notes交流</label>
+        </section>
+
+        <section class="panel reflection-panel">
+          <h2>今日の振り返り</h2>
+          <label>今日できたこと<textarea id="didToday" rows="3"></textarea></label>
+          <label>困ったこと<textarea id="blockedToday" rows="3"></textarea></label>
+          <label>明日やること<textarea id="tomorrowPlan" rows="3"></textarea></label>
+        </section>
+
+        <section class="panel data-panel span-2">
+          <div class="panel-heading">
+            <h2>データ</h2>
+            <button class="ghost-button" id="downloadCsv" type="button">CSV</button>
+          </div>
+          <input id="historySearch" type="search" placeholder="過去データを検索" aria-label="過去データを検索" />
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="taskTemplate">
+      <div class="task-row">
+        <input class="task-check" type="checkbox" />
+        <input class="task-title" type="text" />
+        <button class="priority-button" type="button" title="今日最優先">★</button>
+        <button class="move-button" data-move="up" type="button" title="上へ">↑</button>
+        <button class="move-button" data-move="down" type="button" title="下へ">↓</button>
+        <button class="delete-button" type="button">削除</button>
+      </div>
+    </template>
+
+    <template id="memoTemplate">
+      <div class="memo-item">
+        <textarea rows="3" placeholder="アイデア、記事ネタ、改善案、アプリ案"></textarea>
+        <button class="delete-button" type="button">削除</button>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

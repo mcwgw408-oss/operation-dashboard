@@ -1,0 +1,364 @@
+const STORAGE_KEY = "operation-dashboard-v1";
+const defaultDailyTasks = [
+  "メール確認",
+  "DM確認（前日分まで）",
+  "記事執筆（翌日公開分）",
+  "ボイスメッセージ（翌日公開分）",
+  "Notes投稿",
+];
+const defaultProjects = [
+  "無料アプリ改善",
+  "Substack交流",
+  "GitHub",
+  "新企画",
+  "新アプリ構想",
+];
+
+const $ = (selector) => document.querySelector(selector);
+const listIds = ["dailyTasks", "todayTasks", "projects"];
+let activeDate = toDateInputValue(new Date());
+let store = loadStore();
+
+function toDateInputValue(date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function newItem(title = "") {
+  return {
+    id: crypto.randomUUID(),
+    title,
+    done: false,
+    priority: false,
+  };
+}
+
+function blankDay() {
+  return {
+    dailyTasks: defaultDailyTasks.map(newItem),
+    todayTasks: [],
+    projects: defaultProjects.map(newItem),
+    memos: [],
+    metrics: {
+      mailUnread: "",
+      mailProcessed: "",
+      dmPending: "",
+      dmHandled: "",
+      dmPreviousDone: false,
+      commentReplies: "",
+      restackDone: false,
+      liveJoined: false,
+      notesExchange: false,
+    },
+    reflection: {
+      didToday: "",
+      blockedToday: "",
+      tomorrowPlan: "",
+    },
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function loadStore() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStore() {
+  store[activeDate].updatedAt = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  renderSummary();
+  renderHistory();
+}
+
+function getDay() {
+  if (!store[activeDate]) {
+    store[activeDate] = blankDay();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  return store[activeDate];
+}
+
+function formatDateLabel(dateText) {
+  const date = new Date(`${dateText}T00:00:00`);
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  }).format(date);
+}
+
+function renderClock() {
+  $("#timeLabel").textContent = new Intl.DateTimeFormat("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date());
+}
+
+function renderSummary() {
+  const day = getDay();
+  const tracked = [
+    ...day.dailyTasks,
+    ...day.todayTasks,
+    ...day.projects,
+    { done: day.metrics.dmPreviousDone, title: "DM前日分" },
+    { done: day.metrics.restackDone, title: "リスタック" },
+    { done: day.metrics.liveJoined, title: "ライブ参加" },
+    { done: day.metrics.notesExchange, title: "Notes交流" },
+  ];
+  const total = tracked.length;
+  const done = tracked.filter((item) => item.done).length;
+  const progress = total ? Math.round((done / total) * 100) : 0;
+  $("#dateLabel").textContent = formatDateLabel(activeDate);
+  $("#progressLabel").textContent = `${progress}%`;
+  $("#progressBar").style.width = `${progress}%`;
+  $("#completeCount").textContent = `${done} / ${total}`;
+}
+
+function renderTaskList(listId) {
+  const day = getDay();
+  const target = $(`#${listId}`);
+  const template = $("#taskTemplate");
+  target.replaceChildren();
+  day[listId].forEach((item, index) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    row.classList.toggle("done", item.done);
+    row.classList.toggle("priority", item.priority && !item.done);
+    const checkbox = row.querySelector(".task-check");
+    const title = row.querySelector(".task-title");
+    const priority = row.querySelector(".priority-button");
+    checkbox.checked = item.done;
+    title.value = item.title;
+    priority.classList.toggle("active", item.priority);
+    checkbox.addEventListener("change", () => {
+      item.done = checkbox.checked;
+      saveStore();
+      renderTaskList(listId);
+    });
+    title.addEventListener("input", () => {
+      item.title = title.value;
+      saveStore();
+    });
+    priority.addEventListener("click", () => {
+      day[listId].forEach((candidate) => {
+        if (candidate.id !== item.id) candidate.priority = false;
+      });
+      item.priority = !item.priority;
+      saveStore();
+      renderTaskList(listId);
+    });
+    row.querySelector(".delete-button").addEventListener("click", () => {
+      day[listId] = day[listId].filter((candidate) => candidate.id !== item.id);
+      saveStore();
+      renderTaskList(listId);
+    });
+    row.querySelectorAll(".move-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const direction = button.dataset.move === "up" ? -1 : 1;
+        const nextIndex = index + direction;
+        if (nextIndex < 0 || nextIndex >= day[listId].length) return;
+        const [moving] = day[listId].splice(index, 1);
+        day[listId].splice(nextIndex, 0, moving);
+        saveStore();
+        renderTaskList(listId);
+      });
+    });
+    target.append(row);
+  });
+}
+
+function renderMemos() {
+  const day = getDay();
+  const target = $("#memoList");
+  const template = $("#memoTemplate");
+  target.replaceChildren();
+  day.memos.forEach((memo) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    const textarea = row.querySelector("textarea");
+    textarea.value = memo.text;
+    textarea.addEventListener("input", () => {
+      memo.text = textarea.value;
+      saveStore();
+    });
+    row.querySelector(".delete-button").addEventListener("click", () => {
+      day.memos = day.memos.filter((candidate) => candidate.id !== memo.id);
+      saveStore();
+      renderMemos();
+    });
+    target.append(row);
+  });
+}
+
+function renderFields() {
+  const day = getDay();
+  Object.entries(day.metrics).forEach(([key, value]) => {
+    const field = $(`#${key}`);
+    if (!field) return;
+    if (field.type === "checkbox") field.checked = Boolean(value);
+    else field.value = value;
+  });
+  Object.entries(day.reflection).forEach(([key, value]) => {
+    $(`#${key}`).value = value;
+  });
+}
+
+function collectSearchText(day) {
+  return [
+    ...day.dailyTasks.map((item) => item.title),
+    ...day.todayTasks.map((item) => item.title),
+    ...day.projects.map((item) => item.title),
+    ...day.memos.map((memo) => memo.text),
+    ...Object.values(day.reflection),
+  ].join(" ");
+}
+
+function renderHistory() {
+  const query = $("#historySearch").value.trim().toLowerCase();
+  const target = $("#historyList");
+  target.replaceChildren();
+  Object.entries(store)
+    .sort(([a], [b]) => b.localeCompare(a))
+    .filter(([, day]) => !query || collectSearchText(day).toLowerCase().includes(query))
+    .slice(0, 30)
+    .forEach(([date, day]) => {
+      const row = document.createElement("div");
+      row.className = "history-item";
+      const tracked = [...day.dailyTasks, ...day.todayTasks, ...day.projects];
+      const done = tracked.filter((item) => item.done).length;
+      const total = tracked.length;
+      row.innerHTML = `
+        <strong>${date}</strong>
+        <span>${done}/${total} 完了・メモ ${day.memos.length} 件</span>
+        <button class="ghost-button" type="button">開く</button>
+      `;
+      row.querySelector("button").addEventListener("click", () => {
+        activeDate = date;
+        $("#activeDate").value = activeDate;
+        renderAll();
+      });
+      target.append(row);
+    });
+}
+
+function renderAll() {
+  getDay();
+  $("#activeDate").value = activeDate;
+  listIds.forEach(renderTaskList);
+  renderMemos();
+  renderFields();
+  renderSummary();
+  renderHistory();
+}
+
+function bindEvents() {
+  $("#activeDate").addEventListener("change", (event) => {
+    activeDate = event.target.value || toDateInputValue(new Date());
+    renderAll();
+  });
+  $("#prevDay").addEventListener("click", () => shiftDate(-1));
+  $("#nextDay").addEventListener("click", () => shiftDate(1));
+  document.querySelectorAll("[data-add-list]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = form.querySelector("input");
+      const title = input.value.trim();
+      if (!title) return;
+      getDay()[form.dataset.addList].push(newItem(title));
+      input.value = "";
+      saveStore();
+      renderTaskList(form.dataset.addList);
+    });
+  });
+  $("#addMemo").addEventListener("click", () => {
+    getDay().memos.unshift({ id: crypto.randomUUID(), text: "" });
+    saveStore();
+    renderMemos();
+  });
+  Object.keys(getDay().metrics).forEach((key) => {
+    const field = $(`#${key}`);
+    field.addEventListener("input", () => updateField("metrics", key, field));
+    field.addEventListener("change", () => updateField("metrics", key, field));
+  });
+  Object.keys(getDay().reflection).forEach((key) => {
+    const field = $(`#${key}`);
+    field.addEventListener("input", () => updateField("reflection", key, field));
+  });
+  $("#historySearch").addEventListener("input", renderHistory);
+  $("#downloadCsv").addEventListener("click", downloadCsv);
+}
+
+function updateField(group, key, field) {
+  getDay()[group][key] = field.type === "checkbox" ? field.checked : field.value;
+  saveStore();
+}
+
+function shiftDate(delta) {
+  const date = new Date(`${activeDate}T00:00:00`);
+  date.setDate(date.getDate() + delta);
+  activeDate = toDateInputValue(date);
+  renderAll();
+}
+
+function escapeCsv(value) {
+  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
+function downloadCsv() {
+  const rows = [
+    [
+      "date",
+      "progress_done",
+      "progress_total",
+      "daily_tasks",
+      "today_tasks",
+      "projects",
+      "memos",
+      "mail_unread",
+      "mail_processed",
+      "dm_pending",
+      "dm_handled",
+      "did_today",
+      "blocked_today",
+      "tomorrow_plan",
+    ],
+  ];
+  Object.entries(store)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .forEach(([date, day]) => {
+      const tracked = [...day.dailyTasks, ...day.todayTasks, ...day.projects];
+      rows.push([
+        date,
+        tracked.filter((item) => item.done).length,
+        tracked.length,
+        day.dailyTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        day.todayTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        day.projects.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        day.memos.map((memo) => memo.text).join(" / "),
+        day.metrics.mailUnread,
+        day.metrics.mailProcessed,
+        day.metrics.dmPending,
+        day.metrics.dmHandled,
+        day.reflection.didToday,
+        day.reflection.blockedToday,
+        day.reflection.tomorrowPlan,
+      ]);
+    });
+  const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `operation-dashboard-${toDateInputValue(new Date())}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+bindEvents();
+renderAll();
+renderClock();
+setInterval(renderClock, 1000);
