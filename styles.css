@@ -123,6 +123,19 @@ textarea {
   color: #7f1d1d;
 }
 
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  padding: 0 12px;
+  text-decoration: none;
+}
+
 .dashboard {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -328,6 +341,81 @@ textarea {
   font-size: 13px;
 }
 
+.cockpit-app {
+  width: min(980px, calc(100% - 24px));
+}
+
+.cockpit-topbar {
+  align-items: flex-end;
+}
+
+.cockpit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
+  gap: 12px;
+}
+
+.cockpit-hero {
+  grid-column: 1 / -1;
+  min-height: 130px;
+}
+
+.cockpit-hero h2 {
+  margin-top: 8px;
+  font-size: 24px;
+}
+
+.cockpit-hero p:last-child {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.cockpit-checks,
+.cockpit-today {
+  display: grid;
+  gap: 10px;
+}
+
+.cockpit-check-row {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  padding: 9px;
+}
+
+.cockpit-check-row input {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  accent-color: var(--green);
+}
+
+.cockpit-check-row.done {
+  border-color: #b8dfc3;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.cockpit-today label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cockpit-notes ul {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: var(--text);
+}
+
 @media (max-width: 1080px) {
   .dashboard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -394,6 +482,14 @@ textarea {
   .memo-item,
   .history-item {
     grid-template-columns: 1fr;
+  }
+
+  .cockpit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cockpit-topbar {
+    align-items: stretch;
   }
 }
 

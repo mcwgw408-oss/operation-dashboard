@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>運営コックピット</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app cockpit-app">
+      <header class="topbar cockpit-topbar">
+        <div>
+          <p class="kicker">発信者のコックピット</p>
+          <h1>運営コックピット</h1>
+        </div>
+        <div class="date-switcher">
+          <button class="icon-button" id="prevDay" type="button" title="前日">‹</button>
+          <input id="cockpitDate" type="date" />
+          <button class="icon-button" id="nextDay" type="button" title="翌日">›</button>
+        </div>
+        <a class="nav-link" href="./index.html">ダッシュボードへ戻る</a>
+      </header>
+
+      <main class="cockpit-grid">
+        <section class="panel cockpit-hero">
+          <p class="kicker">今日迷わないための画面</p>
+          <h2 id="cockpitDateLabel"></h2>
+          <p>頑張るためではなく、続けるための仕組み。</p>
+        </section>
+
+        <section class="panel">
+          <h2>毎日見る</h2>
+          <div class="cockpit-checks" id="dailyChecks"></div>
+        </section>
+
+        <section class="panel cockpit-today">
+          <h2>今日の運営</h2>
+          <label>今日やること<textarea id="todayFocus" rows="3"></textarea></label>
+          <label>今日育てるもの（1つ）<input id="growthTarget" type="text" /></label>
+          <label>気づいたこと<textarea id="noticed" rows="4"></textarea></label>
+        </section>
+
+        <section class="panel cockpit-notes">
+          <h2>考え方メモ</h2>
+          <ul>
+            <li>メールは毎日増える</li>
+            <li>73人購読しているので全部は読まない</li>
+            <li>情報は「読む」ではなく「拾う」</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <script src="./cockpit.js"></script>
+  </body>
+</html>
