@@ -13,6 +13,8 @@ function toDateInputValue(date) {
 function blankDay() {
   return {
     checks: Object.fromEntries(dailyItems.map((item) => [item, false])),
+    topPriority: "",
+    articleNote: "",
     todayFocus: "",
     growthTarget: "",
     noticed: "",
@@ -76,9 +78,11 @@ function renderFields() {
   const day = getDay();
   $("#cockpitDate").value = activeDate;
   $("#cockpitDateLabel").textContent = formatDateLabel(activeDate);
-  $("#todayFocus").value = day.todayFocus;
-  $("#growthTarget").value = day.growthTarget;
-  $("#noticed").value = day.noticed;
+  $("#topPriority").value = day.topPriority || "";
+  $("#articleNote").value = day.articleNote || "";
+  $("#todayFocus").value = day.todayFocus || "";
+  $("#growthTarget").value = day.growthTarget || "";
+  $("#noticed").value = day.noticed || "";
 }
 
 function renderAll() {
@@ -101,7 +105,7 @@ function bindEvents() {
   });
   $("#prevDay").addEventListener("click", () => shiftDate(-1));
   $("#nextDay").addEventListener("click", () => shiftDate(1));
-  ["todayFocus", "growthTarget", "noticed"].forEach((key) => {
+  ["topPriority", "articleNote", "todayFocus", "growthTarget", "noticed"].forEach((key) => {
     $(`#${key}`).addEventListener("input", (event) => {
       getDay()[key] = event.target.value;
       saveStore();

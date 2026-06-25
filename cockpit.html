@@ -28,6 +28,21 @@
           <p>頑張るためではなく、続けるための仕組み。</p>
         </section>
 
+        <section class="panel cockpit-priority">
+          <p class="kicker">最優先を1つだけ</p>
+          <label>今日一番大事なこと<textarea id="topPriority" rows="3"></textarea></label>
+        </section>
+
+        <section class="panel cockpit-article">
+          <p class="kicker">毎朝、最初に確認</p>
+          <label>今日の記事<textarea id="articleNote" rows="4" placeholder="タイトル、切り口、書き出しメモ"></textarea></label>
+        </section>
+
+        <section class="panel cockpit-growth">
+          <p class="kicker">今日育てるもの（1つ）</p>
+          <label><input id="growthTarget" type="text" placeholder="例：Substack交流" /></label>
+        </section>
+
         <section class="panel">
           <h2>毎日見る</h2>
           <div class="cockpit-checks" id="dailyChecks"></div>
@@ -36,7 +51,6 @@
         <section class="panel cockpit-today">
           <h2>今日の運営</h2>
           <label>今日やること<textarea id="todayFocus" rows="3"></textarea></label>
-          <label>今日育てるもの（1つ）<input id="growthTarget" type="text" /></label>
           <label>気づいたこと<textarea id="noticed" rows="4"></textarea></label>
         </section>
 

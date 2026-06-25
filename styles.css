@@ -376,6 +376,62 @@ textarea {
   gap: 10px;
 }
 
+.cockpit-priority,
+.cockpit-article,
+.cockpit-growth {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.cockpit-priority {
+  border-color: var(--yellow-line);
+  background: #fff9db;
+}
+
+.cockpit-priority label,
+.cockpit-article label,
+.cockpit-growth label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cockpit-priority textarea {
+  min-height: 96px;
+  border-color: #e3b341;
+  font-size: 17px;
+}
+
+.cockpit-article {
+  grid-column: 1 / -1;
+}
+
+.cockpit-article textarea {
+  min-height: 120px;
+}
+
+.cockpit-growth {
+  grid-column: 1 / -1;
+  min-height: 170px;
+  border-color: #b8dfc3;
+  background: var(--green-soft);
+}
+
+.cockpit-growth .kicker {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.cockpit-growth input {
+  min-height: 62px;
+  border-color: #8bc79c;
+  color: var(--green);
+  font-size: 26px;
+  font-weight: 700;
+}
+
 .cockpit-check-row {
   display: grid;
   grid-template-columns: 20px 1fr;
