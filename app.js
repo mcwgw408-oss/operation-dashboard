@@ -5,6 +5,8 @@ const defaultDailyTasks = [
   "記事執筆（翌日公開分）",
   "ボイスメッセージ（翌日公開分）",
   "Notes投稿",
+  "おはスタック投稿",
+  "チャット投稿",
 ];
 const defaultProjects = [
   "無料アプリ改善",
@@ -59,6 +61,18 @@ function blankDay() {
   };
 }
 
+function ensureDefaultDailyTasks(day) {
+  let changed = false;
+  day.dailyTasks ||= [];
+  defaultDailyTasks.forEach((title) => {
+    if (!day.dailyTasks.some((item) => item.title === title)) {
+      day.dailyTasks.push(newItem(title));
+      changed = true;
+    }
+  });
+  return changed;
+}
+
 function loadStore() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -77,6 +91,9 @@ function saveStore() {
 function getDay() {
   if (!store[activeDate]) {
     store[activeDate] = blankDay();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureDefaultDailyTasks(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
