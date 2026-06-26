@@ -1,4 +1,5 @@
 const STORAGE_KEY = "operation-dashboard-v1";
+const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const defaultDailyTasks = [
   "メール確認",
   "DM確認（前日分まで）",
@@ -20,6 +21,7 @@ const $ = (selector) => document.querySelector(selector);
 const listIds = ["dailyTasks", "todayTasks", "projects"];
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
+let laterItems = loadLaterItems();
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -32,6 +34,18 @@ function newItem(title = "") {
     title,
     done: false,
     priority: false,
+  };
+}
+
+function newLaterItem({ type = "見る", title = "", url = "", memo = "" } = {}) {
+  return {
+    id: crypto.randomUUID(),
+    type,
+    title,
+    url,
+    memo,
+    done: false,
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -79,6 +93,19 @@ function loadStore() {
   } catch {
     return {};
   }
+}
+
+function loadLaterItems() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LATER_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLaterItems() {
+  localStorage.setItem(LATER_STORAGE_KEY, JSON.stringify(laterItems));
 }
 
 function saveStore() {
@@ -211,6 +238,69 @@ function renderMemos() {
   });
 }
 
+function renderLaterItems() {
+  const target = $("#laterList");
+  if (!target) return;
+  const template = $("#laterTemplate");
+  target.replaceChildren();
+  if (!laterItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "あとで見るもの、読むものはまだありません。";
+    target.append(empty);
+    return;
+  }
+  laterItems.forEach((item) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    row.classList.toggle("done", item.done);
+    const check = row.querySelector(".later-check");
+    const type = row.querySelector(".later-type");
+    const title = row.querySelector(".later-title");
+    const url = row.querySelector(".later-url");
+    const memo = row.querySelector(".later-memo");
+    const open = row.querySelector(".later-open");
+    check.checked = item.done;
+    type.value = item.type;
+    title.value = item.title;
+    url.value = item.url;
+    memo.value = item.memo;
+    open.href = item.url || "#";
+    open.classList.toggle("disabled", !item.url);
+    check.addEventListener("change", () => {
+      item.done = check.checked;
+      saveLaterItems();
+      renderLaterItems();
+    });
+    type.addEventListener("change", () => {
+      item.type = type.value;
+      saveLaterItems();
+    });
+    title.addEventListener("input", () => {
+      item.title = title.value;
+      saveLaterItems();
+    });
+    url.addEventListener("input", () => {
+      item.url = url.value.trim();
+      saveLaterItems();
+      open.href = item.url || "#";
+      open.classList.toggle("disabled", !item.url);
+    });
+    memo.addEventListener("input", () => {
+      item.memo = memo.value;
+      saveLaterItems();
+    });
+    open.addEventListener("click", (event) => {
+      if (!item.url) event.preventDefault();
+    });
+    row.querySelector(".delete-button").addEventListener("click", () => {
+      laterItems = laterItems.filter((candidate) => candidate.id !== item.id);
+      saveLaterItems();
+      renderLaterItems();
+    });
+    target.append(row);
+  });
+}
+
 function renderFields() {
   const day = getDay();
   Object.entries(day.metrics).forEach(([key, value]) => {
@@ -267,6 +357,7 @@ function renderAll() {
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
   renderMemos();
+  renderLaterItems();
   renderFields();
   renderSummary();
   renderHistory();
@@ -295,6 +386,22 @@ function bindEvents() {
     getDay().memos.unshift({ id: crypto.randomUUID(), text: "" });
     saveStore();
     renderMemos();
+  });
+  $("#laterForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const title = $("#laterTitle").value.trim();
+    if (!title) return;
+    laterItems.unshift(newLaterItem({
+      type: $("#laterType").value,
+      title,
+      url: $("#laterUrl").value.trim(),
+      memo: $("#laterMemo").value.trim(),
+    }));
+    $("#laterTitle").value = "";
+    $("#laterUrl").value = "";
+    $("#laterMemo").value = "";
+    saveLaterItems();
+    renderLaterItems();
   });
   Object.keys(getDay().metrics).forEach((key) => {
     const field = $(`#${key}`);

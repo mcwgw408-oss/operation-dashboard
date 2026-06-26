@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>運営ダッシュボード</title>
+    <title>生活・発信ダッシュボード</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="app">
       <header class="topbar">
         <div>
-          <p class="kicker">迷わず動くための一画面</p>
-          <h1>運営ダッシュボード</h1>
+          <p class="kicker">生活と発信のホーム画面</p>
+          <h1>生活・発信ダッシュボード</h1>
         </div>
         <div class="date-switcher">
           <button class="icon-button" id="prevDay" type="button" title="前日">‹</button>
@@ -40,6 +40,61 @@
             <span>完了した項目数</span>
             <strong id="completeCount">0 / 0</strong>
           </div>
+        </section>
+
+        <section class="panel home-launch-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>最初に開く入口</h2>
+              <p class="section-note">毎日使う場所だけをここに集めます。</p>
+            </div>
+          </div>
+          <div class="launch-grid">
+            <a class="launch-card primary" href="./cockpit.html">
+              <strong>運営コックピット</strong>
+              <span>毎朝最初に見る</span>
+            </a>
+            <a class="launch-card" href="https://mcwgw408-oss.github.io/substack-labo/">
+              <strong>Substack-Labo</strong>
+              <span>Substack専用</span>
+            </a>
+            <a class="launch-card" href="https://mcwgw408-oss.github.io/discovery-Labo/">
+              <strong>Discovery-Labo</strong>
+              <span>発見と整理</span>
+            </a>
+            <a class="launch-card" href="https://mcwgw408-oss.github.io/action-Labo/">
+              <strong>交流ログ</strong>
+              <span>Substack以外の交流</span>
+            </a>
+            <a class="launch-card" href="https://mcwgw408-oss.github.io/observation-Labo/">
+              <strong>発信観察Labo</strong>
+              <span>今後使う観察場所</span>
+            </a>
+            <a class="launch-card" href="https://mcwgw408-oss.github.io/Stock-Labo/">
+              <strong>ストック管理Labo</strong>
+              <span>日用品・食材</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="panel later-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>あとで見る / あとで読む</h2>
+              <p class="section-note">atode-Labo の代わりに、ここへ一時保存します。</p>
+            </div>
+          </div>
+          <form class="later-form" id="laterForm">
+            <select id="laterType" aria-label="種類">
+              <option value="見る">見る</option>
+              <option value="読む">読む</option>
+            </select>
+            <input id="laterTitle" type="text" placeholder="タイトル" aria-label="あとで見る・読むタイトル" />
+            <input id="laterUrl" type="url" placeholder="URL（任意）" aria-label="URL" />
+            <input id="laterMemo" type="text" placeholder="メモ（任意）" aria-label="メモ" />
+            <button type="submit">追加</button>
+          </form>
+          <div id="laterList" class="later-list"></div>
         </section>
 
         <section class="panel span-2">
@@ -119,6 +174,14 @@
           <input id="historySearch" type="search" placeholder="過去データを検索" aria-label="過去データを検索" />
           <div id="historyList" class="history-list"></div>
         </section>
+
+        <section class="panel on-demand-panel">
+          <h2>必要な時だけ使う</h2>
+          <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
+            <strong>記事Labo</strong>
+            <span>必要な時だけ開く</span>
+          </a>
+        </section>
       </main>
     </div>
 
@@ -136,6 +199,21 @@
     <template id="memoTemplate">
       <div class="memo-item">
         <textarea rows="3" placeholder="アイデア、記事ネタ、改善案、アプリ案"></textarea>
+        <button class="delete-button" type="button">削除</button>
+      </div>
+    </template>
+
+    <template id="laterTemplate">
+      <div class="later-item">
+        <input class="later-check" type="checkbox" />
+        <select class="later-type" aria-label="種類">
+          <option value="見る">見る</option>
+          <option value="読む">読む</option>
+        </select>
+        <input class="later-title" type="text" aria-label="タイトル" />
+        <input class="later-url" type="url" aria-label="URL" placeholder="URL" />
+        <input class="later-memo" type="text" aria-label="メモ" placeholder="メモ" />
+        <a class="ghost-button later-open" href="#" target="_blank" rel="noreferrer">開く</a>
         <button class="delete-button" type="button">削除</button>
       </div>
     </template>
