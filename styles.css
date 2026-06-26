@@ -355,16 +355,15 @@ textarea {
 
 .launch-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
 }
 
 .launch-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  align-content: center;
   gap: 5px;
-  min-height: 66px;
+  min-height: 92px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
@@ -385,7 +384,6 @@ textarea {
 .launch-card span {
   color: var(--muted);
   font-size: 13px;
-  text-align: right;
 }
 
 .later-form {
