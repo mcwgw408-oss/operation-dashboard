@@ -1,5 +1,6 @@
 const STORAGE_KEY = "operation-dashboard-v1";
 const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
+const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const defaultDailyTasks = [
   "メール確認",
   "DM確認（前日分まで）",
@@ -22,6 +23,7 @@ const listIds = ["dailyTasks", "todayTasks", "projects"];
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let laterItems = loadLaterItems();
+let showDoneLater = loadShowDoneLater();
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -104,8 +106,20 @@ function loadLaterItems() {
   }
 }
 
+function loadShowDoneLater() {
+  try {
+    return JSON.parse(localStorage.getItem(LATER_VIEW_STORAGE_KEY))?.showDone ?? false;
+  } catch {
+    return false;
+  }
+}
+
 function saveLaterItems() {
   localStorage.setItem(LATER_STORAGE_KEY, JSON.stringify(laterItems));
+}
+
+function saveLaterView() {
+  localStorage.setItem(LATER_VIEW_STORAGE_KEY, JSON.stringify({ showDone: showDoneLater }));
 }
 
 function saveStore() {
@@ -241,16 +255,21 @@ function renderMemos() {
 function renderLaterItems() {
   const target = $("#laterList");
   if (!target) return;
+  const showDoneField = $("#showDoneLater");
+  if (showDoneField) showDoneField.checked = showDoneLater;
   const template = $("#laterTemplate");
   target.replaceChildren();
-  if (!laterItems.length) {
+  const visibleItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
+  if (!visibleItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = "あとで見るもの、読むものはまだありません。";
+    empty.textContent = laterItems.length
+      ? "未完了のあとで見るもの、読むものはありません。"
+      : "あとで見るもの、読むものはまだありません。";
     target.append(empty);
     return;
   }
-  laterItems.forEach((item) => {
+  visibleItems.forEach((item) => {
     const row = template.content.firstElementChild.cloneNode(true);
     row.classList.toggle("done", item.done);
     const check = row.querySelector(".later-check");
@@ -400,6 +419,16 @@ function bindEvents() {
     $("#laterTitle").value = "";
     $("#laterUrl").value = "";
     $("#laterMemo").value = "";
+    saveLaterItems();
+    renderLaterItems();
+  });
+  $("#showDoneLater")?.addEventListener("change", (event) => {
+    showDoneLater = event.target.checked;
+    saveLaterView();
+    renderLaterItems();
+  });
+  $("#clearDoneLater")?.addEventListener("click", () => {
+    laterItems = laterItems.filter((item) => !item.done);
     saveLaterItems();
     renderLaterItems();
   });

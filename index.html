@@ -94,6 +94,10 @@
             <input id="laterMemo" type="text" placeholder="メモ（任意）" aria-label="メモ" />
             <button type="submit">追加</button>
           </form>
+          <div class="later-controls">
+            <label><input id="showDoneLater" type="checkbox" /> 完了済みも表示</label>
+            <button class="delete-button" id="clearDoneLater" type="button">完了済みを一括削除</button>
+          </div>
           <div id="laterList" class="later-list"></div>
         </section>
 
