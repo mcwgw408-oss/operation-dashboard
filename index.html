@@ -144,8 +144,9 @@
 
         <section class="panel metrics-panel">
           <h2>メール</h2>
-          <label>未読件数<input id="mailUnread" type="number" min="0" inputmode="numeric" /></label>
-          <label>本日処理<input id="mailProcessed" type="number" min="0" inputmode="numeric" /></label>
+          <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
+          <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
+          <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
         </section>
 
         <section class="panel metrics-panel">
@@ -157,7 +158,6 @@
 
         <section class="panel metrics-panel">
           <h2>コメント・交流</h2>
-          <label>コメント返信数<input id="commentReplies" type="number" min="0" inputmode="numeric" /></label>
           <label class="check-row"><input id="restackDone" type="checkbox" /> リスタック</label>
           <label class="check-row"><input id="liveJoined" type="checkbox" /> ライブ参加</label>
           <label class="check-row"><input id="notesExchange" type="checkbox" /> Notes交流</label>

@@ -60,6 +60,9 @@ function blankDay() {
     metrics: {
       mailUnread: "",
       mailProcessed: "",
+      mailMorningChecked: false,
+      mailNoonChecked: false,
+      mailNightChecked: false,
       dmPending: "",
       dmHandled: "",
       dmPreviousDone: false,
@@ -89,6 +92,18 @@ function ensureDefaultDailyTasks(day) {
   return changed;
 }
 
+function ensureMetricDefaults(day) {
+  let changed = false;
+  day.metrics ||= {};
+  ["mailMorningChecked", "mailNoonChecked", "mailNightChecked"].forEach((key) => {
+    if (!(key in day.metrics)) {
+      day.metrics[key] = false;
+      changed = true;
+    }
+  });
+  return changed;
+}
+
 function loadStore() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -108,9 +123,9 @@ function loadLaterItems() {
 
 function loadShowDoneLater() {
   try {
-    return JSON.parse(localStorage.getItem(LATER_VIEW_STORAGE_KEY))?.showDone ?? false;
+    return JSON.parse(localStorage.getItem(LATER_VIEW_STORAGE_KEY))?.showDone ?? true;
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -135,6 +150,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureDefaultDailyTasks(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureMetricDefaults(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
@@ -164,6 +182,9 @@ function renderSummary() {
     ...day.dailyTasks,
     ...day.todayTasks,
     ...day.projects,
+    { done: day.metrics.mailMorningChecked, title: "メール朝チェック" },
+    { done: day.metrics.mailNoonChecked, title: "メール昼チェック" },
+    { done: day.metrics.mailNightChecked, title: "メール夜チェック" },
     { done: day.metrics.dmPreviousDone, title: "DM前日分" },
     { done: day.metrics.restackDone, title: "リスタック" },
     { done: day.metrics.liveJoined, title: "ライブ参加" },
@@ -287,6 +308,10 @@ function renderLaterItems() {
     open.classList.toggle("disabled", !item.url);
     check.addEventListener("change", () => {
       item.done = check.checked;
+      if (item.done) {
+        showDoneLater = true;
+        saveLaterView();
+      }
       saveLaterItems();
       renderLaterItems();
     });
@@ -361,10 +386,20 @@ function renderHistory() {
         <strong>${date}</strong>
         <span>${done}/${total} 完了・メモ ${day.memos.length} 件</span>
         <button class="ghost-button" type="button">開く</button>
+        <button class="delete-button" type="button">削除</button>
       `;
-      row.querySelector("button").addEventListener("click", () => {
+      row.querySelector(".ghost-button").addEventListener("click", () => {
         activeDate = date;
         $("#activeDate").value = activeDate;
+        renderAll();
+      });
+      row.querySelector(".delete-button").addEventListener("click", () => {
+        if (!confirm(`${date} のデータを削除しますか？`)) return;
+        delete store[date];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        if (activeDate === date) {
+          activeDate = toDateInputValue(new Date());
+        }
         renderAll();
       });
       target.append(row);
@@ -434,11 +469,13 @@ function bindEvents() {
   });
   Object.keys(getDay().metrics).forEach((key) => {
     const field = $(`#${key}`);
+    if (!field) return;
     field.addEventListener("input", () => updateField("metrics", key, field));
     field.addEventListener("change", () => updateField("metrics", key, field));
   });
   Object.keys(getDay().reflection).forEach((key) => {
     const field = $(`#${key}`);
+    if (!field) return;
     field.addEventListener("input", () => updateField("reflection", key, field));
   });
   $("#historySearch").addEventListener("input", renderHistory);
@@ -471,8 +508,9 @@ function downloadCsv() {
       "today_tasks",
       "projects",
       "memos",
-      "mail_unread",
-      "mail_processed",
+      "mail_morning_checked",
+      "mail_noon_checked",
+      "mail_night_checked",
       "dm_pending",
       "dm_handled",
       "did_today",
@@ -483,7 +521,15 @@ function downloadCsv() {
   Object.entries(store)
     .sort(([a], [b]) => a.localeCompare(b))
     .forEach(([date, day]) => {
-      const tracked = [...day.dailyTasks, ...day.todayTasks, ...day.projects];
+      ensureMetricDefaults(day);
+      const tracked = [
+        ...day.dailyTasks,
+        ...day.todayTasks,
+        ...day.projects,
+        { done: day.metrics.mailMorningChecked },
+        { done: day.metrics.mailNoonChecked },
+        { done: day.metrics.mailNightChecked },
+      ];
       rows.push([
         date,
         tracked.filter((item) => item.done).length,
@@ -492,8 +538,9 @@ function downloadCsv() {
         day.todayTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.projects.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.memos.map((memo) => memo.text).join(" / "),
-        day.metrics.mailUnread,
-        day.metrics.mailProcessed,
+        day.metrics.mailMorningChecked ? "1" : "0",
+        day.metrics.mailNoonChecked ? "1" : "0",
+        day.metrics.mailNightChecked ? "1" : "0",
         day.metrics.dmPending,
         day.metrics.dmHandled,
         day.reflection.didToday,

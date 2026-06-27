@@ -324,7 +324,7 @@ textarea {
 
 .history-item {
   display: grid;
-  grid-template-columns: 120px 1fr auto;
+  grid-template-columns: 120px 1fr auto auto;
   gap: 8px;
   align-items: center;
   border: 1px solid var(--line);
