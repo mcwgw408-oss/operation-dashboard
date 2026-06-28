@@ -51,12 +51,24 @@ function newLaterItem({ type = "見る", title = "", url = "", memo = "" } = {})
   };
 }
 
+function newLearningItem() {
+  return {
+    id: crypto.randomUUID(),
+    title: "",
+    url: "",
+    hook: "",
+    experiment: "",
+    intro: "",
+  };
+}
+
 function blankDay() {
   return {
     dailyTasks: defaultDailyTasks.map(newItem),
     todayTasks: [],
     projects: defaultProjects.map(newItem),
     memos: [],
+    learnings: [],
     metrics: {
       mailUnread: "",
       mailProcessed: "",
@@ -102,6 +114,14 @@ function ensureMetricDefaults(day) {
     }
   });
   return changed;
+}
+
+function ensureLearningList(day) {
+  if (!Array.isArray(day.learnings)) {
+    day.learnings = [];
+    return true;
+  }
+  return false;
 }
 
 function loadStore() {
@@ -153,6 +173,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureMetricDefaults(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureLearningList(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
@@ -273,6 +296,62 @@ function renderMemos() {
   });
 }
 
+function renderLearnings() {
+  const day = getDay();
+  const target = $("#learningList");
+  if (!target) return;
+  const template = $("#learningTemplate");
+  target.replaceChildren();
+  if (!day.learnings.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "今日の学びはまだありません。";
+    target.append(empty);
+    return;
+  }
+  day.learnings.forEach((learning) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    const title = row.querySelector(".learning-title");
+    const url = row.querySelector(".learning-url");
+    const hook = row.querySelector(".learning-hook");
+    const experiment = row.querySelector(".learning-experiment");
+    const intro = row.querySelector(".learning-intro");
+    title.value = learning.title || "";
+    url.value = learning.url || "";
+    hook.value = learning.hook || "";
+    experiment.value = learning.experiment || "";
+    intro.value = learning.intro || "";
+    [
+      ["title", title],
+      ["url", url],
+      ["hook", hook],
+      ["experiment", experiment],
+      ["intro", intro],
+    ].forEach(([key, field]) => {
+      field.addEventListener("input", () => {
+        learning[key] = field.value;
+        saveStore();
+      });
+    });
+    row.querySelector(".copy-learning-intro").addEventListener("click", async () => {
+      const text = intro.value.trim();
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        intro.select();
+        document.execCommand("copy");
+      }
+    });
+    row.querySelector(".delete-button").addEventListener("click", () => {
+      day.learnings = day.learnings.filter((candidate) => candidate.id !== learning.id);
+      saveStore();
+      renderLearnings();
+    });
+    target.append(row);
+  });
+}
+
 function renderLaterItems() {
   const target = $("#laterList");
   if (!target) return;
@@ -364,6 +443,13 @@ function collectSearchText(day) {
     ...day.todayTasks.map((item) => item.title),
     ...day.projects.map((item) => item.title),
     ...day.memos.map((memo) => memo.text),
+    ...(day.learnings || []).flatMap((learning) => [
+      learning.title,
+      learning.url,
+      learning.hook,
+      learning.experiment,
+      learning.intro,
+    ]),
     ...Object.values(day.reflection),
   ].join(" ");
 }
@@ -411,6 +497,7 @@ function renderAll() {
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
   renderMemos();
+  renderLearnings();
   renderLaterItems();
   renderFields();
   renderSummary();
@@ -440,6 +527,11 @@ function bindEvents() {
     getDay().memos.unshift({ id: crypto.randomUUID(), text: "" });
     saveStore();
     renderMemos();
+  });
+  $("#addLearning")?.addEventListener("click", () => {
+    getDay().learnings.unshift(newLearningItem());
+    saveStore();
+    renderLearnings();
   });
   $("#laterForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -508,6 +600,7 @@ function downloadCsv() {
       "today_tasks",
       "projects",
       "memos",
+      "learnings",
       "mail_morning_checked",
       "mail_noon_checked",
       "mail_night_checked",
@@ -538,6 +631,15 @@ function downloadCsv() {
         day.todayTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.projects.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.memos.map((memo) => memo.text).join(" / "),
+        (day.learnings || [])
+          .map((learning) => [
+            learning.title,
+            learning.url,
+            learning.hook,
+            learning.experiment,
+            learning.intro,
+          ].filter(Boolean).join(" | "))
+          .join(" / "),
         day.metrics.mailMorningChecked ? "1" : "0",
         day.metrics.mailNoonChecked ? "1" : "0",
         day.metrics.mailNightChecked ? "1" : "0",

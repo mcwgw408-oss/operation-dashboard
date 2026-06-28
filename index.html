@@ -142,6 +142,17 @@
           <div id="memoList" class="memo-list"></div>
         </section>
 
+        <section class="panel learning-panel span-2">
+          <div class="panel-heading">
+            <div>
+              <h2>今日の学び</h2>
+              <p class="section-note">学んだことを、今日の記事でどう活かしたか残します。</p>
+            </div>
+            <button class="ghost-button" id="addLearning" type="button">追加</button>
+          </div>
+          <div id="learningList" class="learning-list"></div>
+        </section>
+
         <section class="panel metrics-panel">
           <h2>メール</h2>
           <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
@@ -204,6 +215,20 @@
       <div class="memo-item">
         <textarea rows="3" placeholder="アイデア、記事ネタ、改善案、アプリ案"></textarea>
         <button class="delete-button" type="button">削除</button>
+      </div>
+    </template>
+
+    <template id="learningTemplate">
+      <div class="learning-item">
+        <label>学んだ記事タイトル<input class="learning-title" type="text" /></label>
+        <label>学んだ記事URL<input class="learning-url" type="url" /></label>
+        <label>今日、一番引っかかったこと<textarea class="learning-hook" rows="3"></textarea></label>
+        <label>今日の記事で実験したこと<textarea class="learning-experiment" rows="3"></textarea></label>
+        <label class="learning-intro-field">記事の最後に入れる紹介文<textarea class="learning-intro" rows="4"></textarea></label>
+        <div class="learning-actions">
+          <button class="ghost-button copy-learning-intro" type="button">紹介文をコピー</button>
+          <button class="delete-button" type="button">削除</button>
+        </div>
       </div>
     </template>
 

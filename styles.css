@@ -318,6 +318,51 @@ textarea {
   align-items: start;
 }
 
+.learning-panel {
+  min-height: 250px;
+}
+
+.learning-list {
+  display: grid;
+  gap: 10px;
+}
+
+.learning-item {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  padding: 10px;
+}
+
+.learning-item label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.learning-item textarea {
+  min-height: 82px;
+}
+
+.learning-intro-field,
+.learning-actions {
+  grid-column: 1 / -1;
+}
+
+.learning-intro {
+  min-height: 110px;
+}
+
+.learning-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .data-panel {
   min-height: 250px;
 }
@@ -745,8 +790,19 @@ textarea {
   }
 
   .memo-item,
+  .learning-item,
   .history-item {
     grid-template-columns: 1fr;
+  }
+
+  .learning-intro-field,
+  .learning-actions {
+    grid-column: auto;
+  }
+
+  .learning-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .launch-grid,
