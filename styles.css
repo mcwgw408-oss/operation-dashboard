@@ -482,6 +482,31 @@ textarea {
   padding: 0 12px;
 }
 
+.later-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.later-counts span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfcfb;
+  color: var(--muted);
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.later-counts strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
 .later-controls {
   display: flex;
   align-items: center;

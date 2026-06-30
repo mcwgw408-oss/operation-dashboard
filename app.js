@@ -435,6 +435,12 @@ function renderLaterItems() {
   if (!target) return;
   const showDoneField = $("#showDoneLater");
   if (showDoneField) showDoneField.checked = showDoneLater;
+  const readCount = laterItems.filter((item) => item.type === "読む").length;
+  const openCount = laterItems.filter((item) => !item.done).length;
+  $("#laterOpenCount").textContent = openCount;
+  $("#laterWatchCount").textContent = laterItems.length - readCount;
+  $("#laterReadCount").textContent = readCount;
+  $("#laterTotalCount").textContent = laterItems.length;
   const template = $("#laterTemplate");
   target.replaceChildren();
   const visibleItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);

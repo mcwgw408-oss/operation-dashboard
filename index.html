@@ -94,6 +94,12 @@
             <input id="laterMemo" type="text" placeholder="メモ（任意）" aria-label="メモ" />
             <button type="submit">追加</button>
           </form>
+          <div class="later-counts" aria-label="あとで見る・あとで読むの件数">
+            <span>未完了 <strong id="laterOpenCount">0</strong></span>
+            <span>見る <strong id="laterWatchCount">0</strong></span>
+            <span>読む <strong id="laterReadCount">0</strong></span>
+            <span>合計 <strong id="laterTotalCount">0</strong></span>
+          </div>
           <div class="later-controls">
             <label><input id="showDoneLater" type="checkbox" /> 完了済みも表示</label>
             <button class="delete-button" id="clearDoneLater" type="button">完了済みを一括削除</button>
