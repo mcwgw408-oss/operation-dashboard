@@ -1,6 +1,7 @@
 const STORAGE_KEY = "operation-dashboard-v1";
 const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
+const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
 const defaultDailyTasks = [
   "メール確認",
   "DM確認（前日分まで）",
@@ -24,6 +25,7 @@ let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
+let persistentMemos = loadPersistentMemos();
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -59,6 +61,16 @@ function newLearningItem() {
     hook: "",
     experiment: "",
     intro: "",
+  };
+}
+
+function newPersistentMemo() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    text: "",
+    createdAt: now,
+    updatedAt: now,
   };
 }
 
@@ -149,12 +161,25 @@ function loadShowDoneLater() {
   }
 }
 
+function loadPersistentMemos() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PERSISTENT_MEMO_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function saveLaterItems() {
   localStorage.setItem(LATER_STORAGE_KEY, JSON.stringify(laterItems));
 }
 
 function saveLaterView() {
   localStorage.setItem(LATER_VIEW_STORAGE_KEY, JSON.stringify({ showDone: showDoneLater }));
+}
+
+function savePersistentMemos() {
+  localStorage.setItem(PERSISTENT_MEMO_STORAGE_KEY, JSON.stringify(persistentMemos));
 }
 
 function saveStore() {
@@ -293,6 +318,59 @@ function renderMemos() {
       renderMemos();
     });
     target.append(row);
+  });
+}
+
+function renderPersistentMemos({ focusId } = {}) {
+  const target = $("#persistentMemoList");
+  if (!target) return;
+  const template = $("#persistentMemoTemplate");
+  target.replaceChildren();
+  if (!persistentMemos.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "残るメモはまだありません。";
+    target.append(empty);
+    return;
+  }
+  persistentMemos.forEach((memo) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    const textarea = row.querySelector("textarea");
+    const meta = row.querySelector(".persistent-memo-meta");
+    textarea.value = memo.text || "";
+    meta.textContent = memo.updatedAt
+      ? `更新 ${new Intl.DateTimeFormat("ja-JP", {
+          month: "numeric",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date(memo.updatedAt))}`
+      : "";
+    textarea.addEventListener("input", () => {
+      memo.text = textarea.value;
+      memo.updatedAt = new Date().toISOString();
+      savePersistentMemos();
+      meta.textContent = `更新 ${new Intl.DateTimeFormat("ja-JP", {
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(memo.updatedAt))}`;
+    });
+    row.querySelector(".edit-button").addEventListener("click", () => {
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    });
+    row.querySelector(".delete-button").addEventListener("click", () => {
+      if (!confirm("この残るメモを削除しますか？")) return;
+      persistentMemos = persistentMemos.filter((candidate) => candidate.id !== memo.id);
+      savePersistentMemos();
+      renderPersistentMemos();
+    });
+    target.append(row);
+    if (memo.id === focusId) {
+      textarea.focus();
+    }
   });
 }
 
@@ -497,6 +575,7 @@ function renderAll() {
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
   renderMemos();
+  renderPersistentMemos();
   renderLearnings();
   renderLaterItems();
   renderFields();
@@ -527,6 +606,12 @@ function bindEvents() {
     getDay().memos.unshift({ id: crypto.randomUUID(), text: "" });
     saveStore();
     renderMemos();
+  });
+  $("#addPersistentMemo")?.addEventListener("click", () => {
+    const memo = newPersistentMemo();
+    persistentMemos.unshift(memo);
+    savePersistentMemos();
+    renderPersistentMemos({ focusId: memo.id });
   });
   $("#addLearning")?.addEventListener("click", () => {
     getDay().learnings.unshift(newLearningItem());

@@ -221,6 +221,7 @@ textarea {
 
 .task-list,
 .memo-list,
+.persistent-memo-list,
 .history-list {
   display: grid;
   gap: 8px;
@@ -316,6 +317,41 @@ textarea {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: start;
+}
+
+.persistent-memo-panel {
+  min-height: 360px;
+}
+
+.persistent-memo-list {
+  gap: 10px;
+}
+
+.persistent-memo-item {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  padding: 10px;
+}
+
+.persistent-memo-item textarea {
+  min-height: 220px;
+  line-height: 1.7;
+}
+
+.persistent-memo-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.persistent-memo-meta {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .learning-panel {
@@ -790,9 +826,19 @@ textarea {
   }
 
   .memo-item,
+  .persistent-memo-actions,
   .learning-item,
   .history-item {
     grid-template-columns: 1fr;
+  }
+
+  .persistent-memo-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .persistent-memo-meta {
+    margin-right: 0;
   }
 
   .learning-intro-field,
