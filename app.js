@@ -430,17 +430,29 @@ function renderLearnings() {
   });
 }
 
+function renderLaterCounts() {
+  const counts = laterItems.reduce(
+    (summary, item) => {
+      summary.total += 1;
+      if (!item.done) summary.open += 1;
+      if (item.type === "読む") summary.read += 1;
+      else summary.watch += 1;
+      return summary;
+    },
+    { open: 0, watch: 0, read: 0, total: 0 },
+  );
+  $("#laterOpenCount").textContent = counts.open;
+  $("#laterWatchCount").textContent = counts.watch;
+  $("#laterReadCount").textContent = counts.read;
+  $("#laterTotalCount").textContent = counts.total;
+}
+
 function renderLaterItems() {
   const target = $("#laterList");
   if (!target) return;
   const showDoneField = $("#showDoneLater");
   if (showDoneField) showDoneField.checked = showDoneLater;
-  const readCount = laterItems.filter((item) => item.type === "読む").length;
-  const openCount = laterItems.filter((item) => !item.done).length;
-  $("#laterOpenCount").textContent = openCount;
-  $("#laterWatchCount").textContent = laterItems.length - readCount;
-  $("#laterReadCount").textContent = readCount;
-  $("#laterTotalCount").textContent = laterItems.length;
+  renderLaterCounts();
   const template = $("#laterTemplate");
   target.replaceChildren();
   const visibleItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
@@ -481,6 +493,7 @@ function renderLaterItems() {
     type.addEventListener("change", () => {
       item.type = type.value;
       saveLaterItems();
+      renderLaterCounts();
     });
     title.addEventListener("input", () => {
       item.title = title.value;
