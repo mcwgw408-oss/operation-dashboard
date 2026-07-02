@@ -872,3 +872,53 @@ textarea {
   align-items: center;
   gap: 8px;
 }
+
+/* ===== さくらAIパネル ===== */
+.sakura-panel {
+  grid-column: 1 / -1;
+}
+
+.sakura-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin-bottom: 14px;
+}
+
+.sakura-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sakura-modes {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mode-button {
+  min-height: 36px;
+  padding: 0 18px;
+  background: #fff;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.mode-button.active {
+  background: var(--green-soft);
+  color: #47725a;
+}
+
+.mode-button:active {
+  transform: none;
+}
+
+@media (max-width: 720px) {
+  .sakura-switches {
+    flex-direction: column;
+  }
+}

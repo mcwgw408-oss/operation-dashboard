@@ -217,6 +217,31 @@
           <input id="historySearch" type="search" placeholder="過去データを検索" aria-label="過去データを検索" />
           <div id="historyList" class="history-list"></div>
         </section>
+
+        <section class="panel sakura-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>さくらAI</h2>
+              <p class="section-note">6つのLaboの「今」を1つにまとめて、さくらAIに渡します。</p>
+            </div>
+          </div>
+          <div class="sakura-switches" aria-label="AIに渡す情報の選択">
+            <label class="check-row"><input id="snapReflection" type="checkbox" /> 今日の振り返りを含める</label>
+            <label class="check-row"><input id="snapFeelings" type="checkbox" /> 気持ちの記録を含める（緊張・印象・嬉しかった瞬間）</label>
+            <label class="check-row"><input id="snapMailDm" type="checkbox" /> メール・DMの数値を含める</label>
+            <label class="check-row"><input id="snapStock" type="checkbox" /> ストック管理を含める</label>
+          </div>
+          <div class="sakura-controls">
+            <div class="sakura-modes" role="group" aria-label="時間帯">
+              <button id="snapModeMorning" class="mode-button" type="button">朝</button>
+              <button id="snapModeNight" class="mode-button" type="button">夜</button>
+            </div>
+            <button class="ghost-button" id="snapshotDownload" type="button">ダウンロード</button>
+            <button class="ghost-button" id="snapshotCopy" type="button">クリップボードにコピー</button>
+          </div>
+          <p class="section-note" id="snapshotLastCreated">まだ作成していません</p>
+          <p class="section-note">※ 本番のページ（github.io）で、いつも使うブラウザから作成してください。手元で開いたファイルからは他のLaboのデータが見えません。</p>
+        </section>
       </main>
     </div>
 

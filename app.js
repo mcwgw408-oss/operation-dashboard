@@ -2,6 +2,31 @@ const STORAGE_KEY = "operation-dashboard-v1";
 const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
+
+// ===== さくらスナップショット（Phase 1）の定数 =====
+const SNAPSHOT_FORMAT = "sakura-snapshot";
+const SNAPSHOT_VERSION = 1;
+const SNAPSHOT_DICTIONARY_VERSION = "v1.2";
+const SNAPSHOT_SETTINGS_KEY = "sakura-snapshot-settings-v1";
+const SNAPSHOT_DETAIL_DAYS = 7;
+const SNAPSHOT_LOG_DAYS = 30;
+
+const EXTERNAL_APP_KEYS = {
+  discoveries: "discovery-labo-discoveries",
+  discoverySources: "discovery-labo-entry-sources-v1",
+  koryu: "koryu-log-labo-entries",
+  hasshin: "hasshin-kansatsu-labo-entries",
+  substack: "substack-labo-store",
+  stock: "stock-labo-items-v1",
+};
+
+const snapshotSettingDefaults = {
+  reflection: true,
+  feelings: true,
+  mailDmCounts: true,
+  stock: false,
+};
+let snapshotMode = new Date().getHours() < 12 ? "morning" : "night";
 const defaultDailyTasks = [
   "メール確認",
   "DM確認（前日分まで）",
@@ -760,6 +785,7 @@ function bindEvents() {
     event.target.value = "";
     if (file) handleImportBackupFile(file);
   });
+  bindSnapshotPanel();
 }
 
 const mailCheckKeys = ["mailMorningChecked", "mailNoonChecked", "mailNightChecked"];
@@ -981,4 +1007,306 @@ async function handleImportBackupFile(file) {
 
   alert("取り込みが完了しました。画面を読み込み直します。");
   location.reload();
+}
+
+// ===== さくらスナップショット（Phase 1） =====
+// 参照：さくらAI Phase 1 詳細設計書
+
+function loadSnapshotSettings() {
+  const stored = readStoredJson(SNAPSHOT_SETTINGS_KEY, {});
+  return { ...snapshotSettingDefaults, ...stored };
+}
+
+function saveSnapshotSettings(settings) {
+  localStorage.setItem(SNAPSHOT_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function deepCopy(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function flattenRecordArrays(value) {
+  if (!value || typeof value !== "object") return [];
+  return Object.values(value).flatMap((entry) => asArray(entry));
+}
+
+function daysBetween(fromIso, now) {
+  const from = new Date(fromIso).getTime();
+  if (Number.isNaN(from)) return null;
+  return Math.max(0, Math.floor((now.getTime() - from) / 86400000));
+}
+
+function dateKeyDaysAgo(days) {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return toDateInputValue(date);
+}
+
+function buildSakuraSnapshot(mode) {
+  const settings = loadSnapshotSettings();
+  const now = new Date();
+  const fromKey = dateKeyDaysAgo(SNAPSHOT_DETAIL_DAYS - 1);
+  const toKey = toDateInputValue(now);
+  const logFromKey = dateKeyDaysAgo(SNAPSHOT_LOG_DAYS - 1);
+
+  // --- ダッシュボード：直近7日分の詳細＋それ以前は日数のみ ---
+  const fullStore = readStoredJson(STORAGE_KEY, {});
+  const recentDays = {};
+  let olderDaysCount = 0;
+  Object.keys(fullStore)
+    .sort()
+    .forEach((dateKey) => {
+      if (dateKey < fromKey) {
+        olderDaysCount += 1;
+        return;
+      }
+      const day = deepCopy(fullStore[dateKey]);
+      if (!settings.reflection) {
+        day.reflection = null;
+      }
+      if (!settings.mailDmCounts && day.metrics) {
+        ["dmPending", "dmHandled", "mailUnread", "mailProcessed"].forEach((key) => {
+          if (key in day.metrics) day.metrics[key] = null;
+        });
+      }
+      recentDays[dateKey] = day;
+    });
+
+  const laterItems = asArray(readStoredJson(LATER_STORAGE_KEY, [])).filter((item) => !item.done);
+  const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
+
+  // --- Discovery-Labo：種と発生源は全件 ---
+  const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
+  const discoverySources = asArray(readStoredJson(EXTERNAL_APP_KEYS.discoverySources, []));
+
+  // --- 交流ログ：直近30日＋「また見たい：はい」は期間外でも全件 ---
+  const koryuAll = asArray(readStoredJson(EXTERNAL_APP_KEYS.koryu, []));
+  const koryuEntries = deepCopy(
+    koryuAll.filter((entry) => entry.date >= logFromKey || entry.revisit === "はい"),
+  );
+  if (!settings.feelings) {
+    koryuEntries.forEach((entry) => {
+      ["tension", "impression", "happyMoment"].forEach((key) => {
+        if (key in entry) entry[key] = null;
+      });
+    });
+  }
+
+  // --- 発信観察：直近30日＋nextActionが残っているものは期間外でも全件 ---
+  const hasshinAll = asArray(readStoredJson(EXTERNAL_APP_KEYS.hasshin, []));
+  const hasshinEntries = deepCopy(
+    hasshinAll.filter(
+      (entry) => entry.date >= logFromKey || (entry.nextAction || "").trim() !== "",
+    ),
+  );
+
+  // --- Substack-Labo：emailListだけは構造ごと除外（常に） ---
+  const substackRaw = readStoredJson(EXTERNAL_APP_KEYS.substack, null);
+  let substackData = null;
+  if (substackRaw && typeof substackRaw === "object") {
+    if (substackRaw.content || substackRaw.people || substackRaw.ideas) {
+      substackData = {
+        content: deepCopy(substackRaw.content ?? { notes: [], articles: [], posts: [] }),
+        people: deepCopy(substackRaw.people ?? { following: [], followers: [] }),
+        ideas: deepCopy(substackRaw.ideas ?? { ideas: [], quick: [] }),
+      };
+    } else {
+      substackData = {
+        writings: deepCopy(substackRaw.writings ?? { notes: [], articles: [] }),
+        people: deepCopy(substackRaw.people ?? { follows: [], followers: [] }),
+        articleReviews: deepCopy(substackRaw.articleReviews ?? []),
+        ideas: deepCopy(substackRaw.ideas ?? []),
+        quickMemos: deepCopy(substackRaw.quickMemos ?? []),
+      };
+    }
+  }
+
+  // --- ストック管理：スイッチがオンのときだけ ---
+  const stockItems = settings.stock
+    ? deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.stock, [])))
+    : null;
+
+  // --- summary（計算済みの要約） ---
+  const todayRecord = fullStore[toKey];
+  let todayProgress = "0/0";
+  if (todayRecord) {
+    const tracked = [
+      ...(todayRecord.dailyTasks || []),
+      ...(todayRecord.todayTasks || []),
+    ].map((task) => Boolean(task.done));
+    const metrics = todayRecord.metrics || {};
+    tracked.push(
+      Boolean(metrics.mailMorningChecked),
+      Boolean(metrics.mailNoonChecked),
+      Boolean(metrics.mailNightChecked),
+      Boolean(metrics.dmPreviousDone),
+    );
+    todayProgress = `${tracked.filter(Boolean).length}/${tracked.length}`;
+  }
+
+  const fermenting = discoveries.filter((seed) => seed.status === "発酵中");
+  const fermentingDays = fermenting
+    .map((seed) => (seed.statusChangedAt ? daysBetween(seed.statusChangedAt, now) : null))
+    .filter((value) => value !== null);
+
+  const revisitNames = new Set(
+    koryuAll.filter((entry) => entry.revisit === "はい").map((entry) => entry.name),
+  );
+
+  let writingInProgress = 0;
+  if (substackData) {
+    const writingItems = substackData.content
+      ? flattenRecordArrays(substackData.content)
+      : [
+          ...asArray(substackData.writings?.notes),
+          ...asArray(substackData.writings?.articles),
+        ];
+    writingInProgress = writingItems.filter((item) => item.status === "執筆中").length;
+  }
+
+  const openNextActions = hasshinAll.filter(
+    (entry) => (entry.nextAction || "").trim() !== "",
+  ).length;
+
+  return {
+    format: SNAPSHOT_FORMAT,
+    snapshotVersion: SNAPSHOT_VERSION,
+    dictionaryVersion: SNAPSHOT_DICTIONARY_VERSION,
+    createdAt: now.toISOString(),
+    mode,
+    period: { detailDays: SNAPSHOT_DETAIL_DAYS, from: fromKey, to: toKey },
+    privacy: {
+      reflection: settings.reflection,
+      feelings: settings.feelings,
+      mailDmCounts: settings.mailDmCounts,
+      stock: settings.stock,
+    },
+    summary: {
+      todayProgress,
+      seedsFermenting: fermenting.length,
+      longestFermentingDays: fermentingDays.length ? Math.max(...fermentingDays) : null,
+      revisitPeople: revisitNames.size,
+      writingInProgress,
+      openNextActions,
+    },
+    apps: {
+      "operation-dashboard": {
+        schemaVersion: 1,
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos },
+      },
+      "discovery-labo": {
+        schemaVersion: 1,
+        data: { discoveries, sources: discoverySources },
+      },
+      "koryu-log-labo": { schemaVersion: 1, data: { entries: koryuEntries } },
+      "hasshin-kansatsu-labo": { schemaVersion: 1, data: { entries: hasshinEntries } },
+      "substack-labo": substackData ? { schemaVersion: 1, data: substackData } : null,
+      "stock-labo": stockItems ? { schemaVersion: 1, data: { items: stockItems } } : null,
+    },
+  };
+}
+
+function snapshotFilename(mode) {
+  const date = new Date().toISOString().slice(0, 10);
+  return `sakura-snapshot-${mode}-${date}.json`;
+}
+
+async function copySnapshotText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // HTTPのローカル確認環境などではClipboard APIが拒否されるため、下の旧式コピーに落とす。
+    }
+  }
+
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.position = "fixed";
+  field.style.left = "-9999px";
+  document.body.append(field);
+  field.select();
+  const copied = document.execCommand?.("copy");
+  field.remove();
+  if (!copied) throw new Error("copy failed");
+}
+
+function renderSnapshotPanel() {
+  const settings = loadSnapshotSettings();
+  const reflection = $("#snapReflection");
+  if (!reflection) return;
+  reflection.checked = settings.reflection;
+  $("#snapFeelings").checked = settings.feelings;
+  $("#snapMailDm").checked = settings.mailDmCounts;
+  $("#snapStock").checked = settings.stock;
+  $("#snapModeMorning").classList.toggle("active", snapshotMode === "morning");
+  $("#snapModeNight").classList.toggle("active", snapshotMode === "night");
+  const label = $("#snapshotLastCreated");
+  if (settings.lastCreatedAt) {
+    const time = new Intl.DateTimeFormat("ja-JP", {
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(settings.lastCreatedAt));
+    label.textContent = `最後に作成：${time}（${settings.lastMode === "morning" ? "朝" : "夜"}）`;
+  } else {
+    label.textContent = "まだ作成していません";
+  }
+}
+
+function rememberSnapshotCreated(mode) {
+  const settings = loadSnapshotSettings();
+  settings.lastCreatedAt = new Date().toISOString();
+  settings.lastMode = mode;
+  saveSnapshotSettings(settings);
+  renderSnapshotPanel();
+}
+
+function bindSnapshotPanel() {
+  if (!$("#snapReflection")) return;
+  const switchMap = [
+    ["#snapReflection", "reflection"],
+    ["#snapFeelings", "feelings"],
+    ["#snapMailDm", "mailDmCounts"],
+    ["#snapStock", "stock"],
+  ];
+  switchMap.forEach(([selector, key]) => {
+    $(selector).addEventListener("change", (event) => {
+      const settings = loadSnapshotSettings();
+      settings[key] = event.target.checked;
+      saveSnapshotSettings(settings);
+    });
+  });
+  $("#snapModeMorning").addEventListener("click", () => {
+    snapshotMode = "morning";
+    renderSnapshotPanel();
+  });
+  $("#snapModeNight").addEventListener("click", () => {
+    snapshotMode = "night";
+    renderSnapshotPanel();
+  });
+  $("#snapshotDownload").addEventListener("click", () => {
+    const snapshot = buildSakuraSnapshot(snapshotMode);
+    downloadJson(snapshot, snapshotFilename(snapshotMode));
+    rememberSnapshotCreated(snapshotMode);
+  });
+  $("#snapshotCopy").addEventListener("click", async () => {
+    const snapshot = buildSakuraSnapshot(snapshotMode);
+    const text = JSON.stringify(snapshot, null, 2);
+    try {
+      await copySnapshotText(text);
+      alert(`クリップボードにコピーしました（約${Math.round(text.length / 1000)}千文字）。`);
+      rememberSnapshotCreated(snapshotMode);
+    } catch (error) {
+      alert("コピーできませんでした。「ダウンロード」をお使いください。");
+    }
+  });
+  renderSnapshotPanel();
 }
