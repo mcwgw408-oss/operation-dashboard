@@ -26,6 +26,7 @@ let store = loadStore();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
 let autoDedupeLater = loadAutoDedupeLater();
+let laterSearchQuery = "";
 let persistentMemos = loadPersistentMemos();
 
 function toDateInputValue(date) {
@@ -476,6 +477,14 @@ function laterDuplicateKey(item) {
   return `text:${item.type || "見る"}:${title}`;
 }
 
+function laterMatchesSearch(item, query) {
+  if (!query) return true;
+  return [item.type, item.title, item.url, item.memo]
+    .map((value) => normalizeLaterText(value || ""))
+    .join(" ")
+    .includes(query);
+}
+
 function removeLaterDuplicates() {
   const seen = new Set();
   const before = laterItems.length;
@@ -498,11 +507,22 @@ function renderLaterItems() {
   renderLaterCounts();
   const template = $("#laterTemplate");
   target.replaceChildren();
-  const visibleItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
+  const searchField = $("#laterSearch");
+  if (searchField && searchField.value !== laterSearchQuery) searchField.value = laterSearchQuery;
+  const searchQuery = normalizeLaterText(laterSearchQuery);
+  const statusItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
+  const visibleItems = statusItems.filter((item) => laterMatchesSearch(item, searchQuery));
+  const searchCount = $("#laterSearchCount");
+  if (searchCount) {
+    searchCount.hidden = !searchQuery;
+    searchCount.querySelector("strong").textContent = visibleItems.length;
+  }
   if (!visibleItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = laterItems.length
+    empty.textContent = searchQuery
+      ? "検索に一致するあとで見るもの、読むものはありません。"
+      : laterItems.length
       ? "未完了のあとで見るもの、読むものはありません。"
       : "あとで見るもの、読むものはまだありません。";
     target.append(empty);
@@ -695,6 +715,10 @@ function bindEvents() {
   $("#showDoneLater")?.addEventListener("change", (event) => {
     showDoneLater = event.target.checked;
     saveLaterView();
+    renderLaterItems();
+  });
+  $("#laterSearch")?.addEventListener("input", (event) => {
+    laterSearchQuery = event.target.value;
     renderLaterItems();
   });
   $("#autoDedupeLater")?.addEventListener("change", (event) => {

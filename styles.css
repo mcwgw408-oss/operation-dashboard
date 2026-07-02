@@ -598,6 +598,14 @@ textarea {
   font-size: 17px;
 }
 
+.later-search {
+  margin-bottom: 12px;
+}
+
+.later-search input {
+  width: 100%;
+}
+
 .later-controls {
   display: flex;
   align-items: center;
