@@ -25,6 +25,7 @@ let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
+let autoDedupeLater = loadAutoDedupeLater();
 let persistentMemos = loadPersistentMemos();
 
 function toDateInputValue(date) {
@@ -163,6 +164,14 @@ function loadShowDoneLater() {
   }
 }
 
+function loadAutoDedupeLater() {
+  try {
+    return JSON.parse(localStorage.getItem(LATER_VIEW_STORAGE_KEY))?.autoDedupe ?? false;
+  } catch {
+    return false;
+  }
+}
+
 function loadPersistentMemos() {
   try {
     const saved = JSON.parse(localStorage.getItem(PERSISTENT_MEMO_STORAGE_KEY));
@@ -177,7 +186,10 @@ function saveLaterItems() {
 }
 
 function saveLaterView() {
-  localStorage.setItem(LATER_VIEW_STORAGE_KEY, JSON.stringify({ showDone: showDoneLater }));
+  localStorage.setItem(
+    LATER_VIEW_STORAGE_KEY,
+    JSON.stringify({ showDone: showDoneLater, autoDedupe: autoDedupeLater }),
+  );
 }
 
 function savePersistentMemos() {
@@ -438,11 +450,50 @@ function renderLaterCounts() {
   $("#laterTotalCount").textContent = counts.total;
 }
 
+function normalizeLaterText(value = "") {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function normalizeLaterUrl(value = "") {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  try {
+    const url = new URL(trimmed);
+    url.hash = "";
+    return url.toString().replace(/\/$/, "").toLowerCase();
+  } catch {
+    return trimmed.replace(/\/$/, "").toLowerCase();
+  }
+}
+
+function laterDuplicateKey(item) {
+  const url = normalizeLaterUrl(item.url || "");
+  if (url) return `url:${url}`;
+
+  const title = normalizeLaterText(item.title || "");
+  if (!title) return `id:${item.id}`;
+  return `text:${item.type || "見る"}:${title}`;
+}
+
+function removeLaterDuplicates() {
+  const seen = new Set();
+  const before = laterItems.length;
+  laterItems = laterItems.filter((item) => {
+    const key = laterDuplicateKey(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return before - laterItems.length;
+}
+
 function renderLaterItems() {
   const target = $("#laterList");
   if (!target) return;
   const showDoneField = $("#showDoneLater");
   if (showDoneField) showDoneField.checked = showDoneLater;
+  const autoDedupeField = $("#autoDedupeLater");
+  if (autoDedupeField) autoDedupeField.checked = autoDedupeLater;
   renderLaterCounts();
   const template = $("#laterTemplate");
   target.replaceChildren();
@@ -633,6 +684,7 @@ function bindEvents() {
       url: $("#laterUrl").value.trim(),
       memo: $("#laterMemo").value.trim(),
     }));
+    if (autoDedupeLater) removeLaterDuplicates();
     $("#laterTitle").value = "";
     $("#laterUrl").value = "";
     $("#laterMemo").value = "";
@@ -643,6 +695,20 @@ function bindEvents() {
     showDoneLater = event.target.checked;
     saveLaterView();
     renderLaterItems();
+  });
+  $("#autoDedupeLater")?.addEventListener("change", (event) => {
+    autoDedupeLater = event.target.checked;
+    saveLaterView();
+  });
+  $("#dedupeLater")?.addEventListener("click", () => {
+    const removed = removeLaterDuplicates();
+    if (!removed) {
+      alert("重複している項目はありません。");
+      return;
+    }
+    saveLaterItems();
+    renderLaterItems();
+    alert(`${removed}件の重複を削除しました。`);
   });
   $("#clearDoneLater")?.addEventListener("click", () => {
     laterItems = laterItems.filter((item) => !item.done);
