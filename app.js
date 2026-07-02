@@ -56,6 +56,7 @@ function newLaterItem({ type = "見る", title = "", url = "", memo = "" } = {})
 
 function newLearningItem() {
   return {
+    createdAt: new Date().toISOString(),
     id: crypto.randomUUID(),
     title: "",
     url: "",
@@ -728,6 +729,13 @@ function bindEvents() {
   });
   $("#historySearch").addEventListener("input", renderHistory);
   $("#downloadCsv").addEventListener("click", downloadCsv);
+  $("#exportBackup")?.addEventListener("click", handleExportBackup);
+  $("#importBackup")?.addEventListener("click", () => $("#importBackupFile")?.click());
+  $("#importBackupFile")?.addEventListener("change", (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) handleImportBackupFile(file);
+  });
 }
 
 const mailCheckKeys = ["mailMorningChecked", "mailNoonChecked", "mailNightChecked"];
@@ -828,3 +836,125 @@ bindEvents();
 renderAll();
 renderClock();
 setInterval(renderClock, 1000);
+
+// ===== さくらバックアップ形式（Phase 0 共通の封筒） =====
+// 参照：さくらAI Phase 0 詳細設計書 / さくらLaboデータ辞書 v1
+const BACKUP_FORMAT = "sakura-backup";
+const BACKUP_APP_NAME = "operation-dashboard";
+const BACKUP_SCHEMA_VERSION = 1;
+const BACKUP_DICTIONARY_VERSION = "v1";
+const BACKUP_KEYS = [STORAGE_KEY, LATER_STORAGE_KEY, PERSISTENT_MEMO_STORAGE_KEY, LATER_VIEW_STORAGE_KEY];
+
+function readStoredJson(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function createBackup() {
+  const data = {};
+  data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
+  data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
+  data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
+  data[LATER_VIEW_STORAGE_KEY] = readStoredJson(LATER_VIEW_STORAGE_KEY, {});
+  return {
+    format: BACKUP_FORMAT,
+    app: BACKUP_APP_NAME,
+    schemaVersion: BACKUP_SCHEMA_VERSION,
+    dictionaryVersion: BACKUP_DICTIONARY_VERSION,
+    exportedAt: new Date().toISOString(),
+    data,
+  };
+}
+
+function backupFilename(autoBeforeImport) {
+  const date = toDateInputValue(new Date());
+  return autoBeforeImport
+    ? `${BACKUP_APP_NAME}-backup-auto-before-import-${date}.json`
+    : `${BACKUP_APP_NAME}-backup-${date}.json`;
+}
+
+function downloadJson(value, filename) {
+  const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function validateBackup(parsed) {
+  if (typeof parsed !== "object" || parsed === null) {
+    return { ok: false, error: "JSONファイルとして読み取れませんでした。" };
+  }
+  if (parsed.format !== BACKUP_FORMAT) {
+    return { ok: false, error: "さくらバックアップ形式のファイルではありません。" };
+  }
+  if (parsed.app !== BACKUP_APP_NAME) {
+    return {
+      ok: false,
+      error: `これは「${parsed.app ?? "不明"}」のバックアップです。生活・発信ダッシュボードには取り込めません。`,
+    };
+  }
+  if (typeof parsed.data !== "object" || parsed.data === null) {
+    return { ok: false, error: "ファイルにデータが入っていません。" };
+  }
+  return { ok: true, backup: parsed };
+}
+
+function handleExportBackup() {
+  downloadJson(createBackup(), backupFilename(false));
+}
+
+async function handleImportBackupFile(file) {
+  let parsed;
+  try {
+    parsed = JSON.parse(await file.text());
+  } catch (error) {
+    alert("JSONファイルとして読み取れませんでした。");
+    return;
+  }
+
+  const result = validateBackup(parsed);
+  if (!result.ok) {
+    alert(result.error);
+    return;
+  }
+
+  const incomingStore = result.backup.data[STORAGE_KEY];
+  if (typeof incomingStore !== "object" || incomingStore === null || Array.isArray(incomingStore)) {
+    alert("ファイルにデータが入っていません。");
+    return;
+  }
+
+  // 取り込み前に、今のデータを自動でバックアップ
+  downloadJson(createBackup(), backupFilename(true));
+
+  const currentStore = readStoredJson(STORAGE_KEY, {});
+  const currentLater = readStoredJson(LATER_STORAGE_KEY, []);
+  const incomingLater = Array.isArray(result.backup.data[LATER_STORAGE_KEY])
+    ? result.backup.data[LATER_STORAGE_KEY]
+    : [];
+
+  const accepted = confirm(
+    `今のデータ（記録${Object.keys(currentStore).length}日分・あとで見る${currentLater.length}件）を、\n` +
+      `ファイルの内容（記録${Object.keys(incomingStore).length}日分・あとで見る${incomingLater.length}件）で置き換えます。\n` +
+      "直前のデータは自動バックアップとしてダウンロードされています。\nよろしいですか？",
+  );
+  if (!accepted) return;
+
+  BACKUP_KEYS.forEach((key) => {
+    if (key in result.backup.data) {
+      localStorage.setItem(key, JSON.stringify(result.backup.data[key]));
+    }
+  });
+
+  alert("取り込みが完了しました。画面を読み込み直します。");
+  location.reload();
+}

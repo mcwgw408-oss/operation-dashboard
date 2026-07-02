@@ -857,3 +857,10 @@ textarea {
     min-height: 140px;
   }
 }
+
+/* ===== バックアップ（書き出し・取り込み） ===== */
+.data-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
