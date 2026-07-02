@@ -8,6 +8,15 @@
   </head>
   <body>
     <div class="app">
+      <nav class="global-nav" aria-label="アプリ切り替え">
+        <a class="global-nav-link current" aria-current="page" href="https://mcwgw408-oss.github.io/operation-dashboard/">🏠 ダッシュボード</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/substack-labo/">Substack-Labo</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/discovery-Labo/">Discovery-Labo</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/action-Labo/">交流ログ</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/observation-Labo/">発信観察</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/Stock-Labo/">ストック管理</a>
+      </nav>
+
       <header class="topbar">
         <div>
           <p class="kicker">生活と発信のホーム画面</p>
@@ -18,7 +27,6 @@
           <input id="activeDate" type="date" />
           <button class="icon-button" id="nextDay" type="button" title="翌日">›</button>
         </div>
-        <a class="nav-link" href="./cockpit.html">運営コックピットへ移動</a>
       </header>
 
       <main class="dashboard">
@@ -50,10 +58,6 @@
             </div>
           </div>
           <div class="launch-grid">
-            <a class="launch-card primary" href="./cockpit.html">
-              <strong>運営コックピット</strong>
-              <span>毎朝最初に見る</span>
-            </a>
             <a class="launch-card" href="https://mcwgw408-oss.github.io/substack-labo/">
               <strong>Substack-Labo</strong>
               <span>Substack専用</span>
@@ -75,6 +79,43 @@
               <span>日用品・食材</span>
             </a>
           </div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <h2>今日やること</h2>
+            <form class="inline-form" data-add-list="todayTasks">
+              <input type="text" placeholder="今日だけのタスク" aria-label="今日やることを追加" />
+              <button type="submit">追加</button>
+            </form>
+          </div>
+          <div id="todayTasks" class="task-list"></div>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-heading">
+            <h2>毎日タスク</h2>
+            <form class="inline-form" data-add-list="dailyTasks">
+              <input type="text" placeholder="項目を追加" aria-label="毎日タスクを追加" />
+              <button type="submit">追加</button>
+            </form>
+          </div>
+          <div id="dailyTasks" class="task-list"></div>
+        </section>
+
+        <section class="panel metrics-panel span-2">
+          <h2>メール</h2>
+          <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
+          <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
+          <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
+          <p class="mail-last-checked">最後に確認した時間：<strong id="mailLastCheckedLabel">未確認</strong></p>
+        </section>
+
+        <section class="panel metrics-panel span-2">
+          <h2>DM</h2>
+          <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
+          <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
+          <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
         </section>
 
         <section class="panel later-panel">
@@ -107,29 +148,16 @@
           <div id="laterList" class="later-list"></div>
         </section>
 
-        <section class="panel span-2">
-          <div class="panel-heading">
-            <h2>毎日タスク</h2>
-            <form class="inline-form" data-add-list="dailyTasks">
-              <input type="text" placeholder="項目を追加" aria-label="毎日タスクを追加" />
-              <button type="submit">追加</button>
-            </form>
+        <section class="panel reflection-panel">
+          <h2>今日の振り返り</h2>
+          <div class="reflection-grid">
+            <label>今日できたこと<textarea id="didToday" rows="8"></textarea></label>
+            <label>困ったこと<textarea id="blockedToday" rows="8"></textarea></label>
+            <label>明日やること<textarea id="tomorrowPlan" rows="8"></textarea></label>
           </div>
-          <div id="dailyTasks" class="task-list"></div>
         </section>
 
         <section class="panel span-2">
-          <div class="panel-heading">
-            <h2>今日やること</h2>
-            <form class="inline-form" data-add-list="todayTasks">
-              <input type="text" placeholder="今日だけのタスク" aria-label="今日やることを追加" />
-              <button type="submit">追加</button>
-            </form>
-          </div>
-          <div id="todayTasks" class="task-list"></div>
-        </section>
-
-        <section class="panel">
           <div class="panel-heading">
             <h2>育てるプロジェクト</h2>
             <form class="inline-form compact" data-add-list="projects">
@@ -140,12 +168,12 @@
           <div id="projects" class="task-list compact-list"></div>
         </section>
 
-        <section class="panel">
-          <div class="panel-heading">
-            <h2>思いつきメモ</h2>
-            <button class="ghost-button" id="addMemo" type="button">追加</button>
-          </div>
-          <div id="memoList" class="memo-list"></div>
+        <section class="panel on-demand-panel span-2">
+          <h2>必要な時だけ使う</h2>
+          <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
+            <strong>記事Labo</strong>
+            <span>必要な時だけ開く</span>
+          </a>
         </section>
 
         <section class="panel persistent-memo-panel span-2">
@@ -170,34 +198,6 @@
           <div id="learningList" class="learning-list"></div>
         </section>
 
-        <section class="panel metrics-panel">
-          <h2>メール</h2>
-          <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
-          <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
-          <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
-        </section>
-
-        <section class="panel metrics-panel">
-          <h2>DM</h2>
-          <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
-          <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
-          <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
-        </section>
-
-        <section class="panel metrics-panel">
-          <h2>コメント・交流</h2>
-          <label class="check-row"><input id="restackDone" type="checkbox" /> リスタック</label>
-          <label class="check-row"><input id="liveJoined" type="checkbox" /> ライブ参加</label>
-          <label class="check-row"><input id="notesExchange" type="checkbox" /> Notes交流</label>
-        </section>
-
-        <section class="panel reflection-panel">
-          <h2>今日の振り返り</h2>
-          <label>今日できたこと<textarea id="didToday" rows="3"></textarea></label>
-          <label>困ったこと<textarea id="blockedToday" rows="3"></textarea></label>
-          <label>明日やること<textarea id="tomorrowPlan" rows="3"></textarea></label>
-        </section>
-
         <section class="panel data-panel span-2">
           <div class="panel-heading">
             <h2>データ</h2>
@@ -205,14 +205,6 @@
           </div>
           <input id="historySearch" type="search" placeholder="過去データを検索" aria-label="過去データを検索" />
           <div id="historyList" class="history-list"></div>
-        </section>
-
-        <section class="panel on-demand-panel">
-          <h2>必要な時だけ使う</h2>
-          <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
-            <strong>記事Labo</strong>
-            <span>必要な時だけ開く</span>
-          </a>
         </section>
       </main>
     </div>
@@ -224,13 +216,6 @@
         <button class="priority-button" type="button" title="今日最優先">★</button>
         <button class="move-button" data-move="up" type="button" title="上へ">↑</button>
         <button class="move-button" data-move="down" type="button" title="下へ">↓</button>
-        <button class="delete-button" type="button">削除</button>
-      </div>
-    </template>
-
-    <template id="memoTemplate">
-      <div class="memo-item">
-        <textarea rows="3" placeholder="アイデア、記事ネタ、改善案、アプリ案"></textarea>
         <button class="delete-button" type="button">削除</button>
       </div>
     </template>

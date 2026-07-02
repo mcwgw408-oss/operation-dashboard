@@ -436,7 +436,7 @@ textarea {
 
 .launch-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -573,158 +573,31 @@ textarea {
   min-height: 70px;
 }
 
-.cockpit-app {
-  width: min(980px, calc(100% - 24px));
-}
 
-.cockpit-topbar {
-  align-items: flex-end;
-}
 
-.cockpit-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
-  gap: 12px;
-}
 
-.cockpit-hero {
-  grid-column: 1 / -1;
-  min-height: 130px;
-}
 
-.cockpit-hero h2 {
-  margin-top: 8px;
-  font-size: 24px;
-}
 
-.cockpit-hero p:last-child {
-  margin-bottom: 0;
-  color: var(--muted);
-}
 
-.cockpit-checks,
-.cockpit-today,
-.cockpit-mail,
-.cockpit-community {
-  display: grid;
-  gap: 10px;
-}
 
-.cockpit-priority,
-.cockpit-article,
-.cockpit-growth {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-}
 
-.cockpit-priority {
-  border-color: var(--yellow-line);
-  background: #fff9db;
-}
 
-.cockpit-priority label,
-.cockpit-article label,
-.cockpit-growth label {
-  display: grid;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 13px;
-}
 
-.cockpit-priority textarea {
-  min-height: 96px;
-  border-color: #e3b341;
-  font-size: 17px;
-}
 
-.cockpit-article {
-  grid-column: 1 / -1;
-}
 
-.cockpit-article textarea {
-  min-height: 120px;
-}
 
-.cockpit-growth {
-  grid-column: 1 / -1;
-  min-height: 170px;
-  border-color: #b8dfc3;
-  background: var(--green-soft);
-}
 
-.cockpit-growth .kicker {
-  color: var(--green);
-  font-weight: 700;
-}
 
-.cockpit-growth input {
-  min-height: 62px;
-  border-color: #8bc79c;
-  color: var(--green);
-  font-size: 26px;
-  font-weight: 700;
-}
 
-.cockpit-check-row {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  padding: 9px;
-}
 
-.cockpit-check-row input {
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  accent-color: var(--green);
-}
 
-.cockpit-check-row.done {
-  border-color: #b8dfc3;
-  background: var(--green-soft);
-  color: var(--green);
-}
 
-.cockpit-today label,
-.cockpit-mail label {
-  display: grid;
-  gap: 5px;
-  color: var(--muted);
-  font-size: 13px;
-}
 
-.cockpit-mail {
-  border-color: #cdd6e0;
-  background: #fbfcfd;
-}
 
-.cockpit-mail input[type="time"] {
-  min-height: 44px;
-  font-size: 18px;
-}
 
-.cockpit-community {
-  border-color: #d7c7a3;
-  background: #fffdf7;
-}
 
-.cockpit-creators {
-  grid-column: 1 / -1;
-}
 
-.cockpit-creators .panel-heading {
-  align-items: flex-start;
-}
 
-.cockpit-creators .kicker {
-  margin-top: 4px;
-}
 
 .creator-list {
   display: grid;
@@ -779,13 +652,6 @@ textarea {
   gap: 6px;
 }
 
-.cockpit-notes ul {
-  display: grid;
-  gap: 10px;
-  margin: 12px 0 0;
-  padding-left: 20px;
-  color: var(--text);
-}
 
 @media (max-width: 1080px) {
   .dashboard {
@@ -891,13 +757,7 @@ textarea {
     flex-direction: column;
   }
 
-  .cockpit-grid {
-    grid-template-columns: 1fr;
-  }
 
-  .cockpit-topbar {
-    align-items: stretch;
-  }
 
   .creator-row {
     grid-template-columns: 22px minmax(0, 1fr);
@@ -909,3 +769,85 @@ textarea {
 }
 
 
+
+/* ===== 共通ナビゲーション ===== */
+.global-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.global-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.global-nav-link:hover {
+  border-color: var(--green);
+}
+
+.global-nav-link.current {
+  border-color: var(--green);
+  background: var(--green-soft);
+  pointer-events: none;
+}
+
+/* ===== データパネルは全幅 ===== */
+.data-panel {
+  grid-column: 1 / -1;
+}
+
+/* ===== メール最終確認時間 ===== */
+.mail-last-checked {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mail-last-checked strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+/* ===== 今日の振り返り（大きい入力欄） ===== */
+.reflection-panel {
+  grid-column: 1 / -1;
+}
+
+.reflection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reflection-grid textarea {
+  min-height: 180px;
+  font-size: 15px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+@media (max-width: 1100px) {
+  .reflection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reflection-grid textarea {
+    min-height: 140px;
+  }
+}

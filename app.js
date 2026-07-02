@@ -87,13 +87,11 @@ function blankDay() {
       mailMorningChecked: false,
       mailNoonChecked: false,
       mailNightChecked: false,
+      mailLastCheckedAt: "",
       dmPending: "",
       dmHandled: "",
       dmPreviousDone: false,
       commentReplies: "",
-      restackDone: false,
-      liveJoined: false,
-      notesExchange: false,
     },
     reflection: {
       didToday: "",
@@ -125,6 +123,10 @@ function ensureMetricDefaults(day) {
       changed = true;
     }
   });
+  if (!("mailLastCheckedAt" in day.metrics)) {
+    day.metrics.mailLastCheckedAt = "";
+    changed = true;
+  }
   return changed;
 }
 
@@ -234,9 +236,6 @@ function renderSummary() {
     { done: day.metrics.mailNoonChecked, title: "メール昼チェック" },
     { done: day.metrics.mailNightChecked, title: "メール夜チェック" },
     { done: day.metrics.dmPreviousDone, title: "DM前日分" },
-    { done: day.metrics.restackDone, title: "リスタック" },
-    { done: day.metrics.liveJoined, title: "ライブ参加" },
-    { done: day.metrics.notesExchange, title: "Notes交流" },
   ];
   const total = tracked.length;
   const done = tracked.filter((item) => item.done).length;
@@ -299,26 +298,18 @@ function renderTaskList(listId) {
   });
 }
 
-function renderMemos() {
-  const day = getDay();
-  const target = $("#memoList");
-  const template = $("#memoTemplate");
-  target.replaceChildren();
-  day.memos.forEach((memo) => {
-    const row = template.content.firstElementChild.cloneNode(true);
-    const textarea = row.querySelector("textarea");
-    textarea.value = memo.text;
-    textarea.addEventListener("input", () => {
-      memo.text = textarea.value;
-      saveStore();
-    });
-    row.querySelector(".delete-button").addEventListener("click", () => {
-      day.memos = day.memos.filter((candidate) => candidate.id !== memo.id);
-      saveStore();
-      renderMemos();
-    });
-    target.append(row);
-  });
+function renderMailLastChecked() {
+  const label = $("#mailLastCheckedLabel");
+  if (!label) return;
+  const value = getDay().metrics.mailLastCheckedAt;
+  if (!value) {
+    label.textContent = "未確認";
+    return;
+  }
+  label.textContent = new Intl.DateTimeFormat("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 function renderPersistentMemos({ focusId } = {}) {
@@ -539,7 +530,7 @@ function collectSearchText(day) {
     ...day.dailyTasks.map((item) => item.title),
     ...day.todayTasks.map((item) => item.title),
     ...day.projects.map((item) => item.title),
-    ...day.memos.map((memo) => memo.text),
+    ...(day.memos || []).map((memo) => memo.text),
     ...(day.learnings || []).flatMap((learning) => [
       learning.title,
       learning.url,
@@ -567,7 +558,7 @@ function renderHistory() {
       const total = tracked.length;
       row.innerHTML = `
         <strong>${date}</strong>
-        <span>${done}/${total} 完了・メモ ${day.memos.length} 件</span>
+        <span>${done}/${total} 完了</span>
         <button class="ghost-button" type="button">開く</button>
         <button class="delete-button" type="button">削除</button>
       `;
@@ -593,7 +584,7 @@ function renderAll() {
   getDay();
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
-  renderMemos();
+  renderMailLastChecked();
   renderPersistentMemos();
   renderLearnings();
   renderLaterItems();
@@ -620,11 +611,6 @@ function bindEvents() {
       saveStore();
       renderTaskList(form.dataset.addList);
     });
-  });
-  $("#addMemo").addEventListener("click", () => {
-    getDay().memos.unshift({ id: crypto.randomUUID(), text: "" });
-    saveStore();
-    renderMemos();
   });
   $("#addPersistentMemo")?.addEventListener("click", () => {
     const memo = newPersistentMemo();
@@ -678,8 +664,16 @@ function bindEvents() {
   $("#downloadCsv").addEventListener("click", downloadCsv);
 }
 
+const mailCheckKeys = ["mailMorningChecked", "mailNoonChecked", "mailNightChecked"];
+
 function updateField(group, key, field) {
-  getDay()[group][key] = field.type === "checkbox" ? field.checked : field.value;
+  const day = getDay();
+  const value = field.type === "checkbox" ? field.checked : field.value;
+  day[group][key] = value;
+  if (group === "metrics" && mailCheckKeys.includes(key) && value === true) {
+    day.metrics.mailLastCheckedAt = new Date().toISOString();
+    renderMailLastChecked();
+  }
   saveStore();
 }
 
@@ -734,7 +728,7 @@ function downloadCsv() {
         day.dailyTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.todayTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.projects.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
-        day.memos.map((memo) => memo.text).join(" / "),
+        (day.memos || []).map((memo) => memo.text).join(" / "),
         (day.learnings || [])
           .map((learning) => [
             learning.title,
