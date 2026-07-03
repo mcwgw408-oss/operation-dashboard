@@ -499,6 +499,41 @@ textarea {
   font-size: 12px;
 }
 
+.learning-summary-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.learning-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.learning-summary-grid div {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px;
+}
+
+.learning-summary-grid span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.learning-summary-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;
@@ -1002,6 +1037,10 @@ textarea {
 
   .explain-layer-grid {
     grid-template-columns: 1fr;
+  }
+
+  .learning-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .span-2 {

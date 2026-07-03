@@ -123,6 +123,18 @@
                 <textarea id="learningFeedbackNote" rows="3" placeholder="今日の状態メモ" aria-label="今日の状態メモ"></textarea>
                 <p id="learningFeedbackStatus" class="learning-feedback-status">この提案をLearning Logに記録します。</p>
               </div>
+              <div class="learning-summary-panel" aria-label="Learning Summary">
+                <span class="brain-label">Learning Summary</span>
+                <div class="learning-summary-grid">
+                  <div><span>総ログ</span><strong id="learningSummaryTotal">0件</strong></div>
+                  <div><span>合っていた</span><strong id="learningSummaryAccepted">0件</strong></div>
+                  <div><span>違った</span><strong id="learningSummaryRejected">0件</strong></div>
+                  <div><span>未回答</span><strong id="learningSummaryUnanswered">0件</strong></div>
+                  <div><span>最近7件の一致率</span><strong id="learningSummaryRate">-</strong></div>
+                  <div><span>最近多い提案</span><strong id="learningSummaryType">なし</strong></div>
+                  <div><span>平均Energy</span><strong id="learningSummaryEnergy">-</strong></div>
+                </div>
+              </div>
             </div>
             <div class="brain-card">
               <span class="brain-label">今日やること</span>

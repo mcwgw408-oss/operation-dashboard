@@ -1295,6 +1295,59 @@ function renderLearningFeedback(entry) {
   }
 }
 
+function energyToScore(energy) {
+  const scores = {
+    "High Energy": 85,
+    Normal: 60,
+    "Low Energy": 35,
+    Recovery: 20,
+  };
+  return scores[energy] ?? null;
+}
+
+function mostCommonValue(items, key) {
+  const counts = items.reduce((result, item) => {
+    const value = item[key];
+    if (!value) return result;
+    result[value] = (result[value] || 0) + 1;
+    return result;
+  }, {});
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "なし";
+}
+
+function buildLearningSummary(logItems = learningLog) {
+  const logs = asArray(logItems);
+  const recent = logs.slice(0, 7);
+  const acceptedCount = logs.filter((entry) => entry.accepted === true).length;
+  const rejectedCount = logs.filter((entry) => entry.accepted === false).length;
+  const answeredRecent = recent.filter((entry) => entry.accepted === true || entry.accepted === false);
+  const acceptedRecent = recent.filter((entry) => entry.accepted === true).length;
+  const energyScores = recent.map((entry) => energyToScore(entry.energy)).filter((score) => score !== null);
+  return {
+    totalLogs: logs.length,
+    acceptedCount,
+    rejectedCount,
+    unansweredCount: logs.filter((entry) => entry.accepted !== true && entry.accepted !== false).length,
+    recentAcceptanceRate: answeredRecent.length ? Math.round((acceptedRecent / answeredRecent.length) * 100) : null,
+    commonRecommendationType: mostCommonValue(recent, "recommendationType"),
+    averageEnergy: energyScores.length ? Math.round(energyScores.reduce((sum, score) => sum + score, 0) / energyScores.length) : null,
+  };
+}
+
+function renderLearningSummary(summary = buildLearningSummary()) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value;
+  };
+  setText("#learningSummaryTotal", `${summary.totalLogs}件`);
+  setText("#learningSummaryAccepted", `${summary.acceptedCount}件`);
+  setText("#learningSummaryRejected", `${summary.rejectedCount}件`);
+  setText("#learningSummaryUnanswered", `${summary.unansweredCount}件`);
+  setText("#learningSummaryRate", summary.recentAcceptanceRate === null ? "-" : `${summary.recentAcceptanceRate}%`);
+  setText("#learningSummaryType", summary.commonRecommendationType);
+  setText("#learningSummaryEnergy", summary.averageEnergy === null ? "-" : String(summary.averageEnergy));
+}
+
 function buildExplainLayerDetails(input, recommendation) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
@@ -1313,6 +1366,10 @@ function buildExplainLayerDetails(input, recommendation) {
     "画面上とlocalStorageにある情報だけを見ています。",
     "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
   ];
+  const learningSummary = buildLearningSummary();
+  if (learningSummary.commonRecommendationType !== "なし" && learningSummary.recentAcceptanceRate !== null) {
+    uncertainty.push(`最近は「${learningSummary.commonRecommendationType}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
+  }
   if (!input.topCandidate) {
     uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
   }
@@ -1442,6 +1499,7 @@ function renderBrainPrototype() {
   appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
   renderExplainLayerDetails(explainLayerDetails);
   renderLearningFeedback(learningEntry);
+  renderLearningSummary();
   showFirstAgentResponse("");
 
   appendBrainItems(
@@ -1520,6 +1578,7 @@ function bindEvents() {
       entry.accepted = button.dataset.learningFeedback === "true";
       saveLearningLog();
       renderLearningFeedback(entry);
+      renderLearningSummary();
     });
   });
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
@@ -1528,6 +1587,7 @@ function bindEvents() {
     entry.note = event.target.value;
     saveLearningLog();
     renderLearningFeedback(entry);
+    renderLearningSummary();
   });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
@@ -1947,6 +2007,7 @@ function buildSakuraSnapshot(mode) {
   const laterItems = asArray(readStoredJson(LATER_STORAGE_KEY, [])).filter((item) => !item.done);
   const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
   const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
+  const learningSummary = buildLearningSummary(learningLogItems);
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -2071,7 +2132,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary },
       },
       "discovery-labo": {
         schemaVersion: 1,
