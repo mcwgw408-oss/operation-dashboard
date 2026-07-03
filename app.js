@@ -16,7 +16,8 @@ const EXTERNAL_APP_KEYS = {
   discoverySources: "discovery-labo-entry-sources-v1",
   koryu: "koryu-log-labo-entries",
   hasshin: "hasshin-kansatsu-labo-entries",
-  substack: "substack-labo-store",
+  substack: "substack-labo-workspace-v2",
+  substackLegacy: "substack-labo-store",
   stock: "stock-labo-items-v1",
 };
 
@@ -904,6 +905,14 @@ function readStoredJson(key, fallback) {
   }
 }
 
+function readFirstStoredJson(keys, fallback) {
+  for (const key of keys) {
+    const value = readStoredJson(key, null);
+    if (value !== null) return value;
+  }
+  return fallback;
+}
+
 function createBackup() {
   const data = {};
   data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
@@ -1105,22 +1114,25 @@ function buildSakuraSnapshot(mode) {
   );
 
   // --- Substack-Labo：emailListだけは構造ごと除外（常に） ---
-  const substackRaw = readStoredJson(EXTERNAL_APP_KEYS.substack, null);
+  const substackRaw = readFirstStoredJson(
+    [EXTERNAL_APP_KEYS.substack, EXTERNAL_APP_KEYS.substackLegacy],
+    null,
+  );
   let substackData = null;
   if (substackRaw && typeof substackRaw === "object") {
-    if (substackRaw.content || substackRaw.people || substackRaw.ideas) {
-      substackData = {
-        content: deepCopy(substackRaw.content ?? { notes: [], articles: [], posts: [] }),
-        people: deepCopy(substackRaw.people ?? { following: [], followers: [] }),
-        ideas: deepCopy(substackRaw.ideas ?? { ideas: [], quick: [] }),
-      };
-    } else {
+    if (substackRaw.writings || substackRaw.articleReviews || substackRaw.quickMemos) {
       substackData = {
         writings: deepCopy(substackRaw.writings ?? { notes: [], articles: [] }),
         people: deepCopy(substackRaw.people ?? { follows: [], followers: [] }),
         articleReviews: deepCopy(substackRaw.articleReviews ?? []),
         ideas: deepCopy(substackRaw.ideas ?? []),
         quickMemos: deepCopy(substackRaw.quickMemos ?? []),
+      };
+    } else {
+      substackData = {
+        content: deepCopy(substackRaw.content ?? { notes: [], articles: [], posts: [] }),
+        people: deepCopy(substackRaw.people ?? { following: [], followers: [] }),
+        ideas: deepCopy(substackRaw.ideas ?? { ideas: [], quick: [] }),
       };
     }
   }
