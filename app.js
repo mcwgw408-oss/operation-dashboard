@@ -678,6 +678,112 @@ function renderHistory() {
     });
 }
 
+function appendBrainItems(target, items, emptyText) {
+  if (!target) return;
+  target.replaceChildren();
+  const visibleItems = items.filter(Boolean).slice(0, 4);
+  if (!visibleItems.length) {
+    const item = document.createElement("li");
+    item.className = "empty-note";
+    item.textContent = emptyText;
+    target.append(item);
+    return;
+  }
+  visibleItems.forEach((text) => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    target.append(item);
+  });
+}
+
+function readSubstackWorkspace() {
+  const raw = readFirstStoredJson([EXTERNAL_APP_KEYS.substack, EXTERNAL_APP_KEYS.substackLegacy], null);
+  if (!raw || typeof raw !== "object") return null;
+  return raw;
+}
+
+function collectBrainWritingItems(workspace) {
+  if (!workspace) return [];
+  if (workspace.writings) {
+    return [
+      ...asArray(workspace.writings.notes),
+      ...asArray(workspace.writings.articles),
+    ];
+  }
+  if (workspace.content) {
+    return Object.values(workspace.content).flatMap((entry) => asArray(entry));
+  }
+  return [];
+}
+
+function renderBrainPrototype() {
+  if (!$("#brainPriority")) return;
+
+  const day = store[activeDate] || {};
+  const dailyTasks = asArray(day.dailyTasks);
+  const todayTasks = asArray(day.todayTasks);
+  const projects = asArray(day.projects);
+  const trackedTasks = [...todayTasks, ...dailyTasks, ...projects];
+  const priorityTask = trackedTasks.find((item) => item.priority && !item.done)
+    || todayTasks.find((item) => !item.done)
+    || dailyTasks.find((item) => !item.done)
+    || projects.find((item) => !item.done);
+
+  $("#brainPriority").textContent = priorityTask?.title || "今日は整える日";
+  $("#brainPriorityNote").textContent = priorityTask
+    ? "既存タスクから最初に見る候補を表示しています。"
+    : "未完了タスクが少ないため、無理に増やさず整える前提で表示しています。";
+
+  appendBrainItems(
+    $("#brainTodayTasks"),
+    todayTasks.filter((item) => !item.done).map((item) => item.title),
+    "今日だけのタスクはまだありません。",
+  );
+
+  const laterOpen = laterItems.filter((item) => !item.done).length;
+  const reflection = day.reflection || {};
+  const suggestions = [
+    priorityTask ? `まず「${priorityTask.title}」から着手する` : "今日の最初の一手を1つだけ決める",
+    laterOpen ? `あとで見る/読むが${laterOpen}件あります` : "あとで見る/読むは落ち着いています",
+    reflection.tomorrowPlan ? "昨日の明日メモを見直す" : "夜に短く振り返りを残す",
+  ];
+  appendBrainItems($("#brainSuggestions"), suggestions, "提案はまだありません。");
+
+  const discoveries = asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, []));
+  appendBrainItems(
+    $("#brainFermentingIdeas"),
+    discoveries
+      .filter((seed) => seed.status === "発酵中")
+      .map((seed) => seed.title || seed.memo || "無題のアイデア"),
+    "発酵中アイデアはまだありません。",
+  );
+
+  const writingItems = collectBrainWritingItems(readSubstackWorkspace());
+  appendBrainItems(
+    $("#brainWritingItems"),
+    writingItems
+      .filter((item) => item.status === "執筆中")
+      .map((item) => item.title || "無題の記事"),
+    "執筆中の記事はまだありません。",
+  );
+
+  const hasshinEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.hasshin, []));
+  const koryuEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.koryu, []));
+  const recentChanges = [
+    hasshinEntries.find((entry) => (entry.nextAction || "").trim())?.nextAction
+      ? `未消化の観察アクション: ${hasshinEntries.find((entry) => (entry.nextAction || "").trim()).nextAction}`
+      : "",
+    koryuEntries.find((entry) => entry.revisit === "はい")?.name
+      ? `また見たい人: ${koryuEntries.find((entry) => entry.revisit === "はい").name}`
+      : "",
+    day.updatedAt ? `今日の記録更新: ${new Intl.DateTimeFormat("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(day.updatedAt))}` : "",
+  ];
+  appendBrainItems($("#brainRecentChanges"), recentChanges, "最近の変化はまだありません。");
+}
+
 function renderAll() {
   getDay();
   $("#activeDate").value = activeDate;
@@ -689,6 +795,7 @@ function renderAll() {
   renderFields();
   renderSummary();
   renderHistory();
+  renderBrainPrototype();
 }
 
 function bindEvents() {

@@ -272,6 +272,70 @@ textarea {
   transition: width 240ms ease;
 }
 
+.brain-panel {
+  grid-column: 1 / -1;
+}
+
+.brain-layout {
+  display: grid;
+  grid-template-columns: 1.25fr repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.brain-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 132px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 14px 15px;
+}
+
+.brain-card.priority-card {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.brain-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.brain-card strong {
+  overflow-wrap: anywhere;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.brain-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.brain-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.brain-list li {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.brain-list .empty-note {
+  list-style: none;
+  margin-left: -18px;
+  color: var(--muted);
+}
+
 .panel {
   min-height: 180px;
   padding: 20px;
@@ -677,6 +741,10 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .brain-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .summary-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -700,6 +768,10 @@ textarea {
 
   .dashboard,
   .summary-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .brain-layout {
     grid-template-columns: 1fr;
   }
 
