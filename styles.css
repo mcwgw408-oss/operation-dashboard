@@ -352,6 +352,15 @@ textarea {
   font-weight: 700;
 }
 
+.brain-card .brain-adaptive-note {
+  border-left: 3px solid var(--green-line);
+  background: rgba(242, 250, 246, 0.84);
+  color: var(--muted);
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .explain-layer-panel {
   display: grid;
   gap: 9px;

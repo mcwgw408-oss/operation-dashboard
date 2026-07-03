@@ -1220,6 +1220,41 @@ function buildRecommendation(input) {
   };
 }
 
+function adaptRecommendationWithLearning(recommendation, learningHint, learningSummary) {
+  const adapted = {
+    ...recommendation,
+    adaptiveNote: "Learning Hintは参考情報として見ています。今日の判断はBrainの状態整理を優先しています。",
+  };
+  const canAdapt = learningHint.confidence >= 60 &&
+    learningSummary.recentAcceptanceRate >= 60 &&
+    learningSummary.commonRecommendationType === recommendation.type;
+  if (!canAdapt) return adapted;
+
+  const adaptiveText = "最近のフィードバック傾向を参考に、提案の強さだけを少し調整しています。";
+  if (recommendation.type === "schedule_context") {
+    return {
+      ...adapted,
+      actionText: "最近の傾向も踏まえて、予定の準備や少し休むことを優先しても良さそうです。",
+      adaptiveNote: adaptiveText,
+    };
+  }
+  if (recommendation.type === "rest_first") {
+    return {
+      ...adapted,
+      actionText: "最近の傾向も踏まえて、今日は開くだけでも十分です。",
+      adaptiveNote: adaptiveText,
+    };
+  }
+  if (["start_small", "continue_flow", "write_from_idea"].includes(recommendation.type)) {
+    return {
+      ...adapted,
+      actionText: "最近の傾向も踏まえて、まず15分だけ軽く始めてみませんか？",
+      adaptiveNote: adaptiveText,
+    };
+  }
+  return adapted;
+}
+
 function inferLearningMode(input, recommendation) {
   if (input.hasTodayEvents) return "schedule-aware";
   if (input.energy.state === "Recovery") return "recovery";
@@ -1425,6 +1460,9 @@ function buildExplainLayerDetails(input, recommendation) {
     uncertainty.push(`最近は「${learningSummary.commonRecommendationType}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
   }
   uncertainty.push(`${learningHint.message} このヒントは過去のフィードバックから生成されています。まだ学習途中のため、参考情報として扱っています。`);
+  if (recommendation.adaptiveNote) {
+    uncertainty.push("Learningは補助役として扱い、今日の候補・予定・Energyを見たBrainの判断を優先しています。");
+  }
   if (!input.topCandidate) {
     uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
   }
@@ -1538,11 +1576,19 @@ function renderBrainPrototype() {
       completedToday,
     },
   );
-  const recommendation = buildRecommendation(recommendationInput);
+  const learningSummary = buildLearningSummary();
+  const learningHint = buildLearningHint(learningSummary);
+  const recommendation = adaptRecommendationWithLearning(
+    buildRecommendation(recommendationInput),
+    learningHint,
+    learningSummary,
+  );
   const explainLayerDetails = buildExplainLayerDetails(recommendationInput, recommendation);
   const learningEntry = syncCurrentLearningLog(recommendationInput, recommendation, {
     taskCount: todayTasks.length,
   });
+  const latestLearningSummary = buildLearningSummary();
+  const latestLearningHint = buildLearningHint(latestLearningSummary);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -1551,11 +1597,16 @@ function renderBrainPrototype() {
   $("#brainRecommendationTitle").textContent = recommendation.title;
   $("#brainRecommendationMessage").textContent = recommendation.message;
   $("#brainRecommendationAction").textContent = recommendation.actionText;
+  const adaptiveNote = $("#brainAdaptiveNote");
+  if (adaptiveNote) {
+    adaptiveNote.textContent = recommendation.adaptiveNote || "";
+    adaptiveNote.hidden = !recommendation.adaptiveNote;
+  }
   appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
   renderExplainLayerDetails(explainLayerDetails);
   renderLearningFeedback(learningEntry);
-  renderLearningSummary();
-  renderLearningHint();
+  renderLearningSummary(latestLearningSummary);
+  renderLearningHint(latestLearningHint);
   showFirstAgentResponse("");
 
   appendBrainItems(
