@@ -967,6 +967,114 @@ function explainPriorityCandidate(candidate) {
   };
 }
 
+function buildRecommendationInput(priorityCandidate, explanation, energyContext, momentumContext, context) {
+  return {
+    topCandidate: priorityCandidate || null,
+    priorityReasons: asArray(explanation?.reasons),
+    energy: energyContext,
+    momentum: momentumContext,
+    hasFermentingIdeas: context.fermentingIdeas.length > 0,
+    hasWritingInProgress: context.writingInProgress.length > 0,
+    hasNextActions: context.hasshinNextActions.length > 0,
+    openTodayCount: context.openTodayCount,
+    completedToday: context.completedToday,
+  };
+}
+
+function chooseRecommendationType(input) {
+  if (!input.topCandidate) return "organize_or_rest";
+  if (input.energy.state === "Recovery") return "rest_first";
+  if (input.energy.state === "Low Energy") return "start_small";
+  if (input.momentum.state === "Rising" && (input.hasWritingInProgress || input.hasNextActions)) {
+    return "continue_flow";
+  }
+  if (input.hasFermentingIdeas && input.hasWritingInProgress) return "write_from_idea";
+  return "start_small";
+}
+
+function recommendationReasonForSource(source) {
+  const sourceReasons = {
+    "operation-dashboard.todayTasks": "今日やることに入っています。",
+    "operation-dashboard.dailyTasks": "毎日タスクとして残っています。",
+    "operation-dashboard.projects": "育てているプロジェクトに入っています。",
+    "operation-dashboard.laterItems": "あとで見る項目として残っています。",
+    "operation-dashboard.persistentMemos": "最近更新されたメモがあります。",
+    "discovery-labo.discoveries": "発酵中アイデアがあります。",
+    "hasshin-kansatsu-labo.entries": "次のアクションが残っています。",
+    "substack-labo.writing": "執筆中の記事があります。",
+    "koryu-log-labo.entries": "また見たい人の記録があります。",
+  };
+  return sourceReasons[source] || "優先候補として読み取れる項目があります。";
+}
+
+function buildRecommendationReasons(input) {
+  if (!input.topCandidate) {
+    return [
+      "強く急ぐ候補は見つかっていません。",
+      "今日は整理や回復を優先しても良さそうです。",
+    ];
+  }
+
+  const reasons = [recommendationReasonForSource(input.topCandidate.source)];
+  if (input.hasFermentingIdeas && !reasons.includes("発酵中アイデアがあります。")) {
+    reasons.push("発酵中アイデアがあります。");
+  }
+  if (input.hasWritingInProgress && !reasons.includes("執筆中の記事があります。")) {
+    reasons.push("執筆中の記事があります。");
+  }
+  if (input.momentum.state === "Rising") reasons.push("今日は勢いがあります。");
+  if (input.energy.state === "Low Energy") reasons.push("今日は短時間で触れる形が合いそうです。");
+  if (input.energy.state === "Recovery") reasons.push("今日は回復を優先した方が良さそうです。");
+  if (input.completedToday > 0) reasons.push(`今日はすでに${input.completedToday}件進んでいます。`);
+  return [...new Set(reasons)].slice(0, 4);
+}
+
+function generateRecommendationMessage(input, type) {
+  const title = input.topCandidate?.title || "";
+  if (type === "organize_or_rest") {
+    return {
+      title: "おはよう、さくら。",
+      message: "今日は少し休みながら整理する日にしても良さそうです。",
+      actionText: "まず今日やることを1つだけ眺めてみませんか？",
+    };
+  }
+  if (type === "rest_first") {
+    return {
+      title: "おはよう、さくら。",
+      message: `「${title}」が候補ですが、今日は回復を優先して良さそうです。`,
+      actionText: "完了を目指さず、開くだけでも十分です。",
+    };
+  }
+  if (type === "continue_flow") {
+    return {
+      title: "おはよう、さくら。",
+      message: `今日は「${title}」の流れを少し続けるタイミングかもしれません。`,
+      actionText: "まず15分だけ始めてみませんか？",
+    };
+  }
+  if (type === "write_from_idea") {
+    return {
+      title: "おはよう、さくら。",
+      message: "今日は記事を書くタイミングかもしれません。",
+      actionText: "まず15分だけ始めてみませんか？",
+    };
+  }
+  return {
+    title: "おはよう、さくら。",
+    message: `今日は「${title}」に少し触れてみるのが良さそうです。`,
+    actionText: "まず15分だけ、軽く始めてみませんか？",
+  };
+}
+
+function buildRecommendation(input) {
+  const type = chooseRecommendationType(input);
+  return {
+    type,
+    reasons: buildRecommendationReasons(input),
+    ...generateRecommendationMessage(input, type),
+  };
+}
+
 function renderBrainPrototype() {
   if (!$("#brainPriority")) return;
 
@@ -1010,10 +1118,28 @@ function renderBrainPrototype() {
   const rankedCandidates = rankPriorityCandidates(candidates, energyContext, momentumContext);
   const priorityCandidate = rankedCandidates[0];
   const explanation = explainPriorityCandidate(priorityCandidate);
+  const recommendation = buildRecommendation(buildRecommendationInput(
+    priorityCandidate,
+    explanation,
+    energyContext,
+    momentumContext,
+    {
+      fermentingIdeas,
+      writingInProgress,
+      hasshinNextActions,
+      openTodayCount: openToday.length,
+      completedToday,
+    },
+  ));
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
   appendBrainItems($("#brainPriorityReasons"), explanation.reasons, "理由はまだありません。");
+
+  $("#brainRecommendationTitle").textContent = recommendation.title;
+  $("#brainRecommendationMessage").textContent = recommendation.message;
+  $("#brainRecommendationAction").textContent = recommendation.actionText;
+  appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
 
   appendBrainItems(
     $("#brainTodayTasks"),

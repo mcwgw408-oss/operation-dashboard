@@ -323,6 +323,12 @@ textarea {
   background: var(--blue-soft);
 }
 
+.brain-card.recommendation-card {
+  grid-column: span 2;
+  border-color: #f0c9d5;
+  background: linear-gradient(135deg, #fff7f9, #ffffff 72%);
+}
+
 .brain-label {
   color: var(--muted);
   font-size: 12px;
@@ -339,6 +345,11 @@ textarea {
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+}
+
+.brain-card .brain-action-text {
+  color: #8a4c61;
+  font-weight: 700;
 }
 
 .brain-list {
