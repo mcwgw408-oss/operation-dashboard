@@ -274,6 +274,26 @@ textarea {
 
 .brain-panel {
   grid-column: 1 / -1;
+  position: relative;
+  overflow: hidden;
+  border-color: var(--green-line);
+  background:
+    linear-gradient(135deg, rgba(237, 245, 239, 0.95), rgba(255, 255, 255, 0.88) 42%),
+    var(--panel);
+}
+
+.brain-panel::after {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  content: "Phase2";
+  border: 1px solid var(--green-line);
+  border-radius: 999px;
+  background: #fff;
+  color: #47725a;
+  padding: 4px 11px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .brain-layout {
@@ -289,7 +309,7 @@ textarea {
   min-height: 132px;
   border: 1px solid var(--line);
   border-radius: var(--radius-item);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.92);
   padding: 14px 15px;
 }
 
@@ -328,6 +348,10 @@ textarea {
   color: var(--text);
   font-size: 14px;
   line-height: 1.55;
+}
+
+.brain-list li::marker {
+  color: var(--green);
 }
 
 .brain-list .empty-note {
