@@ -1334,6 +1334,50 @@ function buildLearningSummary(logItems = learningLog) {
   };
 }
 
+function learningConfidence(totalLogs) {
+  if (totalLogs >= 30) return 90;
+  if (totalLogs >= 10) return 60;
+  if (totalLogs >= 3) return 20;
+  return 10;
+}
+
+function buildLearningHint(summary = buildLearningSummary()) {
+  const confidence = learningConfidence(summary.totalLogs);
+  if (summary.totalLogs < 3 || summary.recentAcceptanceRate === null) {
+    return {
+      message: "フィードバック数が少ないため、まだ学習中です。",
+      confidence,
+      source: "totalLogs",
+    };
+  }
+  if (summary.commonRecommendationType === "schedule_context" && summary.recentAcceptanceRate >= 60) {
+    return {
+      message: "最近は予定がある日に準備や休息を優先する提案が合いやすい傾向があります。",
+      confidence,
+      source: "recentAcceptanceRate, commonRecommendationType",
+    };
+  }
+  if (["start_small", "continue_flow", "write_from_idea"].includes(summary.commonRecommendationType) && summary.recentAcceptanceRate >= 60) {
+    return {
+      message: "最近は小さな一歩の提案が合いやすい傾向があります。",
+      confidence,
+      source: "recentAcceptanceRate, commonRecommendationType",
+    };
+  }
+  if (summary.commonRecommendationType === "rest_first" && summary.recentAcceptanceRate >= 60) {
+    return {
+      message: "最近は休息を優先する提案が合いやすい傾向があります。",
+      confidence,
+      source: "recentAcceptanceRate, commonRecommendationType",
+    };
+  }
+  return {
+    message: "最近の傾向はまだはっきりしていないため、参考情報として見ています。",
+    confidence,
+    source: "recentAcceptanceRate",
+  };
+}
+
 function renderLearningSummary(summary = buildLearningSummary()) {
   const setText = (selector, value) => {
     const target = $(selector);
@@ -1346,6 +1390,15 @@ function renderLearningSummary(summary = buildLearningSummary()) {
   setText("#learningSummaryRate", summary.recentAcceptanceRate === null ? "-" : `${summary.recentAcceptanceRate}%`);
   setText("#learningSummaryType", summary.commonRecommendationType);
   setText("#learningSummaryEnergy", summary.averageEnergy === null ? "-" : String(summary.averageEnergy));
+}
+
+function renderLearningHint(hint = buildLearningHint()) {
+  const message = $("#learningHintMessage");
+  const confidence = $("#learningHintConfidence");
+  const source = $("#learningHintSource");
+  if (message) message.textContent = hint.message;
+  if (confidence) confidence.textContent = `${hint.confidence}%`;
+  if (source) source.textContent = hint.source;
 }
 
 function buildExplainLayerDetails(input, recommendation) {
@@ -1367,9 +1420,11 @@ function buildExplainLayerDetails(input, recommendation) {
     "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
   ];
   const learningSummary = buildLearningSummary();
+  const learningHint = buildLearningHint(learningSummary);
   if (learningSummary.commonRecommendationType !== "なし" && learningSummary.recentAcceptanceRate !== null) {
     uncertainty.push(`最近は「${learningSummary.commonRecommendationType}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
   }
+  uncertainty.push(`${learningHint.message} このヒントは過去のフィードバックから生成されています。まだ学習途中のため、参考情報として扱っています。`);
   if (!input.topCandidate) {
     uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
   }
@@ -1500,6 +1555,7 @@ function renderBrainPrototype() {
   renderExplainLayerDetails(explainLayerDetails);
   renderLearningFeedback(learningEntry);
   renderLearningSummary();
+  renderLearningHint();
   showFirstAgentResponse("");
 
   appendBrainItems(
@@ -1579,6 +1635,7 @@ function bindEvents() {
       saveLearningLog();
       renderLearningFeedback(entry);
       renderLearningSummary();
+      renderLearningHint();
     });
   });
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
@@ -1588,6 +1645,7 @@ function bindEvents() {
     saveLearningLog();
     renderLearningFeedback(entry);
     renderLearningSummary();
+    renderLearningHint();
   });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
@@ -2008,6 +2066,7 @@ function buildSakuraSnapshot(mode) {
   const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
   const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
+  const learningHint = buildLearningHint(learningSummary);
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -2132,7 +2191,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary, learningHint },
       },
       "discovery-labo": {
         schemaVersion: 1,

@@ -534,6 +534,38 @@ textarea {
   font-size: 15px;
 }
 
+.learning-hint-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.brain-card .learning-hint-panel p {
+  border: 1px solid var(--green-line);
+  border-radius: 8px;
+  background: var(--green-soft);
+  color: var(--text);
+  padding: 10px;
+  line-height: 1.6;
+}
+
+.learning-hint-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.learning-hint-meta span {
+  border: 1px solid #e7edf4;
+  border-radius: 999px;
+  background: #fff;
+  padding: 5px 8px;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;
