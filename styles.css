@@ -352,6 +352,44 @@ textarea {
   font-weight: 700;
 }
 
+.first-agent-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 4px;
+  border-top: 1px solid #f3dce4;
+  padding-top: 10px;
+}
+
+.first-agent-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.first-agent-actions button {
+  min-height: 38px;
+  border: 1px solid #f0c9d5;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.first-agent-actions button:hover {
+  background: #fff2f6;
+}
+
+.brain-card .first-agent-response {
+  border-radius: 8px;
+  background: #fff2f6;
+  color: #8a4c61;
+  padding: 9px 10px;
+  font-weight: 700;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;

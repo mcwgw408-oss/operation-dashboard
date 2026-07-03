@@ -1075,6 +1075,21 @@ function buildRecommendation(input) {
   };
 }
 
+const FIRST_AGENT_RESPONSES = {
+  try: "いいですね。まず15分だけ始めてみましょう。",
+  later: "了解です。必要になったらまた一緒に考えましょう。",
+  rest: "今日は回復を優先しましょう。それも大切な選択です。",
+  other: "了解です。今日は今の自分に合うことを選びましょう。",
+};
+
+function showFirstAgentResponse(reply) {
+  const target = $("#firstAgentResponse");
+  if (!target) return;
+  const message = FIRST_AGENT_RESPONSES[reply];
+  target.textContent = message || "";
+  target.hidden = !message;
+}
+
 function renderBrainPrototype() {
   if (!$("#brainPriority")) return;
 
@@ -1140,6 +1155,7 @@ function renderBrainPrototype() {
   $("#brainRecommendationMessage").textContent = recommendation.message;
   $("#brainRecommendationAction").textContent = recommendation.actionText;
   appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
+  showFirstAgentResponse("");
 
   appendBrainItems(
     $("#brainTodayTasks"),
@@ -1194,6 +1210,11 @@ function renderAll() {
 }
 
 function bindEvents() {
+  document.querySelectorAll("[data-first-agent-reply]").forEach((button) => {
+    button.addEventListener("click", () => {
+      showFirstAgentResponse(button.dataset.firstAgentReply);
+    });
+  });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
     renderAll();

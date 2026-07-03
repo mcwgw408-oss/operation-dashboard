@@ -74,6 +74,16 @@
               <p id="brainRecommendationMessage">優先候補を読み取って、やさしい提案文を表示します。</p>
               <ul id="brainRecommendationReasons" class="brain-list"></ul>
               <p id="brainRecommendationAction" class="brain-action-text">無理なく始められる一歩を提案します。</p>
+              <div class="first-agent-panel" aria-label="First Agent">
+                <span class="brain-label">First Agent</span>
+                <div class="first-agent-actions">
+                  <button type="button" data-first-agent-reply="try">😊 やってみる</button>
+                  <button type="button" data-first-agent-reply="later">🤔 あとで</button>
+                  <button type="button" data-first-agent-reply="rest">😴 今日は休む</button>
+                  <button type="button" data-first-agent-reply="other">✨ 別のことをする</button>
+                </div>
+                <p id="firstAgentResponse" class="first-agent-response" hidden></p>
+              </div>
             </div>
             <div class="brain-card">
               <span class="brain-label">今日やること</span>
