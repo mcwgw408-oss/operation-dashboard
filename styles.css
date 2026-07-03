@@ -575,6 +575,40 @@ textarea {
   color: var(--yellow-text);
 }
 
+.schedule-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.event-form,
+.event-row {
+  display: grid;
+  grid-template-columns: minmax(82px, 0.7fr) minmax(120px, 0.9fr) minmax(160px, 1.4fr) minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-list {
+  display: grid;
+  gap: 9px;
+}
+
+.event-row {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 6px 8px;
+}
+
+.event-time,
+.event-type,
+.event-title,
+.event-note {
+  min-width: 0;
+}
+
 .metrics-panel {
   display: grid;
   align-content: start;
@@ -943,6 +977,11 @@ textarea {
   .inline-form,
   .inline-form.compact {
     width: 100%;
+  }
+
+  .event-form,
+  .event-row {
+    grid-template-columns: 1fr;
   }
 
   .task-row,

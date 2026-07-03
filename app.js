@@ -47,6 +47,14 @@ const defaultProjects = [
 
 const $ = (selector) => document.querySelector(selector);
 const listIds = ["dailyTasks", "todayTasks", "projects"];
+const eventTypeLabels = {
+  meeting: "打ち合わせ",
+  outing: "外出",
+  medical: "医療・ケア",
+  delivery: "配信",
+  broadcast: "コラボ・配信",
+  other: "その他",
+};
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let laterItems = loadLaterItems();
@@ -66,6 +74,16 @@ function newItem(title = "") {
     title,
     done: false,
     priority: false,
+  };
+}
+
+function newEvent({ title = "", time = "", type = "other", note = "" } = {}) {
+  return {
+    id: crypto.randomUUID(),
+    title,
+    time,
+    type,
+    note,
   };
 }
 
@@ -107,6 +125,7 @@ function blankDay() {
   return {
     dailyTasks: defaultDailyTasks.map(newItem),
     todayTasks: [],
+    todayEvents: [],
     projects: defaultProjects.map(newItem),
     memos: [],
     learnings: [],
@@ -162,6 +181,14 @@ function ensureMetricDefaults(day) {
 function ensureLearningList(day) {
   if (!Array.isArray(day.learnings)) {
     day.learnings = [];
+    return true;
+  }
+  return false;
+}
+
+function ensureTodayEvents(day) {
+  if (!Array.isArray(day.todayEvents)) {
+    day.todayEvents = [];
     return true;
   }
   return false;
@@ -243,6 +270,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureLearningList(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureTodayEvents(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
@@ -333,6 +363,52 @@ function renderTaskList(listId) {
         saveStore();
         renderTaskList(listId);
       });
+    });
+    target.append(row);
+  });
+}
+
+function formatEventLabel(event) {
+  return [
+    event.time,
+    event.title,
+    event.type && event.type !== "other" ? `(${eventTypeLabels[event.type] || event.type})` : "",
+  ].filter(Boolean).join(" ");
+}
+
+function renderEventList() {
+  const day = getDay();
+  const target = $("#todayEvents");
+  const template = $("#eventTemplate");
+  if (!target || !template) return;
+  target.replaceChildren();
+  day.todayEvents.forEach((event) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    const time = row.querySelector(".event-time");
+    const type = row.querySelector(".event-type");
+    const title = row.querySelector(".event-title");
+    const note = row.querySelector(".event-note");
+    const updateEvent = () => {
+      event.time = time.value.trim();
+      event.type = type.value;
+      event.title = title.value.trim();
+      event.note = note.value.trim();
+      saveStore();
+      renderBrainPrototype();
+    };
+    time.value = event.time || "";
+    type.value = event.type || "other";
+    title.value = event.title || "";
+    note.value = event.note || "";
+    [time, type, title, note].forEach((field) => {
+      field.addEventListener("input", updateEvent);
+      field.addEventListener("change", updateEvent);
+    });
+    row.querySelector(".delete-button").addEventListener("click", () => {
+      day.todayEvents = day.todayEvents.filter((candidate) => candidate.id !== event.id);
+      saveStore();
+      renderEventList();
+      renderBrainPrototype();
     });
     target.append(row);
   });
@@ -627,6 +703,12 @@ function collectSearchText(day) {
   return [
     ...day.dailyTasks.map((item) => item.title),
     ...day.todayTasks.map((item) => item.title),
+    ...asArray(day.todayEvents).flatMap((event) => [
+      event.time,
+      event.title,
+      eventTypeLabels[event.type] || event.type,
+      event.note,
+    ]),
     ...day.projects.map((item) => item.title),
     ...(day.memos || []).map((memo) => memo.text),
     ...(day.learnings || []).flatMap((learning) => [
@@ -967,12 +1049,41 @@ function explainPriorityCandidate(candidate) {
   };
 }
 
+function inferEventContext(todayEvents) {
+  const events = asArray(todayEvents).filter((event) => (event.title || "").trim());
+  if (!events.length) {
+    return {
+      count: 0,
+      level: "Open",
+      text: "今日の予定は少なめに見えます。",
+      labels: [],
+    };
+  }
+  const labels = events.map(formatEventLabel);
+  if (events.length >= 2) {
+    return {
+      count: events.length,
+      level: "Busy",
+      text: `今日は予定が${events.length}件あるため、新しい作業を増やしすぎない提案にしています。`,
+      labels,
+    };
+  }
+  return {
+    count: events.length,
+    level: "Scheduled",
+    text: "今日は予定があるため、準備や休息の余白を残す提案にしています。",
+    labels,
+  };
+}
+
 function buildRecommendationInput(priorityCandidate, explanation, energyContext, momentumContext, context) {
   return {
     topCandidate: priorityCandidate || null,
     priorityReasons: asArray(explanation?.reasons),
     energy: energyContext,
     momentum: momentumContext,
+    eventContext: context.eventContext,
+    hasTodayEvents: context.eventContext.count > 0,
     hasFermentingIdeas: context.fermentingIdeas.length > 0,
     hasWritingInProgress: context.writingInProgress.length > 0,
     hasNextActions: context.hasshinNextActions.length > 0,
@@ -983,6 +1094,7 @@ function buildRecommendationInput(priorityCandidate, explanation, energyContext,
 
 function chooseRecommendationType(input) {
   if (!input.topCandidate) return "organize_or_rest";
+  if (input.hasTodayEvents && input.eventContext.level !== "Open") return "schedule_context";
   if (input.energy.state === "Recovery") return "rest_first";
   if (input.energy.state === "Low Energy") return "start_small";
   if (input.momentum.state === "Rising" && (input.hasWritingInProgress || input.hasNextActions)) {
@@ -1009,13 +1121,16 @@ function recommendationReasonForSource(source) {
 
 function buildRecommendationReasons(input) {
   if (!input.topCandidate) {
-    return [
+    const reasons = [
       "強く急ぐ候補は見つかっていません。",
       "今日は整理や回復を優先しても良さそうです。",
     ];
+    if (input.hasTodayEvents) reasons.unshift(input.eventContext.text);
+    return reasons;
   }
 
   const reasons = [recommendationReasonForSource(input.topCandidate.source)];
+  if (input.hasTodayEvents) reasons.push(input.eventContext.text);
   if (input.hasFermentingIdeas && !reasons.includes("発酵中アイデアがあります。")) {
     reasons.push("発酵中アイデアがあります。");
   }
@@ -1032,6 +1147,13 @@ function buildRecommendationReasons(input) {
 function generateRecommendationMessage(input, type) {
   const title = input.topCandidate?.title || "";
   if (type === "organize_or_rest") {
+    if (input.hasTodayEvents) {
+      return {
+        title: "おはよう、さくら。",
+        message: "今日は予定があるため、新しい作業を増やすより、準備と休息を優先しても良さそうです。",
+        actionText: "まず予定の時間と持ち物だけ確認しておきませんか？",
+      };
+    }
     return {
       title: "おはよう、さくら。",
       message: "今日は少し休みながら整理する日にしても良さそうです。",
@@ -1050,6 +1172,13 @@ function generateRecommendationMessage(input, type) {
       title: "おはよう、さくら。",
       message: `今日は「${title}」の流れを少し続けるタイミングかもしれません。`,
       actionText: "まず15分だけ始めてみませんか？",
+    };
+  }
+  if (type === "schedule_context") {
+    return {
+      title: "おはよう、さくら。",
+      message: `今日は予定があるため、「${title}」は余力があれば軽く触れるくらいで良さそうです。`,
+      actionText: "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
     };
   }
   if (type === "write_from_idea") {
@@ -1079,6 +1208,7 @@ function buildExplainLayerDetails(input, recommendation) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
     input.openTodayCount ? `今日やることに未完了が${input.openTodayCount}件あります。` : "今日やることの未完了は少なめです。",
+    input.hasTodayEvents ? `今日の予定が${input.eventContext.count}件あります。` : "",
     input.hasFermentingIdeas ? "発酵中アイデアがあります。" : "",
     input.hasWritingInProgress ? "執筆中の記事があります。" : "",
     input.hasNextActions ? "発信観察の次アクションがあります。" : "",
@@ -1094,6 +1224,9 @@ function buildExplainLayerDetails(input, recommendation) {
   ];
   if (!input.topCandidate) {
     uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
+  }
+  if (input.hasTodayEvents) {
+    uncertainty.push("予定は着手候補ではなく、今日の余白や負荷を見る材料として扱っています。");
   }
   if (input.energy.state === "Normal" && input.momentum.state === "Stable") {
     uncertainty.push("EnergyとMomentumに大きな偏りが見えていないため、説明は控えめにしています。");
@@ -1149,6 +1282,7 @@ function renderBrainPrototype() {
   const day = store[activeDate] || {};
   const dailyTasks = asArray(day.dailyTasks);
   const todayTasks = asArray(day.todayTasks);
+  const todayEvents = asArray(day.todayEvents);
   const projects = asArray(day.projects);
   const completedToday = [...todayTasks, ...dailyTasks].filter((item) => item.done).length;
   const openToday = todayTasks.filter(brainIsOpen);
@@ -1172,6 +1306,7 @@ function renderBrainPrototype() {
   const recentMemos = persistentMemos.filter((memo) => brainDaysSince(memo.updatedAt || memo.createdAt) !== null && brainDaysSince(memo.updatedAt || memo.createdAt) <= 7);
   const energyContext = inferEnergyContext(day, completedToday, openToday.length);
   const momentumContext = inferMomentumContext(day, writingInProgress, hasshinNextActions);
+  const eventContext = inferEventContext(todayEvents);
   const candidates = collectPriorityCandidates({
     todayTasks,
     dailyTasks,
@@ -1195,6 +1330,7 @@ function renderBrainPrototype() {
       fermentingIdeas,
       writingInProgress,
       hasshinNextActions,
+      eventContext,
       openTodayCount: openToday.length,
       completedToday,
     },
@@ -1219,8 +1355,14 @@ function renderBrainPrototype() {
     "今日だけのタスクはまだありません。",
   );
 
+  appendBrainItems(
+    $("#brainTodayEvents"),
+    eventContext.labels,
+    "今日の予定はまだありません。",
+  );
+
   const suggestions = [
-    priorityCandidate ? `まず「${priorityCandidate.title}」を5分だけ触る` : "最初の一手を1つだけ決める",
+    eventContext.count ? "今日の予定前後に休む余白を残す" : priorityCandidate ? `まず「${priorityCandidate.title}」を5分だけ触る` : "最初の一手を1つだけ決める",
     laterOpen.length ? `あとで見る/読むが${laterOpen.length}件あります。1件だけ処理する` : "あとで見る/読むは落ち着いています",
     completedToday ? `今日はすでに${completedToday}件完了しています。追加しすぎない` : "完了がまだ少ないので、短いタスクから始める",
     reflection.tomorrowPlan ? "昨日の「明日やること」を見直す" : "夜に短い振り返りを残す",
@@ -1255,6 +1397,7 @@ function renderAll() {
   getDay();
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
+  renderEventList();
   renderMailLastChecked();
   renderPersistentMemos();
   renderLearnings();
@@ -1292,6 +1435,26 @@ function bindEvents() {
       saveStore();
       renderTaskList(form.dataset.addList);
     });
+  });
+  $("#eventForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const title = $("#eventTitle").value.trim();
+    const time = $("#eventTime").value.trim();
+    const note = $("#eventNote").value.trim();
+    if (!title) return;
+    getDay().todayEvents.push(newEvent({
+      title,
+      time,
+      type: $("#eventType").value,
+      note,
+    }));
+    $("#eventTitle").value = "";
+    $("#eventTime").value = "";
+    $("#eventNote").value = "";
+    $("#eventType").value = "meeting";
+    saveStore();
+    renderEventList();
+    renderBrainPrototype();
   });
   $("#addPersistentMemo")?.addEventListener("click", () => {
     const memo = newPersistentMemo();
@@ -1404,6 +1567,7 @@ function downloadCsv() {
       "progress_total",
       "daily_tasks",
       "today_tasks",
+      "today_events",
       "projects",
       "memos",
       "learnings",
@@ -1435,6 +1599,7 @@ function downloadCsv() {
         tracked.length,
         day.dailyTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.todayTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        asArray(day.todayEvents).map(formatEventLabel).join(" / "),
         day.projects.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
         (day.memos || []).map((memo) => memo.text).join(" / "),
         (day.learnings || [])
@@ -1728,11 +1893,13 @@ function buildSakuraSnapshot(mode) {
   // --- summary（計算済みの要約） ---
   const todayRecord = fullStore[toKey];
   let todayProgress = "0/0";
+  let todayEventCount = 0;
   if (todayRecord) {
     const tracked = [
       ...(todayRecord.dailyTasks || []),
       ...(todayRecord.todayTasks || []),
     ].map((task) => Boolean(task.done));
+    todayEventCount = asArray(todayRecord.todayEvents).length;
     const metrics = todayRecord.metrics || {};
     tracked.push(
       Boolean(metrics.mailMorningChecked),
@@ -1782,6 +1949,7 @@ function buildSakuraSnapshot(mode) {
     },
     summary: {
       todayProgress,
+      todayEventCount,
       seedsFermenting: fermenting.length,
       longestFermentingDays: fermentingDays.length ? Math.max(...fermentingDays) : null,
       revisitPeople: revisitNames.size,

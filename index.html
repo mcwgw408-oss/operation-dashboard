@@ -120,6 +120,10 @@
               <ul id="brainTodayTasks" class="brain-list"></ul>
             </div>
             <div class="brain-card">
+              <span class="brain-label">今日の予定</span>
+              <ul id="brainTodayEvents" class="brain-list"></ul>
+            </div>
+            <div class="brain-card">
               <span class="brain-label">AIからの提案</span>
               <ul id="brainSuggestions" class="brain-list"></ul>
             </div>
@@ -178,6 +182,30 @@
             </form>
           </div>
           <div id="todayTasks" class="task-list"></div>
+        </section>
+
+        <section class="panel schedule-panel span-2">
+          <div class="panel-heading">
+            <div>
+              <h2>今日の予定</h2>
+              <p class="section-note">時間に紐づく予定です。Brainでは着手候補ではなく、今日の余白を見る材料として扱います。</p>
+            </div>
+          </div>
+          <form id="eventForm" class="event-form">
+            <input id="eventTime" type="text" placeholder="14:00 / 午後" aria-label="予定の時間" />
+            <select id="eventType" aria-label="予定の種類">
+              <option value="meeting">打ち合わせ</option>
+              <option value="outing">外出</option>
+              <option value="medical">医療・ケア</option>
+              <option value="delivery">配信</option>
+              <option value="broadcast">コラボ・配信</option>
+              <option value="other">その他</option>
+            </select>
+            <input id="eventTitle" type="text" placeholder="コラボ配信 / 訪問看護" aria-label="予定名" />
+            <input id="eventNote" type="text" placeholder="メモ" aria-label="予定メモ" />
+            <button type="submit">追加</button>
+          </form>
+          <div id="todayEvents" class="event-list"></div>
         </section>
 
         <section class="panel span-2">
@@ -340,6 +368,23 @@
         <button class="priority-button" type="button" title="今日最優先">★</button>
         <button class="move-button" data-move="up" type="button" title="上へ">↑</button>
         <button class="move-button" data-move="down" type="button" title="下へ">↓</button>
+        <button class="delete-button" type="button">削除</button>
+      </div>
+    </template>
+
+    <template id="eventTemplate">
+      <div class="event-row">
+        <input class="event-time" type="text" aria-label="予定の時間" />
+        <select class="event-type" aria-label="予定の種類">
+          <option value="meeting">打ち合わせ</option>
+          <option value="outing">外出</option>
+          <option value="medical">医療・ケア</option>
+          <option value="delivery">配信</option>
+          <option value="broadcast">コラボ・配信</option>
+          <option value="other">その他</option>
+        </select>
+        <input class="event-title" type="text" aria-label="予定名" />
+        <input class="event-note" type="text" aria-label="予定メモ" placeholder="メモ" />
         <button class="delete-button" type="button">削除</button>
       </div>
     </template>
