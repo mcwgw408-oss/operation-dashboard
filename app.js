@@ -1369,15 +1369,37 @@ function buildLearningSummary(logItems = learningLog) {
   };
 }
 
-function learningConfidence(totalLogs) {
+function learningConfidenceScore(totalLogs) {
   if (totalLogs >= 30) return 90;
   if (totalLogs >= 10) return 60;
   if (totalLogs >= 3) return 20;
   return 10;
 }
 
+function buildLearningConfidence(summary = buildLearningSummary(), hint = null) {
+  const baseScore = learningConfidenceScore(summary.totalLogs);
+  const answeredCount = summary.acceptedCount + summary.rejectedCount;
+  const answerBonus = answeredCount >= 10 ? 10 : answeredCount >= 3 ? 5 : 0;
+  const consistencyBonus = summary.recentAcceptanceRate !== null && summary.recentAcceptanceRate >= 70 ? 5 : 0;
+  const score = Math.min(100, baseScore + answerBonus + consistencyBonus);
+  const level = score >= 80 ? "high" : score >= 50 ? "medium" : "low";
+  return {
+    score,
+    level,
+    message: score >= 50
+      ? "Learning Layerは参考情報として使える状態です。"
+      : "Learning Layerはまだ学習中のため、参考情報として控えめに扱います。",
+    source: [...new Set([
+      "totalLogs",
+      answeredCount ? "feedbackCount" : "",
+      summary.recentAcceptanceRate !== null ? "recentAcceptanceRate" : "",
+      hint?.source || "",
+    ].filter(Boolean).flatMap((source) => source.split(",").map((item) => item.trim()).filter(Boolean)))].join(", "),
+  };
+}
+
 function buildLearningHint(summary = buildLearningSummary()) {
-  const confidence = learningConfidence(summary.totalLogs);
+  const confidence = learningConfidenceScore(summary.totalLogs);
   if (summary.totalLogs < 3 || summary.recentAcceptanceRate === null) {
     return {
       message: "フィードバック数が少ないため、まだ学習中です。",
@@ -1436,6 +1458,26 @@ function renderLearningHint(hint = buildLearningHint()) {
   if (source) source.textContent = hint.source;
 }
 
+function renderLearningConfidence(confidence = buildLearningConfidence()) {
+  const score = $("#learningConfidenceScore");
+  const level = $("#learningConfidenceLevel");
+  const message = $("#learningConfidenceMessage");
+  const source = $("#learningConfidenceSource");
+  if (score) score.textContent = `${confidence.score}%`;
+  if (level) level.textContent = confidence.level;
+  if (message) message.textContent = confidence.message;
+  if (source) source.textContent = confidence.source;
+}
+
+function renderLearningStatus() {
+  const summary = buildLearningSummary();
+  const hint = buildLearningHint(summary);
+  const confidence = buildLearningConfidence(summary, hint);
+  renderLearningSummary(summary);
+  renderLearningHint(hint);
+  renderLearningConfidence(confidence);
+}
+
 function buildExplainLayerDetails(input, recommendation) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
@@ -1456,10 +1498,12 @@ function buildExplainLayerDetails(input, recommendation) {
   ];
   const learningSummary = buildLearningSummary();
   const learningHint = buildLearningHint(learningSummary);
+  const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
   if (learningSummary.commonRecommendationType !== "なし" && learningSummary.recentAcceptanceRate !== null) {
     uncertainty.push(`最近は「${learningSummary.commonRecommendationType}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
   }
   uncertainty.push(`${learningHint.message} このヒントは過去のフィードバックから生成されています。まだ学習途中のため、参考情報として扱っています。`);
+  uncertainty.push(`Learning Confidenceは${learningConfidence.score}%です。Brainはこの信頼度を見ながら、学習結果を補助情報として扱います。`);
   if (recommendation.adaptiveNote) {
     uncertainty.push("Learningは補助役として扱い、今日の候補・予定・Energyを見たBrainの判断を優先しています。");
   }
@@ -1589,6 +1633,7 @@ function renderBrainPrototype() {
   });
   const latestLearningSummary = buildLearningSummary();
   const latestLearningHint = buildLearningHint(latestLearningSummary);
+  const latestLearningConfidence = buildLearningConfidence(latestLearningSummary, latestLearningHint);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -1607,6 +1652,7 @@ function renderBrainPrototype() {
   renderLearningFeedback(learningEntry);
   renderLearningSummary(latestLearningSummary);
   renderLearningHint(latestLearningHint);
+  renderLearningConfidence(latestLearningConfidence);
   showFirstAgentResponse("");
 
   appendBrainItems(
@@ -1685,8 +1731,7 @@ function bindEvents() {
       entry.accepted = button.dataset.learningFeedback === "true";
       saveLearningLog();
       renderLearningFeedback(entry);
-      renderLearningSummary();
-      renderLearningHint();
+      renderLearningStatus();
     });
   });
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
@@ -1695,8 +1740,7 @@ function bindEvents() {
     entry.note = event.target.value;
     saveLearningLog();
     renderLearningFeedback(entry);
-    renderLearningSummary();
-    renderLearningHint();
+    renderLearningStatus();
   });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
@@ -2118,6 +2162,7 @@ function buildSakuraSnapshot(mode) {
   const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
+  const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -2242,7 +2287,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary, learningHint },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary, learningHint, learningConfidence },
       },
       "discovery-labo": {
         schemaVersion: 1,

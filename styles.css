@@ -575,6 +575,45 @@ textarea {
   padding: 5px 8px;
 }
 
+.learning-confidence-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.learning-confidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.learning-confidence-grid div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px;
+}
+
+.learning-confidence-grid span,
+.learning-confidence-panel small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.learning-confidence-grid strong {
+  font-size: 15px;
+}
+
+.brain-card .learning-confidence-panel p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;
