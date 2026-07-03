@@ -114,6 +114,15 @@
                 </div>
                 <p id="firstAgentResponse" class="first-agent-response" hidden></p>
               </div>
+              <div class="learning-feedback-panel" aria-label="Learning Layer">
+                <span class="brain-label">Learning Layer</span>
+                <div class="learning-feedback-actions">
+                  <button type="button" data-learning-feedback="true">この提案は合っていた</button>
+                  <button type="button" data-learning-feedback="false">この提案は違った</button>
+                </div>
+                <textarea id="learningFeedbackNote" rows="3" placeholder="今日の状態メモ" aria-label="今日の状態メモ"></textarea>
+                <p id="learningFeedbackStatus" class="learning-feedback-status">この提案をLearning Logに記録します。</p>
+              </div>
             </div>
             <div class="brain-card">
               <span class="brain-label">今日やること</span>

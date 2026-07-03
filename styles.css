@@ -456,6 +456,49 @@ textarea {
   font-weight: 700;
 }
 
+.learning-feedback-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.learning-feedback-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.learning-feedback-actions button {
+  min-height: 38px;
+  border: 1px solid #d9dfe8;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.learning-feedback-actions button:hover,
+.learning-feedback-actions button.active {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.learning-feedback-panel textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.brain-card .learning-feedback-status {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;

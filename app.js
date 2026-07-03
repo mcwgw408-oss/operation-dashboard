@@ -2,6 +2,7 @@ const STORAGE_KEY = "operation-dashboard-v1";
 const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
+const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -62,6 +63,8 @@ let showDoneLater = loadShowDoneLater();
 let autoDedupeLater = loadAutoDedupeLater();
 let laterSearchQuery = "";
 let persistentMemos = loadPersistentMemos();
+let learningLog = loadLearningLog();
+let currentLearningLogId = "";
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -236,6 +239,15 @@ function loadPersistentMemos() {
   }
 }
 
+function loadLearningLog() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LEARNING_LOG_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function saveLaterItems() {
   localStorage.setItem(LATER_STORAGE_KEY, JSON.stringify(laterItems));
 }
@@ -249,6 +261,10 @@ function saveLaterView() {
 
 function savePersistentMemos() {
   localStorage.setItem(PERSISTENT_MEMO_STORAGE_KEY, JSON.stringify(persistentMemos));
+}
+
+function saveLearningLog() {
+  localStorage.setItem(LEARNING_LOG_STORAGE_KEY, JSON.stringify(learningLog));
 }
 
 function saveStore() {
@@ -1204,6 +1220,81 @@ function buildRecommendation(input) {
   };
 }
 
+function inferLearningMode(input, recommendation) {
+  if (input.hasTodayEvents) return "schedule-aware";
+  if (input.energy.state === "Recovery") return "recovery";
+  if (input.energy.state === "Low Energy") return "low-energy";
+  if (input.momentum.state === "Rising") return "momentum";
+  return recommendation.type || "normal";
+}
+
+function buildLearningLogEntry(input, recommendation, context) {
+  const recommendationText = [recommendation.message, recommendation.actionText]
+    .filter(Boolean)
+    .join(" ");
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    energy: input.energy.state,
+    mode: inferLearningMode(input, recommendation),
+    taskCount: context.taskCount,
+    eventCount: input.eventContext.count,
+    recommendationType: recommendation.type,
+    recommendationText,
+    accepted: null,
+    note: "",
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function syncCurrentLearningLog(input, recommendation, context) {
+  const latestSameRecommendation = learningLog.find((entry) =>
+    entry.date === activeDate &&
+    entry.recommendationType === recommendation.type &&
+    entry.recommendationText === [recommendation.message, recommendation.actionText].filter(Boolean).join(" "),
+  );
+  if (latestSameRecommendation) {
+    currentLearningLogId = latestSameRecommendation.id;
+    latestSameRecommendation.energy = input.energy.state;
+    latestSameRecommendation.mode = inferLearningMode(input, recommendation);
+    latestSameRecommendation.taskCount = context.taskCount;
+    latestSameRecommendation.eventCount = input.eventContext.count;
+    saveLearningLog();
+    return latestSameRecommendation;
+  }
+  const entry = buildLearningLogEntry(input, recommendation, context);
+  learningLog.unshift(entry);
+  currentLearningLogId = entry.id;
+  saveLearningLog();
+  return entry;
+}
+
+function currentLearningLogEntry() {
+  return learningLog.find((entry) => entry.id === currentLearningLogId) || null;
+}
+
+function renderLearningFeedback(entry) {
+  const note = $("#learningFeedbackNote");
+  const status = $("#learningFeedbackStatus");
+  document.querySelectorAll("[data-learning-feedback]").forEach((button) => {
+    const value = button.dataset.learningFeedback === "true";
+    button.classList.toggle("active", entry?.accepted === value);
+  });
+  if (note && note.value !== (entry?.note || "")) {
+    note.value = entry?.note || "";
+  }
+  if (!status) return;
+  if (!entry) {
+    status.textContent = "まだ記録はありません。";
+  } else if (entry.accepted === true) {
+    status.textContent = "この提案は合っていた、と記録しました。";
+  } else if (entry.accepted === false) {
+    status.textContent = "この提案は違った、と記録しました。";
+  } else {
+    status.textContent = "この提案をLearning Logに記録しました。";
+  }
+}
+
 function buildExplainLayerDetails(input, recommendation) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
@@ -1337,6 +1428,9 @@ function renderBrainPrototype() {
   );
   const recommendation = buildRecommendation(recommendationInput);
   const explainLayerDetails = buildExplainLayerDetails(recommendationInput, recommendation);
+  const learningEntry = syncCurrentLearningLog(recommendationInput, recommendation, {
+    taskCount: todayTasks.length,
+  });
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -1347,6 +1441,7 @@ function renderBrainPrototype() {
   $("#brainRecommendationAction").textContent = recommendation.actionText;
   appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
   renderExplainLayerDetails(explainLayerDetails);
+  renderLearningFeedback(learningEntry);
   showFirstAgentResponse("");
 
   appendBrainItems(
@@ -1417,6 +1512,22 @@ function bindEvents() {
     button.addEventListener("click", () => {
       showFirstAgentResponse(button.dataset.firstAgentReply);
     });
+  });
+  document.querySelectorAll("[data-learning-feedback]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const entry = currentLearningLogEntry();
+      if (!entry) return;
+      entry.accepted = button.dataset.learningFeedback === "true";
+      saveLearningLog();
+      renderLearningFeedback(entry);
+    });
+  });
+  $("#learningFeedbackNote")?.addEventListener("input", (event) => {
+    const entry = currentLearningLogEntry();
+    if (!entry) return;
+    entry.note = event.target.value;
+    saveLearningLog();
+    renderLearningFeedback(entry);
   });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
@@ -1835,6 +1946,7 @@ function buildSakuraSnapshot(mode) {
 
   const laterItems = asArray(readStoredJson(LATER_STORAGE_KEY, [])).filter((item) => !item.done);
   const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
+  const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -1959,7 +2071,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems },
       },
       "discovery-labo": {
         schemaVersion: 1,
