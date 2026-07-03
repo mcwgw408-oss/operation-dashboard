@@ -696,6 +696,24 @@ function appendBrainItems(target, items, emptyText) {
   });
 }
 
+const PRIORITY_ENGINE_WEIGHTS = {
+  explicitPriority: 40,
+  todayTask: 30,
+  dailyTask: 20,
+  project: 16,
+  hasshinNextAction: 18,
+  writingInProgress: 18,
+  fermentingIdea: 12,
+  laterItem: 8,
+  persistentMemo: 8,
+  revisitPerson: 10,
+  updatedToday: 8,
+  staleSevenDays: 6,
+  staleThirtyDays: 10,
+  completedPenalty: -100,
+  missingTitlePenalty: -20,
+};
+
 function brainTitleOf(item, fallback = "無題") {
   if (!item || typeof item !== "object") return fallback;
   return item.title || item.name || item.memo || item.text || item.body || fallback;
@@ -725,6 +743,13 @@ function brainRecentDateOf(item) {
   return item?.updatedAt || item?.createdAt || item?.date || "";
 }
 
+function brainDaysSince(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000));
+}
+
 function readSubstackWorkspace() {
   const raw = readFirstStoredJson([EXTERNAL_APP_KEYS.substack, EXTERNAL_APP_KEYS.substackLegacy], null);
   if (!raw || typeof raw !== "object") return null;
@@ -745,6 +770,203 @@ function collectBrainWritingItems(workspace) {
   return [];
 }
 
+function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePoints }) {
+  const title = brainTitleOf(item, "");
+  const updatedAt = brainRecentDateOf(item);
+  return {
+    id: item?.id || `${source}:${title}`,
+    item,
+    source,
+    sourceLabel,
+    title,
+    done: Boolean(item?.done),
+    status: item?.status || "open",
+    priorityFlag: Boolean(item?.priority),
+    createdAt: item?.createdAt || item?.date || "",
+    updatedAt,
+    ageDays: brainDaysSince(item?.createdAt || item?.date),
+    stalenessDays: brainDaysSince(updatedAt || item?.createdAt || item?.date),
+    baseReason,
+    basePoints,
+  };
+}
+
+function collectPriorityCandidates(context) {
+  const candidates = [];
+  context.todayTasks.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "operation-dashboard.todayTasks",
+    sourceLabel: "今日やること",
+    baseReason: "今日やることに入っています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.todayTask,
+  })));
+  context.dailyTasks.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "operation-dashboard.dailyTasks",
+    sourceLabel: "毎日タスク",
+    baseReason: "毎日タスクとして残っています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.dailyTask,
+  })));
+  context.projects.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "operation-dashboard.projects",
+    sourceLabel: "育てるプロジェクト",
+    baseReason: "育てるプロジェクトに入っています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.project,
+  })));
+  context.laterOpen.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "operation-dashboard.laterItems",
+    sourceLabel: "あとで見る/読む",
+    baseReason: "あとで見る/読むに未完了で残っています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.laterItem,
+  })));
+  context.persistentMemos.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "operation-dashboard.persistentMemos",
+    sourceLabel: "残るメモ",
+    baseReason: "最近更新された残るメモです。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.persistentMemo,
+  })));
+  context.fermentingIdeas.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "discovery-labo.discoveries",
+    sourceLabel: "発酵中アイデア",
+    baseReason: "発酵中アイデアとして残っています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.fermentingIdea,
+  })));
+  context.hasshinNextActions.forEach((item) => candidates.push(createPriorityCandidate({
+    item: { ...item, title: item.nextAction || item.title || item.memo },
+    source: "hasshin-kansatsu-labo.entries",
+    sourceLabel: "発信観察",
+    baseReason: "発信観察に次アクションが残っています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.hasshinNextAction,
+  })));
+  context.writingInProgress.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "substack-labo.writing",
+    sourceLabel: "執筆中記事",
+    baseReason: "執筆中の記事です。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.writingInProgress,
+  })));
+  context.revisitPeople.forEach((item) => candidates.push(createPriorityCandidate({
+    item,
+    source: "koryu-log-labo.entries",
+    sourceLabel: "また見たい人",
+    baseReason: "また見たい人として記録されています。",
+    basePoints: PRIORITY_ENGINE_WEIGHTS.revisitPerson,
+  })));
+  return candidates;
+}
+
+function scorePriorityCandidate(candidate) {
+  const reasons = [];
+  let score = 0;
+  if (candidate.basePoints) {
+    score += candidate.basePoints;
+    reasons.push({ points: candidate.basePoints, text: candidate.baseReason });
+  }
+  if (candidate.priorityFlag) {
+    score += PRIORITY_ENGINE_WEIGHTS.explicitPriority;
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.explicitPriority, text: "優先マークが付いています。" });
+  }
+  if (candidate.updatedAt && brainDaysSince(candidate.updatedAt) === 0) {
+    score += PRIORITY_ENGINE_WEIGHTS.updatedToday;
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.updatedToday, text: "今日更新されています。" });
+  }
+  if (candidate.stalenessDays >= 30) {
+    score += PRIORITY_ENGINE_WEIGHTS.staleThirtyDays;
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleThirtyDays, text: "30日以上残っている未完了の項目です。" });
+  } else if (candidate.stalenessDays >= 7) {
+    score += PRIORITY_ENGINE_WEIGHTS.staleSevenDays;
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleSevenDays, text: "7日以上残っている未完了の項目です。" });
+  }
+  if (candidate.done || candidate.status === "done" || candidate.status === "完了") {
+    score += PRIORITY_ENGINE_WEIGHTS.completedPenalty;
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.completedPenalty, text: "完了済みのため優先度を下げています。" });
+  }
+  if (!candidate.title) {
+    score += PRIORITY_ENGINE_WEIGHTS.missingTitlePenalty;
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.missingTitlePenalty, text: "タイトルがないため判断しにくい項目です。" });
+  }
+  const clampedScore = Math.max(0, Math.min(100, score));
+  return { ...candidate, score: clampedScore, rawScore: score, reasons };
+}
+
+function inferEnergyContext(day, completedToday, openTodayCount) {
+  const totalOpen = openTodayCount + asArray(day.dailyTasks).filter(brainIsOpen).length;
+  const reflection = day.reflection || {};
+  const reflectionText = [reflection.didToday, reflection.blockedToday, reflection.tomorrowPlan].join(" ");
+  if (/休|疲|無理|しんど|回復/.test(reflectionText)) {
+    return { state: "Recovery", modifier: -30, text: "回復を優先したい記録があるため、重い提案を控えめにしています。" };
+  }
+  if (completedToday >= 4) {
+    return { state: "High Energy", modifier: 10, text: "今日は完了が多く、進める力がありそうです。" };
+  }
+  if (totalOpen >= 8 && completedToday === 0) {
+    return { state: "Low Energy", modifier: -15, text: "未完了が多いため、短時間で触れる形に寄せています。" };
+  }
+  return { state: "Normal", modifier: 0, text: "通常の優先度で表示しています。" };
+}
+
+function inferMomentumContext(day, writingInProgress, hasshinNextActions) {
+  const recentlyUpdatedWriting = writingInProgress.filter((item) => brainDaysSince(brainRecentDateOf(item)) !== null && brainDaysSince(brainRecentDateOf(item)) <= 2);
+  const recentActions = hasshinNextActions.filter((item) => brainDaysSince(brainRecentDateOf(item)) !== null && brainDaysSince(brainRecentDateOf(item)) <= 3);
+  if (recentlyUpdatedWriting.length || recentActions.length) {
+    return { state: "Rising", modifier: 8, text: "最近の更新や次アクションがあり、流れが続いています。" };
+  }
+  const staleOpen = [...asArray(day.todayTasks), ...asArray(day.projects)].some((item) => brainIsOpen(item) && brainDaysSince(brainRecentDateOf(item)) >= 14);
+  if (staleOpen) {
+    return { state: "Declining", modifier: -6, text: "止まっている項目があるため、再開しやすい一手として扱います。" };
+  }
+  return { state: "Stable", modifier: 0, text: "大きな勢いの偏りはないため、基本スコアを優先しています。" };
+}
+
+function applyPriorityModifiers(candidate, energyContext, momentumContext) {
+  const adjustedScore = Math.max(
+    0,
+    Math.min(100, candidate.score + energyContext.modifier + momentumContext.modifier),
+  );
+  return {
+    ...candidate,
+    adjustedScore,
+    modifiers: [energyContext, momentumContext],
+  };
+}
+
+function rankPriorityCandidates(candidates, energyContext, momentumContext) {
+  return candidates
+    .map(scorePriorityCandidate)
+    .filter((candidate) => candidate.title && !candidate.done && candidate.status !== "done" && candidate.status !== "完了")
+    .map((candidate) => applyPriorityModifiers(candidate, energyContext, momentumContext))
+    .sort((a, b) => {
+      if (b.adjustedScore !== a.adjustedScore) return b.adjustedScore - a.adjustedScore;
+      if (Number(b.priorityFlag) !== Number(a.priorityFlag)) return Number(b.priorityFlag) - Number(a.priorityFlag);
+      return String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a)));
+    });
+}
+
+function explainPriorityCandidate(candidate) {
+  if (!candidate) {
+    return {
+      summary: "未完了の候補が少ないため、今日は整える日として表示しています。",
+      reasons: ["今日の優先候補として強く出る項目はありません。"],
+    };
+  }
+  const topReasons = candidate.reasons
+    .filter((reason) => reason.points > 0)
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 3)
+    .map((reason) => reason.text);
+  const modifierReasons = candidate.modifiers
+    .filter((modifier) => modifier.modifier !== 0)
+    .map((modifier) => `${modifier.state}: ${modifier.text}`);
+  return {
+    summary: `${candidate.sourceLabel}から選ばれました。スコア ${candidate.adjustedScore} / 100 の最優先候補です。`,
+    reasons: [...topReasons, ...modifierReasons],
+  };
+}
+
 function renderBrainPrototype() {
   if (!$("#brainPriority")) return;
 
@@ -752,11 +974,6 @@ function renderBrainPrototype() {
   const dailyTasks = asArray(day.dailyTasks);
   const todayTasks = asArray(day.todayTasks);
   const projects = asArray(day.projects);
-  const trackedTasks = [...todayTasks, ...dailyTasks, ...projects].filter(brainIsOpen);
-  const priorityTask = trackedTasks.find((item) => item.priority)
-    || todayTasks.find(brainIsOpen)
-    || dailyTasks.find(brainIsOpen)
-    || projects.find(brainIsOpen);
   const completedToday = [...todayTasks, ...dailyTasks].filter((item) => item.done).length;
   const openToday = todayTasks.filter(brainIsOpen);
   const laterOpen = laterItems.filter((item) => !item.done);
@@ -770,21 +987,33 @@ function renderBrainPrototype() {
     brainStatusMatches(item.status, ["執筆中", "蝓ｷ遲・ｸｭ"]),
   );
   const hasshinEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.hasshin, []));
+  const hasshinNextActions = hasshinEntries.filter((entry) => (entry.nextAction || "").trim());
   const koryuEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.koryu, []));
-  const newestHasshin = hasshinEntries
-    .filter((entry) => (entry.nextAction || "").trim())
-    .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
-  const newestRevisit = koryuEntries
-    .filter((entry) => brainStatusMatches(entry.revisit, ["はい", "縺ｯ縺・"]))
-    .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
+  const revisitPeople = koryuEntries.filter((entry) => brainStatusMatches(entry.revisit, ["はい", "縺ｯ縺・"]));
   const newestMemo = persistentMemos
     .filter((memo) => memo.updatedAt || memo.createdAt)
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
+  const recentMemos = persistentMemos.filter((memo) => brainDaysSince(memo.updatedAt || memo.createdAt) !== null && brainDaysSince(memo.updatedAt || memo.createdAt) <= 7);
+  const energyContext = inferEnergyContext(day, completedToday, openToday.length);
+  const momentumContext = inferMomentumContext(day, writingInProgress, hasshinNextActions);
+  const candidates = collectPriorityCandidates({
+    todayTasks,
+    dailyTasks,
+    projects,
+    laterOpen,
+    persistentMemos: recentMemos,
+    fermentingIdeas,
+    hasshinNextActions,
+    writingInProgress,
+    revisitPeople,
+  });
+  const rankedCandidates = rankPriorityCandidates(candidates, energyContext, momentumContext);
+  const priorityCandidate = rankedCandidates[0];
+  const explanation = explainPriorityCandidate(priorityCandidate);
 
-  $("#brainPriority").textContent = priorityTask?.title || "今日は整える日";
-  $("#brainPriorityNote").textContent = priorityTask
-    ? `未完了の優先候補です。分類: ${projects.includes(priorityTask) ? "育てるプロジェクト" : todayTasks.includes(priorityTask) ? "今日やること" : "毎日タスク"}`
-    : "未完了タスクが少ないため、増やさず整える前提で表示しています。";
+  $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
+  $("#brainPriorityNote").textContent = explanation.summary;
+  appendBrainItems($("#brainPriorityReasons"), explanation.reasons, "理由はまだありません。");
 
   appendBrainItems(
     $("#brainTodayTasks"),
@@ -793,7 +1022,7 @@ function renderBrainPrototype() {
   );
 
   const suggestions = [
-    priorityTask ? `まず「${priorityTask.title}」から着手する` : "最初の一手を1つだけ決める",
+    priorityCandidate ? `まず「${priorityCandidate.title}」を5分だけ触る` : "最初の一手を1つだけ決める",
     laterOpen.length ? `あとで見る/読むが${laterOpen.length}件あります。1件だけ処理する` : "あとで見る/読むは落ち着いています",
     completedToday ? `今日はすでに${completedToday}件完了しています。追加しすぎない` : "完了がまだ少ないので、短いタスクから始める",
     reflection.tomorrowPlan ? "昨日の「明日やること」を見直す" : "夜に短い振り返りを残す",
@@ -812,6 +1041,10 @@ function renderBrainPrototype() {
     "執筆中の記事はまだありません。",
   );
 
+  const newestHasshin = hasshinNextActions
+    .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
+  const newestRevisit = revisitPeople
+    .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   const recentChanges = [
     newestHasshin?.nextAction ? `発信観察の次アクション: ${newestHasshin.nextAction}` : "",
     newestRevisit?.name ? `また見たい人: ${newestRevisit.name}` : "",
