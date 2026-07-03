@@ -74,6 +74,36 @@
               <p id="brainRecommendationMessage">優先候補を読み取って、やさしい提案文を表示します。</p>
               <ul id="brainRecommendationReasons" class="brain-list"></ul>
               <p id="brainRecommendationAction" class="brain-action-text">無理なく始められる一歩を提案します。</p>
+              <div class="explain-layer-panel" aria-label="なぜこの提案？">
+                <button type="button" id="explainLayerToggle" class="explain-layer-toggle" aria-expanded="false" aria-controls="explainLayerBody">
+                  理由を見る
+                </button>
+                <div id="explainLayerBody" class="explain-layer-body" hidden>
+                  <span class="brain-label">なぜこの提案？</span>
+                  <div class="explain-layer-grid">
+                    <section>
+                      <h3>見た情報</h3>
+                      <ul id="explainSeenInfo" class="brain-list"></ul>
+                    </section>
+                    <section>
+                      <h3>主な理由</h3>
+                      <ul id="explainMainReasons" class="brain-list"></ul>
+                    </section>
+                    <section>
+                      <h3>Energyの影響</h3>
+                      <p id="explainEnergyImpact">通常の優先度で見ています。</p>
+                    </section>
+                    <section>
+                      <h3>Momentumの影響</h3>
+                      <p id="explainMomentumImpact">大きな勢いの偏りはありません。</p>
+                    </section>
+                    <section class="explain-layer-wide">
+                      <h3>不確かな点</h3>
+                      <ul id="explainUncertainty" class="brain-list"></ul>
+                    </section>
+                  </div>
+                </div>
+              </div>
               <div class="first-agent-panel" aria-label="First Agent">
                 <span class="brain-label">First Agent</span>
                 <div class="first-agent-actions">

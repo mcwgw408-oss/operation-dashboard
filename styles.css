@@ -352,6 +352,72 @@ textarea {
   font-weight: 700;
 }
 
+.explain-layer-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 2px;
+}
+
+.explain-layer-toggle {
+  width: fit-content;
+  min-height: 34px;
+  border: 1px solid #d9dfe8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 11px;
+}
+
+.explain-layer-toggle:hover {
+  background: #f6f8fb;
+}
+
+.explain-layer-body {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 11px;
+}
+
+.explain-layer-body[hidden] {
+  display: none;
+}
+
+.explain-layer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.explain-layer-grid section {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.explain-layer-grid h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.explain-layer-grid p {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.explain-layer-wide {
+  grid-column: 1 / -1;
+}
+
 .first-agent-panel {
   display: grid;
   gap: 9px;
@@ -850,6 +916,14 @@ textarea {
   }
 
   .brain-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .brain-card.recommendation-card {
+    grid-column: span 1;
+  }
+
+  .explain-layer-grid {
     grid-template-columns: 1fr;
   }
 

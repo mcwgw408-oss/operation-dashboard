@@ -1075,6 +1075,59 @@ function buildRecommendation(input) {
   };
 }
 
+function buildExplainLayerDetails(input, recommendation) {
+  const seenInfo = [
+    input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
+    input.openTodayCount ? `今日やることに未完了が${input.openTodayCount}件あります。` : "今日やることの未完了は少なめです。",
+    input.hasFermentingIdeas ? "発酵中アイデアがあります。" : "",
+    input.hasWritingInProgress ? "執筆中の記事があります。" : "",
+    input.hasNextActions ? "発信観察の次アクションがあります。" : "",
+  ].filter(Boolean);
+
+  const mainReasons = input.topCandidate
+    ? asArray(recommendation.reasons).map((reason) => `${reason} そのため、この提案にしています。`)
+    : ["強く急ぐ候補が見えていないため、整理や回復寄りの提案にしています。"];
+
+  const uncertainty = [
+    "画面上とlocalStorageにある情報だけを見ています。",
+    "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
+  ];
+  if (!input.topCandidate) {
+    uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
+  }
+  if (input.energy.state === "Normal" && input.momentum.state === "Stable") {
+    uncertainty.push("EnergyとMomentumに大きな偏りが見えていないため、説明は控えめにしています。");
+  }
+
+  return {
+    seenInfo,
+    mainReasons,
+    energyImpact: input.energy.text,
+    momentumImpact: input.momentum.text,
+    uncertainty,
+  };
+}
+
+function setExplainLayerExpanded(isExpanded) {
+  const toggle = $("#explainLayerToggle");
+  const body = $("#explainLayerBody");
+  if (!toggle || !body) return;
+  toggle.setAttribute("aria-expanded", String(isExpanded));
+  toggle.textContent = isExpanded ? "理由を閉じる" : "理由を見る";
+  body.hidden = !isExpanded;
+}
+
+function renderExplainLayerDetails(details) {
+  appendBrainItems($("#explainSeenInfo"), details.seenInfo, "見ている情報はまだ少なめです。");
+  appendBrainItems($("#explainMainReasons"), details.mainReasons, "主な理由はまだありません。");
+  appendBrainItems($("#explainUncertainty"), details.uncertainty, "不確かな点は少なめです。");
+  const energyTarget = $("#explainEnergyImpact");
+  const momentumTarget = $("#explainMomentumImpact");
+  if (energyTarget) energyTarget.textContent = details.energyImpact;
+  if (momentumTarget) momentumTarget.textContent = details.momentumImpact;
+  setExplainLayerExpanded(false);
+}
+
 const FIRST_AGENT_RESPONSES = {
   try: "いいですね。まず15分だけ始めてみましょう。",
   later: "了解です。必要になったらまた一緒に考えましょう。",
@@ -1133,7 +1186,7 @@ function renderBrainPrototype() {
   const rankedCandidates = rankPriorityCandidates(candidates, energyContext, momentumContext);
   const priorityCandidate = rankedCandidates[0];
   const explanation = explainPriorityCandidate(priorityCandidate);
-  const recommendation = buildRecommendation(buildRecommendationInput(
+  const recommendationInput = buildRecommendationInput(
     priorityCandidate,
     explanation,
     energyContext,
@@ -1145,7 +1198,9 @@ function renderBrainPrototype() {
       openTodayCount: openToday.length,
       completedToday,
     },
-  ));
+  );
+  const recommendation = buildRecommendation(recommendationInput);
+  const explainLayerDetails = buildExplainLayerDetails(recommendationInput, recommendation);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -1155,6 +1210,7 @@ function renderBrainPrototype() {
   $("#brainRecommendationMessage").textContent = recommendation.message;
   $("#brainRecommendationAction").textContent = recommendation.actionText;
   appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
+  renderExplainLayerDetails(explainLayerDetails);
   showFirstAgentResponse("");
 
   appendBrainItems(
@@ -1210,6 +1266,10 @@ function renderAll() {
 }
 
 function bindEvents() {
+  $("#explainLayerToggle")?.addEventListener("click", () => {
+    const body = $("#explainLayerBody");
+    setExplainLayerExpanded(Boolean(body?.hidden));
+  });
   document.querySelectorAll("[data-first-agent-reply]").forEach((button) => {
     button.addEventListener("click", () => {
       showFirstAgentResponse(button.dataset.firstAgentReply);
