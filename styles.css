@@ -614,6 +614,57 @@ textarea {
   line-height: 1.55;
 }
 
+.memory-layer-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.memory-layer-panel section {
+  display: grid;
+  gap: 6px;
+}
+
+.memory-layer-panel h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.memory-memo-form {
+  display: grid;
+  gap: 8px;
+}
+
+.memory-memo-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.memory-memo-form textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.memory-memo-form button {
+  justify-self: start;
+  min-height: 36px;
+  border: 1px solid var(--green-line);
+  border-radius: 8px;
+  background: var(--green-soft);
+  color: var(--green);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 12px;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;

@@ -3,6 +3,7 @@ const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
 const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
+const MEMORY_STORE_STORAGE_KEY = "sakura-memory-store-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -64,6 +65,7 @@ let autoDedupeLater = loadAutoDedupeLater();
 let laterSearchQuery = "";
 let persistentMemos = loadPersistentMemos();
 let learningLog = loadLearningLog();
+let memoryStore = loadMemoryStore();
 let currentLearningLogId = "";
 
 function toDateInputValue(date) {
@@ -248,6 +250,17 @@ function loadLearningLog() {
   }
 }
 
+function loadMemoryStore() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MEMORY_STORE_STORAGE_KEY));
+    return {
+      shortMemory: Array.isArray(saved?.shortMemory) ? saved.shortMemory : [],
+    };
+  } catch {
+    return { shortMemory: [] };
+  }
+}
+
 function saveLaterItems() {
   localStorage.setItem(LATER_STORAGE_KEY, JSON.stringify(laterItems));
 }
@@ -265,6 +278,10 @@ function savePersistentMemos() {
 
 function saveLearningLog() {
   localStorage.setItem(LEARNING_LOG_STORAGE_KEY, JSON.stringify(learningLog));
+}
+
+function saveMemoryStore() {
+  localStorage.setItem(MEMORY_STORE_STORAGE_KEY, JSON.stringify(memoryStore));
 }
 
 function saveStore() {
@@ -792,6 +809,49 @@ function appendBrainItems(target, items, emptyText) {
     item.textContent = text;
     target.append(item);
   });
+}
+
+function upsertShortMemory({ date = activeDate, type, title, summary, source, importance = 2, tags = [] }) {
+  if (!type || !title || !summary || !source) return null;
+  const now = new Date().toISOString();
+  const existing = source === "manual" ? null : memoryStore.shortMemory.find((memory) =>
+    memory.date === date &&
+    memory.type === type &&
+    memory.source === source &&
+    memory.title === title
+  );
+  if (existing) {
+    existing.summary = summary;
+    existing.importance = importance;
+    existing.tags = tags;
+    existing.updatedAt = now;
+    saveMemoryStore();
+    return existing;
+  }
+  const memory = {
+    id: crypto.randomUUID(),
+    date,
+    type,
+    title,
+    summary,
+    source,
+    importance,
+    tags,
+    createdAt: now,
+    updatedAt: now,
+  };
+  memoryStore.shortMemory.unshift(memory);
+  memoryStore.shortMemory = memoryStore.shortMemory.slice(0, 80);
+  saveMemoryStore();
+  return memory;
+}
+
+function renderMemoryLayer() {
+  const recent = memoryStore.shortMemory
+    .filter((memory) => memory.date >= dateKeyDaysAgo(3))
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))
+    .map((memory) => memory.title);
+  appendBrainItems($("#shortMemoryList"), recent, "最近の記憶はまだありません。");
 }
 
 const PRIORITY_ENGINE_WEIGHTS = {
@@ -1655,6 +1715,26 @@ function renderBrainPrototype() {
   renderLearningConfidence(latestLearningConfidence);
   showFirstAgentResponse("");
 
+  if (eventContext.count) {
+    upsertShortMemory({
+      type: "event_context",
+      title: "今日は予定がある日",
+      summary: eventContext.labels.join(" / "),
+      source: "todayEvents",
+      importance: eventContext.count >= 2 ? 4 : 3,
+      tags: ["schedule", "short"],
+    });
+  }
+  upsertShortMemory({
+    type: "recommendation",
+    title: "Recommendation が出た",
+    summary: [recommendation.message, recommendation.actionText].filter(Boolean).join(" "),
+    source: "recommendation",
+    importance: 2,
+    tags: ["recommendation", recommendation.type],
+  });
+  renderMemoryLayer();
+
   appendBrainItems(
     $("#brainTodayTasks"),
     openToday.map((item) => item.title),
@@ -1732,6 +1812,15 @@ function bindEvents() {
       saveLearningLog();
       renderLearningFeedback(entry);
       renderLearningStatus();
+      upsertShortMemory({
+        type: "learning_feedback",
+        title: "Learning feedback が記録された",
+        summary: entry.accepted ? "この提案は合っていた、と記録されました。" : "この提案は違った、と記録されました。",
+        source: "learningLog",
+        importance: 3,
+        tags: ["learning", "feedback"],
+      });
+      renderMemoryLayer();
     });
   });
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
@@ -1741,6 +1830,21 @@ function bindEvents() {
     saveLearningLog();
     renderLearningFeedback(entry);
     renderLearningStatus();
+  });
+  $("#memoryMemoForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const memo = $("#memoryMemoText")?.value.trim();
+    if (!memo) return;
+    upsertShortMemory({
+      type: "manual",
+      title: "今日の記憶メモ",
+      summary: memo,
+      source: "manual",
+      importance: 3,
+      tags: ["manual", "short"],
+    });
+    $("#memoryMemoText").value = "";
+    renderMemoryLayer();
   });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
@@ -2163,6 +2267,9 @@ function buildSakuraSnapshot(mode) {
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
+  const memory = {
+    shortMemory: asArray(readStoredJson(MEMORY_STORE_STORAGE_KEY, {})?.shortMemory),
+  };
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -2287,7 +2394,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary, learningHint, learningConfidence },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary, learningHint, learningConfidence, memory },
       },
       "discovery-labo": {
         schemaVersion: 1,
