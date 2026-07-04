@@ -1887,6 +1887,7 @@ function buildReply(
     feedback,
     health,
   ),
+  healthInsight = buildHealthInsight(getRecentHealthStates()),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1937,6 +1938,7 @@ function buildReply(
     sections,
     metadata: {
       healthSummary,
+      healthInsight,
       executiveSummary,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
@@ -2061,6 +2063,7 @@ function buildReply(
       retryCount: workflow.retryCount,
     } : null,
     healthSummary,
+    healthInsight,
     executiveSummary,
     executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
@@ -3284,6 +3287,96 @@ function renderHealthState() {
   if (status) status.textContent = health?.updatedAt ? "Health Check saved." : "Record today's health context.";
   const summaryTarget = $("#healthStateSummary");
   if (summaryTarget) summaryTarget.textContent = summary.healthContext || "-";
+}
+
+function getRecentHealthStates(limit = 7) {
+  return [...asArray(healthState)]
+    .sort((a, b) =>
+      String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
+    )
+    .slice(0, limit);
+}
+
+function mostCommonHealthValue(items, key, fallback = "unknown") {
+  const counts = new Map();
+  asArray(items).forEach((item) => {
+    const value = item?.[key];
+    if (!value || value === "unknown") return;
+    counts.set(value, (counts.get(value) || 0) + 1);
+  });
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || fallback;
+}
+
+function buildHealthInsight(healthItems = getRecentHealthStates()) {
+  const items = asArray(healthItems).filter(Boolean);
+  const latest = items[0] || null;
+  const recordCount = items.length;
+  if (!recordCount) {
+    return {
+      date: activeDate,
+      recordCount: 0,
+      recentRecovery: "No recent Health Check records yet.",
+      recentEnergyTrend: "No recent energy trend yet.",
+      sleepRecoveryNote: "Sleep and recovery can be reviewed after a few records.",
+      nutritionTrend: "Nutrition satisfaction can be reviewed after a few records.",
+      stressMoodNote: "Stress and mood can be reviewed after a few records.",
+      insightText: "Health Insight will appear after Health Check records are added.",
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  const recentRecovery = mostCommonHealthValue(items, "recoveryFeeling");
+  const recentEnergy = mostCommonHealthValue(items, "energyLevel", "medium");
+  const recentNutrition = mostCommonHealthValue(items, "nutritionSatisfaction");
+  const recentStress = mostCommonHealthValue(items, "stressLevel");
+  const recentMood = mostCommonHealthValue(items, "mood", "mixed");
+  const sleepItems = items.filter((item) => item.sleepHours || (item.sleepQuality && item.sleepQuality !== "unknown"));
+  const lowRecoveryWithSleep = sleepItems.filter((item) => ["depleted", "low"].includes(item.recoveryFeeling)).length;
+  const sleepRecoveryNote = sleepItems.length
+    ? `Recent records with sleep entries show recovery as ${recentRecovery}. This may be useful context, not a cause.`
+    : "Sleep entries are still limited, so the recovery relationship is not visible yet.";
+  const energyLowCount = items.filter((item) => ["very_low", "low", "unstable"].includes(item.energyLevel)).length;
+  const recentEnergyTrend = energyLowCount >= Math.ceil(recordCount / 2)
+    ? `Recent energy is often ${recentEnergy}, so smaller actions may fit the recent pattern.`
+    : `Recent energy is mostly ${recentEnergy}.`;
+  const nutritionTrend = recentNutrition === "unknown"
+    ? "Nutrition satisfaction is not visible yet."
+    : `Recent nutrition satisfaction is often ${recentNutrition}.`;
+  const stressMoodNote = recentStress === "unknown"
+    ? `Recent mood is mostly ${recentMood}. Stress records are still limited.`
+    : `Recent records show stress ${recentStress} and mood ${recentMood}.`;
+  const insightText = [
+    `Recent Health Check records: ${recordCount}.`,
+    lowRecoveryWithSleep ? "Recovery has been low in some sleep-related records." : "",
+    energyLowCount ? "Energy may be a useful context when choosing task size." : "",
+    "This is a reflection aid, not a medical judgment.",
+  ].filter(Boolean).join(" ");
+
+  return {
+    date: latest?.date || activeDate,
+    recordCount,
+    recentRecovery,
+    recentEnergyTrend,
+    sleepRecoveryNote,
+    nutritionTrend,
+    stressMoodNote,
+    insightText,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function renderHealthInsight() {
+  const insight = buildHealthInsight(getRecentHealthStates());
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#healthInsightRecovery", insight.recentRecovery);
+  setText("#healthInsightEnergyTrend", insight.recentEnergyTrend);
+  setText("#healthInsightSleepRecovery", insight.sleepRecoveryNote);
+  setText("#healthInsightNutrition", insight.nutritionTrend);
+  setText("#healthInsightStressMood", insight.stressMoodNote);
+  setText("#healthInsightText", insight.insightText);
 }
 
 function findConversationFeedback(replyText) {
@@ -4576,6 +4669,7 @@ function renderBrainPrototype() {
   renderExecutionState();
   renderExecutionFeedback();
   renderHealthState();
+  renderHealthInsight();
   renderExecutiveSummary();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
@@ -4790,6 +4884,7 @@ function bindEvents() {
     $(selector)?.addEventListener(eventName, (event) => {
       upsertHealthState({ [key]: event.target.value });
       renderHealthState();
+      renderHealthInsight();
       renderExecutiveSummary();
     });
   };
@@ -5308,6 +5403,13 @@ function buildSakuraSnapshot(mode) {
   const healthStateItems = asArray(readStoredJson(HEALTH_STATE_STORAGE_KEY, []));
   const latestHealthState = latestHealthStateFrom(healthStateItems);
   const healthSummary = buildHealthSummary(latestHealthState);
+  const healthInsight = buildHealthInsight(
+    [...healthStateItems]
+      .sort((a, b) =>
+        String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
+      )
+      .slice(0, 7),
+  );
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -5394,6 +5496,7 @@ function buildSakuraSnapshot(mode) {
     latestExecutionFeedbackFrom(executionFeedbackItems),
     latestHealthState,
     executiveSummary,
+    healthInsight,
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -5544,6 +5647,7 @@ function buildSakuraSnapshot(mode) {
       state: deepCopy(healthStateItems),
       latest: deepCopy(latestHealthState),
       summary: deepCopy(healthSummary),
+      insight: deepCopy(healthInsight),
     },
     conversation,
     apps: {
