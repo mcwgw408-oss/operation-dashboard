@@ -1189,6 +1189,48 @@ function renderConversationContext(context) {
   setText("#conversationContextLearning", context?.learningConfidence ? `Confidence ${context.learningConfidence.score}%` : "");
 }
 
+function buildReplyPlan(conversationContext = {}) {
+  const firstEvent = asArray(conversationContext.todayEvents).find((event) => event.title);
+  const firstTask = asArray(conversationContext.todayTasks).find((task) => task.title && !task.done);
+  const memoryTitle = memoryDisplayTitle(conversationContext.memoryContext?.retrieved?.[0]) ||
+    memoryDisplayTitle(conversationContext.memoryContext?.recent?.[0]);
+  const confidence = conversationContext.learningConfidence?.score ?? 0;
+
+  return {
+    opening: firstEvent
+      ? `今日の予定: ${firstEvent.title}`
+      : conversationContext.project
+        ? `プロジェクト: ${conversationContext.project}`
+        : firstTask
+          ? `今日のタスク: ${firstTask.title}`
+          : "今日の状況を軽く確認する",
+    mainPoint: conversationContext.recommendation?.actionText ||
+      conversationContext.recommendation?.message ||
+      conversationContext.recommendation?.title ||
+      "Recommendation を確認する",
+    support: [
+      memoryTitle ? `Memory: ${memoryTitle}` : "",
+      conversationContext.learningHint?.message ? `Learning: ${conversationContext.learningHint.message}` : "",
+    ].filter(Boolean).join(" / ") || "補足情報はまだ少ない",
+    uncertainty: confidence >= 60
+      ? `Learning Confidence ${confidence}%。参考情報として使える状態です。`
+      : `Learning Confidence ${confidence}%。まだ学習途中として控えめに扱います。`,
+    closing: "様子を見ながら、次の一歩につなげる",
+  };
+}
+
+function renderReplyPlan(replyPlan) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#replyPlanOpening", replyPlan?.opening);
+  setText("#replyPlanMainPoint", replyPlan?.mainPoint);
+  setText("#replyPlanSupport", replyPlan?.support);
+  setText("#replyPlanUncertainty", replyPlan?.uncertainty);
+  setText("#replyPlanClosing", replyPlan?.closing);
+}
+
 function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
   const consolidation = buildMemoryConsolidation(memoryStore);
@@ -2083,6 +2125,7 @@ function renderBrainPrototype() {
     todayTasks,
     todayEvents,
   });
+  const replyPlan = buildReplyPlan(conversationContext);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -2103,6 +2146,7 @@ function renderBrainPrototype() {
   renderLearningHint(latestLearningHint);
   renderLearningConfidence(latestLearningConfidence);
   renderConversationContext(conversationContext);
+  renderReplyPlan(replyPlan);
   showFirstAgentResponse("");
 
   if (eventContext.count) {
@@ -2684,8 +2728,7 @@ function buildSakuraSnapshot(mode) {
       memory,
     ),
   };
-  const conversation = {
-    context: buildConversationContext({
+  const conversationContext = buildConversationContext({
       project: brain.memoryContext.project,
       recommendation: latestRecommendationMemory ? {
         type: asArray(latestRecommendationMemory.tags).find((tag) => tag !== "recommendation") || "",
@@ -2699,7 +2742,10 @@ function buildSakuraSnapshot(mode) {
       memoryContext: brain.memoryContext,
       todayTasks: asArray(fullStore[toKey]?.todayTasks),
       todayEvents: asArray(fullStore[toKey]?.todayEvents),
-    }),
+    });
+  const conversation = {
+    context: conversationContext,
+    replyPlan: buildReplyPlan(conversationContext),
   };
 
   // --- Discovery-Labo：種と発生源は全件 ---

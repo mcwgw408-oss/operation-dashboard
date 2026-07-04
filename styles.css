@@ -675,12 +675,22 @@ textarea {
   padding-top: 8px;
 }
 
+.reply-plan-panel {
+  border-top: 1px solid #e7edf4;
+  padding-top: 8px;
+}
+
 .brain-memory-context-grid {
   display: grid;
   gap: 7px;
 }
 
 .conversation-context-grid {
+  display: grid;
+  gap: 7px;
+}
+
+.reply-plan-grid {
   display: grid;
   gap: 7px;
 }
@@ -703,6 +713,15 @@ textarea {
   padding: 8px 9px;
 }
 
+.reply-plan-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
 .brain-memory-context-grid span {
   color: var(--muted);
   font-size: 12px;
@@ -710,6 +729,12 @@ textarea {
 }
 
 .conversation-context-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reply-plan-grid span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -724,6 +749,13 @@ textarea {
   overflow-wrap: anywhere;
   color: var(--text);
   font-size: 14px;
+}
+
+.reply-plan-grid p {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .memory-consolidation-summary {
