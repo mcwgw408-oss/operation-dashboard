@@ -16,6 +16,7 @@ const IDENTITY_PROFILE_STORAGE_KEY = "sakura-identity-profile-v1";
 const GOAL_STATE_STORAGE_KEY = "sakura-goal-state-v1";
 const PRIORITY_STATE_STORAGE_KEY = "sakura-priority-state-v1";
 const DECISION_STATE_STORAGE_KEY = "sakura-decision-state-v1";
+const STRATEGY_STATE_STORAGE_KEY = "sakura-strategy-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -110,6 +111,7 @@ let identityProfile = loadIdentityProfile();
 let goalState = loadGoalState();
 let priorityState = loadPriorityState();
 let decisionState = loadDecisionState();
+let strategyState = loadStrategyState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -452,6 +454,15 @@ function loadDecisionState() {
   }
 }
 
+function loadStrategyState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STRATEGY_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -570,6 +581,12 @@ function savePriorityState() {
 
 function saveDecisionState() {
   localStorage.setItem(DECISION_STATE_STORAGE_KEY, JSON.stringify(decisionState));
+  upsertStrategyState();
+  renderStrategyState();
+}
+
+function saveStrategyState() {
+  localStorage.setItem(STRATEGY_STATE_STORAGE_KEY, JSON.stringify(strategyState));
 }
 
 function saveMemoryStore() {
@@ -1597,6 +1614,15 @@ function getLatestDecisionState() {
   return latestDecisionStateFrom(decisionState);
 }
 
+function latestStrategyStateFrom(strategyItems) {
+  return [...asArray(strategyItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestStrategyState() {
+  return latestStrategyStateFrom(strategyState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1610,6 +1636,7 @@ function buildReply(
   goal = getLatestGoalState(),
   priority = getLatestPriorityState(),
   decision = getLatestDecisionState(),
+  strategy = getLatestStrategyState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1703,6 +1730,13 @@ function buildReply(
       decisionReason: decision.decisionReason,
       confidence: decision.confidence,
       expectedOutcome: decision.expectedOutcome,
+    } : null,
+    strategyState: strategy ? {
+      strategyType: strategy.strategyType,
+      steps: asArray(strategy.steps),
+      communicationPlan: strategy.communicationPlan,
+      risk: strategy.risk,
+      fallback: strategy.fallback,
     } : null,
   };
 }
@@ -2115,6 +2149,85 @@ function renderDecisionState() {
   setText("#decisionReason", decision?.decisionReason);
   setText("#decisionConfidence", decision?.confidence !== undefined ? `${decision.confidence}%` : "");
   setText("#decisionExpectedOutcome", decision?.expectedOutcome);
+}
+
+function buildStrategyState(
+  goal = getLatestGoalState(),
+  priority = getLatestPriorityState(),
+  decision = getLatestDecisionState(),
+  identity = getLatestIdentityProfile(),
+) {
+  const confidence = Number(decision?.confidence ?? goal?.confidence ?? 50);
+  const strategyType = confidence < 40
+    ? "careful_stepwise"
+    : priority?.urgency === "medium"
+      ? "focused_action"
+      : "steady_support";
+  const steps = [
+    decision?.selectedApproach || priority?.primaryPriority || goal?.nextStep,
+    priority?.secondaryPriority || decision?.expectedOutcome || goal?.successCondition,
+    identity?.currentTone ? `Tone: ${identity.currentTone}` : "",
+  ].filter(Boolean).slice(0, 3);
+  const communicationPlan = [
+    identity?.responsePrinciple || goal?.assistantGoal,
+    priority?.ignoredTopics?.length ? `Avoid: ${asArray(priority.ignoredTopics).join(" / ")}` : "",
+  ].filter(Boolean).join(" / ") || "目的に沿って短く自然に進める";
+  const risk = confidence < 40
+    ? "確信度が低いため、断定しすぎると違和感が出る可能性があります。"
+    : asArray(priority?.ignoredTopics).join(" / ") || "大きなリスクはまだ検出されていません。";
+  const fallback = decision?.alternativeApproaches?.[0] ||
+    goal?.successCondition ||
+    "反応を見て、より短く確認する返答に切り替える";
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    strategyType,
+    steps,
+    communicationPlan,
+    risk,
+    fallback,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertStrategyState() {
+  if (!getLatestDecisionState() && !getLatestPriorityState() && !getLatestGoalState()) return null;
+  const built = buildStrategyState(
+    getLatestGoalState(),
+    getLatestPriorityState(),
+    getLatestDecisionState(),
+    getLatestIdentityProfile(),
+  );
+  const now = new Date().toISOString();
+  let strategy = strategyState.find((entry) => entry.date === activeDate);
+  if (strategy) {
+    strategy.strategyType = built.strategyType;
+    strategy.steps = built.steps;
+    strategy.communicationPlan = built.communicationPlan;
+    strategy.risk = built.risk;
+    strategy.fallback = built.fallback;
+    strategy.updatedAt = now;
+  } else {
+    strategy = built;
+    strategyState.unshift(strategy);
+  }
+  saveStrategyState();
+  return strategy;
+}
+
+function renderStrategyState() {
+  const strategy = getLatestStrategyState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#strategyType", strategy?.strategyType);
+  setText("#strategySteps", asArray(strategy?.steps).join(" / "));
+  setText("#strategyCommunicationPlan", strategy?.communicationPlan);
+  setText("#strategyRisk", strategy?.risk);
+  setText("#strategyFallback", strategy?.fallback);
 }
 
 function findConversationFeedback(replyText) {
@@ -3397,6 +3510,7 @@ function renderBrainPrototype() {
   renderGoalState();
   renderPriorityState();
   renderDecisionState();
+  renderStrategyState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3539,6 +3653,7 @@ function bindEvents() {
       renderGoalState();
       renderPriorityState();
       renderDecisionState();
+      renderStrategyState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -3558,6 +3673,7 @@ function bindEvents() {
     renderGoalState();
     renderPriorityState();
     renderDecisionState();
+    renderStrategyState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -3817,6 +3933,7 @@ const BACKUP_KEYS = [
   GOAL_STATE_STORAGE_KEY,
   PRIORITY_STATE_STORAGE_KEY,
   DECISION_STATE_STORAGE_KEY,
+  STRATEGY_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3854,6 +3971,7 @@ function createBackup() {
   data[GOAL_STATE_STORAGE_KEY] = readStoredJson(GOAL_STATE_STORAGE_KEY, []);
   data[PRIORITY_STATE_STORAGE_KEY] = readStoredJson(PRIORITY_STATE_STORAGE_KEY, []);
   data[DECISION_STATE_STORAGE_KEY] = readStoredJson(DECISION_STATE_STORAGE_KEY, []);
+  data[STRATEGY_STATE_STORAGE_KEY] = readStoredJson(STRATEGY_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4035,6 +4153,7 @@ function buildSakuraSnapshot(mode) {
   const goalStateItems = asArray(readStoredJson(GOAL_STATE_STORAGE_KEY, []));
   const priorityStateItems = asArray(readStoredJson(PRIORITY_STATE_STORAGE_KEY, []));
   const decisionStateItems = asArray(readStoredJson(DECISION_STATE_STORAGE_KEY, []));
+  const strategyStateItems = asArray(readStoredJson(STRATEGY_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4101,6 +4220,7 @@ function buildSakuraSnapshot(mode) {
     latestGoalStateFrom(goalStateItems),
     latestPriorityStateFrom(priorityStateItems),
     latestDecisionStateFrom(decisionStateItems),
+    latestStrategyStateFrom(strategyStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -4234,6 +4354,7 @@ function buildSakuraSnapshot(mode) {
       goal: deepCopy(goalStateItems),
       priority: deepCopy(priorityStateItems),
       decision: deepCopy(decisionStateItems),
+      strategy: deepCopy(strategyStateItems),
     },
     conversation,
     apps: {
