@@ -5,6 +5,8 @@ const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
 const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
 const MEMORY_STORE_STORAGE_KEY = "sakura-memory-store-v1";
 const CONVERSATION_FEEDBACK_STORAGE_KEY = "sakura-conversation-feedback-v1";
+const CONVERSATION_IMPROVEMENTS_STORAGE_KEY = "sakura-conversation-improvements-v1";
+const CONVERSATION_REFLECTIONS_STORAGE_KEY = "sakura-conversation-reflections-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -88,8 +90,11 @@ let persistentMemos = loadPersistentMemos();
 let learningLog = loadLearningLog();
 let memoryStore = loadMemoryStore();
 let conversationFeedback = loadConversationFeedback();
+let conversationImprovements = loadConversationImprovements();
+let conversationReflections = loadConversationReflections();
 let currentLearningLogId = "";
 let currentReplyText = "";
+let currentConversationContext = null;
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -282,6 +287,24 @@ function loadConversationFeedback() {
   }
 }
 
+function loadConversationImprovements() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONVERSATION_IMPROVEMENTS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadConversationReflections() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONVERSATION_REFLECTIONS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -342,6 +365,14 @@ function saveLearningLog() {
 
 function saveConversationFeedback() {
   localStorage.setItem(CONVERSATION_FEEDBACK_STORAGE_KEY, JSON.stringify(conversationFeedback));
+}
+
+function saveConversationImprovements() {
+  localStorage.setItem(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, JSON.stringify(conversationImprovements));
+}
+
+function saveConversationReflections() {
+  localStorage.setItem(CONVERSATION_REFLECTIONS_STORAGE_KEY, JSON.stringify(conversationReflections));
 }
 
 function saveMemoryStore() {
@@ -1285,7 +1316,32 @@ function shouldIncludeReplyUncertainty(uncertainty) {
   return /Confidence [0-5]?\d%|まだ|学習途中|控えめ/.test(uncertainty || "");
 }
 
-function buildReply(replyPlan = {}) {
+function conversationImprovementHintsFrom(improvements, limit = 3) {
+  return [...asArray(improvements)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))
+    .slice(0, limit)
+    .map((improvement) => improvement.hint)
+    .filter(Boolean);
+}
+
+function getRecentConversationImprovementHints(limit = 3) {
+  return conversationImprovementHintsFrom(conversationImprovements, limit);
+}
+
+function latestConversationReflectionFrom(reflections) {
+  return [...asArray(reflections)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestConversationReflection() {
+  return latestConversationReflectionFrom(conversationReflections);
+}
+
+function buildReply(
+  replyPlan = {},
+  improvementHints = getRecentConversationImprovementHints(),
+  latestReflection = getLatestConversationReflection(),
+) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
     mainPoint: sentenceWithPeriod(replyPlan.mainPoint),
@@ -1303,7 +1359,17 @@ function buildReply(replyPlan = {}) {
     sections.closing,
   ].filter(Boolean).join("\n\n");
 
-  return { text, sections };
+  return {
+    text,
+    sections,
+    improvementHints: asArray(improvementHints),
+    latestReflection: latestReflection ? {
+      summary: latestReflection.summary,
+      tone: latestReflection.tone,
+      userNeed: latestReflection.userNeed,
+      nextReplyHint: latestReflection.nextReplyHint,
+    } : null,
+  };
 }
 
 function renderReply(reply) {
@@ -1344,6 +1410,137 @@ function upsertConversationFeedback(replyText, updates = {}) {
   }
   saveConversationFeedback();
   return entry;
+}
+
+function buildConversationImprovementHint(feedback) {
+  if (!feedback) return "";
+  const note = replySentence(feedback.note);
+  if (feedback.natural === true) {
+    return note
+      ? `自然だった返答として記録されています。次回も同じ調子を保ちつつ、メモ「${note}」を表現の参考にします。`
+      : "自然だった返答として記録されています。次回も同じ調子、長さ、やわらかさを保ちます。";
+  }
+  if (feedback.natural === false) {
+    return note
+      ? `違和感があった返答として記録されています。次回はメモ「${note}」を避ける方向の手がかりにします。`
+      : "違和感があった返答として記録されています。次回は言い切りを弱め、より自然なつながりに整えます。";
+  }
+  return note
+    ? `返答へのメモ「${note}」があります。次回の表現調整の参考にします。`
+    : "";
+}
+
+function upsertConversationImprovement(feedback) {
+  const hint = buildConversationImprovementHint(feedback);
+  if (!feedback?.id || !hint) return null;
+  const now = new Date().toISOString();
+  let improvement = conversationImprovements.find((entry) => entry.feedbackId === feedback.id);
+  if (improvement) {
+    improvement.date = feedback.date;
+    improvement.replyText = feedback.replyText;
+    improvement.natural = feedback.natural;
+    improvement.note = feedback.note || "";
+    improvement.hint = hint;
+    improvement.updatedAt = now;
+  } else {
+    improvement = {
+      id: crypto.randomUUID(),
+      feedbackId: feedback.id,
+      date: feedback.date,
+      replyText: feedback.replyText,
+      natural: feedback.natural,
+      note: feedback.note || "",
+      hint,
+      createdAt: now,
+      updatedAt: now,
+    };
+    conversationImprovements.unshift(improvement);
+  }
+  saveConversationImprovements();
+  return improvement;
+}
+
+function renderConversationImprovementHints() {
+  const target = $("#conversationImprovementHints");
+  if (!target) return;
+  appendBrainItems(target, getRecentConversationImprovementHints(3), "Improvement Hint はまだありません。");
+}
+
+function buildConversationReflection(context = {}, feedbacks = [], improvements = []) {
+  const latestFeedback = [...asArray(feedbacks)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+  const latestImprovement = [...asArray(improvements)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+  const recommendationLabel = context?.recommendation?.title || context?.recommendation?.type || "Generated Reply";
+  const feedbackLabel = latestFeedback?.natural === true
+    ? "自然"
+    : latestFeedback?.natural === false
+      ? "違和感あり"
+      : "未評価";
+  const summary = `${recommendationLabel} への返答は「${feedbackLabel}」として振り返られています。`;
+  const tone = latestFeedback?.natural === false
+    ? "softer"
+    : latestFeedback?.natural === true
+      ? "natural"
+      : "observing";
+  const userNeed = replySentence(latestFeedback?.note) ||
+    (latestFeedback?.natural === false ? "より自然で違和感の少ない返答" : "自然な返答の維持");
+  const nextReplyHint = latestImprovement?.hint ||
+    (latestFeedback?.natural === false
+      ? "次回は言い切りを弱め、文のつながりをやわらかくします。"
+      : latestFeedback?.natural === true
+        ? "次回も同じ調子と長さを保ちます。"
+        : "次回の返答後に自然さを確認します。");
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    summary,
+    tone,
+    userNeed,
+    nextReplyHint,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertConversationReflection() {
+  if (!currentReplyText && !currentConversationContext) return null;
+  const relatedFeedbacks = conversationFeedback.filter((feedback) =>
+    feedback.date === activeDate &&
+    (!currentReplyText || feedback.replyText === currentReplyText),
+  );
+  const relatedImprovements = conversationImprovements.filter((improvement) =>
+    improvement.date === activeDate &&
+    (!currentReplyText || improvement.replyText === currentReplyText),
+  );
+  const built = buildConversationReflection(currentConversationContext || {}, relatedFeedbacks, relatedImprovements);
+  const now = new Date().toISOString();
+  let reflection = conversationReflections.find((entry) => entry.date === activeDate);
+  if (reflection) {
+    reflection.summary = built.summary;
+    reflection.tone = built.tone;
+    reflection.userNeed = built.userNeed;
+    reflection.nextReplyHint = built.nextReplyHint;
+    reflection.updatedAt = now;
+  } else {
+    reflection = built;
+    conversationReflections.unshift(reflection);
+  }
+  saveConversationReflections();
+  return reflection;
+}
+
+function renderConversationReflection() {
+  const reflection = getLatestConversationReflection();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#conversationReflectionSummary", reflection?.summary);
+  setText("#conversationReflectionTone", reflection?.tone);
+  setText("#conversationReflectionUserNeed", reflection?.userNeed);
+  setText("#conversationReflectionNextReplyHint", reflection?.nextReplyHint);
 }
 
 function renderConversationFeedback(reply) {
@@ -2270,6 +2467,7 @@ function renderBrainPrototype() {
     todayTasks,
     todayEvents,
   });
+  currentConversationContext = conversationContext;
   const replyPlan = buildReplyPlan(conversationContext);
   const reply = buildReply(replyPlan);
 
@@ -2295,6 +2493,8 @@ function renderBrainPrototype() {
   renderReplyPlan(replyPlan);
   renderReply(reply);
   renderConversationFeedback(reply);
+  renderConversationImprovementHints();
+  renderConversationReflection();
   showFirstAgentResponse("");
 
   if (eventContext.count) {
@@ -2416,15 +2616,23 @@ function bindEvents() {
   });
   document.querySelectorAll("[data-conversation-feedback]").forEach((button) => {
     button.addEventListener("click", () => {
-      upsertConversationFeedback(currentReplyText, {
+      const feedback = upsertConversationFeedback(currentReplyText, {
         natural: button.dataset.conversationFeedback === "true",
       });
+      upsertConversationImprovement(feedback);
+      upsertConversationReflection();
       renderConversationFeedback({ text: currentReplyText });
+      renderConversationImprovementHints();
+      renderConversationReflection();
     });
   });
   $("#conversationFeedbackNote")?.addEventListener("input", (event) => {
-    upsertConversationFeedback(currentReplyText, { note: event.target.value });
+    const feedback = upsertConversationFeedback(currentReplyText, { note: event.target.value });
+    upsertConversationImprovement(feedback);
+    upsertConversationReflection();
     renderConversationFeedback({ text: currentReplyText });
+    renderConversationImprovementHints();
+    renderConversationReflection();
   });
   $("#memoryMemoForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -2671,6 +2879,8 @@ const BACKUP_KEYS = [
   PERSISTENT_MEMO_STORAGE_KEY,
   LATER_VIEW_STORAGE_KEY,
   CONVERSATION_FEEDBACK_STORAGE_KEY,
+  CONVERSATION_IMPROVEMENTS_STORAGE_KEY,
+  CONVERSATION_REFLECTIONS_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -2697,6 +2907,8 @@ function createBackup() {
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[LATER_VIEW_STORAGE_KEY] = readStoredJson(LATER_VIEW_STORAGE_KEY, {});
   data[CONVERSATION_FEEDBACK_STORAGE_KEY] = readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []);
+  data[CONVERSATION_IMPROVEMENTS_STORAGE_KEY] = readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []);
+  data[CONVERSATION_REFLECTIONS_STORAGE_KEY] = readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -2867,6 +3079,8 @@ function buildSakuraSnapshot(mode) {
   const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
   const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
   const conversationFeedbackItems = asArray(readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []));
+  const conversationImprovementItems = asArray(readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []));
+  const conversationReflectionItems = asArray(readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -2915,8 +3129,14 @@ function buildSakuraSnapshot(mode) {
     context: conversationContext,
     replyPlan: buildReplyPlan(conversationContext),
     feedback: deepCopy(conversationFeedbackItems),
+    improvements: deepCopy(conversationImprovementItems),
+    reflections: deepCopy(conversationReflectionItems),
   };
-  conversation.reply = buildReply(conversation.replyPlan);
+  conversation.reply = buildReply(
+    conversation.replyPlan,
+    conversationImprovementHintsFrom(conversationImprovementItems, 3),
+    latestConversationReflectionFrom(conversationReflectionItems),
+  );
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
