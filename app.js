@@ -1005,8 +1005,83 @@ function buildMemoryRetrievalContext({ priorityCandidate = null, recommendationT
   };
 }
 
+function memoryAgeDays(memory, now = Date.now()) {
+  const updatedTime = memoryUpdatedTime(memory);
+  if (!updatedTime) return null;
+  return Math.max(0, Math.floor((now - updatedTime) / 86400000));
+}
+
+function memoryGroupKey(memory) {
+  const project = String(memory?.project || "").trim();
+  if (project) return { key: `project:${project}`, label: project, type: "project" };
+  const tags = normalizeMemoryTags(memory?.tags);
+  if (tags.length) return { key: `tags:${tags.join("+")}`, label: tags.join(" / "), type: "tags" };
+  return { key: "ungrouped", label: "Ungrouped", type: "none" };
+}
+
+function buildMemoryConsolidation(memorySource = memoryStore) {
+  const now = Date.now();
+  const shortMemory = asArray(memorySource?.shortMemory);
+  const memories = getMemorySource(memorySource);
+  const candidates = shortMemory
+    .filter((memory) => {
+      const ageDays = memoryAgeDays(memory, now);
+      return Number(memory?.importance || 0) <= 2 && ageDays !== null && ageDays >= 14;
+    })
+    .map((memory) => ({
+      id: memory.id,
+      title: memoryDisplayTitle(memory),
+      summary: memory.summary || "",
+      importance: Number(memory.importance || 0),
+      ageDays: memoryAgeDays(memory, now),
+      tags: asArray(memory.tags),
+      source: memory.source || "",
+      updatedAt: memory.updatedAt || memory.createdAt || memory.date || "",
+    }))
+    .sort((a, b) => b.ageDays - a.ageDays || a.importance - b.importance);
+  const groupMap = new Map();
+
+  memories.forEach((memory) => {
+    const group = memoryGroupKey(memory);
+    if (!groupMap.has(group.key)) {
+      groupMap.set(group.key, {
+        key: group.key,
+        label: group.label,
+        type: group.type,
+        count: 0,
+        latestUpdatedAt: "",
+        tags: [],
+        sampleTitles: [],
+      });
+    }
+    const entry = groupMap.get(group.key);
+    entry.count += 1;
+    const updatedAt = memory.updatedAt || memory.createdAt || memory.date || "";
+    if (String(updatedAt).localeCompare(String(entry.latestUpdatedAt)) > 0) entry.latestUpdatedAt = updatedAt;
+    entry.tags = [...new Set([...entry.tags, ...asArray(memory.tags)])];
+    if (entry.sampleTitles.length < 3) entry.sampleTitles.push(memoryDisplayTitle(memory));
+  });
+
+  const groups = [...groupMap.values()]
+    .filter((group) => group.count > 1 || group.type !== "none")
+    .sort((a, b) => b.count - a.count || String(b.latestUpdatedAt).localeCompare(String(a.latestUpdatedAt)));
+
+  return { candidates, groups };
+}
+
+function renderMemoryConsolidation(consolidation) {
+  const candidateCount = $("#memoryConsolidationCandidateCount");
+  if (candidateCount) candidateCount.textContent = `${asArray(consolidation?.candidates).length}件`;
+  appendBrainItems(
+    $("#memoryConsolidationGroups"),
+    asArray(consolidation?.groups).map((group) => `${group.label} (${group.count})`),
+    "Memory groups are not available yet.",
+  );
+}
+
 function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
+  const consolidation = buildMemoryConsolidation(memoryStore);
   const recent = memoryStore.shortMemory
     .filter((memory) => memory.date >= dateKeyDaysAgo(3))
     .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))
@@ -1017,6 +1092,7 @@ function renderMemoryLayer(context = {}) {
     getRelevantMemories(context).map(memoryDisplayTitle),
     "Retrieved memory is not available yet.",
   );
+  renderMemoryConsolidation(consolidation);
 
   const target = $("#projectMemoryList");
   if (!target) return;
@@ -2468,6 +2544,7 @@ function buildSakuraSnapshot(mode) {
     },
     { memorySource: memory },
   );
+  memory.consolidation = buildMemoryConsolidation(memory);
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));

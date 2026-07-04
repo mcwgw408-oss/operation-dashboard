@@ -660,6 +660,34 @@ textarea {
   line-height: 1.5;
 }
 
+.memory-consolidation-panel {
+  border-top: 1px solid #e7edf4;
+  padding-top: 8px;
+}
+
+.memory-consolidation-summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
+.memory-consolidation-summary span,
+.memory-consolidation-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.memory-consolidation-summary strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
 .memory-memo-form {
   display: grid;
   gap: 8px;
