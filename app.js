@@ -1878,6 +1878,8 @@ function buildReply(
   execution = getLatestExecutionState(),
   feedback = getLatestExecutionFeedback(),
   health = getLatestHealthState(),
+  healthInsight = buildHealthInsight(getRecentHealthStates()),
+  healthContext = buildHealthContext(health, healthInsight),
   executiveSummary = buildExecutiveSummary(
     intent,
     taskPlan,
@@ -1886,8 +1888,8 @@ function buildReply(
     execution,
     feedback,
     health,
+    healthContext,
   ),
-  healthInsight = buildHealthInsight(getRecentHealthStates()),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1939,6 +1941,7 @@ function buildReply(
     metadata: {
       healthSummary,
       healthInsight,
+      healthContext,
       executiveSummary,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
@@ -2064,6 +2067,7 @@ function buildReply(
     } : null,
     healthSummary,
     healthInsight,
+    healthContext,
     executiveSummary,
     executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
@@ -3128,6 +3132,7 @@ function buildExecutiveSummary(
   execution = getLatestExecutionState(),
   feedback = getLatestExecutionFeedback(),
   health = getLatestHealthState(),
+  healthContext = getLatestHealthContext(),
 ) {
   const workflowStatus = workflow?.workflowStatus || "";
   const healthSummary = buildHealthSummary(health);
@@ -3160,7 +3165,7 @@ function buildExecutiveSummary(
     feedback?.difficulty === "hard" ? "Feedback marked hard." : "",
     feedback?.outcome === "failed" ? "Execution failed." : "",
     workflowStatus === "failed" ? "Workflow failed." : "",
-    healthSummary.risk,
+    healthContext.currentRisk || healthSummary.risk,
     !execution ? "Execution candidate is not available." : "",
   ].filter(Boolean).join(" ") || "No immediate risk detected.";
 
@@ -3174,7 +3179,7 @@ function buildExecutiveSummary(
     executionStatus,
     feedbackOutcome,
     nextAction: workflow?.nextAction || execution?.title || decision?.selectedTitle || "",
-    healthContext: healthSummary.healthContext,
+    healthContext: healthContext.executiveNote || healthSummary.healthContext,
     risk,
     updatedAt: new Date().toISOString(),
   };
@@ -3377,6 +3382,70 @@ function renderHealthInsight() {
   setText("#healthInsightNutrition", insight.nutritionTrend);
   setText("#healthInsightStressMood", insight.stressMoodNote);
   setText("#healthInsightText", insight.insightText);
+}
+
+function buildHealthContext(health = getLatestHealthState(), healthInsight = buildHealthInsight(getRecentHealthStates())) {
+  const summary = buildHealthSummary(health);
+  const recovery = health?.recoveryFeeling || healthInsight?.recentRecovery || "unknown";
+  const energy = health?.energyLevel || "medium";
+  const stress = health?.stressLevel || "unknown";
+  const capacity = ["very_low", "low"].includes(energy) || ["depleted", "low"].includes(recovery)
+    ? "low"
+    : energy === "unstable"
+      ? "unstable"
+      : energy === "high" && ["recovered", "refreshed"].includes(recovery)
+        ? "high"
+        : "medium";
+  const recoveryStatus = ["depleted", "low"].includes(recovery)
+    ? "needs_recovery"
+    : ["recovered", "refreshed"].includes(recovery)
+      ? "recovered"
+      : recovery === "unknown"
+        ? "unknown"
+        : "steady";
+  const riskParts = [
+    ["very_low", "low", "unstable"].includes(energy) ? `energy_${energy}` : "",
+    ["depleted", "low"].includes(recovery) ? `recovery_${recovery}` : "",
+    ["high", "overwhelming"].includes(stress) ? `stress_${stress}` : "",
+  ].filter(Boolean);
+  const currentRisk = riskParts.join(" / ") || "no_immediate_health_context_risk";
+  const recommendationContext = capacity === "low" || capacity === "unstable"
+    ? "Recent records suggest smaller, flexible actions may fit better today."
+    : "Recent records suggest normal action size may be usable as context.";
+  const executiveNote = [
+    `Capacity context: ${capacity}.`,
+    `Recovery status: ${recoveryStatus}.`,
+    riskParts.length ? `Useful context: ${currentRisk}.` : "",
+  ].filter(Boolean).join(" ");
+
+  return {
+    date: health?.date || healthInsight?.date || activeDate,
+    currentCapacity: capacity,
+    recoveryStatus,
+    currentRisk,
+    recommendationContext,
+    executiveNote,
+    sourceSummary: `Built from Health State and Health Insight. ${summary.healthContext}`,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function getLatestHealthContext() {
+  return buildHealthContext(getLatestHealthState(), buildHealthInsight(getRecentHealthStates()));
+}
+
+function renderHealthContext() {
+  const context = getLatestHealthContext();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#healthContextCapacity", context.currentCapacity);
+  setText("#healthContextRecovery", context.recoveryStatus);
+  setText("#healthContextRisk", context.currentRisk);
+  setText("#healthContextRecommendation", context.recommendationContext);
+  setText("#healthContextExecutiveNote", context.executiveNote);
+  setText("#healthContextSource", context.sourceSummary);
 }
 
 function findConversationFeedback(replyText) {
@@ -4670,6 +4739,7 @@ function renderBrainPrototype() {
   renderExecutionFeedback();
   renderHealthState();
   renderHealthInsight();
+  renderHealthContext();
   renderExecutiveSummary();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
@@ -4885,6 +4955,7 @@ function bindEvents() {
       upsertHealthState({ [key]: event.target.value });
       renderHealthState();
       renderHealthInsight();
+      renderHealthContext();
       renderExecutiveSummary();
     });
   };
@@ -5410,6 +5481,7 @@ function buildSakuraSnapshot(mode) {
       )
       .slice(0, 7),
   );
+  const healthContext = buildHealthContext(latestHealthState, healthInsight);
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -5471,6 +5543,7 @@ function buildSakuraSnapshot(mode) {
     latestExecutionStateFrom(executionStateItems),
     latestExecutionFeedbackFrom(executionFeedbackItems),
     latestHealthState,
+    healthContext,
   );
   conversation.reply = buildReply(
     conversation.replyPlan,
@@ -5495,8 +5568,9 @@ function buildSakuraSnapshot(mode) {
     latestExecutionStateFrom(executionStateItems),
     latestExecutionFeedbackFrom(executionFeedbackItems),
     latestHealthState,
-    executiveSummary,
     healthInsight,
+    healthContext,
+    executiveSummary,
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -5648,6 +5722,7 @@ function buildSakuraSnapshot(mode) {
       latest: deepCopy(latestHealthState),
       summary: deepCopy(healthSummary),
       insight: deepCopy(healthInsight),
+      context: deepCopy(healthContext),
     },
     conversation,
     apps: {
