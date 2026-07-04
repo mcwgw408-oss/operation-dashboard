@@ -878,6 +878,48 @@ textarea {
   line-height: 1.55;
 }
 
+.conversation-continuity-panel {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.conversation-continuity-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.conversation-continuity-grid {
+  display: grid;
+  gap: 7px;
+}
+
+.conversation-continuity-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
+.conversation-continuity-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.conversation-continuity-grid p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .memory-consolidation-summary {
   display: grid;
   grid-template-columns: 1fr auto;
