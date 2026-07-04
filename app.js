@@ -22,6 +22,7 @@ const COGNITIVE_STATE_STORAGE_KEY = "sakura-cognitive-state-v1";
 const INTENT_STATE_STORAGE_KEY = "sakura-intent-state-v1";
 const TASK_PLAN_STATE_STORAGE_KEY = "sakura-task-plan-state-v1";
 const WORKFLOW_STATE_STORAGE_KEY = "sakura-workflow-state-v1";
+const EXECUTION_DECISION_STORAGE_KEY = "sakura-execution-decision-v1";
 const EXECUTION_STATE_STORAGE_KEY = "sakura-execution-state-v1";
 const EXECUTION_FEEDBACK_STORAGE_KEY = "sakura-execution-feedback-v1";
 
@@ -124,6 +125,7 @@ let cognitiveState = loadCognitiveState();
 let intentState = loadIntentState();
 let taskPlanState = loadTaskPlanState();
 let workflowState = loadWorkflowState();
+let executionDecision = loadExecutionDecision();
 let executionState = loadExecutionState();
 let executionFeedback = loadExecutionFeedback();
 let currentLearningLogId = "";
@@ -522,6 +524,15 @@ function loadWorkflowState() {
   }
 }
 
+function loadExecutionDecision() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(EXECUTION_DECISION_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function loadExecutionState() {
   try {
     const saved = JSON.parse(localStorage.getItem(EXECUTION_STATE_STORAGE_KEY));
@@ -694,9 +705,15 @@ function saveTaskPlanState() {
 
 function saveWorkflowState() {
   localStorage.setItem(WORKFLOW_STATE_STORAGE_KEY, JSON.stringify(workflowState));
+  upsertExecutionDecision();
+  renderExecutionDecision();
   upsertExecutionState();
   renderExecutionState();
   renderExecutionFeedback();
+}
+
+function saveExecutionDecision() {
+  localStorage.setItem(EXECUTION_DECISION_STORAGE_KEY, JSON.stringify(executionDecision));
 }
 
 function saveExecutionState() {
@@ -1786,6 +1803,15 @@ function getLatestWorkflowState() {
   return latestWorkflowStateFrom(workflowState);
 }
 
+function latestExecutionDecisionFrom(decisionItems) {
+  return [...asArray(decisionItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestExecutionDecision() {
+  return latestExecutionDecisionFrom(executionDecision);
+}
+
 function latestExecutionStateFrom(executionItems) {
   return [...asArray(executionItems)]
     .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
@@ -1823,6 +1849,7 @@ function buildReply(
   intent = getLatestIntentState(),
   taskPlan = getLatestTaskPlanState(),
   workflow = getLatestWorkflowState(),
+  executionDecisionState = getLatestExecutionDecision(),
   execution = getLatestExecutionState(),
   feedback = getLatestExecutionFeedback(),
 ) {
@@ -1859,11 +1886,21 @@ function buildReply(
     durationMinutes: feedback.durationMinutes,
     note: feedback.note,
   } : null;
+  const executionDecisionMetadata = executionDecisionState ? {
+    workflowId: executionDecisionState.workflowId,
+    selectedTitle: executionDecisionState.selectedTitle,
+    selectedActionType: executionDecisionState.selectedActionType,
+    priority: executionDecisionState.priority,
+    decisionStatus: executionDecisionState.decisionStatus,
+    decisionReason: executionDecisionState.decisionReason,
+    confidence: executionDecisionState.confidence,
+  } : null;
 
   return {
     text,
     sections,
     metadata: {
+      executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
       executionFeedback: executionFeedbackMetadata,
     },
@@ -1985,6 +2022,7 @@ function buildReply(
       nextAction: workflow.nextAction,
       retryCount: workflow.retryCount,
     } : null,
+    executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
     executionFeedback: executionFeedbackMetadata,
   };
@@ -2848,16 +2886,82 @@ function renderWorkflowState() {
   setText("#workflowRetryCount", workflow?.retryCount !== undefined ? String(workflow.retryCount) : "");
 }
 
-function buildExecutionState(workflow = getLatestWorkflowState(), plan = getLatestTaskPlanState()) {
+function buildExecutionDecision(workflow = getLatestWorkflowState()) {
   const now = new Date().toISOString();
+  const workflowStatus = workflow?.workflowStatus || "";
+  const selectedTitle = workflow?.nextAction || "";
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    workflowId: workflow?.id || "",
+    selectedTitle,
+    selectedActionType: workflowStatus === "ready" ? "manual_confirm" : "review",
+    priority: workflowStatus === "ready" ? "normal" : "low",
+    decisionStatus: "proposed",
+    decisionReason: selectedTitle
+      ? `Workflow status is ${workflowStatus || "unknown"}, so "${selectedTitle}" is proposed for review.`
+      : `Workflow status is ${workflowStatus || "unknown"}, so the next execution candidate needs review.`,
+    confidence: "medium",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertExecutionDecision() {
+  const workflow = getLatestWorkflowState();
+  if (!workflow) return null;
+  const built = buildExecutionDecision(workflow);
+  const now = new Date().toISOString();
+  let decision = executionDecision.find((entry) =>
+    entry.date === activeDate &&
+    entry.workflowId === built.workflowId
+  );
+  if (decision) {
+    decision.selectedTitle = built.selectedTitle;
+    decision.selectedActionType = built.selectedActionType;
+    decision.priority = built.priority;
+    decision.decisionReason = built.decisionReason;
+    decision.confidence = built.confidence;
+    decision.updatedAt = now;
+  } else {
+    decision = built;
+    executionDecision.unshift(decision);
+  }
+  saveExecutionDecision();
+  return decision;
+}
+
+function renderExecutionDecision() {
+  const decision = getLatestExecutionDecision();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#executionDecisionPriority", decision?.priority);
+  setText("#executionDecisionStatus", decision?.decisionStatus);
+  setText("#executionDecisionTitle", decision?.selectedTitle);
+  setText("#executionDecisionActionType", decision?.selectedActionType);
+  setText("#executionDecisionConfidence", decision?.confidence);
+  setText("#executionDecisionReason", decision?.decisionReason);
+}
+
+function buildExecutionState(
+  workflow = getLatestWorkflowState(),
+  plan = getLatestTaskPlanState(),
+  decision = getLatestExecutionDecision(),
+) {
+  const now = new Date().toISOString();
+  const title = decision?.selectedTitle || workflow?.nextAction || "";
+  const actionType = decision?.selectedActionType ||
+    (workflow?.workflowStatus === "ready" ? "manual_confirm" : "review");
   return {
     id: crypto.randomUUID(),
     date: activeDate,
     sourceWorkflowId: workflow?.id || "",
-    title: workflow?.nextAction || "",
-    actionType: workflow?.workflowStatus === "ready" ? "manual_confirm" : "review",
+    title,
+    actionType,
     status: "pending",
-    reason: plan?.completionCriteria || workflow?.workflowStatus || "",
+    reason: decision?.decisionReason || plan?.completionCriteria || workflow?.workflowStatus || "",
     createdAt: now,
     updatedAt: now,
     executedAt: "",
@@ -2868,7 +2972,7 @@ function buildExecutionState(workflow = getLatestWorkflowState(), plan = getLate
 function upsertExecutionState() {
   const workflow = getLatestWorkflowState();
   if (!workflow) return null;
-  const built = buildExecutionState(workflow, getLatestTaskPlanState());
+  const built = buildExecutionState(workflow, getLatestTaskPlanState(), getLatestExecutionDecision());
   const now = new Date().toISOString();
   let execution = executionState.find((entry) =>
     entry.date === activeDate &&
@@ -4259,6 +4363,7 @@ function renderBrainPrototype() {
   renderIntentState();
   renderTaskPlanState();
   renderWorkflowState();
+  renderExecutionDecision();
   renderExecutionState();
   renderExecutionFeedback();
   renderConversationFeedback(reply);
@@ -4409,6 +4514,7 @@ function bindEvents() {
       renderIntentState();
       renderTaskPlanState();
       renderWorkflowState();
+      renderExecutionDecision();
       renderExecutionState();
       renderExecutionFeedback();
       renderConversationContinuity();
@@ -4436,6 +4542,7 @@ function bindEvents() {
     renderIntentState();
     renderTaskPlanState();
     renderWorkflowState();
+    renderExecutionDecision();
     renderExecutionState();
     renderExecutionFeedback();
     renderConversationContinuity();
@@ -4723,6 +4830,7 @@ const BACKUP_KEYS = [
   INTENT_STATE_STORAGE_KEY,
   TASK_PLAN_STATE_STORAGE_KEY,
   WORKFLOW_STATE_STORAGE_KEY,
+  EXECUTION_DECISION_STORAGE_KEY,
   EXECUTION_STATE_STORAGE_KEY,
   EXECUTION_FEEDBACK_STORAGE_KEY,
 ];
@@ -4768,6 +4876,7 @@ function createBackup() {
   data[INTENT_STATE_STORAGE_KEY] = readStoredJson(INTENT_STATE_STORAGE_KEY, []);
   data[TASK_PLAN_STATE_STORAGE_KEY] = readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []);
   data[WORKFLOW_STATE_STORAGE_KEY] = readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []);
+  data[EXECUTION_DECISION_STORAGE_KEY] = readStoredJson(EXECUTION_DECISION_STORAGE_KEY, []);
   data[EXECUTION_STATE_STORAGE_KEY] = readStoredJson(EXECUTION_STATE_STORAGE_KEY, []);
   data[EXECUTION_FEEDBACK_STORAGE_KEY] = readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []);
   return {
@@ -4957,6 +5066,7 @@ function buildSakuraSnapshot(mode) {
   const intentStateItems = asArray(readStoredJson(INTENT_STATE_STORAGE_KEY, []));
   const taskPlanStateItems = asArray(readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []));
   const workflowStateItems = asArray(readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []));
+  const executionDecisionItems = asArray(readStoredJson(EXECUTION_DECISION_STORAGE_KEY, []));
   const executionStateItems = asArray(readStoredJson(EXECUTION_STATE_STORAGE_KEY, []));
   const executionFeedbackItems = asArray(readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
@@ -5031,6 +5141,7 @@ function buildSakuraSnapshot(mode) {
     latestIntentStateFrom(intentStateItems),
     latestTaskPlanStateFrom(taskPlanStateItems),
     latestWorkflowStateFrom(workflowStateItems),
+    latestExecutionDecisionFrom(executionDecisionItems),
     latestExecutionStateFrom(executionStateItems),
     latestExecutionFeedbackFrom(executionFeedbackItems),
   );
@@ -5174,6 +5285,7 @@ function buildSakuraSnapshot(mode) {
       intent: deepCopy(intentStateItems),
       taskPlan: deepCopy(taskPlanStateItems),
       workflow: deepCopy(workflowStateItems),
+      executionDecision: deepCopy(executionDecisionItems),
       execution: deepCopy(executionStateItems),
       executionFeedback: deepCopy(executionFeedbackItems),
     },
