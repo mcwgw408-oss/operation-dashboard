@@ -1231,6 +1231,71 @@ function renderReplyPlan(replyPlan) {
   setText("#replyPlanClosing", replyPlan?.closing);
 }
 
+function replySentence(value) {
+  return String(value || "").trim();
+}
+
+function sentenceWithPeriod(value) {
+  const text = replySentence(value);
+  if (!text) return "";
+  return /[。！？!?]$/.test(text) ? text : `${text}。`;
+}
+
+function buildReplyOpening(opening) {
+  const text = replySentence(opening);
+  if (!text) return "";
+  const eventMatch = text.match(/^今日の予定[:：]\s*(.+)$/);
+  if (eventMatch) return `今日は「${eventMatch[1]}」の予定がありますね。`;
+  const projectMatch = text.match(/^プロジェクト[:：]\s*(.+)$/);
+  if (projectMatch) return `今日は「${projectMatch[1]}」を見ながら進める流れですね。`;
+  const taskMatch = text.match(/^今日のタスク[:：]\s*(.+)$/);
+  if (taskMatch) return `今日は「${taskMatch[1]}」が気になっているところですね。`;
+  return sentenceWithPeriod(text);
+}
+
+function buildReplySupport(support) {
+  const parts = replySentence(support).split(/\s*\/\s*/).filter(Boolean);
+  if (!parts.length) return "";
+  return parts.map((part) => {
+    const memoryMatch = part.match(/^Memory[:：]\s*(.+)$/);
+    if (memoryMatch) return `以前の記録では「${memoryMatch[1]}」が参考になりそうです。`;
+    const learningMatch = part.match(/^Learning[:：]\s*(.+)$/);
+    if (learningMatch) return `Learning では「${learningMatch[1]}」という傾向も見ています。`;
+    return sentenceWithPeriod(part);
+  }).join("\n");
+}
+
+function shouldIncludeReplyUncertainty(uncertainty) {
+  return /Confidence [0-5]?\d%|まだ|学習途中|控えめ/.test(uncertainty || "");
+}
+
+function buildReply(replyPlan = {}) {
+  const sections = {
+    opening: buildReplyOpening(replyPlan.opening),
+    mainPoint: sentenceWithPeriod(replyPlan.mainPoint),
+    support: buildReplySupport(replyPlan.support),
+    uncertainty: shouldIncludeReplyUncertainty(replyPlan.uncertainty)
+      ? sentenceWithPeriod(replyPlan.uncertainty)
+      : "",
+    closing: sentenceWithPeriod(replyPlan.closing),
+  };
+  const text = [
+    sections.opening,
+    sections.mainPoint,
+    sections.support,
+    sections.uncertainty,
+    sections.closing,
+  ].filter(Boolean).join("\n\n");
+
+  return { text, sections };
+}
+
+function renderReply(reply) {
+  const target = $("#generatedReplyText");
+  if (!target) return;
+  target.textContent = reply?.text || "-";
+}
+
 function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
   const consolidation = buildMemoryConsolidation(memoryStore);
@@ -2126,6 +2191,7 @@ function renderBrainPrototype() {
     todayEvents,
   });
   const replyPlan = buildReplyPlan(conversationContext);
+  const reply = buildReply(replyPlan);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -2147,6 +2213,7 @@ function renderBrainPrototype() {
   renderLearningConfidence(latestLearningConfidence);
   renderConversationContext(conversationContext);
   renderReplyPlan(replyPlan);
+  renderReply(reply);
   showFirstAgentResponse("");
 
   if (eventContext.count) {
@@ -2747,6 +2814,7 @@ function buildSakuraSnapshot(mode) {
     context: conversationContext,
     replyPlan: buildReplyPlan(conversationContext),
   };
+  conversation.reply = buildReply(conversation.replyPlan);
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));

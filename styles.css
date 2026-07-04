@@ -680,6 +680,11 @@ textarea {
   padding-top: 8px;
 }
 
+.generated-reply-panel {
+  border-top: 1px solid #e7edf4;
+  padding-top: 8px;
+}
+
 .brain-memory-context-grid {
   display: grid;
   gap: 7px;
@@ -756,6 +761,18 @@ textarea {
   color: var(--text);
   font-size: 13px;
   line-height: 1.55;
+}
+
+.generated-reply-panel p {
+  margin: 0;
+  white-space: pre-line;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--text);
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .memory-consolidation-summary {
