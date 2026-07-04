@@ -895,13 +895,128 @@ function upsertShortMemory({ date = activeDate, type, title, summary, source, im
   return memory;
 }
 
-function renderMemoryLayer() {
+function normalizeMemoryTags(tags) {
+  return asArray(tags).map((tag) => String(tag).trim().toLowerCase()).filter(Boolean);
+}
+
+function memoryUpdatedTime(memory) {
+  const time = new Date(memory?.updatedAt || memory?.createdAt || memory?.date || 0).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function memoryDisplayTitle(memory) {
+  return memory?.title || memory?.summary || memory?.project || "";
+}
+
+function getMemorySource(memorySource = memoryStore) {
+  return [
+    ...asArray(memorySource?.projectMemory),
+    ...asArray(memorySource?.shortMemory),
+  ];
+}
+
+function scoreMemoryForContext(memory, context) {
+  const contextProject = String(context?.project || "").trim().toLowerCase();
+  const contextTags = normalizeMemoryTags([
+    ...asArray(context?.tags),
+    context?.recommendationType,
+    context?.eventType,
+  ]);
+  const memoryProject = String(memory?.project || "").trim().toLowerCase();
+  const memoryTags = normalizeMemoryTags(memory?.tags);
+  const memoryText = [
+    memory?.project,
+    memory?.title,
+    memory?.summary,
+    memory?.type,
+    memory?.source,
+  ].filter(Boolean).join(" ").toLowerCase();
+  let score = 0;
+
+  if (contextProject && memoryProject === contextProject) score += 80;
+  else if (contextProject && memoryText.includes(contextProject)) score += 35;
+
+  contextTags.forEach((tag) => {
+    if (memoryTags.includes(tag)) score += 20;
+    else if (tag && memoryText.includes(tag)) score += 8;
+  });
+
+  score += Math.min(20, Number(memory?.importance || 0) * 4);
+
+  const updatedTime = memoryUpdatedTime(memory);
+  const daysOld = updatedTime ? Math.floor((Date.now() - updatedTime) / 86400000) : null;
+  if (daysOld !== null) score += Math.max(0, 16 - Math.min(16, daysOld));
+
+  return score;
+}
+
+function getRelevantMemories(context, { limit = 5, memorySource = memoryStore } = {}) {
+  const memories = getMemorySource(memorySource);
+  const ranked = memories
+    .map((memory) => ({ memory, score: scoreMemoryForContext(memory, context) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) =>
+      b.score - a.score ||
+      Number(b.memory.importance || 0) - Number(a.memory.importance || 0) ||
+      memoryUpdatedTime(b.memory) - memoryUpdatedTime(a.memory),
+    );
+  const fallback = memories
+    .map((memory) => ({ memory, score: scoreMemoryForContext(memory, {}) }))
+    .sort((a, b) =>
+      b.score - a.score ||
+      Number(b.memory.importance || 0) - Number(a.memory.importance || 0) ||
+      memoryUpdatedTime(b.memory) - memoryUpdatedTime(a.memory),
+    );
+
+  return (ranked.length ? ranked : fallback)
+    .slice(0, limit)
+    .map((entry) => ({ ...entry.memory }));
+}
+
+function inferMemoryProjectFromCandidate(candidate, eventContext) {
+  const source = candidate?.source || "";
+  if (source.includes("substack")) return "Substack";
+  if (eventContext?.count) return "\u751f\u6d3b\u6539\u5584";
+  if (source === "operation-dashboard.projects") return candidate?.title || "";
+  return "";
+}
+
+function buildMemoryRetrievalContext({ priorityCandidate = null, recommendationType = "", eventContext = {} } = {}) {
+  const source = priorityCandidate?.source || "";
+  const sourceTags = {
+    "operation-dashboard.todayTasks": ["task", "life"],
+    "operation-dashboard.dailyTasks": ["task", "life"],
+    "operation-dashboard.projects": ["project"],
+    "operation-dashboard.laterItems": ["later"],
+    "operation-dashboard.persistentMemos": ["memo"],
+    "discovery-labo.discoveries": ["idea", "discovery"],
+    "hasshin-kansatsu-labo.entries": ["publishing", "action"],
+    "substack-labo.writing": ["substack", "writing"],
+    "koryu-log-labo.entries": ["relationship"],
+  };
+  return {
+    project: inferMemoryProjectFromCandidate(priorityCandidate, eventContext),
+    tags: [
+      ...asArray(sourceTags[source]),
+      eventContext?.count ? "schedule" : "",
+    ].filter(Boolean),
+    recommendationType,
+    eventType: eventContext?.level || "",
+  };
+}
+
+function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
   const recent = memoryStore.shortMemory
     .filter((memory) => memory.date >= dateKeyDaysAgo(3))
     .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))
     .map((memory) => memory.title);
   appendBrainItems($("#shortMemoryList"), recent, "最近の記憶はまだありません。");
+  appendBrainItems(
+    $("#retrievedMemoryList"),
+    getRelevantMemories(context).map(memoryDisplayTitle),
+    "Retrieved memory is not available yet.",
+  );
 
   const target = $("#projectMemoryList");
   if (!target) return;
@@ -1798,7 +1913,12 @@ function renderBrainPrototype() {
     importance: 2,
     tags: ["recommendation", recommendation.type],
   });
-  renderMemoryLayer();
+  const memoryRetrievalContext = buildMemoryRetrievalContext({
+    priorityCandidate,
+    recommendationType: recommendation.type,
+    eventContext,
+  });
+  renderMemoryLayer(memoryRetrievalContext);
 
   appendBrainItems(
     $("#brainTodayTasks"),
@@ -2333,10 +2453,21 @@ function buildSakuraSnapshot(mode) {
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
   const savedMemoryStore = readStoredJson(MEMORY_STORE_STORAGE_KEY, {});
+  const savedShortMemory = asArray(savedMemoryStore?.shortMemory);
+  const latestRecommendationMemory = [...savedShortMemory]
+    .filter((memoryItem) => memoryItem.type === "recommendation")
+    .sort((a, b) => memoryUpdatedTime(b) - memoryUpdatedTime(a))[0];
   const memory = {
-    shortMemory: asArray(savedMemoryStore?.shortMemory),
+    shortMemory: savedShortMemory,
     projectMemory: ensureDefaultProjectMemory(asArray(savedMemoryStore?.projectMemory)),
   };
+  memory.retrieved = getRelevantMemories(
+    {
+      tags: asArray(latestRecommendationMemory?.tags),
+      recommendationType: asArray(latestRecommendationMemory?.tags).find((tag) => tag !== "recommendation") || "",
+    },
+    { memorySource: memory },
+  );
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
