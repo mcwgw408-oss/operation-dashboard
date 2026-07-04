@@ -124,6 +124,12 @@
                 <textarea id="learningFeedbackNote" rows="3" placeholder="今日の状態メモ" aria-label="今日の状態メモ"></textarea>
                 <p id="learningFeedbackStatus" class="learning-feedback-status">この提案をLearning Logに記録します。</p>
               </div>
+              <details class="developer-state-panel">
+                <summary>
+                  <span>AIの内部状態（開発者向け）</span>
+                  <small>Learning の集計と判断材料</small>
+                </summary>
+                <div class="developer-state-body">
               <div class="learning-summary-panel" aria-label="Learning Summary">
                 <span class="brain-label">Learning Summary</span>
                 <div class="learning-summary-grid">
@@ -153,8 +159,16 @@
                 <p id="learningConfidenceMessage">Learning Layerはまだ学習中のため、参考情報として控えめに扱います。</p>
                 <small>source <strong id="learningConfidenceSource">totalLogs</strong></small>
               </div>
+                </div>
+              </details>
               <div class="memory-layer-panel" aria-label="Memory Layer">
                 <span class="brain-label">Memory Layer</span>
+                <details class="developer-state-panel">
+                  <summary>
+                    <span>AIの内部状態（開発者向け）</span>
+                    <small>Memory / Context / Reply Plan</small>
+                  </summary>
+                  <div class="developer-state-body">
                 <section>
                   <h3>最近の記憶</h3>
                   <ul id="shortMemoryList" class="brain-list"></ul>
@@ -194,9 +208,17 @@
                     <div><span>Closing</span><p id="replyPlanClosing">-</p></div>
                   </div>
                 </section>
+                  </div>
+                </details>
                 <section class="generated-reply-panel">
                   <h3>Generated Reply</h3>
                   <p id="generatedReplyText">-</p>
+                  <details class="developer-state-panel">
+                    <summary>
+                      <span>AIの内部状態（開発者向け）</span>
+                      <small>Personality / Cognitive / Executive State</small>
+                    </summary>
+                    <div class="developer-state-body">
                   <div class="personality-profile-panel" aria-label="Personality Profile">
                     <h4>Personality Profile</h4>
                     <div class="personality-profile-grid">
@@ -334,6 +356,8 @@
                       <div><span>Retry Count</span><p id="workflowRetryCount">-</p></div>
                     </div>
                   </div>
+                    </div>
+                  </details>
                   <div class="conversation-feedback-panel" aria-label="Conversation Feedback">
                     <div class="conversation-feedback-actions">
                       <button type="button" data-conversation-feedback="true">この返事は自然</button>
@@ -342,6 +366,12 @@
                     <textarea id="conversationFeedbackNote" rows="3" placeholder="返事へのメモ" aria-label="返事へのメモ"></textarea>
                     <p id="conversationFeedbackStatus" class="conversation-feedback-status">この返事の自然さを記録できます。</p>
                   </div>
+                  <details class="developer-state-panel">
+                    <summary>
+                      <span>AIの内部状態（開発者向け）</span>
+                      <small>Conversation feedback analysis</small>
+                    </summary>
+                    <div class="developer-state-body">
                   <div class="conversation-improvement-panel" aria-label="Conversation Improvement">
                     <h4>Improvement Hint</h4>
                     <ul id="conversationImprovementHints" class="brain-list"></ul>
@@ -374,7 +404,15 @@
                       <div><span>Suggested Opening</span><p id="conversationRecoverySuggestedOpening">-</p></div>
                     </div>
                   </div>
+                    </div>
+                  </details>
                 </section>
+                <details class="developer-state-panel">
+                  <summary>
+                    <span>AIの内部状態（開発者向け）</span>
+                    <small>Memory Consolidation</small>
+                  </summary>
+                  <div class="developer-state-body">
                 <section class="memory-consolidation-panel">
                   <h3>Memory Consolidation</h3>
                   <div class="memory-consolidation-summary">
@@ -386,6 +424,8 @@
                     <ul id="memoryConsolidationGroups" class="brain-list"></ul>
                   </div>
                 </section>
+                  </div>
+                </details>
                 <form id="memoryMemoForm" class="memory-memo-form">
                   <label>今日の記憶メモ<textarea id="memoryMemoText" rows="3" placeholder="覚えておきたいこと"></textarea></label>
                   <button type="submit">記憶に追加</button>

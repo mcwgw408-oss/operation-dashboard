@@ -508,6 +508,60 @@ textarea {
   font-size: 12px;
 }
 
+.developer-state-panel {
+  display: grid;
+  margin-top: 10px;
+  border: 1px dashed #cbd7e5;
+  border-radius: 8px;
+  background: rgba(246, 249, 252, 0.72);
+}
+
+.developer-state-panel summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 9px 11px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.developer-state-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.developer-state-panel summary::before {
+  content: "▶";
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.developer-state-panel[open] summary::before {
+  content: "▼";
+}
+
+.developer-state-panel summary span {
+  flex: 1;
+}
+
+.developer-state-panel summary small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.developer-state-body {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid #e3eaf2;
+  padding: 10px;
+}
+
 .learning-summary-panel {
   display: grid;
   gap: 9px;
