@@ -1132,6 +1132,63 @@ function renderBrainMemoryContext(memoryContext) {
   );
 }
 
+function buildConversationContext({
+  project = "",
+  recommendation = null,
+  explanation = null,
+  learningHint = null,
+  learningConfidence = null,
+  memoryContext = null,
+  todayTasks = [],
+  todayEvents = [],
+} = {}) {
+  return {
+    project,
+    recommendation: recommendation ? {
+      type: recommendation.type,
+      title: recommendation.title,
+      message: recommendation.message,
+      actionText: recommendation.actionText,
+    } : null,
+    explanation: explanation ? {
+      summary: explanation.summary || "",
+      reasons: asArray(explanation.reasons),
+    } : null,
+    learningHint: learningHint ? {
+      message: learningHint.message,
+      confidence: learningHint.confidence,
+      source: learningHint.source,
+    } : null,
+    learningConfidence: learningConfidence ? {
+      score: learningConfidence.score,
+      level: learningConfidence.level,
+      message: learningConfidence.message,
+      source: learningConfidence.source,
+    } : null,
+    memoryContext,
+    todayTasks: asArray(todayTasks).map((task) => ({
+      title: task.title || "",
+      done: Boolean(task.done),
+    })),
+    todayEvents: asArray(todayEvents).map((event) => ({
+      title: event.title || "",
+      type: event.type || "",
+      time: event.time || "",
+    })),
+  };
+}
+
+function renderConversationContext(context) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#conversationContextProject", context?.project);
+  setText("#conversationContextRecommendation", context?.recommendation?.title || context?.recommendation?.type);
+  setText("#conversationContextMemory", memoryDisplayTitle(context?.memoryContext?.retrieved?.[0]) || memoryDisplayTitle(context?.memoryContext?.recent?.[0]));
+  setText("#conversationContextLearning", context?.learningConfidence ? `Confidence ${context.learningConfidence.score}%` : "");
+}
+
 function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
   const consolidation = buildMemoryConsolidation(memoryStore);
@@ -2016,6 +2073,16 @@ function renderBrainPrototype() {
   const latestLearningSummary = buildLearningSummary();
   const latestLearningHint = buildLearningHint(latestLearningSummary);
   const latestLearningConfidence = buildLearningConfidence(latestLearningSummary, latestLearningHint);
+  const conversationContext = buildConversationContext({
+    project: brainMemoryContext.project || priorityCandidate?.title || "",
+    recommendation,
+    explanation,
+    learningHint: latestLearningHint,
+    learningConfidence: latestLearningConfidence,
+    memoryContext: brainMemoryContext,
+    todayTasks,
+    todayEvents,
+  });
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -2035,6 +2102,7 @@ function renderBrainPrototype() {
   renderLearningSummary(latestLearningSummary);
   renderLearningHint(latestLearningHint);
   renderLearningConfidence(latestLearningConfidence);
+  renderConversationContext(conversationContext);
   showFirstAgentResponse("");
 
   if (eventContext.count) {
@@ -2616,6 +2684,23 @@ function buildSakuraSnapshot(mode) {
       memory,
     ),
   };
+  const conversation = {
+    context: buildConversationContext({
+      project: brain.memoryContext.project,
+      recommendation: latestRecommendationMemory ? {
+        type: asArray(latestRecommendationMemory.tags).find((tag) => tag !== "recommendation") || "",
+        title: latestRecommendationMemory.title || "",
+        message: latestRecommendationMemory.summary || "",
+        actionText: "",
+      } : null,
+      explanation: null,
+      learningHint,
+      learningConfidence,
+      memoryContext: brain.memoryContext,
+      todayTasks: asArray(fullStore[toKey]?.todayTasks),
+      todayEvents: asArray(fullStore[toKey]?.todayEvents),
+    }),
+  };
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -2738,6 +2823,7 @@ function buildSakuraSnapshot(mode) {
       openNextActions,
     },
     brain,
+    conversation,
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
