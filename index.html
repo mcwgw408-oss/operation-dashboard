@@ -197,6 +197,14 @@
                 <section class="generated-reply-panel">
                   <h3>Generated Reply</h3>
                   <p id="generatedReplyText">-</p>
+                  <div class="conversation-feedback-panel" aria-label="Conversation Feedback">
+                    <div class="conversation-feedback-actions">
+                      <button type="button" data-conversation-feedback="true">この返事は自然</button>
+                      <button type="button" data-conversation-feedback="false">この返事は違和感がある</button>
+                    </div>
+                    <textarea id="conversationFeedbackNote" rows="3" placeholder="返事へのメモ" aria-label="返事へのメモ"></textarea>
+                    <p id="conversationFeedbackStatus" class="conversation-feedback-status">この返事の自然さを記録できます。</p>
+                  </div>
                 </section>
                 <section class="memory-consolidation-panel">
                   <h3>Memory Consolidation</h3>

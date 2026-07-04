@@ -775,6 +775,53 @@ textarea {
   line-height: 1.65;
 }
 
+.conversation-feedback-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.conversation-feedback-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.conversation-feedback-actions button {
+  min-height: 38px;
+  border: 1px solid #d9dfe8;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.conversation-feedback-actions button:hover,
+.conversation-feedback-actions button.active {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.conversation-feedback-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.conversation-feedback-panel textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.conversation-feedback-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .memory-consolidation-summary {
   display: grid;
   grid-template-columns: 1fr auto;

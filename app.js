@@ -4,6 +4,7 @@ const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
 const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
 const MEMORY_STORE_STORAGE_KEY = "sakura-memory-store-v1";
+const CONVERSATION_FEEDBACK_STORAGE_KEY = "sakura-conversation-feedback-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -86,7 +87,9 @@ let laterSearchQuery = "";
 let persistentMemos = loadPersistentMemos();
 let learningLog = loadLearningLog();
 let memoryStore = loadMemoryStore();
+let conversationFeedback = loadConversationFeedback();
 let currentLearningLogId = "";
+let currentReplyText = "";
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -270,6 +273,15 @@ function loadLearningLog() {
   }
 }
 
+function loadConversationFeedback() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONVERSATION_FEEDBACK_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -326,6 +338,10 @@ function savePersistentMemos() {
 
 function saveLearningLog() {
   localStorage.setItem(LEARNING_LOG_STORAGE_KEY, JSON.stringify(learningLog));
+}
+
+function saveConversationFeedback() {
+  localStorage.setItem(CONVERSATION_FEEDBACK_STORAGE_KEY, JSON.stringify(conversationFeedback));
 }
 
 function saveMemoryStore() {
@@ -1296,6 +1312,70 @@ function renderReply(reply) {
   target.textContent = reply?.text || "-";
 }
 
+function findConversationFeedback(replyText) {
+  return conversationFeedback.find((entry) =>
+    entry.date === activeDate &&
+    entry.replyText === replyText,
+  ) || null;
+}
+
+function upsertConversationFeedback(replyText, updates = {}) {
+  const text = replySentence(replyText);
+  if (!text) return null;
+  const now = new Date().toISOString();
+  let entry = findConversationFeedback(text);
+  if (entry) {
+    entry.date = activeDate;
+    entry.replyText = text;
+    if ("natural" in updates) entry.natural = updates.natural;
+    if ("note" in updates) entry.note = updates.note;
+    entry.updatedAt = now;
+  } else {
+    entry = {
+      id: crypto.randomUUID(),
+      date: activeDate,
+      replyText: text,
+      natural: "natural" in updates ? updates.natural : null,
+      note: "note" in updates ? updates.note : "",
+      createdAt: now,
+      updatedAt: now,
+    };
+    conversationFeedback.unshift(entry);
+  }
+  saveConversationFeedback();
+  return entry;
+}
+
+function renderConversationFeedback(reply) {
+  currentReplyText = replySentence(reply?.text);
+  const entry = currentReplyText ? findConversationFeedback(currentReplyText) : null;
+  const note = $("#conversationFeedbackNote");
+  const status = $("#conversationFeedbackStatus");
+  document.querySelectorAll("[data-conversation-feedback]").forEach((button) => {
+    const value = button.dataset.conversationFeedback === "true";
+    button.classList.toggle("active", entry?.natural === value);
+    button.disabled = !currentReplyText;
+  });
+  if (note) {
+    note.disabled = !currentReplyText;
+    if (note.value !== (entry?.note || "")) {
+      note.value = entry?.note || "";
+    }
+  }
+  if (!status) return;
+  if (!currentReplyText) {
+    status.textContent = "Generated Reply がまだありません。";
+  } else if (entry?.natural === true) {
+    status.textContent = "この返事は自然、と記録しました。";
+  } else if (entry?.natural === false) {
+    status.textContent = "この返事は違和感がある、と記録しました。";
+  } else if (entry?.note) {
+    status.textContent = "返事へのメモを記録しました。";
+  } else {
+    status.textContent = "この返事の自然さを記録できます。";
+  }
+}
+
 function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
   const consolidation = buildMemoryConsolidation(memoryStore);
@@ -2214,6 +2294,7 @@ function renderBrainPrototype() {
   renderConversationContext(conversationContext);
   renderReplyPlan(replyPlan);
   renderReply(reply);
+  renderConversationFeedback(reply);
   showFirstAgentResponse("");
 
   if (eventContext.count) {
@@ -2332,6 +2413,18 @@ function bindEvents() {
     saveLearningLog();
     renderLearningFeedback(entry);
     renderLearningStatus();
+  });
+  document.querySelectorAll("[data-conversation-feedback]").forEach((button) => {
+    button.addEventListener("click", () => {
+      upsertConversationFeedback(currentReplyText, {
+        natural: button.dataset.conversationFeedback === "true",
+      });
+      renderConversationFeedback({ text: currentReplyText });
+    });
+  });
+  $("#conversationFeedbackNote")?.addEventListener("input", (event) => {
+    upsertConversationFeedback(currentReplyText, { note: event.target.value });
+    renderConversationFeedback({ text: currentReplyText });
   });
   $("#memoryMemoForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -2572,7 +2665,13 @@ const BACKUP_FORMAT = "sakura-backup";
 const BACKUP_APP_NAME = "operation-dashboard";
 const BACKUP_SCHEMA_VERSION = 1;
 const BACKUP_DICTIONARY_VERSION = "v1";
-const BACKUP_KEYS = [STORAGE_KEY, LATER_STORAGE_KEY, PERSISTENT_MEMO_STORAGE_KEY, LATER_VIEW_STORAGE_KEY];
+const BACKUP_KEYS = [
+  STORAGE_KEY,
+  LATER_STORAGE_KEY,
+  PERSISTENT_MEMO_STORAGE_KEY,
+  LATER_VIEW_STORAGE_KEY,
+  CONVERSATION_FEEDBACK_STORAGE_KEY,
+];
 
 function readStoredJson(key, fallback) {
   try {
@@ -2597,6 +2696,7 @@ function createBackup() {
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[LATER_VIEW_STORAGE_KEY] = readStoredJson(LATER_VIEW_STORAGE_KEY, {});
+  data[CONVERSATION_FEEDBACK_STORAGE_KEY] = readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -2766,6 +2866,7 @@ function buildSakuraSnapshot(mode) {
   const laterItems = asArray(readStoredJson(LATER_STORAGE_KEY, [])).filter((item) => !item.done);
   const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
   const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
+  const conversationFeedbackItems = asArray(readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -2813,6 +2914,7 @@ function buildSakuraSnapshot(mode) {
   const conversation = {
     context: conversationContext,
     replyPlan: buildReplyPlan(conversationContext),
+    feedback: deepCopy(conversationFeedbackItems),
   };
   conversation.reply = buildReply(conversation.replyPlan);
 
