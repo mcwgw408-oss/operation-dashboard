@@ -14,6 +14,7 @@ const RELATIONSHIP_PROFILE_STORAGE_KEY = "sakura-relationship-profile-v1";
 const EMOTIONAL_RESONANCE_STORAGE_KEY = "sakura-emotional-resonance-v1";
 const IDENTITY_PROFILE_STORAGE_KEY = "sakura-identity-profile-v1";
 const GOAL_STATE_STORAGE_KEY = "sakura-goal-state-v1";
+const PRIORITY_STATE_STORAGE_KEY = "sakura-priority-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -106,6 +107,7 @@ let relationshipProfile = loadRelationshipProfile();
 let emotionalResonance = loadEmotionalResonance();
 let identityProfile = loadIdentityProfile();
 let goalState = loadGoalState();
+let priorityState = loadPriorityState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -430,6 +432,15 @@ function loadGoalState() {
   }
 }
 
+function loadPriorityState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PRIORITY_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -536,6 +547,12 @@ function saveIdentityProfile() {
 
 function saveGoalState() {
   localStorage.setItem(GOAL_STATE_STORAGE_KEY, JSON.stringify(goalState));
+  upsertPriorityState();
+  renderPriorityState();
+}
+
+function savePriorityState() {
+  localStorage.setItem(PRIORITY_STATE_STORAGE_KEY, JSON.stringify(priorityState));
 }
 
 function saveMemoryStore() {
@@ -1545,6 +1562,15 @@ function getLatestGoalState() {
   return latestGoalStateFrom(goalState);
 }
 
+function latestPriorityStateFrom(priorityItems) {
+  return [...asArray(priorityItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestPriorityState() {
+  return latestPriorityStateFrom(priorityState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1556,6 +1582,7 @@ function buildReply(
   resonance = getLatestEmotionalResonance(),
   identity = getLatestIdentityProfile(),
   goal = getLatestGoalState(),
+  priority = getLatestPriorityState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1635,6 +1662,13 @@ function buildReply(
       successCondition: goal.successCondition,
       nextStep: goal.nextStep,
       confidence: goal.confidence,
+    } : null,
+    priorityState: priority ? {
+      primaryPriority: priority.primaryPriority,
+      secondaryPriority: priority.secondaryPriority,
+      ignoredTopics: asArray(priority.ignoredTopics),
+      urgency: priority.urgency,
+      reasoning: priority.reasoning,
     } : null,
   };
 }
@@ -1891,6 +1925,82 @@ function renderGoalState() {
   setText("#goalSuccessCondition", goal?.successCondition);
   setText("#goalNextStep", goal?.nextStep);
   setText("#goalConfidence", goal?.confidence !== undefined ? `${goal.confidence}%` : "");
+}
+
+function buildPriorityState(goal = getLatestGoalState(), context = {}, identity = getLatestIdentityProfile()) {
+  const confidence = Number(goal?.confidence ?? context?.learningConfidence?.score ?? 50);
+  const hasUncertainty = confidence < 40 || Boolean(context?.replyPlan?.uncertainty);
+  const ignoredTopics = [
+    hasUncertainty ? "確信度が低い断定" : "",
+    context?.recommendation ? "Recommendation と無関係な話題転換" : "",
+  ].filter(Boolean);
+  const urgency = confidence < 35
+    ? "low"
+    : asArray(context?.todayEvents).length > 0 || asArray(context?.todayTasks).length > 0
+      ? "medium"
+      : "normal";
+  const primaryPriority = goal?.nextStep ||
+    goal?.currentGoal ||
+    context?.recommendation?.actionText ||
+    "ユーザーが次に進みやすい一歩を明確にする";
+  const secondaryPriority = goal?.successCondition ||
+    identity?.responsePrinciple ||
+    "返答の自然さと目的の一貫性を保つ";
+  const reasoning = [
+    goal?.userGoal ? `User goal: ${goal.userGoal}` : "",
+    identity?.currentTone ? `Tone: ${identity.currentTone}` : "",
+    context?.project ? `Context: ${context.project}` : "",
+    `Confidence: ${confidence}%`,
+  ].filter(Boolean).join(" / ");
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    primaryPriority,
+    secondaryPriority,
+    ignoredTopics,
+    urgency,
+    reasoning,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertPriorityState() {
+  if (!getLatestGoalState() && !currentConversationContext && !getLatestIdentityProfile()) return null;
+  const built = buildPriorityState(
+    getLatestGoalState(),
+    currentConversationContext || {},
+    getLatestIdentityProfile(),
+  );
+  const now = new Date().toISOString();
+  let priority = priorityState.find((entry) => entry.date === activeDate);
+  if (priority) {
+    priority.primaryPriority = built.primaryPriority;
+    priority.secondaryPriority = built.secondaryPriority;
+    priority.ignoredTopics = built.ignoredTopics;
+    priority.urgency = built.urgency;
+    priority.reasoning = built.reasoning;
+    priority.updatedAt = now;
+  } else {
+    priority = built;
+    priorityState.unshift(priority);
+  }
+  savePriorityState();
+  return priority;
+}
+
+function renderPriorityState() {
+  const priority = getLatestPriorityState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#priorityPrimaryPriority", priority?.primaryPriority);
+  setText("#prioritySecondaryPriority", priority?.secondaryPriority);
+  setText("#priorityIgnoredTopics", asArray(priority?.ignoredTopics).join(" / "));
+  setText("#priorityUrgency", priority?.urgency);
+  setText("#priorityReasoning", priority?.reasoning);
 }
 
 function findConversationFeedback(replyText) {
@@ -3171,6 +3281,7 @@ function renderBrainPrototype() {
   renderEmotionalResonance();
   renderIdentityProfile();
   renderGoalState();
+  renderPriorityState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3311,6 +3422,7 @@ function bindEvents() {
       renderEmotionalResonance();
       renderIdentityProfile();
       renderGoalState();
+      renderPriorityState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -3328,6 +3440,7 @@ function bindEvents() {
     renderEmotionalResonance();
     renderIdentityProfile();
     renderGoalState();
+    renderPriorityState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -3585,6 +3698,7 @@ const BACKUP_KEYS = [
   EMOTIONAL_RESONANCE_STORAGE_KEY,
   IDENTITY_PROFILE_STORAGE_KEY,
   GOAL_STATE_STORAGE_KEY,
+  PRIORITY_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3620,6 +3734,7 @@ function createBackup() {
   data[EMOTIONAL_RESONANCE_STORAGE_KEY] = readStoredJson(EMOTIONAL_RESONANCE_STORAGE_KEY, []);
   data[IDENTITY_PROFILE_STORAGE_KEY] = readStoredJson(IDENTITY_PROFILE_STORAGE_KEY, []);
   data[GOAL_STATE_STORAGE_KEY] = readStoredJson(GOAL_STATE_STORAGE_KEY, []);
+  data[PRIORITY_STATE_STORAGE_KEY] = readStoredJson(PRIORITY_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -3799,6 +3914,7 @@ function buildSakuraSnapshot(mode) {
   const emotionalResonanceItems = asArray(readStoredJson(EMOTIONAL_RESONANCE_STORAGE_KEY, []));
   const identityProfileItems = asArray(readStoredJson(IDENTITY_PROFILE_STORAGE_KEY, []));
   const goalStateItems = asArray(readStoredJson(GOAL_STATE_STORAGE_KEY, []));
+  const priorityStateItems = asArray(readStoredJson(PRIORITY_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -3863,6 +3979,7 @@ function buildSakuraSnapshot(mode) {
     latestEmotionalResonanceFrom(emotionalResonanceItems),
     latestIdentityProfileFrom(identityProfileItems),
     latestGoalStateFrom(goalStateItems),
+    latestPriorityStateFrom(priorityStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -3994,6 +4111,7 @@ function buildSakuraSnapshot(mode) {
     },
     cognitive: {
       goal: deepCopy(goalStateItems),
+      priority: deepCopy(priorityStateItems),
     },
     conversation,
     apps: {
