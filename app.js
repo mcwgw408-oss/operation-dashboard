@@ -710,6 +710,7 @@ function saveWorkflowState() {
   upsertExecutionState();
   renderExecutionState();
   renderExecutionFeedback();
+  renderExecutiveSummary();
 }
 
 function saveExecutionDecision() {
@@ -1852,6 +1853,14 @@ function buildReply(
   executionDecisionState = getLatestExecutionDecision(),
   execution = getLatestExecutionState(),
   feedback = getLatestExecutionFeedback(),
+  executiveSummary = buildExecutiveSummary(
+    intent,
+    taskPlan,
+    workflow,
+    executionDecisionState,
+    execution,
+    feedback,
+  ),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1900,6 +1909,7 @@ function buildReply(
     text,
     sections,
     metadata: {
+      executiveSummary,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
       executionFeedback: executionFeedbackMetadata,
@@ -2022,6 +2032,7 @@ function buildReply(
       nextAction: workflow.nextAction,
       retryCount: workflow.retryCount,
     } : null,
+    executiveSummary,
     executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
     executionFeedback: executionFeedbackMetadata,
@@ -3075,6 +3086,78 @@ function renderExecutionFeedback() {
   } else {
     status.textContent = "Record execution results manually.";
   }
+}
+
+function buildExecutiveSummary(
+  intent = getLatestIntentState(),
+  plan = getLatestTaskPlanState(),
+  workflow = getLatestWorkflowState(),
+  decision = getLatestExecutionDecision(),
+  execution = getLatestExecutionState(),
+  feedback = getLatestExecutionFeedback(),
+) {
+  const workflowStatus = workflow?.workflowStatus || "";
+  const summaryDate = intent?.date ||
+    plan?.date ||
+    workflow?.date ||
+    decision?.date ||
+    execution?.date ||
+    feedback?.date ||
+    activeDate;
+  const decisionParts = [
+    decision?.priority ? `priority: ${decision.priority}` : "",
+    decision?.decisionStatus ? `status: ${decision.decisionStatus}` : "",
+    decision?.decisionReason || "",
+  ].filter(Boolean);
+  const feedbackParts = [
+    feedback?.outcome || "",
+    feedback?.difficulty ? `difficulty: ${feedback.difficulty}` : "",
+    feedback?.note || "",
+  ].filter(Boolean);
+  const executionStatus = execution?.status || "pending";
+  const feedbackOutcome = feedbackParts.join(" / ") || "pending";
+  const executiveMode = feedback?.outcome === "completed"
+    ? "reviewed"
+    : executionStatus === "pending"
+      ? "ready_for_review"
+      : workflowStatus || "observing";
+  const risk = [
+    feedback?.difficulty === "hard" ? "Feedback marked hard." : "",
+    feedback?.outcome === "failed" ? "Execution failed." : "",
+    workflowStatus === "failed" ? "Workflow failed." : "",
+    !execution ? "Execution candidate is not available." : "",
+  ].filter(Boolean).join(" ") || "No immediate risk detected.";
+
+  return {
+    date: summaryDate,
+    executiveMode,
+    currentIntent: intent?.primaryIntent || "",
+    currentObjective: plan?.objective || "",
+    workflowStatus,
+    decisionSummary: decisionParts.join(" / "),
+    executionStatus,
+    feedbackOutcome,
+    nextAction: workflow?.nextAction || execution?.title || decision?.selectedTitle || "",
+    risk,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function renderExecutiveSummary() {
+  const executiveSummary = buildExecutiveSummary();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#executiveSummaryMode", executiveSummary.executiveMode);
+  setText("#executiveSummaryIntent", executiveSummary.currentIntent);
+  setText("#executiveSummaryObjective", executiveSummary.currentObjective);
+  setText("#executiveSummaryWorkflow", executiveSummary.workflowStatus);
+  setText("#executiveSummaryDecision", executiveSummary.decisionSummary);
+  setText("#executiveSummaryExecution", executiveSummary.executionStatus);
+  setText("#executiveSummaryFeedback", executiveSummary.feedbackOutcome);
+  setText("#executiveSummaryNextAction", executiveSummary.nextAction);
+  setText("#executiveSummaryRisk", executiveSummary.risk);
 }
 
 function findConversationFeedback(replyText) {
@@ -4366,6 +4449,7 @@ function renderBrainPrototype() {
   renderExecutionDecision();
   renderExecutionState();
   renderExecutionFeedback();
+  renderExecutiveSummary();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -4517,6 +4601,7 @@ function bindEvents() {
       renderExecutionDecision();
       renderExecutionState();
       renderExecutionFeedback();
+      renderExecutiveSummary();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -4545,28 +4630,34 @@ function bindEvents() {
     renderExecutionDecision();
     renderExecutionState();
     renderExecutionFeedback();
+    renderExecutiveSummary();
     renderConversationContinuity();
     renderConversationRecovery();
   });
   $("#executionFeedbackOutcome")?.addEventListener("change", (event) => {
     upsertExecutionFeedback({ outcome: event.target.value });
     renderExecutionFeedback();
+    renderExecutiveSummary();
   });
   $("#executionFeedbackDifficulty")?.addEventListener("change", (event) => {
     upsertExecutionFeedback({ difficulty: event.target.value });
     renderExecutionFeedback();
+    renderExecutiveSummary();
   });
   $("#executionFeedbackDuration")?.addEventListener("input", (event) => {
     upsertExecutionFeedback({ durationMinutes: event.target.value });
     renderExecutionFeedback();
+    renderExecutiveSummary();
   });
   $("#executionFeedbackCompletedAt")?.addEventListener("input", (event) => {
     upsertExecutionFeedback({ completedAt: event.target.value });
     renderExecutionFeedback();
+    renderExecutiveSummary();
   });
   $("#executionFeedbackNote")?.addEventListener("input", (event) => {
     upsertExecutionFeedback({ note: event.target.value });
     renderExecutionFeedback();
+    renderExecutiveSummary();
   });
   $("#memoryMemoForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -5122,6 +5213,14 @@ function buildSakuraSnapshot(mode) {
     continuity: deepCopy(conversationContinuityItems),
     recovery: deepCopy(conversationRecoveryItems),
   };
+  const executiveSummary = buildExecutiveSummary(
+    latestIntentStateFrom(intentStateItems),
+    latestTaskPlanStateFrom(taskPlanStateItems),
+    latestWorkflowStateFrom(workflowStateItems),
+    latestExecutionDecisionFrom(executionDecisionItems),
+    latestExecutionStateFrom(executionStateItems),
+    latestExecutionFeedbackFrom(executionFeedbackItems),
+  );
   conversation.reply = buildReply(
     conversation.replyPlan,
     conversationImprovementHintsFrom(conversationImprovementItems, 3),
@@ -5144,6 +5243,7 @@ function buildSakuraSnapshot(mode) {
     latestExecutionDecisionFrom(executionDecisionItems),
     latestExecutionStateFrom(executionStateItems),
     latestExecutionFeedbackFrom(executionFeedbackItems),
+    executiveSummary,
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -5288,6 +5388,7 @@ function buildSakuraSnapshot(mode) {
       executionDecision: deepCopy(executionDecisionItems),
       execution: deepCopy(executionStateItems),
       executionFeedback: deepCopy(executionFeedbackItems),
+      summary: deepCopy(executiveSummary),
     },
     conversation,
     apps: {
