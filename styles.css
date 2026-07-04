@@ -665,6 +665,36 @@ textarea {
   padding-top: 8px;
 }
 
+.brain-memory-context-panel {
+  border-top: 1px solid #e7edf4;
+  padding-top: 8px;
+}
+
+.brain-memory-context-grid {
+  display: grid;
+  gap: 7px;
+}
+
+.brain-memory-context-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
+.brain-memory-context-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.brain-memory-context-grid strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
 .memory-consolidation-summary {
   display: grid;
   grid-template-columns: 1fr auto;

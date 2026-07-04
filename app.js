@@ -1079,6 +1079,59 @@ function renderMemoryConsolidation(consolidation) {
   );
 }
 
+function buildBrainMemoryContext(retrievalContext = {}, memorySource = memoryStore) {
+  const retrieved = getRelevantMemories(retrievalContext, { limit: 3, memorySource });
+  const recent = asArray(memorySource?.shortMemory)
+    .sort((a, b) => memoryUpdatedTime(b) - memoryUpdatedTime(a))
+    .slice(0, 3);
+  const project = retrievalContext.project || retrieved.find((memory) => memory.project)?.project || "";
+  return {
+    project,
+    tags: asArray(retrievalContext.tags),
+    recommendationType: retrievalContext.recommendationType || "",
+    eventType: retrievalContext.eventType || "",
+    retrieved,
+    recent,
+    used: retrieved.length > 0 || recent.length > 0,
+  };
+}
+
+function brainMemoryContextNote(memoryContext) {
+  if (!memoryContext?.used) return "";
+  const project = memoryContext.project || memoryContext.retrieved.find((memory) => memory.project)?.project || "";
+  const retrievedTitle = memoryDisplayTitle(memoryContext.retrieved[0]);
+  if (project && retrievedTitle) {
+    return `${project}の記憶も参照すると、「${retrievedTitle}」の流れが続いています。`;
+  }
+  if (retrievedTitle) return `過去の記憶では「${retrievedTitle}」が近い文脈です。`;
+  return "Memory を補助情報として参照しています。";
+}
+
+function applyBrainMemoryContext(recommendation, memoryContext) {
+  const note = brainMemoryContextNote(memoryContext);
+  if (!note) return recommendation;
+  return {
+    ...recommendation,
+    message: `${recommendation.message} ${note}`,
+    memoryNote: note,
+  };
+}
+
+function renderBrainMemoryContext(memoryContext) {
+  const project = $("#brainMemoryContextProject");
+  if (project) project.textContent = memoryContext?.project || "-";
+  appendBrainItems(
+    $("#brainMemoryContextRetrieved"),
+    asArray(memoryContext?.retrieved).map(memoryDisplayTitle),
+    "Retrieved memory is not available yet.",
+  );
+  appendBrainItems(
+    $("#brainMemoryContextRecent"),
+    asArray(memoryContext?.recent).map(memoryDisplayTitle),
+    "Recent memory is not available yet.",
+  );
+}
+
 function renderMemoryLayer(context = {}) {
   ensureProjectMemoryDefaultsSaved();
   const consolidation = buildMemoryConsolidation(memoryStore);
@@ -1794,7 +1847,7 @@ function renderLearningStatus() {
   renderLearningConfidence(confidence);
 }
 
-function buildExplainLayerDetails(input, recommendation) {
+function buildExplainLayerDetails(input, recommendation, memoryContext = {}) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
     input.openTodayCount ? `今日やることに未完了が${input.openTodayCount}件あります。` : "今日やることの未完了は少なめです。",
@@ -1803,6 +1856,9 @@ function buildExplainLayerDetails(input, recommendation) {
     input.hasWritingInProgress ? "執筆中の記事があります。" : "",
     input.hasNextActions ? "発信観察の次アクションがあります。" : "",
   ].filter(Boolean);
+  if (memoryContext.used) {
+    seenInfo.push(`Memory を参照しています: ${brainMemoryContextNote(memoryContext)}`);
+  }
 
   const mainReasons = input.topCandidate
     ? asArray(recommendation.reasons).map((reason) => `${reason} そのため、この提案にしています。`)
@@ -1815,6 +1871,9 @@ function buildExplainLayerDetails(input, recommendation) {
   const learningSummary = buildLearningSummary();
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
+  if (memoryContext.used) {
+    uncertainty.push("Memory は補助情報として参照しています。Priority 判断や Recommendation の種類は Memory で上書きしていません。");
+  }
   if (learningSummary.commonRecommendationType !== "なし" && learningSummary.recentAcceptanceRate !== null) {
     uncertainty.push(`最近は「${learningSummary.commonRecommendationType}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
   }
@@ -1938,12 +1997,19 @@ function renderBrainPrototype() {
   );
   const learningSummary = buildLearningSummary();
   const learningHint = buildLearningHint(learningSummary);
-  const recommendation = adaptRecommendationWithLearning(
-    buildRecommendation(recommendationInput),
+  const baseRecommendation = buildRecommendation(recommendationInput);
+  const memoryRetrievalContext = buildMemoryRetrievalContext({
+    priorityCandidate,
+    recommendationType: baseRecommendation.type,
+    eventContext,
+  });
+  const brainMemoryContext = buildBrainMemoryContext(memoryRetrievalContext);
+  const recommendation = applyBrainMemoryContext(adaptRecommendationWithLearning(
+    baseRecommendation,
     learningHint,
     learningSummary,
-  );
-  const explainLayerDetails = buildExplainLayerDetails(recommendationInput, recommendation);
+  ), brainMemoryContext);
+  const explainLayerDetails = buildExplainLayerDetails(recommendationInput, recommendation, brainMemoryContext);
   const learningEntry = syncCurrentLearningLog(recommendationInput, recommendation, {
     taskCount: todayTasks.length,
   });
@@ -1989,12 +2055,8 @@ function renderBrainPrototype() {
     importance: 2,
     tags: ["recommendation", recommendation.type],
   });
-  const memoryRetrievalContext = buildMemoryRetrievalContext({
-    priorityCandidate,
-    recommendationType: recommendation.type,
-    eventContext,
-  });
   renderMemoryLayer(memoryRetrievalContext);
+  renderBrainMemoryContext(brainMemoryContext);
 
   appendBrainItems(
     $("#brainTodayTasks"),
@@ -2545,6 +2607,15 @@ function buildSakuraSnapshot(mode) {
     { memorySource: memory },
   );
   memory.consolidation = buildMemoryConsolidation(memory);
+  const brain = {
+    memoryContext: buildBrainMemoryContext(
+      {
+        tags: asArray(latestRecommendationMemory?.tags),
+        recommendationType: asArray(latestRecommendationMemory?.tags).find((tag) => tag !== "recommendation") || "",
+      },
+      memory,
+    ),
+  };
 
   // --- Discovery-Labo：種と発生源は全件 ---
   const discoveries = deepCopy(asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, [])));
@@ -2666,6 +2737,7 @@ function buildSakuraSnapshot(mode) {
       writingInProgress,
       openNextActions,
     },
+    brain,
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
