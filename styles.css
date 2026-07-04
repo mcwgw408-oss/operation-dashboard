@@ -1615,6 +1615,83 @@ textarea {
   font-size: 12px;
 }
 
+.health-check-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  border: 1px solid var(--green-line);
+  border-radius: 10px;
+  background: var(--green-soft);
+  padding: 12px;
+}
+
+.health-check-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.health-check-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.health-check-grid label,
+.health-check-note {
+  display: grid;
+  gap: 5px;
+}
+
+.health-check-grid span,
+.health-check-note span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.health-check-grid input,
+.health-check-grid select,
+.health-check-note textarea {
+  width: 100%;
+  border: 1px solid var(--green-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.health-check-grid input,
+.health-check-grid select {
+  min-height: 34px;
+  padding: 6px 8px;
+}
+
+.health-check-note textarea {
+  min-height: 70px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.health-check-summary {
+  margin: 0;
+  border: 1px solid var(--green-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  padding: 8px 9px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.health-check-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .conversation-improvement-panel {
   display: grid;
   gap: 7px;

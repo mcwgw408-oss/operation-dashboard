@@ -415,11 +415,88 @@
                       <div><span>Execution</span><p id="executiveSummaryExecution">-</p></div>
                       <div><span>Feedback</span><p id="executiveSummaryFeedback">-</p></div>
                       <div><span>Next Action</span><p id="executiveSummaryNextAction">-</p></div>
+                      <div><span>Health</span><p id="executiveSummaryHealth">-</p></div>
                       <div><span>Risk</span><p id="executiveSummaryRisk">-</p></div>
                     </div>
                   </div>
                     </div>
                   </details>
+                  <div class="health-check-panel" aria-label="Health Check">
+                    <h4>Health Check</h4>
+                    <div class="health-check-grid">
+                      <label><span>Sleep Hours</span><input id="healthSleepHours" type="number" min="0" max="24" step="0.5" inputmode="decimal" /></label>
+                      <label><span>Sleep Quality</span>
+                        <select id="healthSleepQuality">
+                          <option value="unknown">unknown</option>
+                          <option value="poor">poor</option>
+                          <option value="light">light</option>
+                          <option value="okay">okay</option>
+                          <option value="good">good</option>
+                          <option value="deep">deep</option>
+                        </select>
+                      </label>
+                      <label><span>Recovery Feeling</span>
+                        <select id="healthRecoveryFeeling">
+                          <option value="unknown">unknown</option>
+                          <option value="depleted">depleted</option>
+                          <option value="low">low</option>
+                          <option value="neutral">neutral</option>
+                          <option value="recovered">recovered</option>
+                          <option value="refreshed">refreshed</option>
+                        </select>
+                      </label>
+                      <label><span>Nutrition Satisfaction</span>
+                        <select id="healthNutritionSatisfaction">
+                          <option value="unknown">unknown</option>
+                          <option value="low">low</option>
+                          <option value="okay">okay</option>
+                          <option value="satisfied">satisfied</option>
+                          <option value="too_much">too_much</option>
+                        </select>
+                      </label>
+                      <label><span>Medication Status</span>
+                        <select id="healthMedicationStatus">
+                          <option value="unknown">unknown</option>
+                          <option value="taken">taken</option>
+                          <option value="skipped">skipped</option>
+                          <option value="partial">partial</option>
+                          <option value="not_applicable">not_applicable</option>
+                        </select>
+                      </label>
+                      <label><span>Energy Level</span>
+                        <select id="healthEnergyLevel">
+                          <option value="very_low">very_low</option>
+                          <option value="low">low</option>
+                          <option value="medium">medium</option>
+                          <option value="high">high</option>
+                          <option value="unstable">unstable</option>
+                        </select>
+                      </label>
+                      <label><span>Mood</span>
+                        <select id="healthMood">
+                          <option value="calm">calm</option>
+                          <option value="flat">flat</option>
+                          <option value="anxious">anxious</option>
+                          <option value="sad">sad</option>
+                          <option value="hopeful">hopeful</option>
+                          <option value="irritated">irritated</option>
+                          <option value="mixed">mixed</option>
+                        </select>
+                      </label>
+                      <label><span>Stress Level</span>
+                        <select id="healthStressLevel">
+                          <option value="unknown">unknown</option>
+                          <option value="low">low</option>
+                          <option value="medium">medium</option>
+                          <option value="high">high</option>
+                          <option value="overwhelming">overwhelming</option>
+                        </select>
+                      </label>
+                    </div>
+                    <label class="health-check-note"><span>Body Note</span><textarea id="healthBodyNote" rows="3"></textarea></label>
+                    <p id="healthStateSummary" class="health-check-summary">-</p>
+                    <p id="healthStateStatus" class="health-check-status">Record today's health context.</p>
+                  </div>
                   <div class="conversation-feedback-panel" aria-label="Conversation Feedback">
                     <div class="conversation-feedback-actions">
                       <button type="button" data-conversation-feedback="true">この返事は自然</button>

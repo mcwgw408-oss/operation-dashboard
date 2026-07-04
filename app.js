@@ -25,6 +25,7 @@ const WORKFLOW_STATE_STORAGE_KEY = "sakura-workflow-state-v1";
 const EXECUTION_DECISION_STORAGE_KEY = "sakura-execution-decision-v1";
 const EXECUTION_STATE_STORAGE_KEY = "sakura-execution-state-v1";
 const EXECUTION_FEEDBACK_STORAGE_KEY = "sakura-execution-feedback-v1";
+const HEALTH_STATE_STORAGE_KEY = "sakura-health-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -128,6 +129,7 @@ let workflowState = loadWorkflowState();
 let executionDecision = loadExecutionDecision();
 let executionState = loadExecutionState();
 let executionFeedback = loadExecutionFeedback();
+let healthState = loadHealthState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -551,6 +553,15 @@ function loadExecutionFeedback() {
   }
 }
 
+function loadHealthState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HEALTH_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -723,6 +734,10 @@ function saveExecutionState() {
 
 function saveExecutionFeedback() {
   localStorage.setItem(EXECUTION_FEEDBACK_STORAGE_KEY, JSON.stringify(executionFeedback));
+}
+
+function saveHealthState() {
+  localStorage.setItem(HEALTH_STATE_STORAGE_KEY, JSON.stringify(healthState));
 }
 
 function saveMemoryStore() {
@@ -1831,6 +1846,15 @@ function getLatestExecutionFeedback() {
   return latestExecutionFeedbackFrom(executionFeedback);
 }
 
+function latestHealthStateFrom(healthItems) {
+  return [...asArray(healthItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestHealthState() {
+  return latestHealthStateFrom(healthState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1853,6 +1877,7 @@ function buildReply(
   executionDecisionState = getLatestExecutionDecision(),
   execution = getLatestExecutionState(),
   feedback = getLatestExecutionFeedback(),
+  health = getLatestHealthState(),
   executiveSummary = buildExecutiveSummary(
     intent,
     taskPlan,
@@ -1860,6 +1885,7 @@ function buildReply(
     executionDecisionState,
     execution,
     feedback,
+    health,
   ),
 ) {
   const sections = {
@@ -1904,11 +1930,13 @@ function buildReply(
     decisionReason: executionDecisionState.decisionReason,
     confidence: executionDecisionState.confidence,
   } : null;
+  const healthSummary = buildHealthSummary(health);
 
   return {
     text,
     sections,
     metadata: {
+      healthSummary,
       executiveSummary,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
@@ -2032,6 +2060,7 @@ function buildReply(
       nextAction: workflow.nextAction,
       retryCount: workflow.retryCount,
     } : null,
+    healthSummary,
     executiveSummary,
     executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
@@ -3095,14 +3124,17 @@ function buildExecutiveSummary(
   decision = getLatestExecutionDecision(),
   execution = getLatestExecutionState(),
   feedback = getLatestExecutionFeedback(),
+  health = getLatestHealthState(),
 ) {
   const workflowStatus = workflow?.workflowStatus || "";
+  const healthSummary = buildHealthSummary(health);
   const summaryDate = intent?.date ||
     plan?.date ||
     workflow?.date ||
     decision?.date ||
     execution?.date ||
     feedback?.date ||
+    health?.date ||
     activeDate;
   const decisionParts = [
     decision?.priority ? `priority: ${decision.priority}` : "",
@@ -3125,6 +3157,7 @@ function buildExecutiveSummary(
     feedback?.difficulty === "hard" ? "Feedback marked hard." : "",
     feedback?.outcome === "failed" ? "Execution failed." : "",
     workflowStatus === "failed" ? "Workflow failed." : "",
+    healthSummary.risk,
     !execution ? "Execution candidate is not available." : "",
   ].filter(Boolean).join(" ") || "No immediate risk detected.";
 
@@ -3138,6 +3171,7 @@ function buildExecutiveSummary(
     executionStatus,
     feedbackOutcome,
     nextAction: workflow?.nextAction || execution?.title || decision?.selectedTitle || "",
+    healthContext: healthSummary.healthContext,
     risk,
     updatedAt: new Date().toISOString(),
   };
@@ -3157,7 +3191,99 @@ function renderExecutiveSummary() {
   setText("#executiveSummaryExecution", executiveSummary.executionStatus);
   setText("#executiveSummaryFeedback", executiveSummary.feedbackOutcome);
   setText("#executiveSummaryNextAction", executiveSummary.nextAction);
+  setText("#executiveSummaryHealth", executiveSummary.healthContext);
   setText("#executiveSummaryRisk", executiveSummary.risk);
+}
+
+function buildHealthSummary(health = getLatestHealthState()) {
+  if (!health) {
+    return {
+      date: activeDate,
+      healthContext: "Health Check is not recorded yet.",
+      recoveryFeeling: "unknown",
+      energyLevel: "medium",
+      stressLevel: "unknown",
+      risk: "",
+    };
+  }
+  const healthContext = [
+    health.sleepHours ? `sleep ${health.sleepHours}h` : "",
+    health.sleepQuality && health.sleepQuality !== "unknown" ? `sleep ${health.sleepQuality}` : "",
+    health.recoveryFeeling && health.recoveryFeeling !== "unknown" ? `recovery ${health.recoveryFeeling}` : "",
+    health.nutritionSatisfaction && health.nutritionSatisfaction !== "unknown" ? `nutrition ${health.nutritionSatisfaction}` : "",
+    health.medicationStatus && health.medicationStatus !== "unknown" ? `medication ${health.medicationStatus}` : "",
+    health.energyLevel ? `energy ${health.energyLevel}` : "",
+    health.mood ? `mood ${health.mood}` : "",
+    health.stressLevel && health.stressLevel !== "unknown" ? `stress ${health.stressLevel}` : "",
+    health.bodyNote || "",
+  ].filter(Boolean).join(" / ") || "Health Check is neutral.";
+  const risk = [
+    ["depleted", "low"].includes(health.recoveryFeeling) ? "Recovery is low." : "",
+    ["very_low", "low", "unstable"].includes(health.energyLevel) ? "Energy may limit action size." : "",
+    ["high", "overwhelming"].includes(health.stressLevel) ? "Stress is elevated." : "",
+    health.medicationStatus === "skipped" ? "Medication status is skipped." : "",
+  ].filter(Boolean).join(" ");
+  return {
+    date: health.date || activeDate,
+    healthContext,
+    recoveryFeeling: health.recoveryFeeling || "unknown",
+    energyLevel: health.energyLevel || "medium",
+    stressLevel: health.stressLevel || "unknown",
+    risk,
+  };
+}
+
+function upsertHealthState(updates = {}) {
+  const now = new Date().toISOString();
+  let entry = healthState.find((item) => item.date === activeDate);
+  if (!entry) {
+    entry = {
+      id: crypto.randomUUID(),
+      date: activeDate,
+      sleepHours: "",
+      sleepQuality: "unknown",
+      recoveryFeeling: "unknown",
+      nutritionSatisfaction: "unknown",
+      medicationStatus: "unknown",
+      energyLevel: "medium",
+      mood: "mixed",
+      stressLevel: "unknown",
+      bodyNote: "",
+      healthSummary: "",
+      createdAt: now,
+      updatedAt: now,
+    };
+    healthState.unshift(entry);
+  }
+  Object.assign(entry, updates);
+  entry.date = activeDate;
+  entry.healthSummary = buildHealthSummary(entry).healthContext;
+  entry.updatedAt = now;
+  saveHealthState();
+  return entry;
+}
+
+function renderHealthState() {
+  const health = healthState.find((item) => item.date === activeDate) || null;
+  const summary = buildHealthSummary(health);
+  const setValue = (selector, value) => {
+    const target = $(selector);
+    if (!target) return;
+    if (target.value !== (value || "")) target.value = value || "";
+  };
+  setValue("#healthSleepHours", health?.sleepHours);
+  setValue("#healthSleepQuality", health?.sleepQuality || "unknown");
+  setValue("#healthRecoveryFeeling", health?.recoveryFeeling || "unknown");
+  setValue("#healthNutritionSatisfaction", health?.nutritionSatisfaction || "unknown");
+  setValue("#healthMedicationStatus", health?.medicationStatus || "unknown");
+  setValue("#healthEnergyLevel", health?.energyLevel || "medium");
+  setValue("#healthMood", health?.mood || "mixed");
+  setValue("#healthStressLevel", health?.stressLevel || "unknown");
+  setValue("#healthBodyNote", health?.bodyNote);
+  const status = $("#healthStateStatus");
+  if (status) status.textContent = health?.updatedAt ? "Health Check saved." : "Record today's health context.";
+  const summaryTarget = $("#healthStateSummary");
+  if (summaryTarget) summaryTarget.textContent = summary.healthContext || "-";
 }
 
 function findConversationFeedback(replyText) {
@@ -4449,6 +4575,7 @@ function renderBrainPrototype() {
   renderExecutionDecision();
   renderExecutionState();
   renderExecutionFeedback();
+  renderHealthState();
   renderExecutiveSummary();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
@@ -4659,6 +4786,22 @@ function bindEvents() {
     renderExecutionFeedback();
     renderExecutiveSummary();
   });
+  const bindHealthInput = (selector, key, eventName = "change") => {
+    $(selector)?.addEventListener(eventName, (event) => {
+      upsertHealthState({ [key]: event.target.value });
+      renderHealthState();
+      renderExecutiveSummary();
+    });
+  };
+  bindHealthInput("#healthSleepHours", "sleepHours", "input");
+  bindHealthInput("#healthSleepQuality", "sleepQuality");
+  bindHealthInput("#healthRecoveryFeeling", "recoveryFeeling");
+  bindHealthInput("#healthNutritionSatisfaction", "nutritionSatisfaction");
+  bindHealthInput("#healthMedicationStatus", "medicationStatus");
+  bindHealthInput("#healthEnergyLevel", "energyLevel");
+  bindHealthInput("#healthMood", "mood");
+  bindHealthInput("#healthStressLevel", "stressLevel");
+  bindHealthInput("#healthBodyNote", "bodyNote", "input");
   $("#memoryMemoForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
     const memo = $("#memoryMemoText")?.value.trim();
@@ -4924,6 +5067,7 @@ const BACKUP_KEYS = [
   EXECUTION_DECISION_STORAGE_KEY,
   EXECUTION_STATE_STORAGE_KEY,
   EXECUTION_FEEDBACK_STORAGE_KEY,
+  HEALTH_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -4970,6 +5114,7 @@ function createBackup() {
   data[EXECUTION_DECISION_STORAGE_KEY] = readStoredJson(EXECUTION_DECISION_STORAGE_KEY, []);
   data[EXECUTION_STATE_STORAGE_KEY] = readStoredJson(EXECUTION_STATE_STORAGE_KEY, []);
   data[EXECUTION_FEEDBACK_STORAGE_KEY] = readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []);
+  data[HEALTH_STATE_STORAGE_KEY] = readStoredJson(HEALTH_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -5160,6 +5305,9 @@ function buildSakuraSnapshot(mode) {
   const executionDecisionItems = asArray(readStoredJson(EXECUTION_DECISION_STORAGE_KEY, []));
   const executionStateItems = asArray(readStoredJson(EXECUTION_STATE_STORAGE_KEY, []));
   const executionFeedbackItems = asArray(readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []));
+  const healthStateItems = asArray(readStoredJson(HEALTH_STATE_STORAGE_KEY, []));
+  const latestHealthState = latestHealthStateFrom(healthStateItems);
+  const healthSummary = buildHealthSummary(latestHealthState);
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -5220,6 +5368,7 @@ function buildSakuraSnapshot(mode) {
     latestExecutionDecisionFrom(executionDecisionItems),
     latestExecutionStateFrom(executionStateItems),
     latestExecutionFeedbackFrom(executionFeedbackItems),
+    latestHealthState,
   );
   conversation.reply = buildReply(
     conversation.replyPlan,
@@ -5243,6 +5392,7 @@ function buildSakuraSnapshot(mode) {
     latestExecutionDecisionFrom(executionDecisionItems),
     latestExecutionStateFrom(executionStateItems),
     latestExecutionFeedbackFrom(executionFeedbackItems),
+    latestHealthState,
     executiveSummary,
   );
 
@@ -5389,6 +5539,11 @@ function buildSakuraSnapshot(mode) {
       execution: deepCopy(executionStateItems),
       executionFeedback: deepCopy(executionFeedbackItems),
       summary: deepCopy(executiveSummary),
+    },
+    health: {
+      state: deepCopy(healthStateItems),
+      latest: deepCopy(latestHealthState),
+      summary: deepCopy(healthSummary),
     },
     conversation,
     apps: {
