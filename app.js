@@ -17,6 +17,7 @@ const GOAL_STATE_STORAGE_KEY = "sakura-goal-state-v1";
 const PRIORITY_STATE_STORAGE_KEY = "sakura-priority-state-v1";
 const DECISION_STATE_STORAGE_KEY = "sakura-decision-state-v1";
 const STRATEGY_STATE_STORAGE_KEY = "sakura-strategy-state-v1";
+const ATTENTION_STATE_STORAGE_KEY = "sakura-attention-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -112,6 +113,7 @@ let goalState = loadGoalState();
 let priorityState = loadPriorityState();
 let decisionState = loadDecisionState();
 let strategyState = loadStrategyState();
+let attentionState = loadAttentionState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -463,6 +465,15 @@ function loadStrategyState() {
   }
 }
 
+function loadAttentionState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ATTENTION_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -587,6 +598,12 @@ function saveDecisionState() {
 
 function saveStrategyState() {
   localStorage.setItem(STRATEGY_STATE_STORAGE_KEY, JSON.stringify(strategyState));
+  upsertAttentionState();
+  renderAttentionState();
+}
+
+function saveAttentionState() {
+  localStorage.setItem(ATTENTION_STATE_STORAGE_KEY, JSON.stringify(attentionState));
 }
 
 function saveMemoryStore() {
@@ -1623,6 +1640,15 @@ function getLatestStrategyState() {
   return latestStrategyStateFrom(strategyState);
 }
 
+function latestAttentionStateFrom(attentionItems) {
+  return [...asArray(attentionItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestAttentionState() {
+  return latestAttentionStateFrom(attentionState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1637,6 +1663,7 @@ function buildReply(
   priority = getLatestPriorityState(),
   decision = getLatestDecisionState(),
   strategy = getLatestStrategyState(),
+  attention = getLatestAttentionState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1737,6 +1764,13 @@ function buildReply(
       communicationPlan: strategy.communicationPlan,
       risk: strategy.risk,
       fallback: strategy.fallback,
+    } : null,
+    attentionState: attention ? {
+      focusTarget: attention.focusTarget,
+      secondaryFocus: attention.secondaryFocus,
+      avoidFocus: attention.avoidFocus,
+      attentionReason: attention.attentionReason,
+      responseCue: attention.responseCue,
     } : null,
   };
 }
@@ -2228,6 +2262,89 @@ function renderStrategyState() {
   setText("#strategyCommunicationPlan", strategy?.communicationPlan);
   setText("#strategyRisk", strategy?.risk);
   setText("#strategyFallback", strategy?.fallback);
+}
+
+function buildAttentionState(
+  goal = getLatestGoalState(),
+  priority = getLatestPriorityState(),
+  decision = getLatestDecisionState(),
+  strategy = getLatestStrategyState(),
+  context = {},
+) {
+  const focusTarget = strategy?.steps?.[0] ||
+    decision?.selectedApproach ||
+    priority?.primaryPriority ||
+    goal?.nextStep ||
+    "次に進むための一歩";
+  const secondaryFocus = strategy?.steps?.[1] ||
+    priority?.secondaryPriority ||
+    decision?.expectedOutcome ||
+    goal?.successCondition ||
+    "返答の自然さ";
+  const avoidFocus = strategy?.risk ||
+    asArray(priority?.ignoredTopics).join(" / ") ||
+    "目的から離れた話題転換";
+  const attentionReason = [
+    strategy?.strategyType ? `Strategy: ${strategy.strategyType}` : "",
+    priority?.reasoning,
+    context?.project && !String(priority?.reasoning || "").includes(`Context: ${context.project}`)
+      ? `Context: ${context.project}`
+      : "",
+  ].filter(Boolean).join(" / ") || "Goal、Priority、Decision、Strategy の現在値に基づきます。";
+  const responseCue = strategy?.communicationPlan ||
+    decision?.decisionReason ||
+    "焦点を一つに絞り、短く自然に返答する";
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    focusTarget,
+    secondaryFocus,
+    avoidFocus,
+    attentionReason,
+    responseCue,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertAttentionState() {
+  if (!getLatestStrategyState() && !getLatestDecisionState() && !getLatestPriorityState() && !getLatestGoalState()) return null;
+  const built = buildAttentionState(
+    getLatestGoalState(),
+    getLatestPriorityState(),
+    getLatestDecisionState(),
+    getLatestStrategyState(),
+    currentConversationContext || {},
+  );
+  const now = new Date().toISOString();
+  let attention = attentionState.find((entry) => entry.date === activeDate);
+  if (attention) {
+    attention.focusTarget = built.focusTarget;
+    attention.secondaryFocus = built.secondaryFocus;
+    attention.avoidFocus = built.avoidFocus;
+    attention.attentionReason = built.attentionReason;
+    attention.responseCue = built.responseCue;
+    attention.updatedAt = now;
+  } else {
+    attention = built;
+    attentionState.unshift(attention);
+  }
+  saveAttentionState();
+  return attention;
+}
+
+function renderAttentionState() {
+  const attention = getLatestAttentionState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#attentionFocusTarget", attention?.focusTarget);
+  setText("#attentionSecondaryFocus", attention?.secondaryFocus);
+  setText("#attentionAvoidFocus", attention?.avoidFocus);
+  setText("#attentionReason", attention?.attentionReason);
+  setText("#attentionResponseCue", attention?.responseCue);
 }
 
 function findConversationFeedback(replyText) {
@@ -3511,6 +3628,7 @@ function renderBrainPrototype() {
   renderPriorityState();
   renderDecisionState();
   renderStrategyState();
+  renderAttentionState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3654,6 +3772,7 @@ function bindEvents() {
       renderPriorityState();
       renderDecisionState();
       renderStrategyState();
+      renderAttentionState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -3674,6 +3793,7 @@ function bindEvents() {
     renderPriorityState();
     renderDecisionState();
     renderStrategyState();
+    renderAttentionState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -3934,6 +4054,7 @@ const BACKUP_KEYS = [
   PRIORITY_STATE_STORAGE_KEY,
   DECISION_STATE_STORAGE_KEY,
   STRATEGY_STATE_STORAGE_KEY,
+  ATTENTION_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3972,6 +4093,7 @@ function createBackup() {
   data[PRIORITY_STATE_STORAGE_KEY] = readStoredJson(PRIORITY_STATE_STORAGE_KEY, []);
   data[DECISION_STATE_STORAGE_KEY] = readStoredJson(DECISION_STATE_STORAGE_KEY, []);
   data[STRATEGY_STATE_STORAGE_KEY] = readStoredJson(STRATEGY_STATE_STORAGE_KEY, []);
+  data[ATTENTION_STATE_STORAGE_KEY] = readStoredJson(ATTENTION_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4154,6 +4276,7 @@ function buildSakuraSnapshot(mode) {
   const priorityStateItems = asArray(readStoredJson(PRIORITY_STATE_STORAGE_KEY, []));
   const decisionStateItems = asArray(readStoredJson(DECISION_STATE_STORAGE_KEY, []));
   const strategyStateItems = asArray(readStoredJson(STRATEGY_STATE_STORAGE_KEY, []));
+  const attentionStateItems = asArray(readStoredJson(ATTENTION_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4221,6 +4344,7 @@ function buildSakuraSnapshot(mode) {
     latestPriorityStateFrom(priorityStateItems),
     latestDecisionStateFrom(decisionStateItems),
     latestStrategyStateFrom(strategyStateItems),
+    latestAttentionStateFrom(attentionStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -4355,6 +4479,7 @@ function buildSakuraSnapshot(mode) {
       priority: deepCopy(priorityStateItems),
       decision: deepCopy(decisionStateItems),
       strategy: deepCopy(strategyStateItems),
+      attention: deepCopy(attentionStateItems),
     },
     conversation,
     apps: {
