@@ -23,6 +23,7 @@ const INTENT_STATE_STORAGE_KEY = "sakura-intent-state-v1";
 const TASK_PLAN_STATE_STORAGE_KEY = "sakura-task-plan-state-v1";
 const WORKFLOW_STATE_STORAGE_KEY = "sakura-workflow-state-v1";
 const EXECUTION_STATE_STORAGE_KEY = "sakura-execution-state-v1";
+const EXECUTION_FEEDBACK_STORAGE_KEY = "sakura-execution-feedback-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -124,6 +125,7 @@ let intentState = loadIntentState();
 let taskPlanState = loadTaskPlanState();
 let workflowState = loadWorkflowState();
 let executionState = loadExecutionState();
+let executionFeedback = loadExecutionFeedback();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -529,6 +531,15 @@ function loadExecutionState() {
   }
 }
 
+function loadExecutionFeedback() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(EXECUTION_FEEDBACK_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -685,10 +696,15 @@ function saveWorkflowState() {
   localStorage.setItem(WORKFLOW_STATE_STORAGE_KEY, JSON.stringify(workflowState));
   upsertExecutionState();
   renderExecutionState();
+  renderExecutionFeedback();
 }
 
 function saveExecutionState() {
   localStorage.setItem(EXECUTION_STATE_STORAGE_KEY, JSON.stringify(executionState));
+}
+
+function saveExecutionFeedback() {
+  localStorage.setItem(EXECUTION_FEEDBACK_STORAGE_KEY, JSON.stringify(executionFeedback));
 }
 
 function saveMemoryStore() {
@@ -1779,6 +1795,15 @@ function getLatestExecutionState() {
   return latestExecutionStateFrom(executionState);
 }
 
+function latestExecutionFeedbackFrom(feedbackItems) {
+  return [...asArray(feedbackItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestExecutionFeedback() {
+  return latestExecutionFeedbackFrom(executionFeedback);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1799,6 +1824,7 @@ function buildReply(
   taskPlan = getLatestTaskPlanState(),
   workflow = getLatestWorkflowState(),
   execution = getLatestExecutionState(),
+  feedback = getLatestExecutionFeedback(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1825,12 +1851,21 @@ function buildReply(
     executedAt: execution.executedAt,
     resultNote: execution.resultNote,
   } : null;
+  const executionFeedbackMetadata = feedback ? {
+    executionId: feedback.executionId,
+    outcome: feedback.outcome,
+    difficulty: feedback.difficulty,
+    completedAt: feedback.completedAt,
+    durationMinutes: feedback.durationMinutes,
+    note: feedback.note,
+  } : null;
 
   return {
     text,
     sections,
     metadata: {
       executionState: executionStateMetadata,
+      executionFeedback: executionFeedbackMetadata,
     },
     improvementHints: asArray(improvementHints),
     latestReflection: latestReflection ? {
@@ -1951,6 +1986,7 @@ function buildReply(
       retryCount: workflow.retryCount,
     } : null,
     executionState: executionStateMetadata,
+    executionFeedback: executionFeedbackMetadata,
   };
 }
 
@@ -2863,6 +2899,78 @@ function renderExecutionState() {
   setText("#executionReason", execution?.reason);
   setText("#executionExecutedAt", execution?.executedAt);
   setText("#executionResultNote", execution?.resultNote);
+}
+
+function buildExecutionFeedback(execution = getLatestExecutionState()) {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    executionId: execution?.id || "",
+    outcome: "pending",
+    difficulty: "unknown",
+    completedAt: "",
+    durationMinutes: "",
+    note: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertExecutionFeedback(updates = {}) {
+  const execution = getLatestExecutionState();
+  if (!execution) return null;
+  const built = buildExecutionFeedback(execution);
+  const now = new Date().toISOString();
+  let feedback = executionFeedback.find((entry) =>
+    entry.date === activeDate &&
+    entry.executionId === built.executionId
+  );
+  if (feedback) {
+    if ("outcome" in updates) feedback.outcome = updates.outcome || "pending";
+    if ("difficulty" in updates) feedback.difficulty = updates.difficulty || "unknown";
+    if ("completedAt" in updates) feedback.completedAt = updates.completedAt || "";
+    if ("durationMinutes" in updates) feedback.durationMinutes = updates.durationMinutes || "";
+    if ("note" in updates) feedback.note = updates.note || "";
+    feedback.updatedAt = now;
+  } else {
+    feedback = { ...built, ...updates, updatedAt: now };
+    feedback.outcome = feedback.outcome || "pending";
+    feedback.difficulty = feedback.difficulty || "unknown";
+    feedback.completedAt = feedback.completedAt || "";
+    feedback.durationMinutes = feedback.durationMinutes || "";
+    feedback.note = feedback.note || "";
+    executionFeedback.unshift(feedback);
+  }
+  saveExecutionFeedback();
+  return feedback;
+}
+
+function renderExecutionFeedback() {
+  const execution = getLatestExecutionState();
+  const feedback = execution
+    ? executionFeedback.find((entry) => entry.date === activeDate && entry.executionId === execution.id)
+    : null;
+  const setValue = (selector, value) => {
+    const target = $(selector);
+    if (!target) return;
+    target.disabled = !execution;
+    if (target.value !== (value || "")) target.value = value || "";
+  };
+  setValue("#executionFeedbackOutcome", feedback?.outcome || "pending");
+  setValue("#executionFeedbackDifficulty", feedback?.difficulty || "unknown");
+  setValue("#executionFeedbackDuration", feedback?.durationMinutes);
+  setValue("#executionFeedbackCompletedAt", feedback?.completedAt);
+  setValue("#executionFeedbackNote", feedback?.note);
+  const status = $("#executionFeedbackStatus");
+  if (!status) return;
+  if (!execution) {
+    status.textContent = "Execution State is not available yet.";
+  } else if (feedback?.updatedAt) {
+    status.textContent = "Execution Feedback saved.";
+  } else {
+    status.textContent = "Record execution results manually.";
+  }
 }
 
 function findConversationFeedback(replyText) {
@@ -4152,6 +4260,7 @@ function renderBrainPrototype() {
   renderTaskPlanState();
   renderWorkflowState();
   renderExecutionState();
+  renderExecutionFeedback();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -4301,6 +4410,7 @@ function bindEvents() {
       renderTaskPlanState();
       renderWorkflowState();
       renderExecutionState();
+      renderExecutionFeedback();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -4327,8 +4437,29 @@ function bindEvents() {
     renderTaskPlanState();
     renderWorkflowState();
     renderExecutionState();
+    renderExecutionFeedback();
     renderConversationContinuity();
     renderConversationRecovery();
+  });
+  $("#executionFeedbackOutcome")?.addEventListener("change", (event) => {
+    upsertExecutionFeedback({ outcome: event.target.value });
+    renderExecutionFeedback();
+  });
+  $("#executionFeedbackDifficulty")?.addEventListener("change", (event) => {
+    upsertExecutionFeedback({ difficulty: event.target.value });
+    renderExecutionFeedback();
+  });
+  $("#executionFeedbackDuration")?.addEventListener("input", (event) => {
+    upsertExecutionFeedback({ durationMinutes: event.target.value });
+    renderExecutionFeedback();
+  });
+  $("#executionFeedbackCompletedAt")?.addEventListener("input", (event) => {
+    upsertExecutionFeedback({ completedAt: event.target.value });
+    renderExecutionFeedback();
+  });
+  $("#executionFeedbackNote")?.addEventListener("input", (event) => {
+    upsertExecutionFeedback({ note: event.target.value });
+    renderExecutionFeedback();
   });
   $("#memoryMemoForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -4593,6 +4724,7 @@ const BACKUP_KEYS = [
   TASK_PLAN_STATE_STORAGE_KEY,
   WORKFLOW_STATE_STORAGE_KEY,
   EXECUTION_STATE_STORAGE_KEY,
+  EXECUTION_FEEDBACK_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -4637,6 +4769,7 @@ function createBackup() {
   data[TASK_PLAN_STATE_STORAGE_KEY] = readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []);
   data[WORKFLOW_STATE_STORAGE_KEY] = readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []);
   data[EXECUTION_STATE_STORAGE_KEY] = readStoredJson(EXECUTION_STATE_STORAGE_KEY, []);
+  data[EXECUTION_FEEDBACK_STORAGE_KEY] = readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4825,6 +4958,7 @@ function buildSakuraSnapshot(mode) {
   const taskPlanStateItems = asArray(readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []));
   const workflowStateItems = asArray(readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []));
   const executionStateItems = asArray(readStoredJson(EXECUTION_STATE_STORAGE_KEY, []));
+  const executionFeedbackItems = asArray(readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4898,6 +5032,7 @@ function buildSakuraSnapshot(mode) {
     latestTaskPlanStateFrom(taskPlanStateItems),
     latestWorkflowStateFrom(workflowStateItems),
     latestExecutionStateFrom(executionStateItems),
+    latestExecutionFeedbackFrom(executionFeedbackItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -5040,6 +5175,7 @@ function buildSakuraSnapshot(mode) {
       taskPlan: deepCopy(taskPlanStateItems),
       workflow: deepCopy(workflowStateItems),
       execution: deepCopy(executionStateItems),
+      executionFeedback: deepCopy(executionFeedbackItems),
     },
     conversation,
     apps: {

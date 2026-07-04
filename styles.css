@@ -1417,6 +1417,73 @@ textarea {
   line-height: 1.55;
 }
 
+.execution-feedback-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.execution-feedback-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.execution-feedback-grid {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.execution-feedback-grid label,
+.execution-feedback-note {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
+.execution-feedback-grid span,
+.execution-feedback-note span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.execution-feedback-grid select,
+.execution-feedback-grid input,
+.execution-feedback-note textarea {
+  width: 100%;
+  border: 1px solid #d8e3ee;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.execution-feedback-grid select,
+.execution-feedback-grid input {
+  min-height: 34px;
+  padding: 6px 8px;
+}
+
+.execution-feedback-note textarea {
+  min-height: 70px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.execution-feedback-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .conversation-feedback-panel {
   display: grid;
   gap: 9px;

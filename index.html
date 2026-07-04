@@ -367,6 +367,32 @@
                       <div><span>Result Note</span><p id="executionResultNote">-</p></div>
                     </div>
                   </div>
+                  <div class="execution-feedback-panel" aria-label="Execution Feedback">
+                    <h4>Execution Feedback</h4>
+                    <div class="execution-feedback-grid">
+                      <label><span>Outcome</span>
+                        <select id="executionFeedbackOutcome">
+                          <option value="pending">pending</option>
+                          <option value="completed">completed</option>
+                          <option value="partial">partial</option>
+                          <option value="failed">failed</option>
+                          <option value="skipped">skipped</option>
+                        </select>
+                      </label>
+                      <label><span>Difficulty</span>
+                        <select id="executionFeedbackDifficulty">
+                          <option value="unknown">unknown</option>
+                          <option value="easy">easy</option>
+                          <option value="normal">normal</option>
+                          <option value="hard">hard</option>
+                        </select>
+                      </label>
+                      <label><span>Duration Minutes</span><input id="executionFeedbackDuration" type="number" min="0" inputmode="numeric" /></label>
+                      <label><span>Completed At</span><input id="executionFeedbackCompletedAt" type="datetime-local" /></label>
+                    </div>
+                    <label class="execution-feedback-note"><span>Note</span><textarea id="executionFeedbackNote" rows="3"></textarea></label>
+                    <p id="executionFeedbackStatus" class="execution-feedback-status">Execution の結果を手動で記録できます。</p>
+                  </div>
                     </div>
                   </details>
                   <div class="conversation-feedback-panel" aria-label="Conversation Feedback">
