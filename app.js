@@ -11,6 +11,7 @@ const CONVERSATION_CONTINUITY_STORAGE_KEY = "sakura-conversation-continuity-v1";
 const CONVERSATION_RECOVERY_STORAGE_KEY = "sakura-conversation-recovery-v1";
 const PERSONALITY_PROFILE_STORAGE_KEY = "sakura-personality-profile-v1";
 const RELATIONSHIP_PROFILE_STORAGE_KEY = "sakura-relationship-profile-v1";
+const EMOTIONAL_RESONANCE_STORAGE_KEY = "sakura-emotional-resonance-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -100,6 +101,7 @@ let conversationContinuity = loadConversationContinuity();
 let conversationRecovery = loadConversationRecovery();
 let personalityProfile = loadPersonalityProfile();
 let relationshipProfile = loadRelationshipProfile();
+let emotionalResonance = loadEmotionalResonance();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -397,6 +399,15 @@ function loadRelationshipProfile() {
   return profile;
 }
 
+function loadEmotionalResonance() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(EMOTIONAL_RESONANCE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -483,6 +494,12 @@ function savePersonalityProfile() {
 function saveRelationshipProfile() {
   relationshipProfile.updatedAt = new Date().toISOString();
   localStorage.setItem(RELATIONSHIP_PROFILE_STORAGE_KEY, JSON.stringify(relationshipProfile));
+  upsertEmotionalResonance();
+  renderEmotionalResonance();
+}
+
+function saveEmotionalResonance() {
+  localStorage.setItem(EMOTIONAL_RESONANCE_STORAGE_KEY, JSON.stringify(emotionalResonance));
 }
 
 function saveMemoryStore() {
@@ -1465,6 +1482,15 @@ function getLatestConversationRecovery() {
   return latestConversationRecoveryFrom(conversationRecovery);
 }
 
+function latestEmotionalResonanceFrom(resonanceItems) {
+  return [...asArray(resonanceItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestEmotionalResonance() {
+  return latestEmotionalResonanceFrom(emotionalResonance);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1473,6 +1499,7 @@ function buildReply(
   latestRecovery = getLatestConversationRecovery(),
   profile = personalityProfile,
   relationship = relationshipProfile,
+  resonance = getLatestEmotionalResonance(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1531,6 +1558,13 @@ function buildReply(
       communicationDistance: relationship.communicationDistance,
       lastInteraction: relationship.lastInteraction,
     } : null,
+    emotionalResonance: resonance ? {
+      detectedMode: resonance.detectedMode,
+      emotionalEnergy: resonance.emotionalEnergy,
+      supportLevel: resonance.supportLevel,
+      responseTone: resonance.responseTone,
+      reasoning: resonance.reasoning,
+    } : null,
   };
 }
 
@@ -1565,6 +1599,91 @@ function renderRelationshipProfile(profile = relationshipProfile) {
   setText("#relationshipPreferredSupport", profile?.preferredSupport);
   setText("#relationshipCommunicationDistance", profile?.communicationDistance);
   setText("#relationshipLastInteraction", profile?.lastInteraction);
+}
+
+function buildEmotionalResonance(context = {}, relationship = relationshipProfile, latestReflection = null) {
+  const hasLowConfidence = Number(context?.learningConfidence?.score ?? 100) < 40;
+  const wantsSoftening = latestReflection?.tone === "softer";
+  const hasNeed = Boolean(replySentence(latestReflection?.userNeed));
+  const trust = relationship?.trust || "building";
+  let detectedMode = "steady_support";
+  let emotionalEnergy = "medium";
+  let supportLevel = "balanced";
+  let responseTone = "warm and clear";
+  const reasoning = [];
+
+  if (wantsSoftening) {
+    detectedMode = "repair";
+    emotionalEnergy = "low";
+    supportLevel = "high";
+    responseTone = "soft, validating, and careful";
+    reasoning.push("Latest reflection asks for a softer tone.");
+  }
+  if (hasLowConfidence) {
+    detectedMode = detectedMode === "repair" ? "repair_with_uncertainty" : "uncertain";
+    supportLevel = "high";
+    responseTone = "careful and non-directive";
+    reasoning.push("Learning confidence is low.");
+  }
+  if (hasNeed) {
+    reasoning.push(`User need is visible: ${latestReflection.userNeed}`);
+  }
+  if (trust === "building") {
+    reasoning.push("Relationship trust is still building.");
+  }
+  if (!reasoning.length) {
+    reasoning.push("Conversation context looks stable.");
+  }
+
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    detectedMode,
+    emotionalEnergy,
+    supportLevel,
+    responseTone,
+    reasoning: reasoning.join(" "),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertEmotionalResonance() {
+  if (!currentConversationContext && !relationshipProfile) return null;
+  const built = buildEmotionalResonance(
+    currentConversationContext || {},
+    relationshipProfile,
+    getLatestConversationReflection(),
+  );
+  const now = new Date().toISOString();
+  let resonance = emotionalResonance.find((entry) => entry.date === activeDate);
+  if (resonance) {
+    resonance.detectedMode = built.detectedMode;
+    resonance.emotionalEnergy = built.emotionalEnergy;
+    resonance.supportLevel = built.supportLevel;
+    resonance.responseTone = built.responseTone;
+    resonance.reasoning = built.reasoning;
+    resonance.updatedAt = now;
+  } else {
+    resonance = built;
+    emotionalResonance.unshift(resonance);
+  }
+  saveEmotionalResonance();
+  return resonance;
+}
+
+function renderEmotionalResonance() {
+  const resonance = getLatestEmotionalResonance();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#emotionalResonanceMode", resonance?.detectedMode);
+  setText("#emotionalResonanceEnergy", resonance?.emotionalEnergy);
+  setText("#emotionalResonanceSupport", resonance?.supportLevel);
+  setText("#emotionalResonanceTone", resonance?.responseTone);
+  setText("#emotionalResonanceReasoning", resonance?.reasoning);
 }
 
 function findConversationFeedback(replyText) {
@@ -2815,6 +2934,7 @@ function renderBrainPrototype() {
   currentConversationContext = conversationContext;
   const replyPlan = buildReplyPlan(conversationContext);
   currentReplyPlan = replyPlan;
+  upsertEmotionalResonance();
   const reply = buildReply(replyPlan);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
@@ -2840,6 +2960,7 @@ function renderBrainPrototype() {
   renderReply(reply);
   renderPersonalityProfile();
   renderRelationshipProfile();
+  renderEmotionalResonance();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -2971,11 +3092,13 @@ function bindEvents() {
       });
       upsertConversationImprovement(feedback);
       upsertConversationReflection();
+      upsertEmotionalResonance();
       upsertConversationContinuity();
       upsertConversationRecovery();
       renderConversationFeedback({ text: currentReplyText });
       renderConversationImprovementHints();
       renderConversationReflection();
+      renderEmotionalResonance();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -2984,11 +3107,13 @@ function bindEvents() {
     const feedback = upsertConversationFeedback(currentReplyText, { note: event.target.value });
     upsertConversationImprovement(feedback);
     upsertConversationReflection();
+    upsertEmotionalResonance();
     upsertConversationContinuity();
     upsertConversationRecovery();
     renderConversationFeedback({ text: currentReplyText });
     renderConversationImprovementHints();
     renderConversationReflection();
+    renderEmotionalResonance();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -3243,6 +3368,7 @@ const BACKUP_KEYS = [
   CONVERSATION_RECOVERY_STORAGE_KEY,
   PERSONALITY_PROFILE_STORAGE_KEY,
   RELATIONSHIP_PROFILE_STORAGE_KEY,
+  EMOTIONAL_RESONANCE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3275,6 +3401,7 @@ function createBackup() {
   data[CONVERSATION_RECOVERY_STORAGE_KEY] = readStoredJson(CONVERSATION_RECOVERY_STORAGE_KEY, []);
   data[PERSONALITY_PROFILE_STORAGE_KEY] = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
   data[RELATIONSHIP_PROFILE_STORAGE_KEY] = readStoredJson(RELATIONSHIP_PROFILE_STORAGE_KEY, buildRelationshipProfile());
+  data[EMOTIONAL_RESONANCE_STORAGE_KEY] = readStoredJson(EMOTIONAL_RESONANCE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -3451,6 +3578,7 @@ function buildSakuraSnapshot(mode) {
   const conversationRecoveryItems = asArray(readStoredJson(CONVERSATION_RECOVERY_STORAGE_KEY, []));
   const savedPersonalityProfile = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
   const savedRelationshipProfile = readStoredJson(RELATIONSHIP_PROFILE_STORAGE_KEY, buildRelationshipProfile());
+  const emotionalResonanceItems = asArray(readStoredJson(EMOTIONAL_RESONANCE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -3512,6 +3640,7 @@ function buildSakuraSnapshot(mode) {
     latestConversationRecoveryFrom(conversationRecoveryItems),
     savedPersonalityProfile,
     savedRelationshipProfile,
+    latestEmotionalResonanceFrom(emotionalResonanceItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -3638,6 +3767,7 @@ function buildSakuraSnapshot(mode) {
     personality: {
       profile: deepCopy(savedPersonalityProfile),
       relationship: deepCopy(savedRelationshipProfile),
+      emotionalResonance: deepCopy(emotionalResonanceItems),
     },
     conversation,
     apps: {
