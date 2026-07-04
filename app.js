@@ -20,6 +20,7 @@ const STRATEGY_STATE_STORAGE_KEY = "sakura-strategy-state-v1";
 const ATTENTION_STATE_STORAGE_KEY = "sakura-attention-state-v1";
 const COGNITIVE_STATE_STORAGE_KEY = "sakura-cognitive-state-v1";
 const INTENT_STATE_STORAGE_KEY = "sakura-intent-state-v1";
+const TASK_PLAN_STATE_STORAGE_KEY = "sakura-task-plan-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -118,6 +119,7 @@ let strategyState = loadStrategyState();
 let attentionState = loadAttentionState();
 let cognitiveState = loadCognitiveState();
 let intentState = loadIntentState();
+let taskPlanState = loadTaskPlanState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -496,6 +498,15 @@ function loadIntentState() {
   }
 }
 
+function loadTaskPlanState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TASK_PLAN_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -638,6 +649,12 @@ function saveCognitiveState() {
 
 function saveIntentState() {
   localStorage.setItem(INTENT_STATE_STORAGE_KEY, JSON.stringify(intentState));
+  upsertTaskPlanState();
+  renderTaskPlanState();
+}
+
+function saveTaskPlanState() {
+  localStorage.setItem(TASK_PLAN_STATE_STORAGE_KEY, JSON.stringify(taskPlanState));
 }
 
 function saveMemoryStore() {
@@ -1701,6 +1718,15 @@ function getLatestIntentState() {
   return latestIntentStateFrom(intentState);
 }
 
+function latestTaskPlanStateFrom(taskPlanItems) {
+  return [...asArray(taskPlanItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestTaskPlanState() {
+  return latestTaskPlanStateFrom(taskPlanState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1718,6 +1744,7 @@ function buildReply(
   attention = getLatestAttentionState(),
   cognitive = getLatestCognitiveState(),
   intent = getLatestIntentState(),
+  taskPlan = getLatestTaskPlanState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1841,6 +1868,13 @@ function buildReply(
       executionType: intent.executionType,
       expectedResult: intent.expectedResult,
       reasoning: intent.reasoning,
+    } : null,
+    taskPlanState: taskPlan ? {
+      objective: taskPlan.objective,
+      plannedSteps: asArray(taskPlan.plannedSteps),
+      dependencies: asArray(taskPlan.dependencies),
+      estimatedComplexity: taskPlan.estimatedComplexity,
+      completionCriteria: taskPlan.completionCriteria,
     } : null,
   };
 }
@@ -2566,6 +2600,72 @@ function renderIntentState() {
   setText("#intentExecutionType", intent?.executionType);
   setText("#intentExpectedResult", intent?.expectedResult);
   setText("#intentReasoning", intent?.reasoning);
+}
+
+function buildTaskPlanState(intent = getLatestIntentState(), cognitive = getLatestCognitiveState()) {
+  const objective = intent?.primaryIntent ||
+    cognitive?.activeDecision ||
+    "現在の Intent に沿って返答を実行する";
+  const plannedSteps = [
+    cognitive?.activeAttention ? `Focus: ${cognitive.activeAttention}` : "",
+    intent?.secondaryIntent ? `Support: ${intent.secondaryIntent}` : "",
+    intent?.executionType ? `Execute as ${intent.executionType}` : "",
+  ].filter(Boolean);
+  const dependencies = [
+    cognitive?.cognitiveMode ? `Cognitive mode: ${cognitive.cognitiveMode}` : "",
+    intent?.reasoning ? "Intent reasoning" : "",
+  ].filter(Boolean);
+  const estimatedComplexity = intent?.executionType?.includes("careful") || cognitive?.cognitiveMode?.includes("careful")
+    ? "medium"
+    : "low";
+  const completionCriteria = intent?.expectedResult ||
+    cognitive?.reasoningSummary ||
+    "返答が Intent と Cognitive State に沿っている";
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    objective,
+    plannedSteps,
+    dependencies,
+    estimatedComplexity,
+    completionCriteria,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertTaskPlanState() {
+  if (!getLatestIntentState() && !getLatestCognitiveState()) return null;
+  const built = buildTaskPlanState(getLatestIntentState(), getLatestCognitiveState());
+  const now = new Date().toISOString();
+  let plan = taskPlanState.find((entry) => entry.date === activeDate);
+  if (plan) {
+    plan.objective = built.objective;
+    plan.plannedSteps = built.plannedSteps;
+    plan.dependencies = built.dependencies;
+    plan.estimatedComplexity = built.estimatedComplexity;
+    plan.completionCriteria = built.completionCriteria;
+    plan.updatedAt = now;
+  } else {
+    plan = built;
+    taskPlanState.unshift(plan);
+  }
+  saveTaskPlanState();
+  return plan;
+}
+
+function renderTaskPlanState() {
+  const plan = getLatestTaskPlanState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#taskPlanObjective", plan?.objective);
+  setText("#taskPlanPlannedSteps", asArray(plan?.plannedSteps).join(" / "));
+  setText("#taskPlanDependencies", asArray(plan?.dependencies).join(" / "));
+  setText("#taskPlanEstimatedComplexity", plan?.estimatedComplexity);
+  setText("#taskPlanCompletionCriteria", plan?.completionCriteria);
 }
 
 function findConversationFeedback(replyText) {
@@ -3852,6 +3952,7 @@ function renderBrainPrototype() {
   renderAttentionState();
   renderCognitiveState();
   renderIntentState();
+  renderTaskPlanState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3998,6 +4099,7 @@ function bindEvents() {
       renderAttentionState();
       renderCognitiveState();
       renderIntentState();
+      renderTaskPlanState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -4021,6 +4123,7 @@ function bindEvents() {
     renderAttentionState();
     renderCognitiveState();
     renderIntentState();
+    renderTaskPlanState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -4284,6 +4387,7 @@ const BACKUP_KEYS = [
   ATTENTION_STATE_STORAGE_KEY,
   COGNITIVE_STATE_STORAGE_KEY,
   INTENT_STATE_STORAGE_KEY,
+  TASK_PLAN_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -4325,6 +4429,7 @@ function createBackup() {
   data[ATTENTION_STATE_STORAGE_KEY] = readStoredJson(ATTENTION_STATE_STORAGE_KEY, []);
   data[COGNITIVE_STATE_STORAGE_KEY] = readStoredJson(COGNITIVE_STATE_STORAGE_KEY, []);
   data[INTENT_STATE_STORAGE_KEY] = readStoredJson(INTENT_STATE_STORAGE_KEY, []);
+  data[TASK_PLAN_STATE_STORAGE_KEY] = readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4510,6 +4615,7 @@ function buildSakuraSnapshot(mode) {
   const attentionStateItems = asArray(readStoredJson(ATTENTION_STATE_STORAGE_KEY, []));
   const cognitiveStateItems = asArray(readStoredJson(COGNITIVE_STATE_STORAGE_KEY, []));
   const intentStateItems = asArray(readStoredJson(INTENT_STATE_STORAGE_KEY, []));
+  const taskPlanStateItems = asArray(readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4580,6 +4686,7 @@ function buildSakuraSnapshot(mode) {
     latestAttentionStateFrom(attentionStateItems),
     latestCognitiveStateFrom(cognitiveStateItems),
     latestIntentStateFrom(intentStateItems),
+    latestTaskPlanStateFrom(taskPlanStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -4719,6 +4826,7 @@ function buildSakuraSnapshot(mode) {
     },
     executive: {
       intent: deepCopy(intentStateItems),
+      taskPlan: deepCopy(taskPlanStateItems),
     },
     conversation,
     apps: {
