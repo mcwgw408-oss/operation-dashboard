@@ -18,6 +18,7 @@ const PRIORITY_STATE_STORAGE_KEY = "sakura-priority-state-v1";
 const DECISION_STATE_STORAGE_KEY = "sakura-decision-state-v1";
 const STRATEGY_STATE_STORAGE_KEY = "sakura-strategy-state-v1";
 const ATTENTION_STATE_STORAGE_KEY = "sakura-attention-state-v1";
+const COGNITIVE_STATE_STORAGE_KEY = "sakura-cognitive-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -114,6 +115,7 @@ let priorityState = loadPriorityState();
 let decisionState = loadDecisionState();
 let strategyState = loadStrategyState();
 let attentionState = loadAttentionState();
+let cognitiveState = loadCognitiveState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -474,6 +476,15 @@ function loadAttentionState() {
   }
 }
 
+function loadCognitiveState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(COGNITIVE_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -604,6 +615,12 @@ function saveStrategyState() {
 
 function saveAttentionState() {
   localStorage.setItem(ATTENTION_STATE_STORAGE_KEY, JSON.stringify(attentionState));
+  upsertCognitiveState();
+  renderCognitiveState();
+}
+
+function saveCognitiveState() {
+  localStorage.setItem(COGNITIVE_STATE_STORAGE_KEY, JSON.stringify(cognitiveState));
 }
 
 function saveMemoryStore() {
@@ -1649,6 +1666,15 @@ function getLatestAttentionState() {
   return latestAttentionStateFrom(attentionState);
 }
 
+function latestCognitiveStateFrom(cognitiveItems) {
+  return [...asArray(cognitiveItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestCognitiveState() {
+  return latestCognitiveStateFrom(cognitiveState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1664,6 +1690,7 @@ function buildReply(
   decision = getLatestDecisionState(),
   strategy = getLatestStrategyState(),
   attention = getLatestAttentionState(),
+  cognitive = getLatestCognitiveState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1771,6 +1798,15 @@ function buildReply(
       avoidFocus: attention.avoidFocus,
       attentionReason: attention.attentionReason,
       responseCue: attention.responseCue,
+    } : null,
+    cognitiveState: cognitive ? {
+      cognitiveMode: cognitive.cognitiveMode,
+      activeGoal: cognitive.activeGoal,
+      activePriority: cognitive.activePriority,
+      activeDecision: cognitive.activeDecision,
+      activeStrategy: cognitive.activeStrategy,
+      activeAttention: cognitive.activeAttention,
+      reasoningSummary: cognitive.reasoningSummary,
     } : null,
   };
 }
@@ -2345,6 +2381,85 @@ function renderAttentionState() {
   setText("#attentionAvoidFocus", attention?.avoidFocus);
   setText("#attentionReason", attention?.attentionReason);
   setText("#attentionResponseCue", attention?.responseCue);
+}
+
+function buildCognitiveState(
+  goal = getLatestGoalState(),
+  priority = getLatestPriorityState(),
+  decision = getLatestDecisionState(),
+  strategy = getLatestStrategyState(),
+  attention = getLatestAttentionState(),
+) {
+  const cognitiveMode = strategy?.strategyType ||
+    (decision?.confidence !== undefined && decision.confidence < 40 ? "careful_integration" : "steady_integration");
+  const activeGoal = goal?.currentGoal || goal?.nextStep || "";
+  const activePriority = priority?.primaryPriority || "";
+  const activeDecision = decision?.selectedApproach || "";
+  const activeStrategy = strategy?.strategyType || "";
+  const activeAttention = attention?.focusTarget || "";
+  const reasoningSummary = [
+    goal?.userGoal ? `Goal: ${goal.userGoal}` : "",
+    priority?.urgency ? `Priority urgency: ${priority.urgency}` : "",
+    decision?.confidence !== undefined ? `Decision confidence: ${decision.confidence}%` : "",
+    attention?.responseCue ? `Cue: ${attention.responseCue}` : "",
+  ].filter(Boolean).join(" / ") || "Goal、Priority、Decision、Strategy、Attention を統合しています。";
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    cognitiveMode,
+    activeGoal,
+    activePriority,
+    activeDecision,
+    activeStrategy,
+    activeAttention,
+    reasoningSummary,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertCognitiveState() {
+  if (!getLatestAttentionState() && !getLatestStrategyState() && !getLatestDecisionState() && !getLatestPriorityState() && !getLatestGoalState()) return null;
+  const built = buildCognitiveState(
+    getLatestGoalState(),
+    getLatestPriorityState(),
+    getLatestDecisionState(),
+    getLatestStrategyState(),
+    getLatestAttentionState(),
+  );
+  const now = new Date().toISOString();
+  let cognitive = cognitiveState.find((entry) => entry.date === activeDate);
+  if (cognitive) {
+    cognitive.cognitiveMode = built.cognitiveMode;
+    cognitive.activeGoal = built.activeGoal;
+    cognitive.activePriority = built.activePriority;
+    cognitive.activeDecision = built.activeDecision;
+    cognitive.activeStrategy = built.activeStrategy;
+    cognitive.activeAttention = built.activeAttention;
+    cognitive.reasoningSummary = built.reasoningSummary;
+    cognitive.updatedAt = now;
+  } else {
+    cognitive = built;
+    cognitiveState.unshift(cognitive);
+  }
+  saveCognitiveState();
+  return cognitive;
+}
+
+function renderCognitiveState() {
+  const cognitive = getLatestCognitiveState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#cognitiveMode", cognitive?.cognitiveMode);
+  setText("#cognitiveActiveGoal", cognitive?.activeGoal);
+  setText("#cognitiveActivePriority", cognitive?.activePriority);
+  setText("#cognitiveActiveDecision", cognitive?.activeDecision);
+  setText("#cognitiveActiveStrategy", cognitive?.activeStrategy);
+  setText("#cognitiveActiveAttention", cognitive?.activeAttention);
+  setText("#cognitiveReasoningSummary", cognitive?.reasoningSummary);
 }
 
 function findConversationFeedback(replyText) {
@@ -3629,6 +3744,7 @@ function renderBrainPrototype() {
   renderDecisionState();
   renderStrategyState();
   renderAttentionState();
+  renderCognitiveState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3773,6 +3889,7 @@ function bindEvents() {
       renderDecisionState();
       renderStrategyState();
       renderAttentionState();
+      renderCognitiveState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -3794,6 +3911,7 @@ function bindEvents() {
     renderDecisionState();
     renderStrategyState();
     renderAttentionState();
+    renderCognitiveState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -4055,6 +4173,7 @@ const BACKUP_KEYS = [
   DECISION_STATE_STORAGE_KEY,
   STRATEGY_STATE_STORAGE_KEY,
   ATTENTION_STATE_STORAGE_KEY,
+  COGNITIVE_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -4094,6 +4213,7 @@ function createBackup() {
   data[DECISION_STATE_STORAGE_KEY] = readStoredJson(DECISION_STATE_STORAGE_KEY, []);
   data[STRATEGY_STATE_STORAGE_KEY] = readStoredJson(STRATEGY_STATE_STORAGE_KEY, []);
   data[ATTENTION_STATE_STORAGE_KEY] = readStoredJson(ATTENTION_STATE_STORAGE_KEY, []);
+  data[COGNITIVE_STATE_STORAGE_KEY] = readStoredJson(COGNITIVE_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4277,6 +4397,7 @@ function buildSakuraSnapshot(mode) {
   const decisionStateItems = asArray(readStoredJson(DECISION_STATE_STORAGE_KEY, []));
   const strategyStateItems = asArray(readStoredJson(STRATEGY_STATE_STORAGE_KEY, []));
   const attentionStateItems = asArray(readStoredJson(ATTENTION_STATE_STORAGE_KEY, []));
+  const cognitiveStateItems = asArray(readStoredJson(COGNITIVE_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4345,6 +4466,7 @@ function buildSakuraSnapshot(mode) {
     latestDecisionStateFrom(decisionStateItems),
     latestStrategyStateFrom(strategyStateItems),
     latestAttentionStateFrom(attentionStateItems),
+    latestCognitiveStateFrom(cognitiveStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -4480,6 +4602,7 @@ function buildSakuraSnapshot(mode) {
       decision: deepCopy(decisionStateItems),
       strategy: deepCopy(strategyStateItems),
       attention: deepCopy(attentionStateItems),
+      state: deepCopy(cognitiveStateItems),
     },
     conversation,
     apps: {
