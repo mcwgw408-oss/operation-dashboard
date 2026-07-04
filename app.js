@@ -21,6 +21,7 @@ const ATTENTION_STATE_STORAGE_KEY = "sakura-attention-state-v1";
 const COGNITIVE_STATE_STORAGE_KEY = "sakura-cognitive-state-v1";
 const INTENT_STATE_STORAGE_KEY = "sakura-intent-state-v1";
 const TASK_PLAN_STATE_STORAGE_KEY = "sakura-task-plan-state-v1";
+const WORKFLOW_STATE_STORAGE_KEY = "sakura-workflow-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -120,6 +121,7 @@ let attentionState = loadAttentionState();
 let cognitiveState = loadCognitiveState();
 let intentState = loadIntentState();
 let taskPlanState = loadTaskPlanState();
+let workflowState = loadWorkflowState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -507,6 +509,15 @@ function loadTaskPlanState() {
   }
 }
 
+function loadWorkflowState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(WORKFLOW_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -655,6 +666,12 @@ function saveIntentState() {
 
 function saveTaskPlanState() {
   localStorage.setItem(TASK_PLAN_STATE_STORAGE_KEY, JSON.stringify(taskPlanState));
+  upsertWorkflowState();
+  renderWorkflowState();
+}
+
+function saveWorkflowState() {
+  localStorage.setItem(WORKFLOW_STATE_STORAGE_KEY, JSON.stringify(workflowState));
 }
 
 function saveMemoryStore() {
@@ -1727,6 +1744,15 @@ function getLatestTaskPlanState() {
   return latestTaskPlanStateFrom(taskPlanState);
 }
 
+function latestWorkflowStateFrom(workflowItems) {
+  return [...asArray(workflowItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestWorkflowState() {
+  return latestWorkflowStateFrom(workflowState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1745,6 +1771,7 @@ function buildReply(
   cognitive = getLatestCognitiveState(),
   intent = getLatestIntentState(),
   taskPlan = getLatestTaskPlanState(),
+  workflow = getLatestWorkflowState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1875,6 +1902,14 @@ function buildReply(
       dependencies: asArray(taskPlan.dependencies),
       estimatedComplexity: taskPlan.estimatedComplexity,
       completionCriteria: taskPlan.completionCriteria,
+    } : null,
+    workflowState: workflow ? {
+      workflowStatus: workflow.workflowStatus,
+      currentStep: workflow.currentStep,
+      totalSteps: workflow.totalSteps,
+      completedSteps: workflow.completedSteps,
+      nextAction: workflow.nextAction,
+      retryCount: workflow.retryCount,
     } : null,
   };
 }
@@ -2666,6 +2701,75 @@ function renderTaskPlanState() {
   setText("#taskPlanDependencies", asArray(plan?.dependencies).join(" / "));
   setText("#taskPlanEstimatedComplexity", plan?.estimatedComplexity);
   setText("#taskPlanCompletionCriteria", plan?.completionCriteria);
+}
+
+function buildWorkflowState(plan = getLatestTaskPlanState()) {
+  const steps = asArray(plan?.plannedSteps);
+  const totalSteps = steps.length;
+  const workflowStatus = totalSteps > 0 ? "ready" : "pending";
+  const currentStep = totalSteps > 0 ? 1 : 0;
+  const completedSteps = 0;
+  const nextAction = steps[0] || plan?.objective || "Task Plan を作成する";
+  const retryCount = 0;
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    workflowStatus,
+    currentStep,
+    totalSteps,
+    completedSteps,
+    nextAction,
+    retryCount,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertWorkflowState() {
+  if (!getLatestTaskPlanState()) return null;
+  const built = buildWorkflowState(getLatestTaskPlanState());
+  const now = new Date().toISOString();
+  let workflow = workflowState.find((entry) => entry.date === activeDate);
+  if (workflow) {
+    const totalSteps = built.totalSteps;
+    workflow.totalSteps = totalSteps;
+    workflow.completedSteps = Math.min(Number(workflow.completedSteps || 0), totalSteps);
+    workflow.currentStep = totalSteps > 0
+      ? Math.min(Math.max(Number(workflow.currentStep || 1), 1), totalSteps)
+      : 0;
+    if (!["pending", "ready", "running", "waiting", "completed", "failed"].includes(workflow.workflowStatus)) {
+      workflow.workflowStatus = built.workflowStatus;
+    }
+    if (workflow.completedSteps >= totalSteps && totalSteps > 0) {
+      workflow.workflowStatus = "completed";
+    } else if (workflow.workflowStatus === "completed" && workflow.completedSteps < totalSteps) {
+      workflow.workflowStatus = built.workflowStatus;
+    }
+    workflow.nextAction = asArray(getLatestTaskPlanState()?.plannedSteps)[workflow.completedSteps] ||
+      built.nextAction;
+    workflow.retryCount = Number(workflow.retryCount || 0);
+    workflow.updatedAt = now;
+  } else {
+    workflow = built;
+    workflowState.unshift(workflow);
+  }
+  saveWorkflowState();
+  return workflow;
+}
+
+function renderWorkflowState() {
+  const workflow = getLatestWorkflowState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#workflowStatus", workflow?.workflowStatus);
+  setText("#workflowCurrentStep", workflow?.currentStep !== undefined ? String(workflow.currentStep) : "");
+  setText("#workflowTotalSteps", workflow?.totalSteps !== undefined ? String(workflow.totalSteps) : "");
+  setText("#workflowCompletedSteps", workflow?.completedSteps !== undefined ? String(workflow.completedSteps) : "");
+  setText("#workflowNextAction", workflow?.nextAction);
+  setText("#workflowRetryCount", workflow?.retryCount !== undefined ? String(workflow.retryCount) : "");
 }
 
 function findConversationFeedback(replyText) {
@@ -3953,6 +4057,7 @@ function renderBrainPrototype() {
   renderCognitiveState();
   renderIntentState();
   renderTaskPlanState();
+  renderWorkflowState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -4100,6 +4205,7 @@ function bindEvents() {
       renderCognitiveState();
       renderIntentState();
       renderTaskPlanState();
+      renderWorkflowState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -4124,6 +4230,7 @@ function bindEvents() {
     renderCognitiveState();
     renderIntentState();
     renderTaskPlanState();
+    renderWorkflowState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -4388,6 +4495,7 @@ const BACKUP_KEYS = [
   COGNITIVE_STATE_STORAGE_KEY,
   INTENT_STATE_STORAGE_KEY,
   TASK_PLAN_STATE_STORAGE_KEY,
+  WORKFLOW_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -4430,6 +4538,7 @@ function createBackup() {
   data[COGNITIVE_STATE_STORAGE_KEY] = readStoredJson(COGNITIVE_STATE_STORAGE_KEY, []);
   data[INTENT_STATE_STORAGE_KEY] = readStoredJson(INTENT_STATE_STORAGE_KEY, []);
   data[TASK_PLAN_STATE_STORAGE_KEY] = readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []);
+  data[WORKFLOW_STATE_STORAGE_KEY] = readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4616,6 +4725,7 @@ function buildSakuraSnapshot(mode) {
   const cognitiveStateItems = asArray(readStoredJson(COGNITIVE_STATE_STORAGE_KEY, []));
   const intentStateItems = asArray(readStoredJson(INTENT_STATE_STORAGE_KEY, []));
   const taskPlanStateItems = asArray(readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []));
+  const workflowStateItems = asArray(readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4687,6 +4797,7 @@ function buildSakuraSnapshot(mode) {
     latestCognitiveStateFrom(cognitiveStateItems),
     latestIntentStateFrom(intentStateItems),
     latestTaskPlanStateFrom(taskPlanStateItems),
+    latestWorkflowStateFrom(workflowStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -4827,6 +4938,7 @@ function buildSakuraSnapshot(mode) {
     executive: {
       intent: deepCopy(intentStateItems),
       taskPlan: deepCopy(taskPlanStateItems),
+      workflow: deepCopy(workflowStateItems),
     },
     conversation,
     apps: {
