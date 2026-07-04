@@ -22,6 +22,7 @@ const COGNITIVE_STATE_STORAGE_KEY = "sakura-cognitive-state-v1";
 const INTENT_STATE_STORAGE_KEY = "sakura-intent-state-v1";
 const TASK_PLAN_STATE_STORAGE_KEY = "sakura-task-plan-state-v1";
 const WORKFLOW_STATE_STORAGE_KEY = "sakura-workflow-state-v1";
+const EXECUTION_STATE_STORAGE_KEY = "sakura-execution-state-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -122,6 +123,7 @@ let cognitiveState = loadCognitiveState();
 let intentState = loadIntentState();
 let taskPlanState = loadTaskPlanState();
 let workflowState = loadWorkflowState();
+let executionState = loadExecutionState();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -518,6 +520,15 @@ function loadWorkflowState() {
   }
 }
 
+function loadExecutionState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(EXECUTION_STATE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -672,6 +683,12 @@ function saveTaskPlanState() {
 
 function saveWorkflowState() {
   localStorage.setItem(WORKFLOW_STATE_STORAGE_KEY, JSON.stringify(workflowState));
+  upsertExecutionState();
+  renderExecutionState();
+}
+
+function saveExecutionState() {
+  localStorage.setItem(EXECUTION_STATE_STORAGE_KEY, JSON.stringify(executionState));
 }
 
 function saveMemoryStore() {
@@ -1753,6 +1770,15 @@ function getLatestWorkflowState() {
   return latestWorkflowStateFrom(workflowState);
 }
 
+function latestExecutionStateFrom(executionItems) {
+  return [...asArray(executionItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestExecutionState() {
+  return latestExecutionStateFrom(executionState);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1772,6 +1798,7 @@ function buildReply(
   intent = getLatestIntentState(),
   taskPlan = getLatestTaskPlanState(),
   workflow = getLatestWorkflowState(),
+  execution = getLatestExecutionState(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1789,10 +1816,22 @@ function buildReply(
     sections.uncertainty,
     sections.closing,
   ].filter(Boolean).join("\n\n");
+  const executionStateMetadata = execution ? {
+    sourceWorkflowId: execution.sourceWorkflowId,
+    title: execution.title,
+    actionType: execution.actionType,
+    status: execution.status,
+    reason: execution.reason,
+    executedAt: execution.executedAt,
+    resultNote: execution.resultNote,
+  } : null;
 
   return {
     text,
     sections,
+    metadata: {
+      executionState: executionStateMetadata,
+    },
     improvementHints: asArray(improvementHints),
     latestReflection: latestReflection ? {
       summary: latestReflection.summary,
@@ -1911,6 +1950,7 @@ function buildReply(
       nextAction: workflow.nextAction,
       retryCount: workflow.retryCount,
     } : null,
+    executionState: executionStateMetadata,
   };
 }
 
@@ -2770,6 +2810,59 @@ function renderWorkflowState() {
   setText("#workflowCompletedSteps", workflow?.completedSteps !== undefined ? String(workflow.completedSteps) : "");
   setText("#workflowNextAction", workflow?.nextAction);
   setText("#workflowRetryCount", workflow?.retryCount !== undefined ? String(workflow.retryCount) : "");
+}
+
+function buildExecutionState(workflow = getLatestWorkflowState(), plan = getLatestTaskPlanState()) {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    sourceWorkflowId: workflow?.id || "",
+    title: workflow?.nextAction || "",
+    actionType: workflow?.workflowStatus === "ready" ? "manual_confirm" : "review",
+    status: "pending",
+    reason: plan?.completionCriteria || workflow?.workflowStatus || "",
+    createdAt: now,
+    updatedAt: now,
+    executedAt: "",
+    resultNote: "",
+  };
+}
+
+function upsertExecutionState() {
+  const workflow = getLatestWorkflowState();
+  if (!workflow) return null;
+  const built = buildExecutionState(workflow, getLatestTaskPlanState());
+  const now = new Date().toISOString();
+  let execution = executionState.find((entry) =>
+    entry.date === activeDate &&
+    entry.sourceWorkflowId === built.sourceWorkflowId
+  );
+  if (execution) {
+    execution.title = built.title;
+    execution.actionType = built.actionType;
+    execution.reason = built.reason;
+    execution.updatedAt = now;
+  } else {
+    execution = built;
+    executionState.unshift(execution);
+  }
+  saveExecutionState();
+  return execution;
+}
+
+function renderExecutionState() {
+  const execution = getLatestExecutionState();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#executionStatus", execution?.status);
+  setText("#executionTitle", execution?.title);
+  setText("#executionActionType", execution?.actionType);
+  setText("#executionReason", execution?.reason);
+  setText("#executionExecutedAt", execution?.executedAt);
+  setText("#executionResultNote", execution?.resultNote);
 }
 
 function findConversationFeedback(replyText) {
@@ -4058,6 +4151,7 @@ function renderBrainPrototype() {
   renderIntentState();
   renderTaskPlanState();
   renderWorkflowState();
+  renderExecutionState();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -4206,6 +4300,7 @@ function bindEvents() {
       renderIntentState();
       renderTaskPlanState();
       renderWorkflowState();
+      renderExecutionState();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -4231,6 +4326,7 @@ function bindEvents() {
     renderIntentState();
     renderTaskPlanState();
     renderWorkflowState();
+    renderExecutionState();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -4496,6 +4592,7 @@ const BACKUP_KEYS = [
   INTENT_STATE_STORAGE_KEY,
   TASK_PLAN_STATE_STORAGE_KEY,
   WORKFLOW_STATE_STORAGE_KEY,
+  EXECUTION_STATE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -4539,6 +4636,7 @@ function createBackup() {
   data[INTENT_STATE_STORAGE_KEY] = readStoredJson(INTENT_STATE_STORAGE_KEY, []);
   data[TASK_PLAN_STATE_STORAGE_KEY] = readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []);
   data[WORKFLOW_STATE_STORAGE_KEY] = readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []);
+  data[EXECUTION_STATE_STORAGE_KEY] = readStoredJson(EXECUTION_STATE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -4726,6 +4824,7 @@ function buildSakuraSnapshot(mode) {
   const intentStateItems = asArray(readStoredJson(INTENT_STATE_STORAGE_KEY, []));
   const taskPlanStateItems = asArray(readStoredJson(TASK_PLAN_STATE_STORAGE_KEY, []));
   const workflowStateItems = asArray(readStoredJson(WORKFLOW_STATE_STORAGE_KEY, []));
+  const executionStateItems = asArray(readStoredJson(EXECUTION_STATE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -4798,6 +4897,7 @@ function buildSakuraSnapshot(mode) {
     latestIntentStateFrom(intentStateItems),
     latestTaskPlanStateFrom(taskPlanStateItems),
     latestWorkflowStateFrom(workflowStateItems),
+    latestExecutionStateFrom(executionStateItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -4939,6 +5039,7 @@ function buildSakuraSnapshot(mode) {
       intent: deepCopy(intentStateItems),
       taskPlan: deepCopy(taskPlanStateItems),
       workflow: deepCopy(workflowStateItems),
+      execution: deepCopy(executionStateItems),
     },
     conversation,
     apps: {
