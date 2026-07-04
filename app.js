@@ -57,6 +57,26 @@ const eventTypeLabels = {
   broadcast: "コラボ・配信",
   other: "その他",
 };
+const defaultProjectMemory = [
+  {
+    project: "Sakura AI",
+    title: "Sakura AI Brainを継続開発中",
+    summary: "Brain、Priority、Recommendation、Explain、Learning、Memory Layerを段階的に育てています。",
+    tags: ["sakura-ai", "brain"],
+  },
+  {
+    project: "Substack",
+    title: "記事公開を継続中",
+    summary: "執筆中記事や発酵中アイデアを見ながら、発信の流れを継続しています。",
+    tags: ["substack", "writing"],
+  },
+  {
+    project: "生活改善",
+    title: "生活の起動と回復を整える",
+    summary: "今日やること、予定、回復ログを分けて、無理なく続けられる状態を作っています。",
+    tags: ["life", "recovery"],
+  },
+];
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let laterItems = loadLaterItems();
@@ -250,14 +270,42 @@ function loadLearningLog() {
   }
 }
 
+function ensureDefaultProjectMemory(projectMemory) {
+  const now = new Date().toISOString();
+  const memories = [...projectMemory];
+  defaultProjectMemory.forEach((template) => {
+    if (memories.some((memory) => memory.project === template.project)) return;
+    memories.push({
+      id: crypto.randomUUID(),
+      project: template.project,
+      title: template.title,
+      summary: template.summary,
+      tags: template.tags,
+      importance: 3,
+      status: "active",
+      source: "default",
+      createdAt: now,
+      updatedAt: now,
+    });
+  });
+  return memories;
+}
+
+function ensureProjectMemoryDefaultsSaved() {
+  const beforeCount = asArray(memoryStore.projectMemory).length;
+  memoryStore.projectMemory = ensureDefaultProjectMemory(asArray(memoryStore.projectMemory));
+  if (memoryStore.projectMemory.length !== beforeCount) saveMemoryStore();
+}
+
 function loadMemoryStore() {
   try {
     const saved = JSON.parse(localStorage.getItem(MEMORY_STORE_STORAGE_KEY));
     return {
       shortMemory: Array.isArray(saved?.shortMemory) ? saved.shortMemory : [],
+      projectMemory: ensureDefaultProjectMemory(Array.isArray(saved?.projectMemory) ? saved.projectMemory : []),
     };
   } catch {
-    return { shortMemory: [] };
+    return { shortMemory: [], projectMemory: ensureDefaultProjectMemory([]) };
   }
 }
 
@@ -281,6 +329,7 @@ function saveLearningLog() {
 }
 
 function saveMemoryStore() {
+  memoryStore.projectMemory = ensureDefaultProjectMemory(asArray(memoryStore.projectMemory));
   localStorage.setItem(MEMORY_STORE_STORAGE_KEY, JSON.stringify(memoryStore));
 }
 
@@ -847,11 +896,27 @@ function upsertShortMemory({ date = activeDate, type, title, summary, source, im
 }
 
 function renderMemoryLayer() {
+  ensureProjectMemoryDefaultsSaved();
   const recent = memoryStore.shortMemory
     .filter((memory) => memory.date >= dateKeyDaysAgo(3))
     .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))
     .map((memory) => memory.title);
   appendBrainItems($("#shortMemoryList"), recent, "最近の記憶はまだありません。");
+
+  const target = $("#projectMemoryList");
+  if (!target) return;
+  target.replaceChildren();
+  memoryStore.projectMemory.forEach((memory) => {
+    const item = document.createElement("li");
+    item.className = "project-memory-item";
+    item.innerHTML = `
+      <strong></strong>
+      <span></span>
+    `;
+    item.querySelector("strong").textContent = memory.project;
+    item.querySelector("span").textContent = memory.title;
+    target.append(item);
+  });
 }
 
 const PRIORITY_ENGINE_WEIGHTS = {
@@ -2267,8 +2332,10 @@ function buildSakuraSnapshot(mode) {
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
+  const savedMemoryStore = readStoredJson(MEMORY_STORE_STORAGE_KEY, {});
   const memory = {
-    shortMemory: asArray(readStoredJson(MEMORY_STORE_STORAGE_KEY, {})?.shortMemory),
+    shortMemory: asArray(savedMemoryStore?.shortMemory),
+    projectMemory: ensureDefaultProjectMemory(asArray(savedMemoryStore?.projectMemory)),
   };
 
   // --- Discovery-Labo：種と発生源は全件 ---

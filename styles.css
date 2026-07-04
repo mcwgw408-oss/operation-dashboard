@@ -633,6 +633,33 @@ textarea {
   font-size: 12px;
 }
 
+.project-memory-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+}
+
+.project-memory-item {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
+.project-memory-item strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.project-memory-item span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .memory-memo-form {
   display: grid;
   gap: 8px;
