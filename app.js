@@ -8,6 +8,8 @@ const CONVERSATION_FEEDBACK_STORAGE_KEY = "sakura-conversation-feedback-v1";
 const CONVERSATION_IMPROVEMENTS_STORAGE_KEY = "sakura-conversation-improvements-v1";
 const CONVERSATION_REFLECTIONS_STORAGE_KEY = "sakura-conversation-reflections-v1";
 const CONVERSATION_CONTINUITY_STORAGE_KEY = "sakura-conversation-continuity-v1";
+const CONVERSATION_RECOVERY_STORAGE_KEY = "sakura-conversation-recovery-v1";
+const PERSONALITY_PROFILE_STORAGE_KEY = "sakura-personality-profile-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -94,9 +96,12 @@ let conversationFeedback = loadConversationFeedback();
 let conversationImprovements = loadConversationImprovements();
 let conversationReflections = loadConversationReflections();
 let conversationContinuity = loadConversationContinuity();
+let conversationRecovery = loadConversationRecovery();
+let personalityProfile = loadPersonalityProfile();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
+let currentReplyPlan = null;
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -316,6 +321,48 @@ function loadConversationContinuity() {
   }
 }
 
+function loadConversationRecovery() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONVERSATION_RECOVERY_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function buildPersonalityProfile() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    warmth: "gentle",
+    curiosity: "thoughtful",
+    patience: "steady",
+    directness: "softly clear",
+    humor: "light",
+    reflection: "careful",
+    supportiveness: "high",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function loadPersonalityProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PERSONALITY_PROFILE_STORAGE_KEY));
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+      return {
+        ...buildPersonalityProfile(),
+        ...saved,
+      };
+    }
+  } catch {
+    // Fall through to a default profile.
+  }
+  const profile = buildPersonalityProfile();
+  localStorage.setItem(PERSONALITY_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  return profile;
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -388,6 +435,15 @@ function saveConversationReflections() {
 
 function saveConversationContinuity() {
   localStorage.setItem(CONVERSATION_CONTINUITY_STORAGE_KEY, JSON.stringify(conversationContinuity));
+}
+
+function saveConversationRecovery() {
+  localStorage.setItem(CONVERSATION_RECOVERY_STORAGE_KEY, JSON.stringify(conversationRecovery));
+}
+
+function savePersonalityProfile() {
+  personalityProfile.updatedAt = new Date().toISOString();
+  localStorage.setItem(PERSONALITY_PROFILE_STORAGE_KEY, JSON.stringify(personalityProfile));
 }
 
 function saveMemoryStore() {
@@ -1361,11 +1417,22 @@ function getLatestConversationContinuity() {
   return latestConversationContinuityFrom(conversationContinuity);
 }
 
+function latestConversationRecoveryFrom(recoveryItems) {
+  return [...asArray(recoveryItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestConversationRecovery() {
+  return latestConversationRecoveryFrom(conversationRecovery);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
   latestReflection = getLatestConversationReflection(),
   latestContinuity = getLatestConversationContinuity(),
+  latestRecovery = getLatestConversationRecovery(),
+  profile = personalityProfile,
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1401,6 +1468,21 @@ function buildReply(
       nextOpeningHint: latestContinuity.nextOpeningHint,
       relatedMemoryIds: asArray(latestContinuity.relatedMemoryIds),
     } : null,
+    latestRecovery: latestRecovery ? {
+      trigger: latestRecovery.trigger,
+      detectedIssue: latestRecovery.detectedIssue,
+      recoveryStrategy: latestRecovery.recoveryStrategy,
+      suggestedOpening: latestRecovery.suggestedOpening,
+    } : null,
+    personalityProfile: profile ? {
+      warmth: profile.warmth,
+      curiosity: profile.curiosity,
+      patience: profile.patience,
+      directness: profile.directness,
+      humor: profile.humor,
+      reflection: profile.reflection,
+      supportiveness: profile.supportiveness,
+    } : null,
   };
 }
 
@@ -1408,6 +1490,20 @@ function renderReply(reply) {
   const target = $("#generatedReplyText");
   if (!target) return;
   target.textContent = reply?.text || "-";
+}
+
+function renderPersonalityProfile(profile = personalityProfile) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#personalityWarmth", profile?.warmth);
+  setText("#personalityCuriosity", profile?.curiosity);
+  setText("#personalityPatience", profile?.patience);
+  setText("#personalityDirectness", profile?.directness);
+  setText("#personalityHumor", profile?.humor);
+  setText("#personalityReflection", profile?.reflection);
+  setText("#personalitySupportiveness", profile?.supportiveness);
 }
 
 function findConversationFeedback(replyText) {
@@ -1650,6 +1746,85 @@ function renderConversationContinuity() {
   setText("#conversationContinuityUnresolvedNeed", continuity?.unresolvedNeed);
   setText("#conversationContinuityNextOpeningHint", continuity?.nextOpeningHint);
   setText("#conversationContinuityMemoryIds", asArray(continuity?.relatedMemoryIds).join(" / "));
+}
+
+function buildConversationRecovery(context = {}, latestReflection = null, latestContinuity = null, replyPlan = {}) {
+  const uncertaintyText = replySentence(replyPlan.uncertainty);
+  const hasLowConfidence = /Confidence [0-5]?\d%|まだ|学習途中|控えめ/.test(uncertaintyText);
+  const needsSofterTone = latestReflection?.tone === "softer" || latestContinuity?.emotionalState === "softer";
+  const hasUnresolvedNeed = Boolean(replySentence(latestContinuity?.unresolvedNeed || latestReflection?.userNeed));
+  const hasTopicGap = !context?.recommendation?.title && !context?.recommendation?.type && !context?.project;
+  let trigger = "stable";
+  let detectedIssue = "大きな立て直しは不要です。";
+  let recoveryStrategy = "前回の流れを保ちながら、短く自然に続けます。";
+  if (hasLowConfidence) {
+    trigger = "low_confidence";
+    detectedIssue = "AIの確信度が低く、断定すると噛み合わない可能性があります。";
+    recoveryStrategy = "まず確認を挟み、提案を控えめにします。";
+  } else if (needsSofterTone) {
+    trigger = "tone_mismatch";
+    detectedIssue = "前回の返答に違和感があり、調子をやわらげる必要があります。";
+    recoveryStrategy = "前回の違和感を踏まえ、言い切りを弱めて始めます。";
+  } else if (hasUnresolvedNeed) {
+    trigger = "unresolved_need";
+    detectedIssue = "前回から残っている必要やメモがあります。";
+    recoveryStrategy = "未解決の必要を軽く受け止めてから次の話題に入ります。";
+  } else if (hasTopicGap) {
+    trigger = "unclear_topic";
+    detectedIssue = "会話の目的や話題がまだ曖昧です。";
+    recoveryStrategy = "話題を決めつけず、今見えていることを短く確認します。";
+  }
+  const topic = latestContinuity?.previousTopic || context?.recommendation?.title || context?.project || "前回の話";
+  const suggestedOpening = trigger === "stable"
+    ? `前回の「${topic}」の流れから、無理なく続けましょう。`
+    : `前回の「${topic}」はいったん軽く確認してから進めましょう。`;
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    trigger,
+    detectedIssue,
+    recoveryStrategy,
+    suggestedOpening,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertConversationRecovery() {
+  if (!currentConversationContext && !currentReplyPlan) return null;
+  const built = buildConversationRecovery(
+    currentConversationContext || {},
+    getLatestConversationReflection(),
+    getLatestConversationContinuity(),
+    currentReplyPlan || {},
+  );
+  const now = new Date().toISOString();
+  let recovery = conversationRecovery.find((entry) => entry.date === activeDate);
+  if (recovery) {
+    recovery.trigger = built.trigger;
+    recovery.detectedIssue = built.detectedIssue;
+    recovery.recoveryStrategy = built.recoveryStrategy;
+    recovery.suggestedOpening = built.suggestedOpening;
+    recovery.updatedAt = now;
+  } else {
+    recovery = built;
+    conversationRecovery.unshift(recovery);
+  }
+  saveConversationRecovery();
+  return recovery;
+}
+
+function renderConversationRecovery() {
+  const recovery = getLatestConversationRecovery();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#conversationRecoveryTrigger", recovery?.trigger);
+  setText("#conversationRecoveryDetectedIssue", recovery?.detectedIssue);
+  setText("#conversationRecoveryStrategy", recovery?.recoveryStrategy);
+  setText("#conversationRecoverySuggestedOpening", recovery?.suggestedOpening);
 }
 
 function renderConversationFeedback(reply) {
@@ -2578,6 +2753,7 @@ function renderBrainPrototype() {
   });
   currentConversationContext = conversationContext;
   const replyPlan = buildReplyPlan(conversationContext);
+  currentReplyPlan = replyPlan;
   const reply = buildReply(replyPlan);
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
@@ -2601,10 +2777,12 @@ function renderBrainPrototype() {
   renderConversationContext(conversationContext);
   renderReplyPlan(replyPlan);
   renderReply(reply);
+  renderPersonalityProfile();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
   renderConversationContinuity();
+  renderConversationRecovery();
   showFirstAgentResponse("");
 
   if (eventContext.count) {
@@ -2732,10 +2910,12 @@ function bindEvents() {
       upsertConversationImprovement(feedback);
       upsertConversationReflection();
       upsertConversationContinuity();
+      upsertConversationRecovery();
       renderConversationFeedback({ text: currentReplyText });
       renderConversationImprovementHints();
       renderConversationReflection();
       renderConversationContinuity();
+      renderConversationRecovery();
     });
   });
   $("#conversationFeedbackNote")?.addEventListener("input", (event) => {
@@ -2743,10 +2923,12 @@ function bindEvents() {
     upsertConversationImprovement(feedback);
     upsertConversationReflection();
     upsertConversationContinuity();
+    upsertConversationRecovery();
     renderConversationFeedback({ text: currentReplyText });
     renderConversationImprovementHints();
     renderConversationReflection();
     renderConversationContinuity();
+    renderConversationRecovery();
   });
   $("#memoryMemoForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -2996,6 +3178,8 @@ const BACKUP_KEYS = [
   CONVERSATION_IMPROVEMENTS_STORAGE_KEY,
   CONVERSATION_REFLECTIONS_STORAGE_KEY,
   CONVERSATION_CONTINUITY_STORAGE_KEY,
+  CONVERSATION_RECOVERY_STORAGE_KEY,
+  PERSONALITY_PROFILE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3025,6 +3209,8 @@ function createBackup() {
   data[CONVERSATION_IMPROVEMENTS_STORAGE_KEY] = readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []);
   data[CONVERSATION_REFLECTIONS_STORAGE_KEY] = readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []);
   data[CONVERSATION_CONTINUITY_STORAGE_KEY] = readStoredJson(CONVERSATION_CONTINUITY_STORAGE_KEY, []);
+  data[CONVERSATION_RECOVERY_STORAGE_KEY] = readStoredJson(CONVERSATION_RECOVERY_STORAGE_KEY, []);
+  data[PERSONALITY_PROFILE_STORAGE_KEY] = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -3198,6 +3384,8 @@ function buildSakuraSnapshot(mode) {
   const conversationImprovementItems = asArray(readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []));
   const conversationReflectionItems = asArray(readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []));
   const conversationContinuityItems = asArray(readStoredJson(CONVERSATION_CONTINUITY_STORAGE_KEY, []));
+  const conversationRecoveryItems = asArray(readStoredJson(CONVERSATION_RECOVERY_STORAGE_KEY, []));
+  const savedPersonalityProfile = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -3249,12 +3437,15 @@ function buildSakuraSnapshot(mode) {
     improvements: deepCopy(conversationImprovementItems),
     reflections: deepCopy(conversationReflectionItems),
     continuity: deepCopy(conversationContinuityItems),
+    recovery: deepCopy(conversationRecoveryItems),
   };
   conversation.reply = buildReply(
     conversation.replyPlan,
     conversationImprovementHintsFrom(conversationImprovementItems, 3),
     latestConversationReflectionFrom(conversationReflectionItems),
     latestConversationContinuityFrom(conversationContinuityItems),
+    latestConversationRecoveryFrom(conversationRecoveryItems),
+    savedPersonalityProfile,
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -3378,6 +3569,9 @@ function buildSakuraSnapshot(mode) {
       openNextActions,
     },
     brain,
+    personality: {
+      profile: deepCopy(savedPersonalityProfile),
+    },
     conversation,
     apps: {
       "operation-dashboard": {
