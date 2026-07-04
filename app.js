@@ -10,6 +10,7 @@ const CONVERSATION_REFLECTIONS_STORAGE_KEY = "sakura-conversation-reflections-v1
 const CONVERSATION_CONTINUITY_STORAGE_KEY = "sakura-conversation-continuity-v1";
 const CONVERSATION_RECOVERY_STORAGE_KEY = "sakura-conversation-recovery-v1";
 const PERSONALITY_PROFILE_STORAGE_KEY = "sakura-personality-profile-v1";
+const RELATIONSHIP_PROFILE_STORAGE_KEY = "sakura-relationship-profile-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -98,6 +99,7 @@ let conversationReflections = loadConversationReflections();
 let conversationContinuity = loadConversationContinuity();
 let conversationRecovery = loadConversationRecovery();
 let personalityProfile = loadPersonalityProfile();
+let relationshipProfile = loadRelationshipProfile();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -363,6 +365,38 @@ function loadPersonalityProfile() {
   return profile;
 }
 
+function buildRelationshipProfile() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    relationshipStage: "growing",
+    familiarity: "developing",
+    trust: "building",
+    preferredSupport: "gentle structure",
+    communicationDistance: "warm but respectful",
+    lastInteraction: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function loadRelationshipProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RELATIONSHIP_PROFILE_STORAGE_KEY));
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+      return {
+        ...buildRelationshipProfile(),
+        ...saved,
+      };
+    }
+  } catch {
+    // Fall through to a default profile.
+  }
+  const profile = buildRelationshipProfile();
+  localStorage.setItem(RELATIONSHIP_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  return profile;
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -444,6 +478,11 @@ function saveConversationRecovery() {
 function savePersonalityProfile() {
   personalityProfile.updatedAt = new Date().toISOString();
   localStorage.setItem(PERSONALITY_PROFILE_STORAGE_KEY, JSON.stringify(personalityProfile));
+}
+
+function saveRelationshipProfile() {
+  relationshipProfile.updatedAt = new Date().toISOString();
+  localStorage.setItem(RELATIONSHIP_PROFILE_STORAGE_KEY, JSON.stringify(relationshipProfile));
 }
 
 function saveMemoryStore() {
@@ -1433,6 +1472,7 @@ function buildReply(
   latestContinuity = getLatestConversationContinuity(),
   latestRecovery = getLatestConversationRecovery(),
   profile = personalityProfile,
+  relationship = relationshipProfile,
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1483,6 +1523,14 @@ function buildReply(
       reflection: profile.reflection,
       supportiveness: profile.supportiveness,
     } : null,
+    relationshipProfile: relationship ? {
+      relationshipStage: relationship.relationshipStage,
+      familiarity: relationship.familiarity,
+      trust: relationship.trust,
+      preferredSupport: relationship.preferredSupport,
+      communicationDistance: relationship.communicationDistance,
+      lastInteraction: relationship.lastInteraction,
+    } : null,
   };
 }
 
@@ -1504,6 +1552,19 @@ function renderPersonalityProfile(profile = personalityProfile) {
   setText("#personalityHumor", profile?.humor);
   setText("#personalityReflection", profile?.reflection);
   setText("#personalitySupportiveness", profile?.supportiveness);
+}
+
+function renderRelationshipProfile(profile = relationshipProfile) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#relationshipStage", profile?.relationshipStage);
+  setText("#relationshipFamiliarity", profile?.familiarity);
+  setText("#relationshipTrust", profile?.trust);
+  setText("#relationshipPreferredSupport", profile?.preferredSupport);
+  setText("#relationshipCommunicationDistance", profile?.communicationDistance);
+  setText("#relationshipLastInteraction", profile?.lastInteraction);
 }
 
 function findConversationFeedback(replyText) {
@@ -2778,6 +2839,7 @@ function renderBrainPrototype() {
   renderReplyPlan(replyPlan);
   renderReply(reply);
   renderPersonalityProfile();
+  renderRelationshipProfile();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3180,6 +3242,7 @@ const BACKUP_KEYS = [
   CONVERSATION_CONTINUITY_STORAGE_KEY,
   CONVERSATION_RECOVERY_STORAGE_KEY,
   PERSONALITY_PROFILE_STORAGE_KEY,
+  RELATIONSHIP_PROFILE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3211,6 +3274,7 @@ function createBackup() {
   data[CONVERSATION_CONTINUITY_STORAGE_KEY] = readStoredJson(CONVERSATION_CONTINUITY_STORAGE_KEY, []);
   data[CONVERSATION_RECOVERY_STORAGE_KEY] = readStoredJson(CONVERSATION_RECOVERY_STORAGE_KEY, []);
   data[PERSONALITY_PROFILE_STORAGE_KEY] = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
+  data[RELATIONSHIP_PROFILE_STORAGE_KEY] = readStoredJson(RELATIONSHIP_PROFILE_STORAGE_KEY, buildRelationshipProfile());
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -3386,6 +3450,7 @@ function buildSakuraSnapshot(mode) {
   const conversationContinuityItems = asArray(readStoredJson(CONVERSATION_CONTINUITY_STORAGE_KEY, []));
   const conversationRecoveryItems = asArray(readStoredJson(CONVERSATION_RECOVERY_STORAGE_KEY, []));
   const savedPersonalityProfile = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
+  const savedRelationshipProfile = readStoredJson(RELATIONSHIP_PROFILE_STORAGE_KEY, buildRelationshipProfile());
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -3446,6 +3511,7 @@ function buildSakuraSnapshot(mode) {
     latestConversationContinuityFrom(conversationContinuityItems),
     latestConversationRecoveryFrom(conversationRecoveryItems),
     savedPersonalityProfile,
+    savedRelationshipProfile,
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -3571,6 +3637,7 @@ function buildSakuraSnapshot(mode) {
     brain,
     personality: {
       profile: deepCopy(savedPersonalityProfile),
+      relationship: deepCopy(savedRelationshipProfile),
     },
     conversation,
     apps: {
