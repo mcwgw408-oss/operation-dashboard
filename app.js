@@ -12,6 +12,7 @@ const CONVERSATION_RECOVERY_STORAGE_KEY = "sakura-conversation-recovery-v1";
 const PERSONALITY_PROFILE_STORAGE_KEY = "sakura-personality-profile-v1";
 const RELATIONSHIP_PROFILE_STORAGE_KEY = "sakura-relationship-profile-v1";
 const EMOTIONAL_RESONANCE_STORAGE_KEY = "sakura-emotional-resonance-v1";
+const IDENTITY_PROFILE_STORAGE_KEY = "sakura-identity-profile-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -102,6 +103,7 @@ let conversationRecovery = loadConversationRecovery();
 let personalityProfile = loadPersonalityProfile();
 let relationshipProfile = loadRelationshipProfile();
 let emotionalResonance = loadEmotionalResonance();
+let identityProfile = loadIdentityProfile();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -408,6 +410,15 @@ function loadEmotionalResonance() {
   }
 }
 
+function loadIdentityProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(IDENTITY_PROFILE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -489,6 +500,8 @@ function saveConversationRecovery() {
 function savePersonalityProfile() {
   personalityProfile.updatedAt = new Date().toISOString();
   localStorage.setItem(PERSONALITY_PROFILE_STORAGE_KEY, JSON.stringify(personalityProfile));
+  upsertIdentityProfile();
+  renderIdentityProfile();
 }
 
 function saveRelationshipProfile() {
@@ -496,10 +509,16 @@ function saveRelationshipProfile() {
   localStorage.setItem(RELATIONSHIP_PROFILE_STORAGE_KEY, JSON.stringify(relationshipProfile));
   upsertEmotionalResonance();
   renderEmotionalResonance();
+  upsertIdentityProfile();
+  renderIdentityProfile();
 }
 
 function saveEmotionalResonance() {
   localStorage.setItem(EMOTIONAL_RESONANCE_STORAGE_KEY, JSON.stringify(emotionalResonance));
+}
+
+function saveIdentityProfile() {
+  localStorage.setItem(IDENTITY_PROFILE_STORAGE_KEY, JSON.stringify(identityProfile));
 }
 
 function saveMemoryStore() {
@@ -1491,6 +1510,15 @@ function getLatestEmotionalResonance() {
   return latestEmotionalResonanceFrom(emotionalResonance);
 }
 
+function latestIdentityProfileFrom(identityItems) {
+  return [...asArray(identityItems)]
+    .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
+}
+
+function getLatestIdentityProfile() {
+  return latestIdentityProfileFrom(identityProfile);
+}
+
 function buildReply(
   replyPlan = {},
   improvementHints = getRecentConversationImprovementHints(),
@@ -1500,6 +1528,7 @@ function buildReply(
   profile = personalityProfile,
   relationship = relationshipProfile,
   resonance = getLatestEmotionalResonance(),
+  identity = getLatestIdentityProfile(),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1564,6 +1593,13 @@ function buildReply(
       supportLevel: resonance.supportLevel,
       responseTone: resonance.responseTone,
       reasoning: resonance.reasoning,
+    } : null,
+    identityProfile: identity ? {
+      identityMode: identity.identityMode,
+      coreTraits: asArray(identity.coreTraits),
+      relationshipContext: identity.relationshipContext,
+      currentTone: identity.currentTone,
+      responsePrinciple: identity.responsePrinciple,
     } : null,
   };
 }
@@ -1670,6 +1706,7 @@ function upsertEmotionalResonance() {
     emotionalResonance.unshift(resonance);
   }
   saveEmotionalResonance();
+  upsertIdentityProfile();
   return resonance;
 }
 
@@ -1684,6 +1721,69 @@ function renderEmotionalResonance() {
   setText("#emotionalResonanceSupport", resonance?.supportLevel);
   setText("#emotionalResonanceTone", resonance?.responseTone);
   setText("#emotionalResonanceReasoning", resonance?.reasoning);
+}
+
+function buildIdentityProfile(profile = personalityProfile, relationship = relationshipProfile, resonance = getLatestEmotionalResonance()) {
+  const coreTraits = [
+    profile?.warmth,
+    profile?.curiosity,
+    profile?.patience,
+    profile?.supportiveness,
+  ].filter(Boolean);
+  const identityMode = resonance?.detectedMode
+    ? `${resonance.detectedMode}_identity`
+    : "steady_identity";
+  const relationshipContext = [
+    relationship?.relationshipStage,
+    relationship?.familiarity,
+    relationship?.trust,
+  ].filter(Boolean).join(" / ") || "relationship context is still forming";
+  const currentTone = resonance?.responseTone || profile?.directness || "warm and clear";
+  const responsePrinciple = `Respond with ${profile?.warmth || "warmth"}, ${profile?.patience || "patience"}, and ${relationship?.preferredSupport || "gentle support"}.`;
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    date: activeDate,
+    identityMode,
+    coreTraits,
+    relationshipContext,
+    currentTone,
+    responsePrinciple,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function upsertIdentityProfile() {
+  const built = buildIdentityProfile(personalityProfile, relationshipProfile, getLatestEmotionalResonance());
+  const now = new Date().toISOString();
+  let identity = identityProfile.find((entry) => entry.date === activeDate);
+  if (identity) {
+    identity.identityMode = built.identityMode;
+    identity.coreTraits = built.coreTraits;
+    identity.relationshipContext = built.relationshipContext;
+    identity.currentTone = built.currentTone;
+    identity.responsePrinciple = built.responsePrinciple;
+    identity.updatedAt = now;
+  } else {
+    identity = built;
+    identityProfile.unshift(identity);
+  }
+  saveIdentityProfile();
+  return identity;
+}
+
+function renderIdentityProfile() {
+  const identity = getLatestIdentityProfile();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#identityMode", identity?.identityMode);
+  setText("#identityCoreTraits", asArray(identity?.coreTraits).join(" / "));
+  setText("#identityRelationshipContext", identity?.relationshipContext);
+  setText("#identityCurrentTone", identity?.currentTone);
+  setText("#identityResponsePrinciple", identity?.responsePrinciple);
 }
 
 function findConversationFeedback(replyText) {
@@ -2961,6 +3061,7 @@ function renderBrainPrototype() {
   renderPersonalityProfile();
   renderRelationshipProfile();
   renderEmotionalResonance();
+  renderIdentityProfile();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -3099,6 +3200,7 @@ function bindEvents() {
       renderConversationImprovementHints();
       renderConversationReflection();
       renderEmotionalResonance();
+      renderIdentityProfile();
       renderConversationContinuity();
       renderConversationRecovery();
     });
@@ -3114,6 +3216,7 @@ function bindEvents() {
     renderConversationImprovementHints();
     renderConversationReflection();
     renderEmotionalResonance();
+    renderIdentityProfile();
     renderConversationContinuity();
     renderConversationRecovery();
   });
@@ -3369,6 +3472,7 @@ const BACKUP_KEYS = [
   PERSONALITY_PROFILE_STORAGE_KEY,
   RELATIONSHIP_PROFILE_STORAGE_KEY,
   EMOTIONAL_RESONANCE_STORAGE_KEY,
+  IDENTITY_PROFILE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -3402,6 +3506,7 @@ function createBackup() {
   data[PERSONALITY_PROFILE_STORAGE_KEY] = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
   data[RELATIONSHIP_PROFILE_STORAGE_KEY] = readStoredJson(RELATIONSHIP_PROFILE_STORAGE_KEY, buildRelationshipProfile());
   data[EMOTIONAL_RESONANCE_STORAGE_KEY] = readStoredJson(EMOTIONAL_RESONANCE_STORAGE_KEY, []);
+  data[IDENTITY_PROFILE_STORAGE_KEY] = readStoredJson(IDENTITY_PROFILE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
@@ -3579,6 +3684,7 @@ function buildSakuraSnapshot(mode) {
   const savedPersonalityProfile = readStoredJson(PERSONALITY_PROFILE_STORAGE_KEY, buildPersonalityProfile());
   const savedRelationshipProfile = readStoredJson(RELATIONSHIP_PROFILE_STORAGE_KEY, buildRelationshipProfile());
   const emotionalResonanceItems = asArray(readStoredJson(EMOTIONAL_RESONANCE_STORAGE_KEY, []));
+  const identityProfileItems = asArray(readStoredJson(IDENTITY_PROFILE_STORAGE_KEY, []));
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -3641,6 +3747,7 @@ function buildSakuraSnapshot(mode) {
     savedPersonalityProfile,
     savedRelationshipProfile,
     latestEmotionalResonanceFrom(emotionalResonanceItems),
+    latestIdentityProfileFrom(identityProfileItems),
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -3768,6 +3875,7 @@ function buildSakuraSnapshot(mode) {
       profile: deepCopy(savedPersonalityProfile),
       relationship: deepCopy(savedRelationshipProfile),
       emotionalResonance: deepCopy(emotionalResonanceItems),
+      identity: deepCopy(identityProfileItems),
     },
     conversation,
     apps: {
