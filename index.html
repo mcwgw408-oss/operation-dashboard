@@ -51,6 +51,13 @@
           </div>
         </section>
 
+        <section class="dashboard-section-heading dashboard-proposal-heading span-2" aria-label="今日の提案">
+          <div>
+            <span>今日の提案</span>
+            <p>Recommendation と AI 返答を確認する場所です。</p>
+          </div>
+        </section>
+
         <section class="panel brain-panel">
           <div class="panel-heading">
             <div>
@@ -665,6 +672,13 @@
           </div>
         </section>
 
+        <section class="dashboard-section-heading dashboard-input-heading span-2" aria-label="今日の入力">
+          <div>
+            <span>今日の入力</span>
+            <p>予定、タスク、体調、記憶メモなど、毎日触る項目をまとめます。</p>
+          </div>
+        </section>
+
         <section class="panel home-launch-panel">
           <div class="panel-heading">
             <div>
@@ -740,6 +754,43 @@
             </form>
           </div>
           <div id="dailyTasks" class="task-list"></div>
+        </section>
+
+        <section class="panel dashboard-health-input-panel span-2" aria-label="Health Check">
+          <div class="panel-heading">
+            <div>
+              <h2>Health Check</h2>
+              <p class="section-note">今日の体調を記録する入力エリアです。</p>
+            </div>
+          </div>
+          <div id="healthCheckInputMount"></div>
+        </section>
+
+        <section class="panel dashboard-memory-input-panel span-2" aria-label="今日の記憶メモ">
+          <div class="panel-heading">
+            <div>
+              <h2>今日の記憶メモ</h2>
+              <p class="section-note">一日の終わりに、覚えておいてほしいことをまとめて記録します。</p>
+            </div>
+          </div>
+          <div id="memoryMemoInputMount"></div>
+        </section>
+
+        <section class="dashboard-section-heading dashboard-analysis-heading span-2" aria-label="AI分析">
+          <div>
+            <span>AI分析</span>
+            <p>自動生成された分析や内部状態を確認する場所です。</p>
+          </div>
+        </section>
+
+        <section class="panel dashboard-ai-analysis-panel span-2" aria-label="Health Analysis">
+          <details class="health-analysis-details">
+            <summary>
+              <span>Health Analysis</span>
+              <small>Health Insight / Health Trend / Health Context</small>
+            </summary>
+            <div id="healthAnalysisMount" class="health-analysis-body"></div>
+          </details>
         </section>
 
         <section class="panel metrics-panel span-2">

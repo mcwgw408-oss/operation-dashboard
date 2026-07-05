@@ -5508,6 +5508,21 @@ function renderAll() {
   renderBrainPrototype();
 }
 
+function moveDashboardNode(selector, targetSelector) {
+  const node = document.querySelector(selector);
+  const target = document.querySelector(targetSelector);
+  if (!node || !target || node.parentElement === target) return;
+  target.append(node);
+}
+
+function arrangeDashboardUxSections() {
+  moveDashboardNode(".health-check-panel", "#healthCheckInputMount");
+  moveDashboardNode(".health-insight-panel", "#healthAnalysisMount");
+  moveDashboardNode(".health-trend-panel", "#healthAnalysisMount");
+  moveDashboardNode(".health-context-panel", "#healthAnalysisMount");
+  moveDashboardNode("#memoryMemoForm", "#memoryMemoInputMount");
+}
+
 function bindEvents() {
   $("#explainLayerToggle")?.addEventListener("click", () => {
     const body = $("#explainLayerBody");
@@ -5880,6 +5895,7 @@ function downloadCsv() {
   URL.revokeObjectURL(url);
 }
 
+arrangeDashboardUxSections();
 bindEvents();
 renderAll();
 renderClock();

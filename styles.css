@@ -272,6 +272,91 @@ textarea {
   transition: width 240ms ease;
 }
 
+.dashboard-section-heading {
+  grid-column: 1 / -1;
+  border: 1px solid #dfe8ef;
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 11px 14px;
+}
+
+.dashboard-section-heading span {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dashboard-section-heading p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dashboard-proposal-heading {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.dashboard-input-heading {
+  border-color: var(--blue-line);
+  background: var(--blue-soft);
+}
+
+.dashboard-analysis-heading {
+  border-color: #e7edf4;
+}
+
+.home-launch-panel {
+  order: 20;
+}
+
+.health-analysis-details {
+  display: grid;
+  gap: 10px;
+}
+
+.health-analysis-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.health-analysis-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.health-analysis-details summary::before {
+  content: "▸";
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.health-analysis-details[open] summary::before {
+  content: "▾";
+}
+
+.health-analysis-details summary span {
+  flex: 1;
+}
+
+.health-analysis-details summary small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.health-analysis-body {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+}
+
 .brain-panel {
   grid-column: 1 / -1;
   position: relative;
