@@ -54,14 +54,14 @@
         <section class="dashboard-section-heading dashboard-proposal-heading span-2" aria-label="今日の提案">
           <div>
             <span>今日の提案</span>
-            <p>Recommendation と AI 返答を確認する場所です。</p>
+            <p>今日の提案と AI 返答を確認する場所です。</p>
           </div>
         </section>
 
         <section class="panel brain-panel">
           <div class="panel-heading">
             <div>
-              <h2>Sakura AI Brain Phase2 Prototype</h2>
+              <h2>Sakura AIの判断メモ</h2>
               <p class="section-note">既存データを読むだけのAIブレイン試作パネルです。保存やデータ変更は行いません。</p>
             </div>
           </div>
@@ -76,7 +76,7 @@
               <ul id="brainPriorityReasons" class="brain-list"></ul>
             </div>
             <div class="brain-card recommendation-card">
-              <span class="brain-label">Recommendation</span>
+              <span class="brain-label">今日の提案</span>
               <strong id="brainRecommendationTitle">今日は少し整える日</strong>
               <p id="brainRecommendationMessage">優先候補を読み取って、やさしい提案文を表示します。</p>
               <ul id="brainRecommendationReasons" class="brain-list"></ul>
@@ -121,8 +121,8 @@
                   </div>
                 </div>
               </div>
-              <div class="first-agent-panel" aria-label="First Agent">
-                <span class="brain-label">First Agent</span>
+              <div class="first-agent-panel" aria-label="最初の返答">
+                <span class="brain-label">最初の返答</span>
                 <div class="first-agent-actions">
                   <button type="button" data-first-agent-reply="try">😊 やってみる</button>
                   <button type="button" data-first-agent-reply="later">🤔 あとで</button>
@@ -131,8 +131,8 @@
                 </div>
                 <p id="firstAgentResponse" class="first-agent-response" hidden></p>
               </div>
-              <div class="learning-feedback-panel" aria-label="Learning Layer">
-                <span class="brain-label">Learning Layer</span>
+              <div class="learning-feedback-panel" aria-label="提案の学習メモ">
+                <span class="brain-label">提案の学習メモ</span>
                 <div class="learning-feedback-actions">
                   <button type="button" data-learning-feedback="true">この提案は合っていた</button>
                   <button type="button" data-learning-feedback="false">この提案は違った</button>
@@ -172,17 +172,17 @@
                   <div><span>score</span><strong id="learningConfidenceScore">10%</strong></div>
                   <div><span>level</span><strong id="learningConfidenceLevel">low</strong></div>
                 </div>
-                <p id="learningConfidenceMessage">Learning Layerはまだ学習中のため、参考情報として控えめに扱います。</p>
+                <p id="learningConfidenceMessage">提案の学習メモはまだ学習中のため、参考情報として控えめに扱います。</p>
                 <small>source <strong id="learningConfidenceSource">totalLogs</strong></small>
               </div>
                 </div>
               </details>
-              <div class="memory-layer-panel" aria-label="Memory Layer">
-                <span class="brain-label">Memory Layer</span>
+              <div class="memory-layer-panel" aria-label="記憶メモ">
+                <span class="brain-label">記憶メモ</span>
                 <details class="developer-state-panel">
                   <summary>
                     <span>AIの内部状態（開発者向け）</span>
-                    <small>Memory / Context / Reply Plan</small>
+                    <small>記憶 / 文脈 / 返答設計</small>
                   </summary>
                   <div class="developer-state-body">
                 <section>
@@ -198,7 +198,7 @@
                   <ul id="retrievedMemoryList" class="brain-list"></ul>
                 </section>
                 <section class="brain-memory-context-panel">
-                  <h3>Brain Memory Context</h3>
+                  <h3>記憶から見た今日の文脈</h3>
                   <div class="brain-memory-context-grid">
                     <div><span>Project</span><strong id="brainMemoryContextProject">-</strong></div>
                     <div><span>Retrieved</span><ul id="brainMemoryContextRetrieved" class="brain-list"></ul></div>
@@ -206,10 +206,10 @@
                   </div>
                 </section>
                 <section class="conversation-context-panel">
-                  <h3>Conversation Context</h3>
+                  <h3>会話の文脈</h3>
                   <div class="conversation-context-grid">
                     <div><span>Project</span><strong id="conversationContextProject">-</strong></div>
-                    <div><span>Recommendation</span><strong id="conversationContextRecommendation">-</strong></div>
+                    <div><span>今日の提案</span><strong id="conversationContextRecommendation">-</strong></div>
                     <div><span>Memory</span><strong id="conversationContextMemory">-</strong></div>
                     <div><span>Learning</span><strong id="conversationContextLearning">-</strong></div>
                   </div>
@@ -226,7 +226,7 @@
                   </div>
                 </section>
                 <section class="reply-plan-panel">
-                  <h3>Reply Plan</h3>
+                  <h3>返答の設計メモ</h3>
                   <div class="reply-plan-grid">
                     <div><span>Opening</span><p id="replyPlanOpening">-</p></div>
                     <div><span>Main</span><p id="replyPlanMainPoint">-</p></div>
@@ -238,7 +238,7 @@
                   </div>
                 </details>
                 <section class="generated-reply-panel">
-                  <h3>Generated Reply</h3>
+                  <h3>生成された返答</h3>
                   <p id="generatedReplyText">-</p>
                   <div id="replyFeedbackMount"></div>
                   <details class="developer-state-panel">
@@ -311,8 +311,8 @@
                       <div><span>Reasoning</span><p id="priorityReasoning">-</p></div>
                     </div>
                   </div>
-                  <div class="decision-state-panel" aria-label="Decision State">
-                    <h4>Decision State</h4>
+                  <div class="decision-state-panel" aria-label="会話方針の判断">
+                    <h4>会話方針の判断</h4>
                     <div class="decision-state-grid">
                       <div><span>Selected Approach</span><p id="decisionSelectedApproach">-</p></div>
                       <div><span>Alternative Approaches</span><p id="decisionAlternativeApproaches">-</p></div>
@@ -384,8 +384,8 @@
                       <div><span>Retry Count</span><p id="workflowRetryCount">-</p></div>
                     </div>
                   </div>
-                  <div class="execution-decision-panel" aria-label="Execution Decision">
-                    <h4>Execution Decision</h4>
+                  <div class="execution-decision-panel" aria-label="実行候補の判断">
+                    <h4>実行候補の判断</h4>
                     <div class="execution-decision-grid">
                       <div><span>Priority</span><p id="executionDecisionPriority">-</p></div>
                       <div><span>Decision Status</span><p id="executionDecisionStatus">-</p></div>
@@ -432,8 +432,8 @@
                     <label class="execution-feedback-note"><span>Note</span><textarea id="executionFeedbackNote" rows="3"></textarea></label>
                     <p id="executionFeedbackStatus" class="execution-feedback-status">Execution の結果を手動で記録できます。</p>
                   </div>
-                  <div class="executive-summary-panel" aria-label="Executive Summary">
-                    <h4>Executive Summary</h4>
+                  <div class="executive-summary-panel" aria-label="実行判断のまとめ">
+                    <h4>実行判断のまとめ</h4>
                     <div class="executive-summary-grid">
                       <div><span>Mode</span><p id="executiveSummaryMode">-</p></div>
                       <div><span>Current Intent</span><p id="executiveSummaryIntent">-</p></div>
@@ -447,8 +447,8 @@
                       <div><span>Risk</span><p id="executiveSummaryRisk">-</p></div>
                     </div>
                   </div>
-                  <div class="adaptive-intelligence-panel" aria-label="Adaptive Intelligence">
-                    <h4>Adaptive Intelligence</h4>
+                  <div class="adaptive-intelligence-panel" aria-label="今日の調整方針">
+                    <h4>今日の調整方針</h4>
                     <div class="adaptive-intelligence-grid">
                       <div><span>振る舞いモード</span><p id="adaptiveMode">-</p></div>
                       <div><span>返答スタイル</span><p id="adaptiveResponseStyle">-</p></div>
