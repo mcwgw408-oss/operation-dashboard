@@ -387,6 +387,25 @@ textarea {
   gap: 12px;
 }
 
+.brain-section-heading {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 2px;
+  padding: 2px 2px 0;
+}
+
+.brain-section-heading span {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.brain-section-heading small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .brain-card {
   display: grid;
   align-content: start;
