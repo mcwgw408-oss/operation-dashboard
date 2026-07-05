@@ -474,6 +474,13 @@ textarea {
   padding: 10px;
 }
 
+.health-aware-recommendation-panel summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .health-aware-recommendation-grid {
   display: grid;
   gap: 7px;
