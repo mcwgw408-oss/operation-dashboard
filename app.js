@@ -1899,6 +1899,28 @@ function buildReply(
     health,
     healthContext,
   ),
+  adaptiveIntelligence = buildAdaptiveIntelligence({
+    conversationContext: currentConversationContext,
+    replyPlan,
+    profile,
+    relationship,
+    resonance,
+    identity,
+    cognitive,
+    intent,
+    taskPlan,
+    workflow,
+    executionDecision: executionDecisionState,
+    execution,
+    feedback,
+    health,
+    healthInsight,
+    healthTrend,
+    healthContext,
+    healthAwareConversation,
+    healthAwareRecommendation,
+    executiveSummary,
+  }),
 ) {
   const sections = {
     opening: buildReplyOpening(replyPlan.opening),
@@ -1955,6 +1977,7 @@ function buildReply(
       healthAwareConversation,
       healthAwareRecommendation,
       executiveSummary,
+      adaptiveIntelligence,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
       executionFeedback: executionFeedbackMetadata,
@@ -2082,6 +2105,7 @@ function buildReply(
     healthContext,
     healthAwareConversation,
     executiveSummary,
+    adaptiveIntelligence,
     executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
     executionFeedback: executionFeedbackMetadata,
@@ -3214,6 +3238,163 @@ function renderExecutiveSummary() {
   setText("#executiveSummaryNextAction", executiveSummary.nextAction);
   setText("#executiveSummaryHealth", executiveSummary.healthContext);
   setText("#executiveSummaryRisk", executiveSummary.risk);
+}
+
+function buildAdaptiveIntelligence(inputs = {}) {
+  const healthContext = inputs.healthContext || getLatestHealthContext();
+  const healthTrend = inputs.healthTrend || getLatestHealthTrend();
+  const executiveSummary = inputs.executiveSummary || buildExecutiveSummary();
+  const cognitive = inputs.cognitive || getLatestCognitiveState();
+  const identity = inputs.identity || getLatestIdentityProfile();
+  const healthAwareConversation = inputs.healthAwareConversation || buildHealthAwareConversation(healthContext);
+  const healthAwareRecommendation = inputs.healthAwareRecommendation || getLatestHealthAwareRecommendation();
+  const feedback = inputs.feedback || getLatestExecutionFeedback();
+  const workflow = inputs.workflow || getLatestWorkflowState();
+  const recovery = inputs.recovery || getLatestConversationRecovery();
+  const riskText = [
+    executiveSummary?.risk,
+    healthContext?.currentRisk,
+    healthAwareConversation?.cautionNote,
+    healthAwareRecommendation?.cautionNote,
+  ].filter(Boolean).join(" ").toLowerCase();
+  const lowCapacity = ["low", "very_low"].includes(healthContext?.currentCapacity);
+  const needsRecovery = ["depleted", "low"].includes(healthContext?.recoveryStatus);
+  const elevatedRisk = riskText.includes("high") ||
+    riskText.includes("overwhelming") ||
+    riskText.includes("failed") ||
+    riskText.includes("hard") ||
+    Boolean(recovery?.detectedIssue);
+  const readyWorkflow = workflow?.workflowStatus === "ready" || executiveSummary?.executiveMode === "ready_for_review";
+  const recoveryMomentum = healthTrend?.recoveryMomentum || "insufficient_data";
+  const adaptiveMode = elevatedRisk
+    ? "careful"
+    : lowCapacity || needsRecovery
+      ? "recovery_support"
+      : readyWorkflow
+        ? "focused"
+        : "steady";
+  const responseStyle = adaptiveMode === "careful" || adaptiveMode === "recovery_support"
+    ? "gentle_contextual"
+    : identity?.currentTone || healthAwareConversation?.conversationTone || "steady";
+  const recommendationBias = lowCapacity || needsRecovery
+    ? "small_step"
+    : recoveryMomentum === "improving"
+      ? "maintain_momentum"
+      : "keep_current";
+  const executionBias = elevatedRisk
+    ? "review_before_action"
+    : readyWorkflow
+      ? "manual_confirm"
+      : "observe";
+  const riskSensitivity = elevatedRisk
+    ? "high"
+    : lowCapacity || needsRecovery
+      ? "medium"
+      : "normal";
+  const supportLevel = adaptiveMode === "careful" || adaptiveMode === "recovery_support"
+    ? "high"
+    : "normal";
+  const attentionTarget = cognitive?.activeAttention ||
+    executiveSummary?.nextAction ||
+    healthContext?.recommendationContext ||
+    "current_context";
+  const reasoning = [
+    executiveSummary?.executiveMode ? `executive:${executiveSummary.executiveMode}` : "",
+    cognitive?.cognitiveMode ? `cognitive:${cognitive.cognitiveMode}` : "",
+    healthContext?.currentCapacity ? `capacity:${healthContext.currentCapacity}` : "",
+    healthContext?.recoveryStatus ? `recovery:${healthContext.recoveryStatus}` : "",
+    healthTrend?.recoveryMomentum ? `momentum:${healthTrend.recoveryMomentum}` : "",
+    feedback?.outcome ? `feedback:${feedback.outcome}` : "",
+  ].filter(Boolean).join(" / ");
+
+  return {
+    date: executiveSummary?.date || healthContext?.date || activeDate,
+    adaptiveMode,
+    responseStyle,
+    recommendationBias,
+    executionBias,
+    riskSensitivity,
+    supportLevel,
+    attentionTarget,
+    reasoning,
+    sourceSummary: "Built from Conversation, Identity, Cognitive, Executive, and Health context.",
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function getLatestAdaptiveIntelligence() {
+  return buildAdaptiveIntelligence({
+    conversationContext: currentConversationContext,
+    replyPlan: currentReplyPlan,
+    profile: personalityProfile,
+    relationship: relationshipProfile,
+    resonance: getLatestEmotionalResonance(),
+    identity: getLatestIdentityProfile(),
+    cognitive: getLatestCognitiveState(),
+    intent: getLatestIntentState(),
+    taskPlan: getLatestTaskPlanState(),
+    workflow: getLatestWorkflowState(),
+    executionDecision: getLatestExecutionDecision(),
+    execution: getLatestExecutionState(),
+    feedback: getLatestExecutionFeedback(),
+    health: getLatestHealthState(),
+    healthInsight: buildHealthInsight(getRecentHealthStates()),
+    healthTrend: getLatestHealthTrend(),
+    healthContext: getLatestHealthContext(),
+    healthAwareConversation: getLatestHealthAwareConversation(),
+    healthAwareRecommendation: getLatestHealthAwareRecommendation(),
+    executiveSummary: buildExecutiveSummary(),
+    recovery: getLatestConversationRecovery(),
+  });
+}
+
+const ADAPTIVE_INTELLIGENCE_UI_LABELS = {
+  steady: "安定",
+  focused: "集中",
+  careful: "慎重",
+  recovery_support: "回復寄り",
+  gentle_contextual: "やさしく文脈重視",
+  small_step: "小さな一歩",
+  maintain_momentum: "流れを保つ",
+  keep_current: "現在の方針を維持",
+  review_before_action: "実行前に確認",
+  manual_confirm: "手動確認",
+  observe: "観察",
+  high: "高め",
+  medium: "中くらい",
+  normal: "通常",
+  current_context: "現在の文脈",
+};
+
+function adaptiveIntelligenceUiValue(value) {
+  return ADAPTIVE_INTELLIGENCE_UI_LABELS[value] || value || "-";
+}
+
+function adaptiveIntelligenceUiText(value) {
+  return String(value || "-")
+    .replace(/Built from Conversation, Identity, Cognitive, Executive, and Health context\./g, "Conversation / Identity / Cognitive / Executive / Health の文脈から作成。")
+    .replace(/executive:([a-z_]+)/g, (_, label) => `Executive: ${adaptiveIntelligenceUiValue(label)}`)
+    .replace(/cognitive:([a-z_]+)/g, (_, label) => `Cognitive: ${adaptiveIntelligenceUiValue(label)}`)
+    .replace(/capacity:([a-z_]+)/g, (_, label) => `行動しやすさ: ${healthUiValue(label)}`)
+    .replace(/recovery:([a-z_]+)/g, (_, label) => `回復状態: ${healthUiValue(label)}`)
+    .replace(/momentum:([a-z_]+)/g, (_, label) => `回復の流れ: ${healthTrendUiValue(label)}`)
+    .replace(/feedback:([a-z_]+)/g, (_, label) => `Feedback: ${adaptiveIntelligenceUiValue(label)}`);
+}
+
+function renderAdaptiveIntelligence(adaptiveIntelligence = getLatestAdaptiveIntelligence()) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#adaptiveMode", adaptiveIntelligenceUiValue(adaptiveIntelligence.adaptiveMode));
+  setText("#adaptiveResponseStyle", adaptiveIntelligenceUiValue(adaptiveIntelligence.responseStyle));
+  setText("#adaptiveRecommendationBias", adaptiveIntelligenceUiValue(adaptiveIntelligence.recommendationBias));
+  setText("#adaptiveExecutionBias", adaptiveIntelligenceUiValue(adaptiveIntelligence.executionBias));
+  setText("#adaptiveRiskSensitivity", adaptiveIntelligenceUiValue(adaptiveIntelligence.riskSensitivity));
+  setText("#adaptiveSupportLevel", adaptiveIntelligenceUiValue(adaptiveIntelligence.supportLevel));
+  setText("#adaptiveAttentionTarget", adaptiveIntelligenceUiText(adaptiveIntelligence.attentionTarget));
+  setText("#adaptiveReasoning", adaptiveIntelligenceUiText(adaptiveIntelligence.reasoning));
+  setText("#adaptiveSourceSummary", adaptiveIntelligenceUiText(adaptiveIntelligence.sourceSummary));
 }
 
 const HEALTH_UI_VALUE_LABELS = {
@@ -5239,6 +5420,7 @@ function renderBrainPrototype() {
   renderHealthContext();
   renderHealthAwareConversation();
   renderExecutiveSummary();
+  renderAdaptiveIntelligence();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
   renderConversationReflection();
@@ -5457,6 +5639,7 @@ function bindEvents() {
       renderHealthContext();
       renderHealthAwareConversation();
       renderHealthAwareRecommendation();
+      renderAdaptiveIntelligence();
       renderExecutiveSummary();
     });
   };
@@ -6057,6 +6240,29 @@ function buildSakuraSnapshot(mode) {
     latestHealthState,
     healthContext,
   );
+  const adaptiveIntelligence = buildAdaptiveIntelligence({
+    conversationContext,
+    replyPlan: conversation.replyPlan,
+    profile: savedPersonalityProfile,
+    relationship: savedRelationshipProfile,
+    resonance: latestEmotionalResonanceFrom(emotionalResonanceItems),
+    identity: latestIdentityProfileFrom(identityProfileItems),
+    cognitive: latestCognitiveStateFrom(cognitiveStateItems),
+    intent: latestIntentStateFrom(intentStateItems),
+    taskPlan: latestTaskPlanStateFrom(taskPlanStateItems),
+    workflow: latestWorkflowStateFrom(workflowStateItems),
+    executionDecision: latestExecutionDecisionFrom(executionDecisionItems),
+    execution: latestExecutionStateFrom(executionStateItems),
+    feedback: latestExecutionFeedbackFrom(executionFeedbackItems),
+    health: latestHealthState,
+    healthInsight,
+    healthTrend,
+    healthContext,
+    healthAwareConversation,
+    healthAwareRecommendation,
+    executiveSummary,
+    recovery: latestConversationRecoveryFrom(conversationRecoveryItems),
+  });
   conversation.reply = buildReply(
     conversation.replyPlan,
     conversationImprovementHintsFrom(conversationImprovementItems, 3),
@@ -6086,6 +6292,7 @@ function buildSakuraSnapshot(mode) {
     healthAwareConversation,
     healthAwareRecommendation,
     executiveSummary,
+    adaptiveIntelligence,
   );
 
   // --- Discovery-Labo：種と発生源は全件 ---
@@ -6231,6 +6438,9 @@ function buildSakuraSnapshot(mode) {
       execution: deepCopy(executionStateItems),
       executionFeedback: deepCopy(executionFeedbackItems),
       summary: deepCopy(executiveSummary),
+    },
+    intelligence: {
+      adaptive: deepCopy(adaptiveIntelligence),
     },
     health: {
       state: deepCopy(healthStateItems),
