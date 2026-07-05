@@ -372,10 +372,10 @@ textarea {
   top: 18px;
   right: 20px;
   content: "Phase2";
-  border: 1px solid var(--green-line);
+  border: 1px solid rgba(168, 196, 176, 0.58);
   border-radius: 999px;
-  background: #fff;
-  color: #47725a;
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(71, 114, 90, 0.62);
   padding: 4px 11px;
   font-size: 12px;
   font-weight: 700;
@@ -391,7 +391,10 @@ textarea {
   grid-column: 1 / -1;
   display: grid;
   gap: 2px;
-  padding: 2px 2px 0;
+  border-left: 4px solid rgba(111, 146, 121, 0.42);
+  border-radius: 0 8px 8px 0;
+  background: rgba(246, 250, 247, 0.78);
+  padding: 8px 10px;
 }
 
 .brain-section-heading span {
@@ -404,6 +407,12 @@ textarea {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.brain-section-heading + .brain-section-heading,
+.brain-section-heading:has(+ .developer-state-panel) {
+  border-left-color: rgba(174, 180, 186, 0.55);
+  background: rgba(248, 249, 250, 0.62);
 }
 
 .brain-card {
@@ -423,14 +432,15 @@ textarea {
 }
 
 .brain-card.reason-card {
-  border-color: var(--blue-line);
-  background: var(--blue-soft);
+  border-color: rgba(181, 202, 214, 0.72);
+  background: rgba(250, 253, 255, 0.84);
 }
 
 .brain-card.recommendation-card {
   grid-column: span 2;
   border-color: #f0c9d5;
   background: linear-gradient(135deg, #fff7f9, #ffffff 72%);
+  padding: 16px 17px;
 }
 
 .brain-label {
@@ -476,7 +486,10 @@ textarea {
 
 .health-aware-recommendation-panel summary {
   cursor: pointer;
+  border-radius: 7px;
+  background: rgba(250, 246, 252, 0.72);
   color: var(--text);
+  padding: 7px 8px;
   font-size: 12px;
   font-weight: 800;
 }
