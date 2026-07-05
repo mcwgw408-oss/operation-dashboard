@@ -26,6 +26,7 @@ const EXECUTION_DECISION_STORAGE_KEY = "sakura-execution-decision-v1";
 const EXECUTION_STATE_STORAGE_KEY = "sakura-execution-state-v1";
 const EXECUTION_FEEDBACK_STORAGE_KEY = "sakura-execution-feedback-v1";
 const HEALTH_STATE_STORAGE_KEY = "sakura-health-state-v1";
+const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -130,6 +131,7 @@ let executionDecision = loadExecutionDecision();
 let executionState = loadExecutionState();
 let executionFeedback = loadExecutionFeedback();
 let healthState = loadHealthState();
+let recurringSchedule = loadRecurringSchedule();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -564,6 +566,15 @@ function loadHealthState() {
   }
 }
 
+function loadRecurringSchedule() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RECURRING_SCHEDULE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -742,6 +753,10 @@ function saveHealthState() {
   localStorage.setItem(HEALTH_STATE_STORAGE_KEY, JSON.stringify(healthState));
 }
 
+function saveRecurringSchedule() {
+  localStorage.setItem(RECURRING_SCHEDULE_STORAGE_KEY, JSON.stringify(recurringSchedule));
+}
+
 function saveMemoryStore() {
   memoryStore.projectMemory = ensureDefaultProjectMemory(asArray(memoryStore.projectMemory));
   localStorage.setItem(MEMORY_STORE_STORAGE_KEY, JSON.stringify(memoryStore));
@@ -872,6 +887,89 @@ function formatEventLabel(event) {
   ].filter(Boolean).join(" ");
 }
 
+function dateKeyToLocalDate(dateKey) {
+  if (!dateKey) return null;
+  const [year, month, day] = String(dateKey).split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+}
+
+function weekdayOfDateKey(dateKey) {
+  return dateKeyToLocalDate(dateKey)?.getDay() ?? 0;
+}
+
+function weeksBetweenDateKeys(fromKey, toKey) {
+  const fromDate = dateKeyToLocalDate(fromKey);
+  const toDate = dateKeyToLocalDate(toKey);
+  if (!fromDate || !toDate) return null;
+  return Math.floor((toDate - fromDate) / (7 * 24 * 60 * 60 * 1000));
+}
+
+function buildRecurringScheduleItem({
+  title = "",
+  type = "medical",
+  frequencyType = "weekly",
+  weekday = weekdayOfDateKey(activeDate),
+  intervalWeeks = 2,
+  startDate = activeDate,
+  defaultTime = "",
+  note = "",
+} = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    title,
+    type,
+    frequencyType,
+    weekday: Number(weekday),
+    intervalWeeks: Math.max(1, Number(intervalWeeks) || 1),
+    startDate,
+    defaultTime,
+    note,
+    enabled: true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function isRecurringScheduleDueOn(item, dateKey = activeDate) {
+  if (!item?.enabled || !item.title) return false;
+  const targetWeekday = weekdayOfDateKey(dateKey);
+  const itemWeekday = Number(item.weekday);
+  if (targetWeekday !== itemWeekday) return false;
+  if (item.frequencyType === "weekly") return true;
+  if (item.frequencyType !== "interval_weeks") return false;
+  const interval = Math.max(1, Number(item.intervalWeeks) || 1);
+  const weeks = weeksBetweenDateKeys(item.startDate, dateKey);
+  return weeks !== null && weeks >= 0 && weeks % interval === 0;
+}
+
+function getDueRecurringSchedules(dateKey = activeDate) {
+  return recurringSchedule.filter((item) => isRecurringScheduleDueOn(item, dateKey));
+}
+
+function recurringEventAlreadyAdded(item) {
+  const day = getDay();
+  return day.todayEvents.some((event) =>
+    event.title === item.title &&
+    (event.time || "") === (item.defaultTime || "")
+  );
+}
+
+function addRecurringScheduleToToday(item) {
+  if (!item || recurringEventAlreadyAdded(item)) return;
+  getDay().todayEvents.push(newEvent({
+    title: item.title,
+    time: item.defaultTime,
+    type: item.type,
+    note: item.note,
+  }));
+  saveStore();
+  renderEventList();
+  renderRecurringSchedule();
+  renderBrainPrototype();
+}
+
 function renderEventList() {
   const day = getDay();
   const target = $("#todayEvents");
@@ -897,6 +995,7 @@ function renderEventList() {
       event.title = title.value.trim();
       event.note = note.value.trim();
       saveStore();
+      renderRecurringSchedule();
       renderBrainPrototype();
     };
     time.value = event.time || "";
@@ -911,9 +1010,97 @@ function renderEventList() {
       day.todayEvents = day.todayEvents.filter((candidate) => candidate.id !== event.id);
       saveStore();
       renderEventList();
+      renderRecurringSchedule();
       renderBrainPrototype();
     });
     target.append(row);
+  });
+}
+
+function recurringScheduleSummary(item) {
+  const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
+  if (item.frequencyType === "weekly") {
+    return `毎週${weekdayLabels[Number(item.weekday)] || "-"}曜日`;
+  }
+  return `${Math.max(1, Number(item.intervalWeeks) || 1)}週間ごとの${weekdayLabels[Number(item.weekday)] || "-"}曜日`;
+}
+
+function renderRecurringSchedule() {
+  const dueTarget = $("#dueRecurringSchedules");
+  const listTarget = $("#recurringScheduleList");
+  if (!dueTarget || !listTarget) return;
+  const startField = $("#recurringStartDate");
+  if (startField && !startField.value) startField.value = activeDate;
+  const weekdayField = $("#recurringWeekday");
+  if (weekdayField && weekdayField.value === "") weekdayField.value = String(weekdayOfDateKey(activeDate));
+  dueTarget.replaceChildren();
+  const dueItems = getDueRecurringSchedules();
+  if (!dueItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = "今日該当する定期予定はありません";
+    dueTarget.append(empty);
+  } else {
+    dueItems.forEach((item) => {
+      const added = recurringEventAlreadyAdded(item);
+      const row = document.createElement("div");
+      row.className = "recurring-schedule-row";
+      row.innerHTML = `
+        <div>
+          <strong></strong>
+          <p></p>
+        </div>
+        <button type="button"></button>
+      `;
+      row.querySelector("strong").textContent = [item.defaultTime, item.title].filter(Boolean).join(" ");
+      row.querySelector("p").textContent = [recurringScheduleSummary(item), item.note].filter(Boolean).join(" / ");
+      const button = row.querySelector("button");
+      button.textContent = added ? "追加済み" : "今日の予定へ追加";
+      button.disabled = added;
+      button.addEventListener("click", () => addRecurringScheduleToToday(item));
+      dueTarget.append(row);
+    });
+  }
+
+  listTarget.replaceChildren();
+  if (!recurringSchedule.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = "定期予定テンプレートはまだありません";
+    listTarget.append(empty);
+    return;
+  }
+  recurringSchedule.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "recurring-template-row";
+    row.innerHTML = `
+      <label class="check-row"><input type="checkbox" /> 有効</label>
+      <div>
+        <strong></strong>
+        <p></p>
+      </div>
+      <button type="button">削除</button>
+    `;
+    const checkbox = row.querySelector("input");
+    checkbox.checked = Boolean(item.enabled);
+    checkbox.addEventListener("change", () => {
+      item.enabled = checkbox.checked;
+      item.updatedAt = new Date().toISOString();
+      saveRecurringSchedule();
+      renderRecurringSchedule();
+    });
+    row.querySelector("strong").textContent = [item.defaultTime, item.title].filter(Boolean).join(" ");
+    row.querySelector("p").textContent = [
+      recurringScheduleSummary(item),
+      eventTypeLabels[item.type] || item.type,
+      item.note,
+    ].filter(Boolean).join(" / ");
+    row.querySelector("button").addEventListener("click", () => {
+      recurringSchedule = recurringSchedule.filter((candidate) => candidate.id !== item.id);
+      saveRecurringSchedule();
+      renderRecurringSchedule();
+    });
+    listTarget.append(row);
   });
 }
 
@@ -5505,6 +5692,7 @@ function renderAll() {
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
   renderEventList();
+  renderRecurringSchedule();
   renderMailLastChecked();
   renderPersistentMemos();
   renderLearnings();
@@ -5726,7 +5914,29 @@ function bindEvents() {
     $("#eventType").value = "meeting";
     saveStore();
     renderEventList();
+    renderRecurringSchedule();
     renderBrainPrototype();
+  });
+  $("#recurringScheduleForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const title = $("#recurringTitle")?.value.trim();
+    if (!title) return;
+    recurringSchedule.unshift(buildRecurringScheduleItem({
+      title,
+      type: $("#recurringType")?.value || "medical",
+      frequencyType: $("#recurringFrequency")?.value || "weekly",
+      weekday: $("#recurringWeekday")?.value || weekdayOfDateKey(activeDate),
+      intervalWeeks: $("#recurringIntervalWeeks")?.value || 2,
+      startDate: $("#recurringStartDate")?.value || activeDate,
+      defaultTime: $("#recurringTime")?.value.trim() || "",
+      note: $("#recurringNote")?.value.trim() || "",
+    }));
+    saveRecurringSchedule();
+    ["#recurringTitle", "#recurringTime", "#recurringNote"].forEach((selector) => {
+      const field = $(selector);
+      if (field) field.value = "";
+    });
+    renderRecurringSchedule();
   });
   $("#addPersistentMemo")?.addEventListener("click", () => {
     const memo = newPersistentMemo();
@@ -5942,6 +6152,7 @@ const BACKUP_KEYS = [
   EXECUTION_STATE_STORAGE_KEY,
   EXECUTION_FEEDBACK_STORAGE_KEY,
   HEALTH_STATE_STORAGE_KEY,
+  RECURRING_SCHEDULE_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -5989,6 +6200,7 @@ function createBackup() {
   data[EXECUTION_STATE_STORAGE_KEY] = readStoredJson(EXECUTION_STATE_STORAGE_KEY, []);
   data[EXECUTION_FEEDBACK_STORAGE_KEY] = readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []);
   data[HEALTH_STATE_STORAGE_KEY] = readStoredJson(HEALTH_STATE_STORAGE_KEY, []);
+  data[RECURRING_SCHEDULE_STORAGE_KEY] = readStoredJson(RECURRING_SCHEDULE_STORAGE_KEY, []);
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,

@@ -745,9 +745,48 @@
             <button type="submit">追加</button>
           </form>
           <div id="todayEvents" class="event-list"></div>
-          <div class="recurring-schedule-placeholder">
-            <span>定期予定</span>
-            <p>毎週・数週間ごとの予定は、今後ここに追加できるようにします。</p>
+          <div class="recurring-schedule-panel">
+            <div class="recurring-schedule-heading">
+              <div>
+                <h3>定期予定</h3>
+                <p>毎週・数週間ごとの予定を保存し、今日該当するものだけ候補に出します。</p>
+              </div>
+            </div>
+            <section class="recurring-due-panel" aria-label="今日の定期予定候補">
+              <h4>今日の予定候補</h4>
+              <div id="dueRecurringSchedules" class="recurring-schedule-list"></div>
+            </section>
+            <form id="recurringScheduleForm" class="recurring-schedule-form">
+              <input id="recurringTitle" type="text" placeholder="ヘルパー / 訪問看護 / 精神科" aria-label="定期予定名" />
+              <input id="recurringTime" type="text" placeholder="14:00 / 午後" aria-label="定期予定の時間" />
+              <select id="recurringType" aria-label="定期予定の種類">
+                <option value="medical">医療・ケア</option>
+                <option value="meeting">打ち合わせ</option>
+                <option value="outing">外出</option>
+                <option value="other">その他</option>
+              </select>
+              <select id="recurringFrequency" aria-label="繰り返し">
+                <option value="weekly">毎週</option>
+                <option value="interval_weeks">○週間ごと</option>
+              </select>
+              <select id="recurringWeekday" aria-label="曜日">
+                <option value="0">日曜</option>
+                <option value="1">月曜</option>
+                <option value="2">火曜</option>
+                <option value="3">水曜</option>
+                <option value="4">木曜</option>
+                <option value="5">金曜</option>
+                <option value="6">土曜</option>
+              </select>
+              <input id="recurringIntervalWeeks" type="number" min="1" value="2" aria-label="何週間ごと" />
+              <input id="recurringStartDate" type="date" aria-label="開始日" />
+              <input id="recurringNote" type="text" placeholder="メモ" aria-label="定期予定メモ" />
+              <button type="submit">定期予定に追加</button>
+            </form>
+            <section class="recurring-template-panel" aria-label="定期予定テンプレート">
+              <h4>保存した定期予定</h4>
+              <div id="recurringScheduleList" class="recurring-schedule-list"></div>
+            </section>
           </div>
         </section>
 

@@ -2366,26 +2366,81 @@ textarea {
   font-size: 13px;
 }
 
-.recurring-schedule-placeholder {
+.recurring-schedule-panel {
   display: grid;
-  gap: 4px;
-  border: 1px dashed #d9e2ea;
+  gap: 10px;
+  border: 1px solid #d9e2ea;
   border-radius: var(--radius-item);
   background: rgba(247, 250, 252, 0.78);
   padding: 10px 12px;
 }
 
-.recurring-schedule-placeholder span {
+.recurring-schedule-heading h3,
+.recurring-due-panel h4,
+.recurring-template-panel h4 {
+  margin: 0;
   color: var(--text);
   font-size: 13px;
   font-weight: 800;
 }
 
-.recurring-schedule-placeholder p {
+.recurring-schedule-heading p {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.recurring-schedule-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 8px;
+}
+
+.recurring-schedule-form button {
+  min-height: 38px;
+}
+
+.recurring-due-panel,
+.recurring-template-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.recurring-schedule-list {
+  display: grid;
+  gap: 8px;
+}
+
+.recurring-schedule-row,
+.recurring-template-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 8px 10px;
+}
+
+.recurring-template-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.recurring-schedule-row strong,
+.recurring-template-row strong {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.recurring-schedule-row p,
+.recurring-template-row p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .event-row {
@@ -2752,6 +2807,12 @@ textarea {
   }
 
   .health-aware-recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recurring-schedule-form,
+  .recurring-schedule-row,
+  .recurring-template-row {
     grid-template-columns: 1fr;
   }
 
