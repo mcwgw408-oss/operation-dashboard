@@ -1885,7 +1885,8 @@ function buildReply(
   feedback = getLatestExecutionFeedback(),
   health = getLatestHealthState(),
   healthInsight = buildHealthInsight(getRecentHealthStates()),
-  healthContext = buildHealthContext(health, healthInsight),
+  healthTrend = getLatestHealthTrend(),
+  healthContext = buildHealthContext(health, healthInsight, healthTrend),
   healthAwareConversation = buildHealthAwareConversation(healthContext),
   healthAwareRecommendation = currentHealthAwareRecommendation || buildHealthAwareRecommendation(currentRecommendation, healthContext),
   executiveSummary = buildExecutiveSummary(
@@ -1949,6 +1950,7 @@ function buildReply(
     metadata: {
       healthSummary,
       healthInsight,
+      healthTrend,
       healthContext,
       healthAwareConversation,
       healthAwareRecommendation,
@@ -3265,8 +3267,20 @@ const HEALTH_UI_TOKEN_LABELS = {
   stress_overwhelming: "ストレスが強い",
 };
 
+const HEALTH_TREND_UI_LABELS = {
+  improving: "改善傾向",
+  declining: "低下傾向",
+  stable: "安定",
+  mixed: "ばらつきあり",
+  insufficient_data: "記録がまだ少ない",
+};
+
 function healthUiValue(value) {
   return HEALTH_UI_VALUE_LABELS[value] || HEALTH_UI_TOKEN_LABELS[value] || value || "-";
+}
+
+function healthTrendUiValue(value) {
+  return HEALTH_TREND_UI_LABELS[value] || healthUiValue(value);
 }
 
 function healthUiRisk(value) {
@@ -3348,6 +3362,10 @@ function localizeHealthUiText(value) {
     .replace(/Capacity context: ([a-z_]+)\./g, (_, valueLabel) => `行動しやすさ: ${healthUiValue(valueLabel)}。`)
     .replace(/Recovery status: ([a-z_]+)\./g, (_, valueLabel) => `回復状態: ${healthUiValue(valueLabel)}。`)
     .replace(/Useful context: ([a-z_ /]+)\./g, (_, valueLabel) => `参考になる注意点: ${healthUiRisk(valueLabel)}。`)
+    .replace(/Recovery momentum: ([a-z_]+)\./g, (_, valueLabel) => `回復の流れ: ${healthTrendUiValue(valueLabel)}。`)
+    .replace(/Health Check is not recorded yet\./g, "ヘルスチェックはまだ記録されていません。")
+    .replace(/Health Check is neutral\./g, "ヘルスチェックは大きな偏りがありません。")
+    .replace(/Built from Health State, Health Insight, and Health Trend\. ?/g, "ヘルス状態・ヘルスインサイト・ヘルストレンドから作成。")
     .replace(/Built from Health State and Health Insight\. ?/g, "ヘルス状態とヘルスインサイトから作成。")
     .replace(/Built from Health Context\. ?/g, "ヘルスコンテキストから作成。")
     .replace(/No strong health context\./g, "強い体調文脈はありません。")
@@ -3535,7 +3553,184 @@ function renderHealthInsight() {
   setText("#healthInsightText", localizeHealthUiText(insight.insightText));
 }
 
-function buildHealthContext(health = getLatestHealthState(), healthInsight = buildHealthInsight(getRecentHealthStates())) {
+function getRecentHealthTrendStates(limit = 14) {
+  return getRecentHealthStates(limit);
+}
+
+const HEALTH_TREND_SCORE_MAPS = {
+  recoveryFeeling: {
+    depleted: 1,
+    low: 2,
+    neutral: 3,
+    recovered: 4,
+    refreshed: 5,
+  },
+  sleepQuality: {
+    poor: 1,
+    light: 2,
+    okay: 3,
+    good: 4,
+    deep: 5,
+  },
+  energyLevel: {
+    very_low: 1,
+    low: 2,
+    medium: 3,
+    high: 4,
+    unstable: 2,
+  },
+  stressLevel: {
+    low: 1,
+    medium: 2,
+    high: 3,
+    overwhelming: 4,
+  },
+};
+
+function averageHealthScore(items, key, scoreMap) {
+  const scores = asArray(items)
+    .map((item) => scoreMap[item?.[key]])
+    .filter((score) => Number.isFinite(score));
+  if (!scores.length) return null;
+  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+}
+
+function averageSleepScore(items) {
+  const scores = asArray(items).flatMap((item) => {
+    const values = [];
+    const sleepHours = Number.parseFloat(item?.sleepHours);
+    if (Number.isFinite(sleepHours)) {
+      values.push(Math.max(1, Math.min(5, sleepHours / 2)));
+    }
+    const qualityScore = HEALTH_TREND_SCORE_MAPS.sleepQuality[item?.sleepQuality];
+    if (Number.isFinite(qualityScore)) values.push(qualityScore);
+    return values;
+  });
+  if (!scores.length) return null;
+  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+}
+
+function compareHealthTrendScores(recentScore, previousScore, { lowerIsBetter = false } = {}) {
+  if (!Number.isFinite(recentScore) || !Number.isFinite(previousScore)) return "insufficient_data";
+  const delta = recentScore - previousScore;
+  if (Math.abs(delta) < 0.35) return "stable";
+  const positiveTrend = lowerIsBetter ? delta < 0 : delta > 0;
+  return positiveTrend ? "improving" : "declining";
+}
+
+function buildWindowedHealthTrend(items, scoreBuilder, options = {}) {
+  if (items.length < 3) return "insufficient_data";
+  const windowSize = Math.ceil(items.length / 2);
+  const recentItems = items.slice(0, windowSize);
+  const previousItems = items.slice(windowSize);
+  if (recentItems.length < 2 || previousItems.length < 1) return "insufficient_data";
+  const recentScore = scoreBuilder(recentItems);
+  const previousScore = scoreBuilder(previousItems);
+  return compareHealthTrendScores(recentScore, previousScore, options);
+}
+
+function buildHealthTrend(healthItems = getRecentHealthTrendStates()) {
+  const items = asArray(healthItems).filter(Boolean);
+  const latest = items[0] || null;
+  const recordCount = items.length;
+  const windowDays = 14;
+  if (recordCount < 3) {
+    return {
+      date: latest?.date || activeDate,
+      recordCount,
+      windowDays,
+      recoveryTrend: "insufficient_data",
+      sleepTrend: "insufficient_data",
+      energyTrend: "insufficient_data",
+      stressTrend: "insufficient_data",
+      recoveryMomentum: "insufficient_data",
+      trendSummary: "insufficient_data",
+      recoveryMemory: "Recent Health Check records are still limited.",
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  const recoveryTrend = buildWindowedHealthTrend(
+    items,
+    (windowItems) => averageHealthScore(windowItems, "recoveryFeeling", HEALTH_TREND_SCORE_MAPS.recoveryFeeling),
+  );
+  const sleepTrend = buildWindowedHealthTrend(items, averageSleepScore);
+  const energyTrend = buildWindowedHealthTrend(
+    items,
+    (windowItems) => averageHealthScore(windowItems, "energyLevel", HEALTH_TREND_SCORE_MAPS.energyLevel),
+  );
+  const stressTrend = buildWindowedHealthTrend(
+    items,
+    (windowItems) => averageHealthScore(windowItems, "stressLevel", HEALTH_TREND_SCORE_MAPS.stressLevel),
+    { lowerIsBetter: true },
+  );
+  const recoveryMomentum = recoveryTrend === "improving" && energyTrend !== "declining"
+    ? "improving"
+    : recoveryTrend === "declining" || energyTrend === "declining"
+      ? "declining"
+      : recoveryTrend === "insufficient_data"
+        ? "insufficient_data"
+        : "stable";
+  const trendSummary = [
+    `recovery:${recoveryTrend}`,
+    `sleep:${sleepTrend}`,
+    `energy:${energyTrend}`,
+    `stress:${stressTrend}`,
+  ].join(" / ");
+  const recoveryMemory = recoveryMomentum === "declining"
+    ? "Recent records suggest recovery momentum may be lower; use this only as context."
+    : recoveryMomentum === "improving"
+      ? "Recent records suggest recovery momentum may be improving; use this only as context."
+      : "Recent records suggest recovery momentum is mostly stable or mixed.";
+
+  return {
+    date: latest?.date || activeDate,
+    recordCount,
+    windowDays,
+    recoveryTrend,
+    sleepTrend,
+    energyTrend,
+    stressTrend,
+    recoveryMomentum,
+    trendSummary,
+    recoveryMemory,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function getLatestHealthTrend() {
+  return buildHealthTrend(getRecentHealthTrendStates());
+}
+
+function healthTrendMemoryUi(value) {
+  const exact = {
+    "Recent Health Check records are still limited.": "最近のヘルスチェック記録はまだ少なめです。",
+    "Recent records suggest recovery momentum may be lower; use this only as context.": "最近の記録では、回復の流れが少し下がっている可能性があります。参考情報として扱います。",
+    "Recent records suggest recovery momentum may be improving; use this only as context.": "最近の記録では、回復の流れが少し上向いている可能性があります。参考情報として扱います。",
+    "Recent records suggest recovery momentum is mostly stable or mixed.": "最近の記録では、回復の流れは安定またはばらつきがあります。",
+  };
+  return exact[value] || value || "-";
+}
+
+function renderHealthTrend() {
+  const trend = getLatestHealthTrend();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#healthTrendRecovery", healthTrendUiValue(trend.recoveryTrend));
+  setText("#healthTrendSleep", healthTrendUiValue(trend.sleepTrend));
+  setText("#healthTrendEnergy", healthTrendUiValue(trend.energyTrend));
+  setText("#healthTrendStress", healthTrendUiValue(trend.stressTrend));
+  setText("#healthTrendMomentum", healthTrendUiValue(trend.recoveryMomentum));
+  setText("#healthTrendMemory", healthTrendMemoryUi(trend.recoveryMemory));
+}
+
+function buildHealthContext(
+  health = getLatestHealthState(),
+  healthInsight = buildHealthInsight(getRecentHealthStates()),
+  healthTrend = getLatestHealthTrend(),
+) {
   const summary = buildHealthSummary(health);
   const recovery = health?.recoveryFeeling || healthInsight?.recentRecovery || "unknown";
   const energy = health?.energyLevel || "medium";
@@ -3560,12 +3755,19 @@ function buildHealthContext(health = getLatestHealthState(), healthInsight = bui
     ["high", "overwhelming"].includes(stress) ? `stress_${stress}` : "",
   ].filter(Boolean);
   const currentRisk = riskParts.join(" / ") || "no_immediate_health_context_risk";
-  const recommendationContext = capacity === "low" || capacity === "unstable"
-    ? "Recent records suggest smaller, flexible actions may fit better today."
-    : "Recent records suggest normal action size may be usable as context.";
+  const trendContext = healthTrend?.recoveryMomentum && healthTrend.recoveryMomentum !== "insufficient_data"
+    ? `Recovery momentum: ${healthTrend.recoveryMomentum}.`
+    : "";
+  const recommendationContext = [
+    capacity === "low" || capacity === "unstable"
+      ? "Recent records suggest smaller, flexible actions may fit better today."
+      : "Recent records suggest normal action size may be usable as context.",
+    trendContext,
+  ].filter(Boolean).join(" ");
   const executiveNote = [
     `Capacity context: ${capacity}.`,
     `Recovery status: ${recoveryStatus}.`,
+    trendContext,
     riskParts.length ? `Useful context: ${currentRisk}.` : "",
   ].filter(Boolean).join(" ");
 
@@ -3576,13 +3778,13 @@ function buildHealthContext(health = getLatestHealthState(), healthInsight = bui
     currentRisk,
     recommendationContext,
     executiveNote,
-    sourceSummary: `Built from Health State and Health Insight. ${summary.healthContext}`,
+    sourceSummary: `Built from Health State, Health Insight, and Health Trend. ${summary.healthContext}`,
     updatedAt: new Date().toISOString(),
   };
 }
 
 function getLatestHealthContext() {
-  return buildHealthContext(getLatestHealthState(), buildHealthInsight(getRecentHealthStates()));
+  return buildHealthContext(getLatestHealthState(), buildHealthInsight(getRecentHealthStates()), getLatestHealthTrend());
 }
 
 function renderHealthContext() {
@@ -4987,6 +5189,7 @@ function renderBrainPrototype() {
     getLatestExecutionFeedback(),
     getLatestHealthState(),
     buildHealthInsight(getRecentHealthStates()),
+    getLatestHealthTrend(),
     getLatestHealthContext(),
     healthAwareConversation,
     healthAwareRecommendation,
@@ -5032,6 +5235,7 @@ function renderBrainPrototype() {
   renderExecutionFeedback();
   renderHealthState();
   renderHealthInsight();
+  renderHealthTrend();
   renderHealthContext();
   renderHealthAwareConversation();
   renderExecutiveSummary();
@@ -5249,6 +5453,7 @@ function bindEvents() {
       upsertHealthState({ [key]: event.target.value });
       renderHealthState();
       renderHealthInsight();
+      renderHealthTrend();
       renderHealthContext();
       renderHealthAwareConversation();
       renderHealthAwareRecommendation();
@@ -5777,7 +5982,12 @@ function buildSakuraSnapshot(mode) {
       )
       .slice(0, 7),
   );
-  const healthContext = buildHealthContext(latestHealthState, healthInsight);
+  const sortedHealthItems = [...healthStateItems]
+    .sort((a, b) =>
+      String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
+    );
+  const healthTrend = buildHealthTrend(sortedHealthItems.slice(0, 14));
+  const healthContext = buildHealthContext(latestHealthState, healthInsight, healthTrend);
   const healthAwareConversation = buildHealthAwareConversation(healthContext);
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
@@ -5871,6 +6081,7 @@ function buildSakuraSnapshot(mode) {
     latestExecutionFeedbackFrom(executionFeedbackItems),
     latestHealthState,
     healthInsight,
+    healthTrend,
     healthContext,
     healthAwareConversation,
     healthAwareRecommendation,
@@ -6026,6 +6237,7 @@ function buildSakuraSnapshot(mode) {
       latest: deepCopy(latestHealthState),
       summary: deepCopy(healthSummary),
       insight: deepCopy(healthInsight),
+      trend: deepCopy(healthTrend),
       context: deepCopy(healthContext),
       awareConversation: deepCopy(healthAwareConversation),
       awareRecommendation: deepCopy(healthAwareRecommendation),
