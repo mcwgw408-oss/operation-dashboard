@@ -240,6 +240,7 @@
                 <section class="generated-reply-panel">
                   <h3>Generated Reply</h3>
                   <p id="generatedReplyText">-</p>
+                  <div id="replyFeedbackMount"></div>
                   <details class="developer-state-panel">
                     <summary>
                       <span>AIの内部状態（開発者向け）</span>
@@ -571,13 +572,14 @@
                       <div><span>参照元</span><p id="healthContextSource">-</p></div>
                     </div>
                   </div>
-                  <div class="conversation-feedback-panel" aria-label="Conversation Feedback">
+                  <div class="conversation-feedback-panel" aria-label="直前のAI返答フィードバック">
+                    <h4>直前のAI返答を評価</h4>
                     <div class="conversation-feedback-actions">
-                      <button type="button" data-conversation-feedback="true">この返事は自然</button>
-                      <button type="button" data-conversation-feedback="false">この返事は違和感がある</button>
+                      <button type="button" data-conversation-feedback="true">このAI返答は自然だった</button>
+                      <button type="button" data-conversation-feedback="false">このAI返答は違和感があった</button>
                     </div>
-                    <textarea id="conversationFeedbackNote" rows="3" placeholder="返事へのメモ" aria-label="返事へのメモ"></textarea>
-                    <p id="conversationFeedbackStatus" class="conversation-feedback-status">この返事の自然さを記録できます。</p>
+                    <textarea id="conversationFeedbackNote" rows="3" placeholder="直前のAI返答へのメモ" aria-label="直前のAI返答へのメモ"></textarea>
+                    <p id="conversationFeedbackStatus" class="conversation-feedback-status">直前のAI返答の自然さを記録できます。</p>
                   </div>
                   <details class="developer-state-panel">
                     <summary>

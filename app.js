@@ -4421,13 +4421,13 @@ function renderConversationFeedback(reply) {
   if (!currentReplyText) {
     status.textContent = "Generated Reply がまだありません。";
   } else if (entry?.natural === true) {
-    status.textContent = "この返事は自然、と記録しました。";
+    status.textContent = "直前のAI返答は自然だった、と記録しました。";
   } else if (entry?.natural === false) {
-    status.textContent = "この返事は違和感がある、と記録しました。";
+    status.textContent = "直前のAI返答は違和感があった、と記録しました。";
   } else if (entry?.note) {
-    status.textContent = "返事へのメモを記録しました。";
+    status.textContent = "直前のAI返答へのメモを記録しました。";
   } else {
-    status.textContent = "この返事の自然さを記録できます。";
+    status.textContent = "直前のAI返答の自然さを記録できます。";
   }
 }
 
@@ -5521,6 +5521,7 @@ function arrangeDashboardUxSections() {
   moveDashboardNode(".health-trend-panel", "#healthAnalysisMount");
   moveDashboardNode(".health-context-panel", "#healthAnalysisMount");
   moveDashboardNode("#memoryMemoForm", "#memoryMemoInputMount");
+  moveDashboardNode(".conversation-feedback-panel", "#replyFeedbackMount");
 }
 
 function bindEvents() {

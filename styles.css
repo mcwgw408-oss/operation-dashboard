@@ -1767,6 +1767,12 @@ textarea {
   margin-top: 10px;
 }
 
+.conversation-feedback-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
 .conversation-feedback-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
