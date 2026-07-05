@@ -1038,7 +1038,7 @@ function renderRecurringSchedule() {
   if (!dueItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
-    empty.textContent = "今日該当する定期予定はありません";
+    empty.textContent = "今日該当する定期予定はありません。必要な予定は手動で追加できます。";
     dueTarget.append(empty);
   } else {
     dueItems.forEach((item) => {
@@ -1090,7 +1090,9 @@ function renderRecurringSchedule() {
       renderRecurringSchedule();
     });
     row.querySelector("strong").textContent = [item.defaultTime, item.title].filter(Boolean).join(" ");
+    const dueStatus = isRecurringScheduleDueOn(item) ? "今日該当" : "今日対象外";
     row.querySelector("p").textContent = [
+      dueStatus,
       recurringScheduleSummary(item),
       eventTypeLabels[item.type] || item.type,
       item.note,
