@@ -712,11 +712,11 @@
           </div>
         </section>
 
-        <section class="panel span-2">
+        <section class="panel dashboard-task-panel span-2">
           <div class="panel-heading">
-            <h2>今日やること</h2>
+            <h2>今日のタスク</h2>
             <form class="inline-form" data-add-list="todayTasks">
-              <input type="text" placeholder="今日だけのタスク" aria-label="今日やることを追加" />
+              <input type="text" placeholder="洗濯 / 買い物 / Codex" aria-label="今日のタスクを追加" />
               <button type="submit">追加</button>
             </form>
           </div>
@@ -727,24 +727,28 @@
           <div class="panel-heading">
             <div>
               <h2>今日の予定</h2>
-              <p class="section-note">時間に紐づく予定です。Brainでは着手候補ではなく、今日の余白を見る材料として扱います。</p>
+              <p class="section-note">時間が決まっている予定を記録します。ヘルパー、訪問看護、通院などをここに入れます。</p>
             </div>
           </div>
           <form id="eventForm" class="event-form">
             <input id="eventTime" type="text" placeholder="14:00 / 午後" aria-label="予定の時間" />
             <select id="eventType" aria-label="予定の種類">
+              <option value="medical">医療・ケア</option>
               <option value="meeting">打ち合わせ</option>
               <option value="outing">外出</option>
-              <option value="medical">医療・ケア</option>
               <option value="delivery">配信</option>
               <option value="broadcast">コラボ・配信</option>
               <option value="other">その他</option>
             </select>
-            <input id="eventTitle" type="text" placeholder="コラボ配信 / 訪問看護" aria-label="予定名" />
+            <input id="eventTitle" type="text" placeholder="ヘルパー / 訪問看護 / 精神科" aria-label="予定名" />
             <input id="eventNote" type="text" placeholder="メモ" aria-label="予定メモ" />
             <button type="submit">追加</button>
           </form>
           <div id="todayEvents" class="event-list"></div>
+          <div class="recurring-schedule-placeholder">
+            <span>定期予定</span>
+            <p>毎週・数週間ごとの予定は、今後ここに追加できるようにします。</p>
+          </div>
         </section>
 
         <section class="panel span-2">

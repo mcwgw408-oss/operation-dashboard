@@ -2356,6 +2356,38 @@ textarea {
   gap: 9px;
 }
 
+.empty-state {
+  margin: 0;
+  border: 1px dashed #d9e2ea;
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--muted);
+  padding: 11px 12px;
+  font-size: 13px;
+}
+
+.recurring-schedule-placeholder {
+  display: grid;
+  gap: 4px;
+  border: 1px dashed #d9e2ea;
+  border-radius: var(--radius-item);
+  background: rgba(247, 250, 252, 0.78);
+  padding: 10px 12px;
+}
+
+.recurring-schedule-placeholder span {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.recurring-schedule-placeholder p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .event-row {
   min-height: 46px;
   border: 1px solid var(--line);

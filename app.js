@@ -878,6 +878,13 @@ function renderEventList() {
   const template = $("#eventTemplate");
   if (!target || !template) return;
   target.replaceChildren();
+  if (!day.todayEvents.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = "予定はまだありません";
+    target.append(empty);
+    return;
+  }
   day.todayEvents.forEach((event) => {
     const row = template.content.firstElementChild.cloneNode(true);
     const time = row.querySelector(".event-time");
