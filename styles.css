@@ -729,6 +729,11 @@ textarea {
   padding-top: 8px;
 }
 
+.health-aware-conversation-panel {
+  border-top: 1px solid #e7edf4;
+  padding-top: 8px;
+}
+
 .reply-plan-panel {
   border-top: 1px solid #e7edf4;
   padding-top: 8px;
@@ -749,6 +754,11 @@ textarea {
   gap: 7px;
 }
 
+.health-aware-conversation-grid {
+  display: grid;
+  gap: 7px;
+}
+
 .reply-plan-grid {
   display: grid;
   gap: 7px;
@@ -764,6 +774,15 @@ textarea {
 }
 
 .conversation-context-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 9px;
+}
+
+.health-aware-conversation-grid div {
   display: grid;
   gap: 5px;
   border: 1px solid #e7edf4;
@@ -793,6 +812,12 @@ textarea {
   font-weight: 700;
 }
 
+.health-aware-conversation-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .reply-plan-grid span {
   color: var(--muted);
   font-size: 12px;
@@ -808,6 +833,13 @@ textarea {
   overflow-wrap: anywhere;
   color: var(--text);
   font-size: 14px;
+}
+
+.health-aware-conversation-grid p {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .reply-plan-grid p {

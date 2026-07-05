@@ -1551,6 +1551,7 @@ function buildConversationContext({
   learningHint = null,
   learningConfidence = null,
   memoryContext = null,
+  healthAwareConversation = null,
   todayTasks = [],
   todayEvents = [],
 } = {}) {
@@ -1578,6 +1579,7 @@ function buildConversationContext({
       source: learningConfidence.source,
     } : null,
     memoryContext,
+    healthAwareConversation,
     todayTasks: asArray(todayTasks).map((task) => ({
       title: task.title || "",
       done: Boolean(task.done),
@@ -1607,6 +1609,7 @@ function buildReplyPlan(conversationContext = {}) {
   const memoryTitle = memoryDisplayTitle(conversationContext.memoryContext?.retrieved?.[0]) ||
     memoryDisplayTitle(conversationContext.memoryContext?.recent?.[0]);
   const confidence = conversationContext.learningConfidence?.score ?? 0;
+  const healthAware = conversationContext.healthAwareConversation || null;
 
   return {
     opening: firstEvent
@@ -1623,6 +1626,7 @@ function buildReplyPlan(conversationContext = {}) {
     support: [
       memoryTitle ? `Memory: ${memoryTitle}` : "",
       conversationContext.learningHint?.message ? `Learning: ${conversationContext.learningHint.message}` : "",
+      healthAware?.supportHint ? `Health: ${healthAware.supportHint}` : "",
     ].filter(Boolean).join(" / ") || "補足情報はまだ少ない",
     uncertainty: confidence >= 60
       ? `Learning Confidence ${confidence}%。参考情報として使える状態です。`
@@ -1880,6 +1884,7 @@ function buildReply(
   health = getLatestHealthState(),
   healthInsight = buildHealthInsight(getRecentHealthStates()),
   healthContext = buildHealthContext(health, healthInsight),
+  healthAwareConversation = buildHealthAwareConversation(healthContext),
   executiveSummary = buildExecutiveSummary(
     intent,
     taskPlan,
@@ -1942,6 +1947,7 @@ function buildReply(
       healthSummary,
       healthInsight,
       healthContext,
+      healthAwareConversation,
       executiveSummary,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
@@ -2068,6 +2074,7 @@ function buildReply(
     healthSummary,
     healthInsight,
     healthContext,
+    healthAwareConversation,
     executiveSummary,
     executionDecision: executionDecisionMetadata,
     executionState: executionStateMetadata,
@@ -3448,6 +3455,54 @@ function renderHealthContext() {
   setText("#healthContextSource", context.sourceSummary);
 }
 
+function buildHealthAwareConversation(healthContext = getLatestHealthContext()) {
+  const capacity = healthContext?.currentCapacity || "medium";
+  const recovery = healthContext?.recoveryStatus || "unknown";
+  const risk = healthContext?.currentRisk || "";
+  const lowCapacity = ["low", "unstable"].includes(capacity);
+  const needsRecovery = recovery === "needs_recovery";
+  const conversationTone = lowCapacity || needsRecovery ? "gentle" : "steady";
+  const openingHint = lowCapacity || needsRecovery
+    ? "Recent records suggest starting with a softer check-in may fit."
+    : "Recent records suggest a steady opening may fit.";
+  const supportHint = lowCapacity || needsRecovery
+    ? "最近の記録では、小さめの一歩が合うかもしれません。"
+    : "最近の記録では、通常の一歩を無理なく扱えそうです。";
+  const cautionNote = "Use this only as conversation context, not as medical judgment.";
+  const replyAdjustment = lowCapacity || needsRecovery
+    ? "Prefer gentle wording and flexible next steps."
+    : "Keep the reply steady while leaving room to adjust.";
+
+  return {
+    date: healthContext?.date || activeDate,
+    conversationTone,
+    openingHint,
+    supportHint,
+    cautionNote,
+    replyAdjustment,
+    sourceSummary: `Built from Health Context. ${healthContext?.executiveNote || risk || "No strong health context."}`,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function getLatestHealthAwareConversation() {
+  return buildHealthAwareConversation(getLatestHealthContext());
+}
+
+function renderHealthAwareConversation() {
+  const healthAware = getLatestHealthAwareConversation();
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#healthAwareConversationTone", healthAware.conversationTone);
+  setText("#healthAwareOpeningHint", healthAware.openingHint);
+  setText("#healthAwareSupportHint", healthAware.supportHint);
+  setText("#healthAwareCautionNote", healthAware.cautionNote);
+  setText("#healthAwareReplyAdjustment", healthAware.replyAdjustment);
+  setText("#healthAwareSourceSummary", healthAware.sourceSummary);
+}
+
 function findConversationFeedback(replyText) {
   return conversationFeedback.find((entry) =>
     entry.date === activeDate &&
@@ -4684,6 +4739,7 @@ function renderBrainPrototype() {
   const latestLearningSummary = buildLearningSummary();
   const latestLearningHint = buildLearningHint(latestLearningSummary);
   const latestLearningConfidence = buildLearningConfidence(latestLearningSummary, latestLearningHint);
+  const healthAwareConversation = getLatestHealthAwareConversation();
   const conversationContext = buildConversationContext({
     project: brainMemoryContext.project || priorityCandidate?.title || "",
     recommendation,
@@ -4691,6 +4747,7 @@ function renderBrainPrototype() {
     learningHint: latestLearningHint,
     learningConfidence: latestLearningConfidence,
     memoryContext: brainMemoryContext,
+    healthAwareConversation,
     todayTasks,
     todayEvents,
   });
@@ -4740,6 +4797,7 @@ function renderBrainPrototype() {
   renderHealthState();
   renderHealthInsight();
   renderHealthContext();
+  renderHealthAwareConversation();
   renderExecutiveSummary();
   renderConversationFeedback(reply);
   renderConversationImprovementHints();
@@ -4956,6 +5014,7 @@ function bindEvents() {
       renderHealthState();
       renderHealthInsight();
       renderHealthContext();
+      renderHealthAwareConversation();
       renderExecutiveSummary();
     });
   };
@@ -5482,6 +5541,7 @@ function buildSakuraSnapshot(mode) {
       .slice(0, 7),
   );
   const healthContext = buildHealthContext(latestHealthState, healthInsight);
+  const healthAwareConversation = buildHealthAwareConversation(healthContext);
   const learningSummary = buildLearningSummary(learningLogItems);
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
@@ -5523,6 +5583,7 @@ function buildSakuraSnapshot(mode) {
       learningHint,
       learningConfidence,
       memoryContext: brain.memoryContext,
+      healthAwareConversation,
       todayTasks: asArray(fullStore[toKey]?.todayTasks),
       todayEvents: asArray(fullStore[toKey]?.todayEvents),
     });
@@ -5534,6 +5595,7 @@ function buildSakuraSnapshot(mode) {
     reflections: deepCopy(conversationReflectionItems),
     continuity: deepCopy(conversationContinuityItems),
     recovery: deepCopy(conversationRecoveryItems),
+    healthAware: deepCopy(healthAwareConversation),
   };
   const executiveSummary = buildExecutiveSummary(
     latestIntentStateFrom(intentStateItems),
@@ -5570,6 +5632,7 @@ function buildSakuraSnapshot(mode) {
     latestHealthState,
     healthInsight,
     healthContext,
+    healthAwareConversation,
     executiveSummary,
   );
 
@@ -5723,6 +5786,7 @@ function buildSakuraSnapshot(mode) {
       summary: deepCopy(healthSummary),
       insight: deepCopy(healthInsight),
       context: deepCopy(healthContext),
+      awareConversation: deepCopy(healthAwareConversation),
     },
     conversation,
     apps: {
