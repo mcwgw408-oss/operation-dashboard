@@ -134,6 +134,8 @@ let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
 let currentReplyPlan = null;
+let currentRecommendation = null;
+let currentHealthAwareRecommendation = null;
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -1885,6 +1887,7 @@ function buildReply(
   healthInsight = buildHealthInsight(getRecentHealthStates()),
   healthContext = buildHealthContext(health, healthInsight),
   healthAwareConversation = buildHealthAwareConversation(healthContext),
+  healthAwareRecommendation = currentHealthAwareRecommendation || buildHealthAwareRecommendation(currentRecommendation, healthContext),
   executiveSummary = buildExecutiveSummary(
     intent,
     taskPlan,
@@ -1948,6 +1951,7 @@ function buildReply(
       healthInsight,
       healthContext,
       healthAwareConversation,
+      healthAwareRecommendation,
       executiveSummary,
       executionDecision: executionDecisionMetadata,
       executionState: executionStateMetadata,
@@ -3643,6 +3647,55 @@ function renderHealthAwareConversation() {
   setText("#healthAwareSourceSummary", localizeHealthUiText(healthAware.sourceSummary));
 }
 
+function buildHealthAwareRecommendation(recommendation = null, healthContext = getLatestHealthContext()) {
+  const capacity = healthContext?.currentCapacity || "medium";
+  const recovery = healthContext?.recoveryStatus || "unknown";
+  const lowCapacity = ["low", "unstable"].includes(capacity);
+  const needsRecovery = recovery === "needs_recovery";
+  const recommendationLabel = recommendation?.title || recommendation?.type || "this recommendation";
+  const actionSizeHint = lowCapacity || needsRecovery
+    ? "smaller_or_flexible"
+    : capacity === "high"
+      ? "normal"
+      : "normal_or_light";
+  const recommendationSupport = lowCapacity || needsRecovery
+    ? "Recent records suggest a smaller step may fit as supporting context."
+    : "Recent records suggest the current recommendation can stay steady as supporting context.";
+  const priorityReason = lowCapacity || needsRecovery
+    ? "Health Context can explain why approaching this recommendation lightly may be easier today."
+    : "Health Context does not add a strong constraint to this recommendation.";
+  const cautionNote = "Reference context only; this is not medical judgment or instruction.";
+  const explanationHint = `Health Context supports how to approach ${recommendationLabel}; it does not change the recommendation type, count, or ranking.`;
+  const sourceSummary = `Built from Health Context. ${healthContext?.recommendationContext || healthContext?.executiveNote || "No strong health context."}`;
+
+  return {
+    date: healthContext?.date || activeDate,
+    recommendationSupport,
+    priorityReason,
+    actionSizeHint,
+    cautionNote,
+    explanationHint,
+    sourceSummary,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function getLatestHealthAwareRecommendation(recommendation = currentRecommendation) {
+  return buildHealthAwareRecommendation(recommendation, getLatestHealthContext());
+}
+
+function renderHealthAwareRecommendation(healthAwareRecommendation = getLatestHealthAwareRecommendation()) {
+  currentHealthAwareRecommendation = healthAwareRecommendation;
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value || "-";
+  };
+  setText("#healthAwareRecommendationActionSize", healthUiValue(healthAwareRecommendation.actionSizeHint));
+  setText("#healthAwareRecommendationSupport", localizeHealthUiText(healthAwareRecommendation.recommendationSupport));
+  setText("#healthAwareRecommendationPriority", localizeHealthUiText(healthAwareRecommendation.priorityReason));
+  setText("#healthAwareRecommendationCaution", localizeHealthUiText(healthAwareRecommendation.cautionNote));
+}
+
 function findConversationFeedback(replyText) {
   return conversationFeedback.find((entry) =>
     entry.date === activeDate &&
@@ -4710,7 +4763,7 @@ function renderLearningStatus() {
   renderLearningConfidence(confidence);
 }
 
-function buildExplainLayerDetails(input, recommendation, memoryContext = {}) {
+function buildExplainLayerDetails(input, recommendation, memoryContext = {}, healthAwareRecommendation = null) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
     input.openTodayCount ? `今日やることに未完了が${input.openTodayCount}件あります。` : "今日やることの未完了は少なめです。",
@@ -4721,6 +4774,10 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}) {
   ].filter(Boolean);
   if (memoryContext.used) {
     seenInfo.push(`Memory を参照しています: ${brainMemoryContextNote(memoryContext)}`);
+  }
+
+  if (healthAwareRecommendation?.explanationHint) {
+    seenInfo.push(`Health-Aware Recommendation: ${healthAwareRecommendation.explanationHint}`);
   }
 
   const mainReasons = input.topCandidate
@@ -4753,6 +4810,10 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}) {
   }
   if (input.energy.state === "Normal" && input.momentum.state === "Stable") {
     uncertainty.push("EnergyとMomentumに大きな偏りが見えていないため、説明は控えめにしています。");
+  }
+
+  if (healthAwareRecommendation?.cautionNote) {
+    uncertainty.push(`Health-Aware Recommendation: ${healthAwareRecommendation.cautionNote}`);
   }
 
   return {
@@ -4872,7 +4933,14 @@ function renderBrainPrototype() {
     learningHint,
     learningSummary,
   ), brainMemoryContext);
-  const explainLayerDetails = buildExplainLayerDetails(recommendationInput, recommendation, brainMemoryContext);
+  currentRecommendation = recommendation;
+  const healthAwareRecommendation = getLatestHealthAwareRecommendation(recommendation);
+  const explainLayerDetails = buildExplainLayerDetails(
+    recommendationInput,
+    recommendation,
+    brainMemoryContext,
+    healthAwareRecommendation,
+  );
   const learningEntry = syncCurrentLearningLog(recommendationInput, recommendation, {
     taskCount: todayTasks.length,
   });
@@ -4895,7 +4963,34 @@ function renderBrainPrototype() {
   const replyPlan = buildReplyPlan(conversationContext);
   currentReplyPlan = replyPlan;
   upsertEmotionalResonance();
-  const reply = buildReply(replyPlan);
+  const reply = buildReply(
+    replyPlan,
+    getRecentConversationImprovementHints(),
+    getLatestConversationReflection(),
+    getLatestConversationContinuity(),
+    getLatestConversationRecovery(),
+    personalityProfile,
+    relationshipProfile,
+    getLatestEmotionalResonance(),
+    getLatestIdentityProfile(),
+    getLatestGoalState(),
+    getLatestPriorityState(),
+    getLatestDecisionState(),
+    getLatestStrategyState(),
+    getLatestAttentionState(),
+    getLatestCognitiveState(),
+    getLatestIntentState(),
+    getLatestTaskPlanState(),
+    getLatestWorkflowState(),
+    getLatestExecutionDecision(),
+    getLatestExecutionState(),
+    getLatestExecutionFeedback(),
+    getLatestHealthState(),
+    buildHealthInsight(getRecentHealthStates()),
+    getLatestHealthContext(),
+    healthAwareConversation,
+    healthAwareRecommendation,
+  );
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
@@ -4910,6 +5005,7 @@ function renderBrainPrototype() {
     adaptiveNote.hidden = !recommendation.adaptiveNote;
   }
   appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
+  renderHealthAwareRecommendation(healthAwareRecommendation);
   renderExplainLayerDetails(explainLayerDetails);
   renderLearningFeedback(learningEntry);
   renderLearningSummary(latestLearningSummary);
@@ -5155,6 +5251,7 @@ function bindEvents() {
       renderHealthInsight();
       renderHealthContext();
       renderHealthAwareConversation();
+      renderHealthAwareRecommendation();
       renderExecutiveSummary();
     });
   };
@@ -5690,6 +5787,13 @@ function buildSakuraSnapshot(mode) {
   const latestRecommendationMemory = [...savedShortMemory]
     .filter((memoryItem) => memoryItem.type === "recommendation")
     .sort((a, b) => memoryUpdatedTime(b) - memoryUpdatedTime(a))[0];
+  const latestRecommendation = latestRecommendationMemory ? {
+    type: asArray(latestRecommendationMemory.tags).find((tag) => tag !== "recommendation") || "",
+    title: latestRecommendationMemory.title || "",
+    message: latestRecommendationMemory.summary || "",
+    actionText: "",
+  } : null;
+  const healthAwareRecommendation = buildHealthAwareRecommendation(latestRecommendation, healthContext);
   const memory = {
     shortMemory: savedShortMemory,
     projectMemory: ensureDefaultProjectMemory(asArray(savedMemoryStore?.projectMemory)),
@@ -5713,12 +5817,7 @@ function buildSakuraSnapshot(mode) {
   };
   const conversationContext = buildConversationContext({
       project: brain.memoryContext.project,
-      recommendation: latestRecommendationMemory ? {
-        type: asArray(latestRecommendationMemory.tags).find((tag) => tag !== "recommendation") || "",
-        title: latestRecommendationMemory.title || "",
-        message: latestRecommendationMemory.summary || "",
-        actionText: "",
-      } : null,
+      recommendation: latestRecommendation,
       explanation: null,
       learningHint,
       learningConfidence,
@@ -5736,6 +5835,7 @@ function buildSakuraSnapshot(mode) {
     continuity: deepCopy(conversationContinuityItems),
     recovery: deepCopy(conversationRecoveryItems),
     healthAware: deepCopy(healthAwareConversation),
+    healthAwareRecommendation: deepCopy(healthAwareRecommendation),
   };
   const executiveSummary = buildExecutiveSummary(
     latestIntentStateFrom(intentStateItems),
@@ -5773,6 +5873,7 @@ function buildSakuraSnapshot(mode) {
     healthInsight,
     healthContext,
     healthAwareConversation,
+    healthAwareRecommendation,
     executiveSummary,
   );
 
@@ -5927,6 +6028,7 @@ function buildSakuraSnapshot(mode) {
       insight: deepCopy(healthInsight),
       context: deepCopy(healthContext),
       awareConversation: deepCopy(healthAwareConversation),
+      awareRecommendation: deepCopy(healthAwareRecommendation),
     },
     conversation,
     apps: {
