@@ -27,6 +27,7 @@ const EXECUTION_STATE_STORAGE_KEY = "sakura-execution-state-v1";
 const EXECUTION_FEEDBACK_STORAGE_KEY = "sakura-execution-feedback-v1";
 const HEALTH_STATE_STORAGE_KEY = "sakura-health-state-v1";
 const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
+const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -132,6 +133,7 @@ let executionState = loadExecutionState();
 let executionFeedback = loadExecutionFeedback();
 let healthState = loadHealthState();
 let recurringSchedule = loadRecurringSchedule();
+let recurringAutoAddLog = loadRecurringAutoAddLog();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -575,6 +577,15 @@ function loadRecurringSchedule() {
   }
 }
 
+function loadRecurringAutoAddLog() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(RECURRING_AUTO_ADD_LOG_STORAGE_KEY));
+    return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+  } catch {
+    return {};
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -755,6 +766,10 @@ function saveHealthState() {
 
 function saveRecurringSchedule() {
   localStorage.setItem(RECURRING_SCHEDULE_STORAGE_KEY, JSON.stringify(recurringSchedule));
+}
+
+function saveRecurringAutoAddLog() {
+  localStorage.setItem(RECURRING_AUTO_ADD_LOG_STORAGE_KEY, JSON.stringify(recurringAutoAddLog));
 }
 
 function saveMemoryStore() {
@@ -954,6 +969,42 @@ function recurringEventAlreadyAdded(item) {
     event.title === item.title &&
     (event.time || "") === (item.defaultTime || "")
   );
+}
+
+function getRecurringAutoAddLogForDate(dateKey = activeDate) {
+  const logged = recurringAutoAddLog[dateKey];
+  return Array.isArray(logged) ? logged : [];
+}
+
+function hasRecurringAutoAddLogged(item, dateKey = activeDate) {
+  return getRecurringAutoAddLogForDate(dateKey).includes(item?.id);
+}
+
+function markRecurringAutoAddLogged(item, dateKey = activeDate) {
+  if (!item?.id) return;
+  const logged = new Set(getRecurringAutoAddLogForDate(dateKey));
+  logged.add(item.id);
+  recurringAutoAddLog[dateKey] = Array.from(logged);
+  saveRecurringAutoAddLog();
+}
+
+function autoAddDueRecurringSchedules(dateKey = activeDate) {
+  const dueItems = getDueRecurringSchedules(dateKey);
+  let changed = false;
+  dueItems.forEach((item) => {
+    if (!item?.id || hasRecurringAutoAddLogged(item, dateKey)) return;
+    if (!recurringEventAlreadyAdded(item)) {
+      getDay().todayEvents.push(newEvent({
+        title: item.title,
+        time: item.defaultTime,
+        type: item.type,
+        note: item.note,
+      }));
+      changed = true;
+    }
+    markRecurringAutoAddLogged(item, dateKey);
+  });
+  if (changed) saveStore();
 }
 
 function addRecurringScheduleToToday(item) {
@@ -5691,6 +5742,7 @@ function renderBrainPrototype() {
 }
 function renderAll() {
   getDay();
+  autoAddDueRecurringSchedules();
   $("#activeDate").value = activeDate;
   listIds.forEach(renderTaskList);
   renderEventList();
@@ -6155,6 +6207,7 @@ const BACKUP_KEYS = [
   EXECUTION_FEEDBACK_STORAGE_KEY,
   HEALTH_STATE_STORAGE_KEY,
   RECURRING_SCHEDULE_STORAGE_KEY,
+  RECURRING_AUTO_ADD_LOG_STORAGE_KEY,
 ];
 
 function readStoredJson(key, fallback) {
@@ -6203,6 +6256,7 @@ function createBackup() {
   data[EXECUTION_FEEDBACK_STORAGE_KEY] = readStoredJson(EXECUTION_FEEDBACK_STORAGE_KEY, []);
   data[HEALTH_STATE_STORAGE_KEY] = readStoredJson(HEALTH_STATE_STORAGE_KEY, []);
   data[RECURRING_SCHEDULE_STORAGE_KEY] = readStoredJson(RECURRING_SCHEDULE_STORAGE_KEY, []);
+  data[RECURRING_AUTO_ADD_LOG_STORAGE_KEY] = readStoredJson(RECURRING_AUTO_ADD_LOG_STORAGE_KEY, {});
   return {
     format: BACKUP_FORMAT,
     app: BACKUP_APP_NAME,
