@@ -3210,6 +3210,147 @@ function renderExecutiveSummary() {
   setText("#executiveSummaryRisk", executiveSummary.risk);
 }
 
+const HEALTH_UI_VALUE_LABELS = {
+  unknown: "わからない",
+  poor: "かなり悪い",
+  light: "少し悪い",
+  okay: "普通",
+  good: "良い",
+  deep: "とても良い",
+  depleted: "かなり消耗している",
+  low: "低い",
+  neutral: "普通",
+  recovered: "回復している",
+  refreshed: "すっきりしている",
+  satisfied: "満足している",
+  too_much: "多すぎた",
+  taken: "飲んだ",
+  skipped: "飲まなかった",
+  partial: "一部のみ",
+  not_applicable: "該当なし",
+  very_low: "かなり低い",
+  medium: "普通",
+  high: "高い",
+  unstable: "不安定",
+  overwhelming: "圧倒される",
+  calm: "落ち着いている",
+  flat: "平坦",
+  anxious: "不安",
+  sad: "悲しい",
+  hopeful: "前向き",
+  irritated: "いらいら",
+  mixed: "混ざっている",
+  needs_recovery: "回復を優先したい状態",
+  steady: "安定",
+  normal: "通常",
+  normal_or_light: "通常から軽め",
+  smaller_or_flexible: "小さめ・調整しやすい",
+  gentle: "やさしめ",
+  low_key: "控えめ",
+  normal_or_steady: "通常・安定",
+  no_immediate_health_context_risk: "大きな注意点は見えていません",
+};
+
+const HEALTH_UI_TOKEN_LABELS = {
+  energy_very_low: "エネルギーがかなり低い",
+  energy_low: "エネルギーが低い",
+  energy_unstable: "エネルギーが不安定",
+  recovery_depleted: "回復感がかなり低い",
+  recovery_low: "回復感が低い",
+  stress_high: "ストレスが高い",
+  stress_overwhelming: "ストレスが強い",
+};
+
+function healthUiValue(value) {
+  return HEALTH_UI_VALUE_LABELS[value] || HEALTH_UI_TOKEN_LABELS[value] || value || "-";
+}
+
+function healthUiRisk(value) {
+  if (!value) return "-";
+  return String(value)
+    .split(" / ")
+    .map((part) => healthUiValue(part))
+    .join(" / ");
+}
+
+function buildHealthSummaryUi(health) {
+  if (!health) return "ヘルスチェックはまだ記録されていません。";
+  return [
+    health.sleepHours ? `睡眠 ${health.sleepHours}時間` : "",
+    health.sleepQuality && health.sleepQuality !== "unknown" ? `睡眠の質 ${healthUiValue(health.sleepQuality)}` : "",
+    health.recoveryFeeling && health.recoveryFeeling !== "unknown" ? `回復感 ${healthUiValue(health.recoveryFeeling)}` : "",
+    health.nutritionSatisfaction && health.nutritionSatisfaction !== "unknown" ? `食事 ${healthUiValue(health.nutritionSatisfaction)}` : "",
+    health.medicationStatus && health.medicationStatus !== "unknown" ? `服薬状況 ${healthUiValue(health.medicationStatus)}` : "",
+    health.energyLevel ? `エネルギー ${healthUiValue(health.energyLevel)}` : "",
+    health.mood ? `気分 ${healthUiValue(health.mood)}` : "",
+    health.stressLevel && health.stressLevel !== "unknown" ? `ストレス ${healthUiValue(health.stressLevel)}` : "",
+    health.bodyNote || "",
+  ].filter(Boolean).join(" / ") || "ヘルスチェックは大きな偏りがありません。";
+}
+
+function localizeHealthUiText(value) {
+  if (!value) return "-";
+  const text = String(value);
+  const exact = {
+    "No recent Health Check records yet.": "最近のヘルスチェック記録はまだありません。",
+    "No recent energy trend yet.": "最近のエネルギー傾向はまだありません。",
+    "Sleep and recovery can be reviewed after a few records.": "記録が少し増えると、睡眠と回復の関係を振り返れます。",
+    "Nutrition satisfaction can be reviewed after a few records.": "記録が少し増えると、食事の満足感を振り返れます。",
+    "Stress and mood can be reviewed after a few records.": "記録が少し増えると、ストレスと気分を振り返れます。",
+    "Health Insight will appear after Health Check records are added.": "ヘルスチェックを記録すると、気づきが表示されます。",
+    "Sleep entries are still limited, so the recovery relationship is not visible yet.": "睡眠の記録がまだ少ないため、回復との関係はまだ見えにくいです。",
+    "Nutrition satisfaction is not visible yet.": "食事の満足感はまだ見えにくいです。",
+    "Recent records suggest smaller, flexible actions may fit better today.": "最近の記録では、今日は小さく調整しやすい行動が合うかもしれません。",
+    "Recent records suggest normal action size may be usable as context.": "最近の記録では、通常の行動サイズも参考にできそうです。",
+    "Recent records suggest starting with a softer check-in may fit.": "最近の記録では、やさしい確認から始めると合うかもしれません。",
+    "Recent records suggest a steady opening may fit.": "最近の記録では、落ち着いた始め方が合いそうです。",
+    "Use this only as conversation context, not as medical judgment.": "会話の参考情報として扱い、医療判断としては扱いません。",
+    "Prefer gentle wording and flexible next steps.": "やさしい言葉づかいと、調整しやすい次の一歩を優先します。",
+    "Keep the reply steady while leaving room to adjust.": "返答は落ち着かせつつ、調整できる余白を残します。",
+    "Recent records suggest a smaller step may fit as supporting context.": "最近の記録では、小さめの一歩が合うかもしれない、という補助情報です。",
+    "Recent records suggest the current recommendation can stay steady as supporting context.": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。",
+    "Health Context can explain why approaching this recommendation lightly may be easier today.": "今日はこの提案を軽めに扱うと進めやすいかもしれない、という説明に使えます。",
+    "Health Context does not add a strong constraint to this recommendation.": "ヘルスコンテキスト上、この提案に強い制約は加えていません。",
+    "Reference context only; this is not medical judgment or instruction.": "参考情報のみです。医療判断や指示ではありません。",
+    "Health Check is not recorded yet.": "ヘルスチェックはまだ記録されていません。",
+    "Health Check is neutral.": "ヘルスチェックは大きな偏りがありません。",
+  };
+  if (exact[text]) return exact[text];
+  return text
+    .replace(/sleep ([0-9.]+)h/g, "睡眠 $1時間")
+    .replace(/sleep ([a-z_]+)/g, (_, valueLabel) => `睡眠の質 ${healthUiValue(valueLabel)}`)
+    .replace(/recovery ([a-z_]+)/g, (_, valueLabel) => `回復感 ${healthUiValue(valueLabel)}`)
+    .replace(/nutrition ([a-z_]+)/g, (_, valueLabel) => `食事 ${healthUiValue(valueLabel)}`)
+    .replace(/medication ([a-z_]+)/g, (_, valueLabel) => `服薬状況 ${healthUiValue(valueLabel)}`)
+    .replace(/energy ([a-z_]+)/g, (_, valueLabel) => `エネルギー ${healthUiValue(valueLabel)}`)
+    .replace(/mood ([a-z_]+)/g, (_, valueLabel) => `気分 ${healthUiValue(valueLabel)}`)
+    .replace(/stress ([a-z_]+)/g, (_, valueLabel) => `ストレス ${healthUiValue(valueLabel)}`)
+    .replace(/Recent records with sleep entries show recovery as ([a-z_]+)\. This may be useful context, not a cause\./g, (_, valueLabel) =>
+      `睡眠の記録がある最近の記録では、回復感は「${healthUiValue(valueLabel)}」です。原因ではなく参考情報として扱います。`)
+    .replace(/Recent energy is often ([a-z_]+), so smaller actions may fit the recent pattern\./g, (_, valueLabel) =>
+      `最近のエネルギーは「${healthUiValue(valueLabel)}」が多めです。最近の傾向として、小さめの行動が合うかもしれません。`)
+    .replace(/Recent energy is mostly ([a-z_]+)\./g, (_, valueLabel) =>
+      `最近のエネルギーは「${healthUiValue(valueLabel)}」が多めです。`)
+    .replace(/Recent nutrition satisfaction is often ([a-z_]+)\./g, (_, valueLabel) =>
+      `最近の食事の満足感は「${healthUiValue(valueLabel)}」が多めです。`)
+    .replace(/Recent mood is mostly ([a-z_]+)\. Stress records are still limited\./g, (_, valueLabel) =>
+      `最近の気分は「${healthUiValue(valueLabel)}」が多めです。ストレスの記録はまだ少なめです。`)
+    .replace(/Recent records show stress ([a-z_]+) and mood ([a-z_]+)\./g, (_, stress, mood) =>
+      `最近の記録では、ストレスは「${healthUiValue(stress)}」、気分は「${healthUiValue(mood)}」です。`)
+    .replace(/Recent Health Check records: (\d+)\./g, "最近のヘルスチェック記録: $1件。")
+    .replace(/Recovery has been low in some sleep-related records\./g, "睡眠に関連する一部の記録で、回復感が低めです。")
+    .replace(/Energy may be a useful context when choosing task size\./g, "行動サイズを考えるとき、エネルギーが参考になりそうです。")
+    .replace(/This is a reflection aid, not a medical judgment\./g, "これは振り返り用の情報で、医療判断ではありません。")
+    .replace(/Capacity context: ([a-z_]+)\./g, (_, valueLabel) => `行動しやすさ: ${healthUiValue(valueLabel)}。`)
+    .replace(/Recovery status: ([a-z_]+)\./g, (_, valueLabel) => `回復状態: ${healthUiValue(valueLabel)}。`)
+    .replace(/Useful context: ([a-z_ /]+)\./g, (_, valueLabel) => `参考になる注意点: ${healthUiRisk(valueLabel)}。`)
+    .replace(/Built from Health State and Health Insight\. ?/g, "ヘルス状態とヘルスインサイトから作成。")
+    .replace(/Built from Health Context\. ?/g, "ヘルスコンテキストから作成。")
+    .replace(/No strong health context\./g, "強い体調文脈はありません。")
+    .replace(/Health Context supports how to approach (.*); it does not change the recommendation type, count, or ranking\./g, (_, label) =>
+      `ヘルスコンテキストは「${label}」への取り組み方の参考です。提案の種類・件数・順位は変更しません。`);
+}
+
 function buildHealthSummary(health = getLatestHealthState()) {
   if (!health) {
     return {
@@ -3280,7 +3421,6 @@ function upsertHealthState(updates = {}) {
 
 function renderHealthState() {
   const health = healthState.find((item) => item.date === activeDate) || null;
-  const summary = buildHealthSummary(health);
   const setValue = (selector, value) => {
     const target = $(selector);
     if (!target) return;
@@ -3296,9 +3436,9 @@ function renderHealthState() {
   setValue("#healthStressLevel", health?.stressLevel || "unknown");
   setValue("#healthBodyNote", health?.bodyNote);
   const status = $("#healthStateStatus");
-  if (status) status.textContent = health?.updatedAt ? "Health Check saved." : "Record today's health context.";
+  if (status) status.textContent = health?.updatedAt ? "Health Check を保存しました。" : "今日の体調メモを記録できます。";
   const summaryTarget = $("#healthStateSummary");
-  if (summaryTarget) summaryTarget.textContent = summary.healthContext || "-";
+  if (summaryTarget) summaryTarget.textContent = buildHealthSummaryUi(health);
 }
 
 function getRecentHealthStates(limit = 7) {
@@ -3383,12 +3523,12 @@ function renderHealthInsight() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#healthInsightRecovery", insight.recentRecovery);
-  setText("#healthInsightEnergyTrend", insight.recentEnergyTrend);
-  setText("#healthInsightSleepRecovery", insight.sleepRecoveryNote);
-  setText("#healthInsightNutrition", insight.nutritionTrend);
-  setText("#healthInsightStressMood", insight.stressMoodNote);
-  setText("#healthInsightText", insight.insightText);
+  setText("#healthInsightRecovery", healthUiValue(insight.recentRecovery));
+  setText("#healthInsightEnergyTrend", localizeHealthUiText(insight.recentEnergyTrend));
+  setText("#healthInsightSleepRecovery", localizeHealthUiText(insight.sleepRecoveryNote));
+  setText("#healthInsightNutrition", localizeHealthUiText(insight.nutritionTrend));
+  setText("#healthInsightStressMood", localizeHealthUiText(insight.stressMoodNote));
+  setText("#healthInsightText", localizeHealthUiText(insight.insightText));
 }
 
 function buildHealthContext(health = getLatestHealthState(), healthInsight = buildHealthInsight(getRecentHealthStates())) {
@@ -3447,12 +3587,12 @@ function renderHealthContext() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#healthContextCapacity", context.currentCapacity);
-  setText("#healthContextRecovery", context.recoveryStatus);
-  setText("#healthContextRisk", context.currentRisk);
-  setText("#healthContextRecommendation", context.recommendationContext);
-  setText("#healthContextExecutiveNote", context.executiveNote);
-  setText("#healthContextSource", context.sourceSummary);
+  setText("#healthContextCapacity", healthUiValue(context.currentCapacity));
+  setText("#healthContextRecovery", healthUiValue(context.recoveryStatus));
+  setText("#healthContextRisk", healthUiRisk(context.currentRisk));
+  setText("#healthContextRecommendation", localizeHealthUiText(context.recommendationContext));
+  setText("#healthContextExecutiveNote", localizeHealthUiText(context.executiveNote));
+  setText("#healthContextSource", localizeHealthUiText(context.sourceSummary));
 }
 
 function buildHealthAwareConversation(healthContext = getLatestHealthContext()) {
@@ -3495,12 +3635,12 @@ function renderHealthAwareConversation() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#healthAwareConversationTone", healthAware.conversationTone);
-  setText("#healthAwareOpeningHint", healthAware.openingHint);
-  setText("#healthAwareSupportHint", healthAware.supportHint);
-  setText("#healthAwareCautionNote", healthAware.cautionNote);
-  setText("#healthAwareReplyAdjustment", healthAware.replyAdjustment);
-  setText("#healthAwareSourceSummary", healthAware.sourceSummary);
+  setText("#healthAwareConversationTone", healthUiValue(healthAware.conversationTone));
+  setText("#healthAwareOpeningHint", localizeHealthUiText(healthAware.openingHint));
+  setText("#healthAwareSupportHint", localizeHealthUiText(healthAware.supportHint));
+  setText("#healthAwareCautionNote", localizeHealthUiText(healthAware.cautionNote));
+  setText("#healthAwareReplyAdjustment", localizeHealthUiText(healthAware.replyAdjustment));
+  setText("#healthAwareSourceSummary", localizeHealthUiText(healthAware.sourceSummary));
 }
 
 function findConversationFeedback(replyText) {

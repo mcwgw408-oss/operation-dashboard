@@ -199,14 +199,14 @@
                   </div>
                 </section>
                 <section class="health-aware-conversation-panel">
-                  <h3>Health-Aware Conversation</h3>
+                  <h3>体調をふまえた会話</h3>
                   <div class="health-aware-conversation-grid">
-                    <div><span>Conversation Tone</span><p id="healthAwareConversationTone">-</p></div>
-                    <div><span>Opening Hint</span><p id="healthAwareOpeningHint">-</p></div>
-                    <div><span>Support Hint</span><p id="healthAwareSupportHint">-</p></div>
-                    <div><span>Caution Note</span><p id="healthAwareCautionNote">-</p></div>
-                    <div><span>Reply Adjustment</span><p id="healthAwareReplyAdjustment">-</p></div>
-                    <div><span>Source Summary</span><p id="healthAwareSourceSummary">-</p></div>
+                    <div><span>会話のトーン</span><p id="healthAwareConversationTone">-</p></div>
+                    <div><span>話し始めのヒント</span><p id="healthAwareOpeningHint">-</p></div>
+                    <div><span>補助メッセージ</span><p id="healthAwareSupportHint">-</p></div>
+                    <div><span>注意事項</span><p id="healthAwareCautionNote">-</p></div>
+                    <div><span>返答の調整方針</span><p id="healthAwareReplyAdjustment">-</p></div>
+                    <div><span>参照元</span><p id="healthAwareSourceSummary">-</p></div>
                   </div>
                 </section>
                 <section class="reply-plan-panel">
@@ -432,102 +432,102 @@
                   </div>
                     </div>
                   </details>
-                  <div class="health-check-panel" aria-label="Health Check">
-                    <h4>Health Check</h4>
+                  <div class="health-check-panel" aria-label="ヘルスチェック">
+                    <h4>ヘルスチェック</h4>
                     <div class="health-check-grid">
-                      <label><span>Sleep Hours</span><input id="healthSleepHours" type="number" min="0" max="24" step="0.5" inputmode="decimal" /></label>
-                      <label><span>Sleep Quality</span>
+                      <label><span>睡眠時間</span><input id="healthSleepHours" type="number" min="0" max="24" step="0.5" inputmode="decimal" /></label>
+                      <label><span>睡眠の質</span>
                         <select id="healthSleepQuality">
-                          <option value="unknown">unknown</option>
-                          <option value="poor">poor</option>
-                          <option value="light">light</option>
-                          <option value="okay">okay</option>
-                          <option value="good">good</option>
-                          <option value="deep">deep</option>
+                          <option value="unknown">わからない</option>
+                          <option value="poor">かなり悪い</option>
+                          <option value="light">少し悪い</option>
+                          <option value="okay">普通</option>
+                          <option value="good">良い</option>
+                          <option value="deep">とても良い</option>
                         </select>
                       </label>
-                      <label><span>Recovery Feeling</span>
+                      <label><span>回復感</span>
                         <select id="healthRecoveryFeeling">
-                          <option value="unknown">unknown</option>
-                          <option value="depleted">depleted</option>
-                          <option value="low">low</option>
-                          <option value="neutral">neutral</option>
-                          <option value="recovered">recovered</option>
-                          <option value="refreshed">refreshed</option>
+                          <option value="unknown">わからない</option>
+                          <option value="depleted">かなり消耗している</option>
+                          <option value="low">低い</option>
+                          <option value="neutral">普通</option>
+                          <option value="recovered">回復している</option>
+                          <option value="refreshed">すっきりしている</option>
                         </select>
                       </label>
-                      <label><span>Nutrition Satisfaction</span>
+                      <label><span>食事の満足感</span>
                         <select id="healthNutritionSatisfaction">
-                          <option value="unknown">unknown</option>
-                          <option value="low">low</option>
-                          <option value="okay">okay</option>
-                          <option value="satisfied">satisfied</option>
-                          <option value="too_much">too_much</option>
+                          <option value="unknown">わからない</option>
+                          <option value="low">低い</option>
+                          <option value="okay">普通</option>
+                          <option value="satisfied">満足している</option>
+                          <option value="too_much">多すぎた</option>
                         </select>
                       </label>
-                      <label><span>Medication Status</span>
+                      <label><span>服薬状況</span>
                         <select id="healthMedicationStatus">
-                          <option value="unknown">unknown</option>
-                          <option value="taken">taken</option>
-                          <option value="skipped">skipped</option>
-                          <option value="partial">partial</option>
-                          <option value="not_applicable">not_applicable</option>
+                          <option value="unknown">わからない</option>
+                          <option value="taken">飲んだ</option>
+                          <option value="skipped">飲まなかった</option>
+                          <option value="partial">一部のみ</option>
+                          <option value="not_applicable">該当なし</option>
                         </select>
                       </label>
-                      <label><span>Energy Level</span>
+                      <label><span>エネルギー</span>
                         <select id="healthEnergyLevel">
-                          <option value="very_low">very_low</option>
-                          <option value="low">low</option>
-                          <option value="medium">medium</option>
-                          <option value="high">high</option>
-                          <option value="unstable">unstable</option>
+                          <option value="very_low">かなり低い</option>
+                          <option value="low">低い</option>
+                          <option value="medium">普通</option>
+                          <option value="high">高い</option>
+                          <option value="unstable">不安定</option>
                         </select>
                       </label>
-                      <label><span>Mood</span>
+                      <label><span>気分</span>
                         <select id="healthMood">
-                          <option value="calm">calm</option>
-                          <option value="flat">flat</option>
-                          <option value="anxious">anxious</option>
-                          <option value="sad">sad</option>
-                          <option value="hopeful">hopeful</option>
-                          <option value="irritated">irritated</option>
-                          <option value="mixed">mixed</option>
+                          <option value="calm">落ち着いている</option>
+                          <option value="flat">平坦</option>
+                          <option value="anxious">不安</option>
+                          <option value="sad">悲しい</option>
+                          <option value="hopeful">前向き</option>
+                          <option value="irritated">いらいら</option>
+                          <option value="mixed">混ざっている</option>
                         </select>
                       </label>
-                      <label><span>Stress Level</span>
+                      <label><span>ストレス</span>
                         <select id="healthStressLevel">
-                          <option value="unknown">unknown</option>
-                          <option value="low">low</option>
-                          <option value="medium">medium</option>
-                          <option value="high">high</option>
-                          <option value="overwhelming">overwhelming</option>
+                          <option value="unknown">わからない</option>
+                          <option value="low">低い</option>
+                          <option value="medium">普通</option>
+                          <option value="high">高い</option>
+                          <option value="overwhelming">圧倒される</option>
                         </select>
                       </label>
                     </div>
-                    <label class="health-check-note"><span>Body Note</span><textarea id="healthBodyNote" rows="3"></textarea></label>
+                    <label class="health-check-note"><span>体のメモ</span><textarea id="healthBodyNote" rows="3"></textarea></label>
                     <p id="healthStateSummary" class="health-check-summary">-</p>
-                    <p id="healthStateStatus" class="health-check-status">Record today's health context.</p>
+                    <p id="healthStateStatus" class="health-check-status">今日の体調メモを記録できます。</p>
                   </div>
-                  <div class="health-insight-panel" aria-label="Health Insight">
-                    <h4>Health Insight</h4>
+                  <div class="health-insight-panel" aria-label="ヘルスインサイト">
+                    <h4>ヘルスインサイト</h4>
                     <div class="health-insight-grid">
-                      <div><span>Recent Recovery</span><p id="healthInsightRecovery">-</p></div>
-                      <div><span>Energy Trend</span><p id="healthInsightEnergyTrend">-</p></div>
-                      <div><span>Sleep / Recovery Note</span><p id="healthInsightSleepRecovery">-</p></div>
-                      <div><span>Nutrition Trend</span><p id="healthInsightNutrition">-</p></div>
-                      <div><span>Stress / Mood Note</span><p id="healthInsightStressMood">-</p></div>
-                      <div><span>Insight</span><p id="healthInsightText">-</p></div>
+                      <div><span>最近の回復傾向</span><p id="healthInsightRecovery">-</p></div>
+                      <div><span>エネルギーの傾向</span><p id="healthInsightEnergyTrend">-</p></div>
+                      <div><span>睡眠と回復のメモ</span><p id="healthInsightSleepRecovery">-</p></div>
+                      <div><span>食事の傾向</span><p id="healthInsightNutrition">-</p></div>
+                      <div><span>ストレス・気分のメモ</span><p id="healthInsightStressMood">-</p></div>
+                      <div><span>気づき</span><p id="healthInsightText">-</p></div>
                     </div>
                   </div>
-                  <div class="health-context-panel" aria-label="Health Context">
-                    <h4>Health Context</h4>
+                  <div class="health-context-panel" aria-label="ヘルスコンテキスト">
+                    <h4>ヘルスコンテキスト</h4>
                     <div class="health-context-grid">
-                      <div><span>Current Capacity</span><p id="healthContextCapacity">-</p></div>
-                      <div><span>Recovery Status</span><p id="healthContextRecovery">-</p></div>
-                      <div><span>Current Risk</span><p id="healthContextRisk">-</p></div>
-                      <div><span>Recommendation Context</span><p id="healthContextRecommendation">-</p></div>
-                      <div><span>Executive Note</span><p id="healthContextExecutiveNote">-</p></div>
-                      <div><span>Source Summary</span><p id="healthContextSource">-</p></div>
+                      <div><span>現在の行動しやすさ</span><p id="healthContextCapacity">-</p></div>
+                      <div><span>回復状態</span><p id="healthContextRecovery">-</p></div>
+                      <div><span>現在の注意点</span><p id="healthContextRisk">-</p></div>
+                      <div><span>提案の参考情報</span><p id="healthContextRecommendation">-</p></div>
+                      <div><span>Executive向けメモ</span><p id="healthContextExecutiveNote">-</p></div>
+                      <div><span>参照元</span><p id="healthContextSource">-</p></div>
                     </div>
                   </div>
                   <div class="conversation-feedback-panel" aria-label="Conversation Feedback">
