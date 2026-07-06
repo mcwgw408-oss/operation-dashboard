@@ -5707,6 +5707,66 @@ function pickDailyFocusTask(todayTasks = [], dailyTasks = []) {
   );
 }
 
+function buildContextSummary({
+  priorityCandidate = null,
+  recommendation = null,
+  healthAwareRecommendation = null,
+  memoryContext = null,
+  todayTasks = [],
+  dailyTasks = [],
+  adaptiveGuidance = buildAdaptiveGuidanceScores(),
+} = {}) {
+  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  const memoryTitle = dailyFocusValue(
+    memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
+    memoryDisplayTitle(memoryContext?.recent?.[0]),
+  );
+  const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
+  const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
+  const taskCount = asArray(todayTasks).filter(brainIsOpen).length + asArray(dailyTasks).filter(brainIsOpen).length;
+  const theme = dailyFocusValue(priorityCandidate?.title) ||
+    dailyFocusValue(recommendation?.title) ||
+    dailyFocusValue(focusTask?.title) ||
+    "整える日";
+  const signals = [
+    priorityCandidate?.title ? "priority" : "",
+    recommendation?.title ? "recommendation" : "",
+    adaptiveGuidance.topCategory && adaptiveGuidance.topCategory !== "none" ? `adaptive:${adaptiveGuidance.topCategory}` : "",
+    support || caution ? "health" : "",
+    memoryTitle ? "memory" : "",
+    taskCount ? `tasks:${taskCount}` : "",
+  ].filter(Boolean);
+  const lines = [
+    `今日は「${theme}」が文脈の中心です。`,
+    support || caution || memoryTitle
+      ? `${support || caution || `記憶では「${memoryTitle}」を見ています。`} 一つずつ進める流れが向いています。`
+      : "一つずつ進める流れが向いています。",
+  ];
+
+  return {
+    theme,
+    focusTask,
+    memoryTitle,
+    support,
+    caution,
+    taskCount,
+    adaptiveTopCategory: adaptiveGuidance.topCategory,
+    text: lines.join("\n"),
+    signals,
+  };
+}
+
+function renderContextSummary(context = {}) {
+  const summary = buildContextSummary(context);
+  const text = $("#contextSummaryText");
+  const theme = $("#contextSummaryTheme");
+  const signals = $("#contextSummarySignals");
+  if (text) text.textContent = summary.text;
+  if (theme) theme.textContent = summary.theme;
+  if (signals) signals.textContent = summary.signals.length ? summary.signals.join(" / ") : "-";
+  return summary;
+}
+
 function buildDailyFocusCondition(healthAwareRecommendation, memoryContext) {
   const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
   const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
@@ -5727,8 +5787,10 @@ function buildDailyFocusCondition(healthAwareRecommendation, memoryContext) {
   return "体調と記憶の入力が増えると、今日の会話の意識点をここにまとめます。";
 }
 
-function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwareRecommendation, memoryContext } = {}) {
-  const priority = dailyFocusValue(priorityCandidate?.title) || dailyFocusValue(recommendation?.title);
+function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwareRecommendation, memoryContext, contextSummary = null } = {}) {
+  const priority = dailyFocusValue(contextSummary?.theme) ||
+    dailyFocusValue(priorityCandidate?.title) ||
+    dailyFocusValue(recommendation?.title);
   const action = dailyFocusValue(recommendation?.actionText);
   const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
   const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
@@ -5766,6 +5828,7 @@ function renderMorningGuidanceLayer({
   recommendation = null,
   healthAwareRecommendation = null,
   memoryContext = null,
+  contextSummary = null,
 } = {}) {
   const target = $("#morningGuidanceText");
   if (!target) return;
@@ -5774,6 +5837,7 @@ function renderMorningGuidanceLayer({
     recommendation,
     healthAwareRecommendation,
     memoryContext,
+    contextSummary,
   });
 }
 
@@ -5784,10 +5848,12 @@ function renderDailyFocusLayer({
   memoryContext = null,
   todayTasks = [],
   dailyTasks = [],
+  contextSummary = null,
 } = {}) {
   if (!$("#dailyFocusPriority")) return;
   const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
   $("#dailyFocusPriority").textContent =
+    dailyFocusValue(contextSummary?.theme) ||
     dailyFocusValue(priorityCandidate?.title) ||
     dailyFocusValue(recommendation?.title) ||
     "今日はまず整えることを優先します。";
@@ -5915,6 +5981,7 @@ function buildReflectionTomorrowNote({
   learningEntry = null,
   reply = null,
   adaptiveGuidance = buildAdaptiveGuidanceScores(),
+  contextSummary = null,
 } = {}) {
   const replyText = replySentence(reply?.text);
   const replyFeedback = replyText ? findConversationFeedback(replyText) : null;
@@ -5930,6 +5997,9 @@ function buildReflectionTomorrowNote({
   }
   if (adaptiveGuidance.topCategory === "health" || adaptiveGuidance.topCategory === "rest") {
     return "今日は体調や回復を強めに見ています。\n明日も無理のない提案を維持します。";
+  }
+  if (contextSummary?.theme) {
+    return `今日は「${contextSummary.theme}」が文脈の中心でした。\n明日もこの流れを見ながら提案を整えます。`;
   }
   return "今日はまだ判断材料を集めている段階です。\n明日はフィードバックを見ながら提案を少しずつ整えます。";
 }
@@ -6111,7 +6181,8 @@ function renderBrainPrototype() {
   renderLearningSummary(latestLearningSummary);
   renderLearningHint(latestLearningHint);
   renderLearningConfidence(latestLearningConfidence);
-  renderAdaptiveGuidanceLayer();
+  const adaptiveGuidance = buildAdaptiveGuidanceScores();
+  renderAdaptiveGuidanceLayer(adaptiveGuidance);
   renderConversationContext(conversationContext);
   renderReplyPlan(replyPlan);
   renderReply(reply);
@@ -6211,6 +6282,15 @@ function renderBrainPrototype() {
     day.updatedAt ? `今日の記録更新: ${brainFormatDateTime(day.updatedAt)}` : "",
   ];
   appendBrainItems($("#brainRecentChanges"), recentChanges, "最近の変化はまだありません。");
+  const contextSummary = renderContextSummary({
+    priorityCandidate,
+    recommendation,
+    healthAwareRecommendation,
+    memoryContext: brainMemoryContext,
+    todayTasks,
+    dailyTasks,
+    adaptiveGuidance,
+  });
   renderDailyFocusLayer({
     priorityCandidate,
     recommendation,
@@ -6218,12 +6298,14 @@ function renderBrainPrototype() {
     memoryContext: brainMemoryContext,
     todayTasks,
     dailyTasks,
+    contextSummary,
   });
   renderMorningGuidanceLayer({
     priorityCandidate,
     recommendation,
     healthAwareRecommendation,
     memoryContext: brainMemoryContext,
+    contextSummary,
   });
   renderExplainableGuidanceLayer({
     priorityCandidate,
@@ -6232,6 +6314,7 @@ function renderBrainPrototype() {
     memoryContext: brainMemoryContext,
     todayTasks,
     dailyTasks,
+    adaptiveGuidance,
   });
   renderReflectionLayer({
     priorityCandidate,
@@ -6239,6 +6322,8 @@ function renderBrainPrototype() {
     learningEntry,
     reply,
     todayTasks,
+    adaptiveGuidance,
+    contextSummary,
   });
 }
 function renderAll() {

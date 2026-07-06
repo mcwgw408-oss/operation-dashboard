@@ -1005,6 +1005,28 @@ textarea {
   padding-top: 10px;
 }
 
+.context-summary-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.context-summary-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.context-summary-panel p {
+  margin: 0;
+  white-space: pre-line;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .reflection-layer-panel {
   display: grid;
   gap: 8px;
@@ -1068,6 +1090,12 @@ textarea {
   gap: 8px;
 }
 
+.context-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .learning-confidence-grid div {
   display: grid;
   gap: 4px;
@@ -1086,17 +1114,28 @@ textarea {
   padding: 8px;
 }
 
+.context-summary-grid div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px;
+}
+
 .learning-confidence-grid span,
 .learning-confidence-panel small,
 .adaptive-guidance-grid span,
-.adaptive-guidance-panel small {
+.adaptive-guidance-panel small,
+.context-summary-grid span {
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
 }
 
 .learning-confidence-grid strong,
-.adaptive-guidance-grid strong {
+.adaptive-guidance-grid strong,
+.context-summary-grid strong {
   font-size: 15px;
 }
 
