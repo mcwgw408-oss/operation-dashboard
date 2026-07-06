@@ -219,6 +219,43 @@ textarea {
   gap: 16px;
 }
 
+.dashboard > * {
+  order: 20;
+}
+
+.summary-panel {
+  order: 1;
+}
+
+.dashboard-proposal-heading {
+  order: 2;
+}
+
+.brain-panel {
+  order: 3;
+}
+
+.dashboard-health-input-panel {
+  order: 4;
+}
+
+.dashboard-memory-input-panel {
+  order: 5;
+}
+
+.dashboard-task-panel {
+  order: 6;
+}
+
+.schedule-panel {
+  order: 7;
+}
+
+.dashboard-ai-analysis-panel,
+.dashboard-analysis-heading {
+  order: 40;
+}
+
 .summary-panel,
 .panel {
   border: 1px solid var(--line);
@@ -676,6 +713,13 @@ textarea {
   padding: 9px 10px;
 }
 
+.brain-decision-details summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .brain-decision-details span,
 .brain-source-note {
   color: var(--muted);
@@ -932,6 +976,16 @@ textarea {
 .generated-reply-panel {
   border-top: 1px solid #e7edf4;
   padding-top: 8px;
+}
+
+.daily-action-mount .generated-reply-panel {
+  display: grid;
+  gap: 9px;
+  margin-top: 4px;
+  border: 1px solid #f0c9d5;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 11px;
 }
 
 .brain-memory-context-grid {

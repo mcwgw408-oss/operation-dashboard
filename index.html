@@ -74,11 +74,12 @@
               <span class="brain-label">Brainが選んだ候補</span>
               <strong id="brainPriority">まだ優先候補はありません</strong>
               <p id="brainPriorityNote">今日の予定・タスク・記憶から、まず注目する対象を選びます。</p>
-              <div class="brain-decision-details" aria-label="候補の判断材料">
+              <details class="brain-decision-details" aria-label="候補の判断材料">
+                <summary>判断材料を見る</summary>
                 <div><span>スコア</span><p id="brainPriorityScore">-</p></div>
                 <div><span>判断材料</span><ul id="brainPriorityMaterials" class="brain-list"></ul></div>
                 <p id="brainPriorityScoreHelp">スコアは候補の種類・更新状況・体調や勢いを合わせた目安です。</p>
-              </div>
+              </details>
             </div>
             <div class="brain-card reason-card">
               <span class="brain-label">候補にした理由</span>
@@ -140,6 +141,7 @@
                 </div>
                 <p id="firstAgentResponse" class="first-agent-response" hidden></p>
               </div>
+              <div id="generatedReplyMount" class="daily-action-mount"></div>
               <div class="learning-feedback-panel" aria-label="提案の学習メモ">
                 <span class="brain-label">提案の学習メモ</span>
                 <div class="learning-feedback-actions">
@@ -661,7 +663,7 @@
                   </div>
                 </details>
                 <form id="memoryMemoForm" class="memory-memo-form">
-                  <label>今日の記憶メモ<textarea id="memoryMemoText" rows="3" placeholder="今日一日で覚えておいてほしいことを書いてください"></textarea></label>
+                  <label>今日さくらに覚えてほしいこと<textarea id="memoryMemoText" rows="3" placeholder="今日一日で覚えておいてほしいことを書いてください"></textarea></label>
                   <button type="submit">記憶に追加</button>
                 </form>
               </div>
@@ -851,7 +853,7 @@
         <section class="panel dashboard-memory-input-panel span-2" aria-label="今日の記憶メモ">
           <div class="panel-heading">
             <div>
-              <h2>今日の記憶メモ</h2>
+              <h2>今日さくらに覚えてほしいこと</h2>
               <p class="section-note">今日あったこと、気づいたこと、体調、次回覚えておいてほしいことを一日の終わりにまとめて記録します。</p>
             </div>
           </div>
