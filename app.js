@@ -5458,6 +5458,127 @@ function renderLearningConfidence(confidence = buildLearningConfidence()) {
   if (source) source.textContent = confidence.source;
 }
 
+const ADAPTIVE_GUIDANCE_CATEGORY_RULES = {
+  writing: {
+    keywords: /write|writing|article|substack|note|idea|発信|記事|執筆|投稿|文章/,
+    recommendationTypes: ["write_from_idea"],
+    modes: [],
+    energies: [],
+  },
+  coding: {
+    keywords: /code|coding|codex|github|app|js|css|html|commit|push|sakura ai|開発|実装/,
+    recommendationTypes: [],
+    modes: [],
+    energies: [],
+  },
+  health: {
+    keywords: /health|recovery|energy|sleep|mood|stress|体調|回復|睡眠|気分|ストレス/,
+    recommendationTypes: [],
+    modes: ["recovery", "low-energy"],
+    energies: ["Recovery"],
+  },
+  rest: {
+    keywords: /rest|break|pause|low-energy|recovery|休|無理|回復/,
+    recommendationTypes: ["rest_first", "start_tiny"],
+    modes: ["recovery", "low-energy"],
+    energies: ["Recovery"],
+  },
+};
+
+const ADAPTIVE_GUIDANCE_CATEGORIES = Object.keys(ADAPTIVE_GUIDANCE_CATEGORY_RULES);
+
+function adaptiveGuidanceCategoriesForText(...parts) {
+  const text = parts.map((part) => String(part || "").toLowerCase()).join(" ");
+  const categories = new Set();
+  Object.entries(ADAPTIVE_GUIDANCE_CATEGORY_RULES).forEach(([category, rule]) => {
+    if (rule.keywords.test(text)) categories.add(category);
+  });
+  return [...categories];
+}
+
+function adaptiveGuidanceCategoriesForLearning(entry) {
+  const categories = new Set(adaptiveGuidanceCategoriesForText(
+    entry?.recommendationType,
+    entry?.recommendationText,
+    entry?.mode,
+    entry?.energy,
+    entry?.note,
+  ));
+  Object.entries(ADAPTIVE_GUIDANCE_CATEGORY_RULES).forEach(([category, rule]) => {
+    if (rule.recommendationTypes.includes(entry?.recommendationType)) categories.add(category);
+    if (rule.modes.includes(entry?.mode)) categories.add(category);
+    if (rule.energies.includes(entry?.energy)) categories.add(category);
+  });
+  return [...categories];
+}
+
+function buildAdaptiveGuidanceScores({
+  learningItems = learningLog,
+  conversationItems = conversationFeedback,
+} = {}) {
+  const state = Object.fromEntries(
+    ADAPTIVE_GUIDANCE_CATEGORIES.map((category) => [category, { total: 1, score: 0.5, signals: 0 }]),
+  );
+  const addSignal = (category, value, weight) => {
+    if (!state[category]) return;
+    state[category].score += value * weight;
+    state[category].total += weight;
+    state[category].signals += 1;
+  };
+
+  asArray(learningItems).slice(0, 20).forEach((entry, index) => {
+    if (entry?.accepted !== true && entry?.accepted !== false) return;
+    const value = entry.accepted ? 1 : 0;
+    const weight = Math.max(0.45, 1 - index * 0.03);
+    adaptiveGuidanceCategoriesForLearning(entry).forEach((category) => addSignal(category, value, weight));
+  });
+
+  asArray(conversationItems).slice(0, 20).forEach((entry, index) => {
+    if (entry?.natural !== true && entry?.natural !== false) return;
+    const value = entry.natural ? 0.75 : 0.25;
+    const weight = Math.max(0.25, 0.55 - index * 0.015);
+    adaptiveGuidanceCategoriesForText(entry.replyText, entry.note).forEach((category) => addSignal(category, value, weight));
+  });
+
+  const scores = Object.fromEntries(
+    ADAPTIVE_GUIDANCE_CATEGORIES.map((category) => [
+      category,
+      Number((state[category].score / state[category].total).toFixed(2)),
+    ]),
+  );
+  const signalCounts = Object.fromEntries(
+    ADAPTIVE_GUIDANCE_CATEGORIES.map((category) => [category, state[category].signals]),
+  );
+  const topCategory = ADAPTIVE_GUIDANCE_CATEGORIES
+    .filter((category) => signalCounts[category] > 0)
+    .sort((a, b) => scores[b] - scores[a])[0] || "none";
+
+  return {
+    scores,
+    signalCounts,
+    topCategory,
+    sourceSummary: `learning:${asArray(learningItems).length} / conversation:${asArray(conversationItems).length}`,
+  };
+}
+
+function renderAdaptiveGuidanceLayer(guidance = buildAdaptiveGuidanceScores()) {
+  const setText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value;
+  };
+  setText("#adaptiveGuidanceWriting", guidance.scores.writing.toFixed(2));
+  setText("#adaptiveGuidanceCoding", guidance.scores.coding.toFixed(2));
+  setText("#adaptiveGuidanceHealth", guidance.scores.health.toFixed(2));
+  setText("#adaptiveGuidanceRest", guidance.scores.rest.toFixed(2));
+  setText(
+    "#adaptiveGuidanceSummary",
+    guidance.topCategory === "none"
+      ? "まだ十分なフィードバック傾向はありません。Recommendationにはまだ反映していません。"
+      : `最近は ${guidance.topCategory} への反応が相対的に高めです。Recommendationにはまだ反映していません。`,
+  );
+  setText("#adaptiveGuidanceSource", guidance.sourceSummary);
+}
+
 function renderLearningStatus() {
   const summary = buildLearningSummary();
   const hint = buildLearningHint(summary);
@@ -5465,6 +5586,7 @@ function renderLearningStatus() {
   renderLearningSummary(summary);
   renderLearningHint(hint);
   renderLearningConfidence(confidence);
+  renderAdaptiveGuidanceLayer();
 }
 
 function buildExplainLayerDetails(input, recommendation, memoryContext = {}, healthAwareRecommendation = null) {
@@ -5842,6 +5964,7 @@ function renderBrainPrototype() {
   renderLearningSummary(latestLearningSummary);
   renderLearningHint(latestLearningHint);
   renderLearningConfidence(latestLearningConfidence);
+  renderAdaptiveGuidanceLayer();
   renderConversationContext(conversationContext);
   renderReplyPlan(replyPlan);
   renderReply(reply);

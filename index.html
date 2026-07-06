@@ -220,6 +220,17 @@
                 <p id="learningConfidenceMessage">提案の学習メモはまだ学習中のため、参考情報として控えめに扱います。</p>
                 <small>source <strong id="learningConfidenceSource">totalLogs</strong></small>
               </div>
+              <div class="adaptive-guidance-panel" aria-label="Adaptive Guidance">
+                <span class="brain-label">Adaptive Guidance</span>
+                <div class="adaptive-guidance-grid">
+                  <div><span>writing</span><strong id="adaptiveGuidanceWriting">0.50</strong></div>
+                  <div><span>coding</span><strong id="adaptiveGuidanceCoding">0.50</strong></div>
+                  <div><span>health</span><strong id="adaptiveGuidanceHealth">0.50</strong></div>
+                  <div><span>rest</span><strong id="adaptiveGuidanceRest">0.50</strong></div>
+                </div>
+                <p id="adaptiveGuidanceSummary">既存フィードバックから最近の傾向を集計します。Recommendationにはまだ反映していません。</p>
+                <small>source <strong id="adaptiveGuidanceSource">learningLog, conversationFeedback</strong></small>
+              </div>
                 </div>
               </details>
             <div class="brain-section-heading">
