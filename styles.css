@@ -615,6 +615,12 @@ textarea {
   background: #fff2f6;
 }
 
+.first-agent-actions button.active {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
 .brain-card .first-agent-response {
   border-radius: 8px;
   background: #fff2f6;
@@ -659,6 +665,32 @@ textarea {
 .learning-feedback-panel textarea {
   min-height: 74px;
   resize: vertical;
+}
+
+.brain-decision-details {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 9px 10px;
+}
+
+.brain-decision-details span,
+.brain-source-note {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.brain-decision-details p,
+.brain-source-note {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.brain-decision-details .brain-list {
+  margin-top: 3px;
 }
 
 .brain-card .learning-feedback-status {
@@ -1847,6 +1879,10 @@ textarea {
   resize: vertical;
 }
 
+.conversation-feedback-save {
+  justify-self: start;
+}
+
 .conversation-feedback-status {
   margin: 0;
   color: var(--muted);
@@ -1910,6 +1946,13 @@ textarea {
   min-height: 70px;
   padding: 8px;
   resize: vertical;
+}
+
+.health-reflection-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .health-check-summary {
@@ -2255,6 +2298,25 @@ textarea {
   font-size: 13px;
   font-weight: 700;
   padding: 6px 12px;
+}
+
+.daily-input-panel textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.daily-input-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.daily-input-actions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .brain-list {

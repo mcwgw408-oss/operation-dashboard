@@ -140,6 +140,7 @@ let currentConversationContext = null;
 let currentReplyPlan = null;
 let currentRecommendation = null;
 let currentHealthAwareRecommendation = null;
+let currentFirstAgentReply = "";
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -207,6 +208,7 @@ function blankDay() {
     projects: defaultProjects.map(newItem),
     memos: [],
     learnings: [],
+    dailyInput: "",
     metrics: {
       mailUnread: "",
       mailProcessed: "",
@@ -267,6 +269,14 @@ function ensureLearningList(day) {
 function ensureTodayEvents(day) {
   if (!Array.isArray(day.todayEvents)) {
     day.todayEvents = [];
+    return true;
+  }
+  return false;
+}
+
+function ensureDailyInput(day) {
+  if (!("dailyInput" in day)) {
+    day.dailyInput = "";
     return true;
   }
   return false;
@@ -799,6 +809,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureTodayEvents(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureDailyInput(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
@@ -1431,6 +1444,14 @@ function renderLaterItems() {
 
 function renderFields() {
   const day = getDay();
+  const dailyInput = $("#dailyInputText");
+  if (dailyInput && dailyInput.value !== (day.dailyInput || "")) {
+    dailyInput.value = day.dailyInput || "";
+  }
+  const dailyInputStatus = $("#dailyInputStatus");
+  if (dailyInputStatus) {
+    dailyInputStatus.textContent = day.dailyInput ? "保存済みです。AI判断の材料として参照されます。" : "未保存の入力はありません。";
+  }
   Object.entries(day.metrics).forEach(([key, value]) => {
     const field = $(`#${key}`);
     if (!field) return;
@@ -1454,6 +1475,7 @@ function collectSearchText(day) {
     ]),
     ...day.projects.map((item) => item.title),
     ...(day.memos || []).map((memo) => memo.text),
+    day.dailyInput || "",
     ...(day.learnings || []).flatMap((learning) => [
       learning.title,
       learning.url,
@@ -3886,7 +3908,11 @@ function renderHealthState() {
   setValue("#healthStressLevel", health?.stressLevel || "unknown");
   setValue("#healthBodyNote", health?.bodyNote);
   const status = $("#healthStateStatus");
-  if (status) status.textContent = health?.updatedAt ? "Health Check を保存しました。" : "今日の体調メモを記録できます。";
+  if (status) {
+    status.textContent = health?.updatedAt
+      ? "Health Check を保存し、今日の提案・体調をふまえた提案・AI返答の補助情報に反映しました。"
+      : "今日の体調メモを記録できます。保存後、今日の提案・AI返答の補助情報になります。";
+  }
   const summaryTarget = $("#healthStateSummary");
   if (summaryTarget) summaryTarget.textContent = buildHealthSummaryUi(health);
 }
@@ -4653,6 +4679,7 @@ function renderConversationFeedback(reply) {
   const entry = currentReplyText ? findConversationFeedback(currentReplyText) : null;
   const note = $("#conversationFeedbackNote");
   const status = $("#conversationFeedbackStatus");
+  const saveButton = $("#saveConversationFeedbackNote");
   document.querySelectorAll("[data-conversation-feedback]").forEach((button) => {
     const value = button.dataset.conversationFeedback === "true";
     button.classList.toggle("active", entry?.natural === value);
@@ -4664,6 +4691,7 @@ function renderConversationFeedback(reply) {
       note.value = entry?.note || "";
     }
   }
+  if (saveButton) saveButton.disabled = !currentReplyText;
   if (!status) return;
   if (!currentReplyText) {
     status.textContent = "Generated Reply がまだありません。";
@@ -4676,6 +4704,34 @@ function renderConversationFeedback(reply) {
   } else {
     status.textContent = "直前のAI返答の自然さを記録できます。";
   }
+}
+
+function refreshConversationFeedbackAnalysis(feedback) {
+  upsertConversationImprovement(feedback);
+  upsertConversationReflection();
+  upsertEmotionalResonance();
+  upsertConversationContinuity();
+  upsertConversationRecovery();
+  renderConversationFeedback({ text: currentReplyText });
+  renderConversationImprovementHints();
+  renderConversationReflection();
+  renderEmotionalResonance();
+  renderIdentityProfile();
+  renderGoalState();
+  renderPriorityState();
+  renderDecisionState();
+  renderStrategyState();
+  renderAttentionState();
+  renderCognitiveState();
+  renderIntentState();
+  renderTaskPlanState();
+  renderWorkflowState();
+  renderExecutionDecision();
+  renderExecutionState();
+  renderExecutionFeedback();
+  renderExecutiveSummary();
+  renderConversationContinuity();
+  renderConversationRecovery();
 }
 
 function renderMemoryLayer(context = {}) {
@@ -4978,6 +5034,24 @@ function explainPriorityCandidate(candidate) {
     summary: `${candidate.sourceLabel}から選ばれました。スコア ${candidate.adjustedScore} / 100 の最優先候補です。`,
     reasons: [...topReasons, ...modifierReasons],
   };
+}
+
+function priorityCandidateMaterialLabels(candidate) {
+  if (!candidate) {
+    return ["今日の予定・タスク・記憶を確認しました。"];
+  }
+  const scoreParts = [
+    `参照元: ${candidate.sourceLabel || candidate.source || "不明"}`,
+    `基本スコア: ${candidate.score ?? 0}`,
+    `調整後スコア: ${candidate.adjustedScore ?? candidate.score ?? 0}`,
+  ];
+  const reasonParts = asArray(candidate.reasons).map((reason) =>
+    `${reason.points > 0 ? "+" : ""}${reason.points}: ${reason.text}`
+  );
+  const modifierParts = asArray(candidate.modifiers)
+    .filter((modifier) => modifier.modifier !== 0)
+    .map((modifier) => `${modifier.modifier > 0 ? "+" : ""}${modifier.modifier}: ${modifier.text}`);
+  return [...scoreParts, ...reasonParts, ...modifierParts].filter(Boolean);
 }
 
 function inferEventContext(todayEvents) {
@@ -5483,6 +5557,10 @@ const FIRST_AGENT_RESPONSES = {
 };
 
 function showFirstAgentResponse(reply) {
+  currentFirstAgentReply = reply || "";
+  document.querySelectorAll("[data-first-agent-reply]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.firstAgentReply === currentFirstAgentReply);
+  });
   const target = $("#firstAgentResponse");
   if (!target) return;
   const message = FIRST_AGENT_RESPONSES[reply];
@@ -5625,6 +5703,17 @@ function renderBrainPrototype() {
 
   $("#brainPriority").textContent = priorityCandidate?.title || "今日は整える日";
   $("#brainPriorityNote").textContent = explanation.summary;
+  const priorityScore = $("#brainPriorityScore");
+  if (priorityScore) {
+    priorityScore.textContent = priorityCandidate
+      ? `${priorityCandidate.adjustedScore} / 100（基本 ${priorityCandidate.score}）`
+      : "候補なし";
+  }
+  appendBrainItems(
+    $("#brainPriorityMaterials"),
+    priorityCandidateMaterialLabels(priorityCandidate),
+    "判断材料はまだありません。",
+  );
   appendBrainItems($("#brainPriorityReasons"), explanation.reasons, "理由はまだありません。");
 
   $("#brainRecommendationTitle").textContent = recommendation.title;
@@ -5733,6 +5822,8 @@ function renderBrainPrototype() {
   const newestRevisit = revisitPeople
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   const recentChanges = [
+    getLatestHealthState()?.updatedAt ? `体調入力: Health Check更新 ${brainFormatDateTime(getLatestHealthState().updatedAt)}` : "",
+    day.dailyInput ? "今日の入力: 自由入力メモを参照" : "",
     newestHasshin?.nextAction ? `発信観察の次アクション: ${newestHasshin.nextAction}` : "",
     newestRevisit?.name ? `また見たい人: ${newestRevisit.name}` : "",
     newestMemo ? `残るメモ更新: ${brainFormatDateTime(newestMemo.updatedAt || newestMemo.createdAt)}` : "",
@@ -5815,60 +5906,39 @@ function bindEvents() {
       const feedback = upsertConversationFeedback(currentReplyText, {
         natural: button.dataset.conversationFeedback === "true",
       });
-      upsertConversationImprovement(feedback);
-      upsertConversationReflection();
-      upsertEmotionalResonance();
-      upsertConversationContinuity();
-      upsertConversationRecovery();
-      renderConversationFeedback({ text: currentReplyText });
-      renderConversationImprovementHints();
-      renderConversationReflection();
-      renderEmotionalResonance();
-      renderIdentityProfile();
-      renderGoalState();
-      renderPriorityState();
-      renderDecisionState();
-      renderStrategyState();
-      renderAttentionState();
-      renderCognitiveState();
-      renderIntentState();
-      renderTaskPlanState();
-      renderWorkflowState();
-      renderExecutionDecision();
-      renderExecutionState();
-      renderExecutionFeedback();
-      renderExecutiveSummary();
-      renderConversationContinuity();
-      renderConversationRecovery();
+      refreshConversationFeedbackAnalysis(feedback);
     });
   });
   $("#conversationFeedbackNote")?.addEventListener("input", (event) => {
-    const feedback = upsertConversationFeedback(currentReplyText, { note: event.target.value });
-    upsertConversationImprovement(feedback);
-    upsertConversationReflection();
-    upsertEmotionalResonance();
-    upsertConversationContinuity();
-    upsertConversationRecovery();
-    renderConversationFeedback({ text: currentReplyText });
-    renderConversationImprovementHints();
-    renderConversationReflection();
-    renderEmotionalResonance();
-    renderIdentityProfile();
-    renderGoalState();
-    renderPriorityState();
-    renderDecisionState();
-    renderStrategyState();
-    renderAttentionState();
-    renderCognitiveState();
-    renderIntentState();
-    renderTaskPlanState();
-    renderWorkflowState();
-    renderExecutionDecision();
-    renderExecutionState();
-    renderExecutionFeedback();
-    renderExecutiveSummary();
-    renderConversationContinuity();
-    renderConversationRecovery();
+    const status = $("#conversationFeedbackStatus");
+    if (status) {
+      status.textContent = currentReplyText
+        ? "未保存の返答メモがあります。「返答メモを保存する」を押してください。"
+        : "生成された返答がまだありません。";
+    }
+  });
+  $("#saveConversationFeedbackNote")?.addEventListener("click", () => {
+    if (!currentReplyText) return;
+    const feedback = upsertConversationFeedback(currentReplyText, {
+      note: $("#conversationFeedbackNote")?.value || "",
+    });
+    refreshConversationFeedbackAnalysis(feedback);
+    const status = $("#conversationFeedbackStatus");
+    if (status) status.textContent = "返答メモを保存し、会話分析へ反映しました。";
+  });
+  $("#dailyInputText")?.addEventListener("input", () => {
+    const status = $("#dailyInputStatus");
+    if (status) status.textContent = "未保存の入力があります。「今日の入力を保存する」を押してください。";
+  });
+  $("#saveDailyInput")?.addEventListener("click", () => {
+    const day = getDay();
+    day.dailyInput = $("#dailyInputText")?.value || "";
+    saveStore();
+    renderSummary();
+    renderHistory();
+    renderBrainPrototype();
+    const status = $("#dailyInputStatus");
+    if (status) status.textContent = "今日の入力を保存し、AI判断の材料に反映しました。";
   });
   $("#executionFeedbackOutcome")?.addEventListener("change", (event) => {
     upsertExecutionFeedback({ outcome: event.target.value });

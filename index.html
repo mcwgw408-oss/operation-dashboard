@@ -74,6 +74,11 @@
               <span class="brain-label">Brainが選んだ候補</span>
               <strong id="brainPriority">まだ優先候補はありません</strong>
               <p id="brainPriorityNote">今日の予定・タスク・記憶から、まず注目する対象を選びます。</p>
+              <div class="brain-decision-details" aria-label="候補の判断材料">
+                <div><span>スコア</span><p id="brainPriorityScore">-</p></div>
+                <div><span>判断材料</span><ul id="brainPriorityMaterials" class="brain-list"></ul></div>
+                <p id="brainPriorityScoreHelp">スコアは候補の種類・更新状況・体調や勢いを合わせた目安です。</p>
+              </div>
             </div>
             <div class="brain-card reason-card">
               <span class="brain-label">候補にした理由</span>
@@ -548,6 +553,7 @@
                       </label>
                     </div>
                     <label class="health-check-note"><span>体のメモ</span><textarea id="healthBodyNote" rows="3"></textarea></label>
+                    <p class="health-reflection-note" id="healthReflectionNote">保存すると、今日の提案・体調をふまえた提案・AI返答の補助情報として反映されます。</p>
                     <p id="healthStateSummary" class="health-check-summary">-</p>
                     <p id="healthStateStatus" class="health-check-status">今日の体調メモを記録できます。</p>
                   </div>
@@ -591,6 +597,7 @@
                       <button type="button" data-conversation-feedback="false">このAI返答は違和感があった</button>
                     </div>
                     <textarea id="conversationFeedbackNote" rows="3" placeholder="直前のAI返答へのメモ" aria-label="直前のAI返答へのメモ"></textarea>
+                    <button class="ghost-button conversation-feedback-save" id="saveConversationFeedbackNote" type="button">返答メモを保存する</button>
                     <p id="conversationFeedbackStatus" class="conversation-feedback-status">直前のAI返答の自然さを記録できます。</p>
                   </div>
                   <details class="developer-state-panel">
@@ -681,6 +688,7 @@
             </div>
             <div class="brain-card">
               <span class="brain-label">最近の変化</span>
+              <p class="brain-source-note">最近の記憶・体調入力・会話文脈などから、変化がありそうなものを表示します。</p>
               <ul id="brainRecentChanges" class="brain-list"></ul>
             </div>
           </div>
@@ -690,6 +698,20 @@
           <div>
             <span>今日の入力</span>
             <p>予定、タスク、体調、記憶メモなど、毎日触る項目をまとめます。</p>
+          </div>
+        </section>
+
+        <section class="panel daily-input-panel span-2" aria-label="今日の入力メモ">
+          <div class="panel-heading">
+            <div>
+              <h2>今日の入力メモ</h2>
+              <p class="section-note">今日の状態やAIに見てほしいことを自由に書けます。保存すると今日の記録に残ります。</p>
+            </div>
+          </div>
+          <textarea id="dailyInputText" rows="4" placeholder="今日の状態、気になっていること、AIに判断材料として見てほしいこと"></textarea>
+          <div class="daily-input-actions">
+            <button class="ghost-button" id="saveDailyInput" type="button">今日の入力を保存する</button>
+            <p id="dailyInputStatus">未保存の入力はありません。</p>
           </div>
         </section>
 
