@@ -227,33 +227,130 @@ textarea {
   order: 1;
 }
 
-.dashboard-proposal-heading {
+.morning-guidance-panel {
   order: 2;
 }
 
-.brain-panel {
+.daily-focus-panel {
   order: 3;
 }
 
-.dashboard-health-input-panel {
+.dashboard-proposal-heading {
   order: 4;
 }
 
-.dashboard-memory-input-panel {
+.brain-panel {
   order: 5;
 }
 
-.dashboard-task-panel {
+.dashboard-health-input-panel {
   order: 6;
 }
 
-.schedule-panel {
+.dashboard-memory-input-panel {
   order: 7;
+}
+
+.dashboard-task-panel {
+  order: 8;
+}
+
+.schedule-panel {
+  order: 9;
 }
 
 .dashboard-ai-analysis-panel,
 .dashboard-analysis-heading {
   order: 40;
+}
+
+.morning-guidance-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--pink-line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(135deg, #fff7f9, rgba(255, 255, 255, 0.96));
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+}
+
+.morning-guidance-panel span {
+  color: var(--pink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.morning-guidance-panel p {
+  margin: 0;
+  white-space: pre-line;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.daily-focus-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(135deg, rgba(237, 245, 239, 0.92), rgba(255, 255, 255, 0.96) 56%),
+    var(--panel);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+}
+
+.daily-focus-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.daily-focus-heading span {
+  color: var(--green);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.daily-focus-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.daily-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.daily-focus-card {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-height: 116px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 13px;
+}
+
+.daily-focus-card span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.daily-focus-card strong {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 .summary-panel,
@@ -2938,6 +3035,10 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .daily-focus-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .summary-cell:nth-child(2) {
     border-right: 0;
   }
@@ -2956,8 +3057,14 @@ textarea {
   }
 
   .dashboard,
-  .summary-panel {
+  .summary-panel,
+  .daily-focus-grid {
     grid-template-columns: 1fr;
+  }
+
+  .daily-focus-heading {
+    align-items: start;
+    flex-direction: column;
   }
 
   .brain-layout {

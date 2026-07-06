@@ -5568,6 +5568,117 @@ function showFirstAgentResponse(reply) {
   target.hidden = !message;
 }
 
+function dailyFocusValue(value) {
+  const text = String(value || "").trim();
+  return text && text !== "-" ? text : "";
+}
+
+function pickDailyFocusTask(todayTasks = [], dailyTasks = []) {
+  const openTodayTasks = asArray(todayTasks).filter(brainIsOpen);
+  const openDailyTasks = asArray(dailyTasks).filter(brainIsOpen);
+  return (
+    openTodayTasks.find((task) => task.priority) ||
+    openTodayTasks[0] ||
+    openDailyTasks.find((task) => task.priority) ||
+    openDailyTasks[0] ||
+    null
+  );
+}
+
+function buildDailyFocusCondition(healthAwareRecommendation, memoryContext) {
+  const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
+  const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
+  const memoryTitle = dailyFocusValue(
+    memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
+    memoryDisplayTitle(memoryContext?.recent?.[0]),
+  );
+
+  if (support && memoryTitle) {
+    return `${support} 「${memoryTitle}」も意識して、会話は軽く始めます。`;
+  }
+  if (caution && memoryTitle) {
+    return `${caution} 記憶では「${memoryTitle}」を見ています。`;
+  }
+  if (support) return support;
+  if (caution) return caution;
+  if (memoryTitle) return `記憶では「${memoryTitle}」を見ながら、今日の話を組み立てます。`;
+  return "体調と記憶の入力が増えると、今日の会話の意識点をここにまとめます。";
+}
+
+function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwareRecommendation, memoryContext } = {}) {
+  const priority = dailyFocusValue(priorityCandidate?.title) || dailyFocusValue(recommendation?.title);
+  const action = dailyFocusValue(recommendation?.actionText);
+  const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
+  const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
+  const memoryTitle = dailyFocusValue(
+    memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
+    memoryDisplayTitle(memoryContext?.recent?.[0]),
+  );
+  const lines = [];
+
+  if (priority) {
+    lines.push(`今日は「${priority}」を中心に進めるとよさそうです。`);
+  } else {
+    lines.push("今日は無理に増やさず、最初の一歩をひとつ決めましょう。");
+  }
+
+  if (action) {
+    lines.push(action);
+  } else if (support) {
+    lines.push(support);
+  } else if (caution) {
+    lines.push(caution);
+  } else {
+    lines.push("小さく始めて、流れが出たら次へ進みましょう。");
+  }
+
+  if (memoryTitle && lines.length < 3) {
+    lines.push(`記憶では「${memoryTitle}」も見ています。`);
+  }
+
+  return lines.slice(0, 3).join("\n");
+}
+
+function renderMorningGuidanceLayer({
+  priorityCandidate = null,
+  recommendation = null,
+  healthAwareRecommendation = null,
+  memoryContext = null,
+} = {}) {
+  const target = $("#morningGuidanceText");
+  if (!target) return;
+  target.textContent = buildMorningGuidanceText({
+    priorityCandidate,
+    recommendation,
+    healthAwareRecommendation,
+    memoryContext,
+  });
+}
+
+function renderDailyFocusLayer({
+  priorityCandidate = null,
+  recommendation = null,
+  healthAwareRecommendation = null,
+  memoryContext = null,
+  todayTasks = [],
+  dailyTasks = [],
+} = {}) {
+  if (!$("#dailyFocusPriority")) return;
+  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  $("#dailyFocusPriority").textContent =
+    dailyFocusValue(priorityCandidate?.title) ||
+    dailyFocusValue(recommendation?.title) ||
+    "今日はまず整えることを優先します。";
+  $("#dailyFocusNextAction").textContent =
+    dailyFocusValue(recommendation?.actionText) ||
+    (focusTask ? `「${focusTask.title}」を5分だけ始める` : "最初の一手を1つだけ決める");
+  $("#dailyFocusCondition").textContent = buildDailyFocusCondition(
+    healthAwareRecommendation,
+    memoryContext,
+  );
+  $("#dailyFocusTask").textContent = focusTask?.title || "今日のタスクはまだありません。";
+}
+
 function renderBrainPrototype() {
   if (!$("#brainPriority")) return;
 
@@ -5830,6 +5941,20 @@ function renderBrainPrototype() {
     day.updatedAt ? `今日の記録更新: ${brainFormatDateTime(day.updatedAt)}` : "",
   ];
   appendBrainItems($("#brainRecentChanges"), recentChanges, "最近の変化はまだありません。");
+  renderDailyFocusLayer({
+    priorityCandidate,
+    recommendation,
+    healthAwareRecommendation,
+    memoryContext: brainMemoryContext,
+    todayTasks,
+    dailyTasks,
+  });
+  renderMorningGuidanceLayer({
+    priorityCandidate,
+    recommendation,
+    healthAwareRecommendation,
+    memoryContext: brainMemoryContext,
+  });
 }
 function renderAll() {
   getDay();
