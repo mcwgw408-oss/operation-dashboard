@@ -5801,6 +5801,153 @@ function renderDailyFocusLayer({
   $("#dailyFocusTask").textContent = focusTask?.title || "今日のタスクはまだありません。";
 }
 
+function buildExplainableGuidanceReasons({
+  priorityCandidate = null,
+  recommendation = null,
+  healthAwareRecommendation = null,
+  memoryContext = null,
+  todayTasks = [],
+  dailyTasks = [],
+  adaptiveGuidance = buildAdaptiveGuidanceScores(),
+} = {}) {
+  const reasons = [];
+  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  const memoryTitle = dailyFocusValue(
+    memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
+    memoryDisplayTitle(memoryContext?.recent?.[0]),
+  );
+  const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
+  const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
+
+  if (priorityCandidate?.title) {
+    reasons.push(`Priority: 今日の候補では「${priorityCandidate.title}」が強く出ています。`);
+  } else if (recommendation?.title) {
+    reasons.push(`Recommendation: 今日の提案は「${recommendation.title}」を中心にしています。`);
+  }
+
+  if (adaptiveGuidance?.topCategory && adaptiveGuidance.topCategory !== "none") {
+    const score = adaptiveGuidance.scores?.[adaptiveGuidance.topCategory];
+    reasons.push(`Adaptive Guidance: 最近は ${adaptiveGuidance.topCategory} の反応が高めです（${Number(score).toFixed(2)}）。`);
+  }
+
+  if (support || caution) {
+    reasons.push(`Health: ${support || caution}`);
+  }
+
+  if (memoryTitle) {
+    reasons.push(`Memory: 「${memoryTitle}」を補助情報として見ています。`);
+  }
+
+  if (focusTask?.title) {
+    reasons.push(`Today Tasks: 次に触るタスクとして「${focusTask.title}」を見ています。`);
+  }
+
+  if (!reasons.length) {
+    reasons.push("Priority / Recommendation / Health / Memory / Today Tasks の既存情報から、軽めの提案にしています。");
+  }
+
+  return reasons.slice(0, 5);
+}
+
+function renderExplainableGuidanceLayer(context = {}) {
+  const target = $("#explainableGuidanceReasons");
+  if (!target) return;
+  target.replaceChildren();
+  buildExplainableGuidanceReasons(context).forEach((reason) => {
+    const item = document.createElement("li");
+    item.textContent = reason;
+    target.append(item);
+  });
+}
+
+function buildReflectionLayerItems({
+  priorityCandidate = null,
+  recommendation = null,
+  learningEntry = null,
+  reply = null,
+  todayTasks = [],
+  adaptiveGuidance = buildAdaptiveGuidanceScores(),
+} = {}) {
+  const items = [];
+  const replyText = replySentence(reply?.text);
+  const replyFeedback = replyText ? findConversationFeedback(replyText) : null;
+  const focusTask = pickDailyFocusTask(todayTasks, []);
+
+  if (recommendation?.title || priorityCandidate?.title) {
+    items.push(`今日は「${recommendation?.title || priorityCandidate.title}」を提案しました。`);
+  }
+
+  if (replyFeedback?.natural === true) {
+    items.push("返答は自然だったと評価されています。");
+  } else if (replyFeedback?.natural === false) {
+    items.push("返答には違和感があったと評価されています。");
+  } else {
+    items.push("返答フィードバックはまだありません。");
+  }
+
+  if (learningEntry?.accepted === true) {
+    items.push("提案は受け入れられました。");
+  } else if (learningEntry?.accepted === false) {
+    items.push("提案は合わなかったと記録されています。");
+  } else {
+    items.push("提案フィードバックはまだありません。");
+  }
+
+  if (adaptiveGuidance.topCategory && adaptiveGuidance.topCategory !== "none") {
+    items.push(`Adaptive Guidance は ${adaptiveGuidance.topCategory} を少し強めに見ています。`);
+  } else {
+    items.push("Adaptive Guidance はまだ十分な傾向を持っていません。");
+  }
+
+  if (learningEntry?.accepted === true && recommendation?.title) {
+    items.push(`次回も似た日は「${recommendation.title}」を優先候補にできます。`);
+  } else if (focusTask?.title) {
+    items.push(`次回は「${focusTask.title}」の進み具合も見直せます。`);
+  } else {
+    items.push("次回はフィードバックが増えるほど、より具体的に振り返れます。");
+  }
+
+  return items.slice(0, 6);
+}
+
+function buildReflectionTomorrowNote({
+  recommendation = null,
+  learningEntry = null,
+  reply = null,
+  adaptiveGuidance = buildAdaptiveGuidanceScores(),
+} = {}) {
+  const replyText = replySentence(reply?.text);
+  const replyFeedback = replyText ? findConversationFeedback(replyText) : null;
+
+  if (replyFeedback?.natural === false) {
+    return "今日は返答に違和感がありました。\n次回は説明を少し簡潔にします。";
+  }
+  if (learningEntry?.accepted === true && recommendation?.title) {
+    return `今日は提案が受け入れられました。\n明日も似た条件なら「${recommendation.title}」を優先候補にします。`;
+  }
+  if (learningEntry?.accepted === false) {
+    return "今日は提案が合わなかったと記録されています。\n明日は別の切り口や小さめの一歩を優先します。";
+  }
+  if (adaptiveGuidance.topCategory === "health" || adaptiveGuidance.topCategory === "rest") {
+    return "今日は体調や回復を強めに見ています。\n明日も無理のない提案を維持します。";
+  }
+  return "今日はまだ判断材料を集めている段階です。\n明日はフィードバックを見ながら提案を少しずつ整えます。";
+}
+
+function renderReflectionLayer(context = {}) {
+  const target = $("#reflectionLayerList");
+  if (target) {
+    target.replaceChildren();
+    buildReflectionLayerItems(context).forEach((text) => {
+      const item = document.createElement("li");
+      item.textContent = text;
+      target.append(item);
+    });
+  }
+  const tomorrowNote = $("#reflectionTomorrowNote");
+  if (tomorrowNote) tomorrowNote.textContent = buildReflectionTomorrowNote(context);
+}
+
 function renderBrainPrototype() {
   if (!$("#brainPriority")) return;
 
@@ -6077,6 +6224,21 @@ function renderBrainPrototype() {
     recommendation,
     healthAwareRecommendation,
     memoryContext: brainMemoryContext,
+  });
+  renderExplainableGuidanceLayer({
+    priorityCandidate,
+    recommendation,
+    healthAwareRecommendation,
+    memoryContext: brainMemoryContext,
+    todayTasks,
+    dailyTasks,
+  });
+  renderReflectionLayer({
+    priorityCandidate,
+    recommendation,
+    learningEntry,
+    reply,
+    todayTasks,
   });
 }
 function renderAll() {

@@ -54,6 +54,10 @@
         <section class="morning-guidance-panel" aria-label="今日のひとこと">
           <span>今日のひとこと</span>
           <p id="morningGuidanceText">今日の提案を準備しています。</p>
+          <details class="explainable-guidance-panel">
+            <summary>理由を見る</summary>
+            <ul id="explainableGuidanceReasons" class="explainable-guidance-list"></ul>
+          </details>
         </section>
 
         <section class="daily-focus-panel" aria-label="Daily Focus">
@@ -230,6 +234,15 @@
                 </div>
                 <p id="adaptiveGuidanceSummary">既存フィードバックから最近の傾向を集計します。Recommendationにはまだ反映していません。</p>
                 <small>source <strong id="adaptiveGuidanceSource">learningLog, conversationFeedback</strong></small>
+              </div>
+              <div class="reflection-layer-panel" aria-label="Reflection Layer">
+                <span class="brain-label">Reflection Layer</span>
+                <h4>今日の振り返り</h4>
+                <ul id="reflectionLayerList" class="reflection-layer-list"></ul>
+                <div class="reflection-tomorrow-note">
+                  <span>明日へのメモ</span>
+                  <p id="reflectionTomorrowNote">フィードバックが増えると、明日に活かせることをここにまとめます。</p>
+                </div>
               </div>
                 </div>
               </details>

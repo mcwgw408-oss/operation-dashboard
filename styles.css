@@ -290,6 +290,35 @@ textarea {
   line-height: 1.65;
 }
 
+.explainable-guidance-panel {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--pink-line);
+  padding-top: 8px;
+}
+
+.explainable-guidance-panel summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--pink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.explainable-guidance-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.explainable-guidance-list li {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .daily-focus-panel {
   grid-column: 1 / -1;
   display: grid;
@@ -974,6 +1003,57 @@ textarea {
   margin-top: 4px;
   border-top: 1px solid #e7edf4;
   padding-top: 10px;
+}
+
+.reflection-layer-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.reflection-layer-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.reflection-layer-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.reflection-layer-list li {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.reflection-tomorrow-note {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #e7edf4;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 9px 10px;
+}
+
+.reflection-tomorrow-note span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reflection-tomorrow-note p {
+  margin: 0;
+  white-space: pre-line;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .learning-confidence-grid {
