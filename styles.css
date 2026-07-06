@@ -1078,6 +1078,34 @@ textarea {
   line-height: 1.55;
 }
 
+.conversation-timeline-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #e7edf4;
+  padding-top: 10px;
+}
+
+.conversation-timeline-panel h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.conversation-timeline-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.conversation-timeline-list li {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .learning-confidence-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -6018,6 +6018,66 @@ function renderReflectionLayer(context = {}) {
   if (tomorrowNote) tomorrowNote.textContent = buildReflectionTomorrowNote(context);
 }
 
+function buildConversationTimelineItems({
+  recommendation = null,
+  memoryContext = null,
+  contextSummary = null,
+  learningEntry = null,
+  reply = null,
+} = {}) {
+  const recentMemory = dailyFocusValue(
+    memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
+    memoryDisplayTitle(memoryContext?.recent?.[0]),
+  );
+  const recentFeedback = asArray(conversationFeedback)
+    .filter((entry) => entry?.natural === true || entry?.natural === false || dailyFocusValue(entry?.note))
+    .slice(0, 3);
+  const replyText = replySentence(reply?.text);
+  const replyFeedback = replyText ? findConversationFeedback(replyText) : null;
+  const items = [];
+
+  items.push(`最近のテーマ: ${contextSummary?.theme || recommendation?.title || recentMemory || "まだ整理中です"}`);
+
+  if (recentFeedback.length) {
+    const naturalCount = recentFeedback.filter((entry) => entry.natural === true).length;
+    const awkwardCount = recentFeedback.filter((entry) => entry.natural === false).length;
+    items.push(`変化: 直近の返答フィードバックは自然 ${naturalCount}件 / 違和感 ${awkwardCount}件です。`);
+  } else if (recentMemory) {
+    items.push(`変化: Memoryでは「${recentMemory}」が流れの手がかりです。`);
+  } else {
+    items.push("変化: まだ会話フィードバックや記憶の手がかりは少なめです。");
+  }
+
+  if (recommendation?.title) {
+    items.push(`現在の流れ: 「${recommendation.title}」を中心に、今日の提案を組み立てています。`);
+  } else {
+    items.push("現在の流れ: 今日の入力を見ながら、軽めの提案に寄せています。");
+  }
+
+  if (replyFeedback?.natural === false) {
+    items.push("AIが感じている方向性: 次の返答は説明を短くし、違和感を減らす方向です。");
+  } else if (learningEntry?.accepted === true) {
+    items.push("AIが感じている方向性: 似た文脈では今回の提案方向を続けられそうです。");
+  } else if (contextSummary?.adaptiveTopCategory && contextSummary.adaptiveTopCategory !== "none") {
+    items.push(`AIが感じている方向性: ${contextSummary.adaptiveTopCategory} の傾向を補助情報として見ています。`);
+  } else {
+    items.push("AIが感じている方向性: もう少しフィードバックを集めながら、流れを見極めます。");
+  }
+
+  return items.slice(0, 4);
+}
+
+function renderConversationTimeline(context = {}) {
+  const target = $("#conversationTimelineList");
+  if (!target) return;
+  target.replaceChildren();
+  buildConversationTimelineItems(context).forEach((text) => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    target.append(item);
+  });
+}
+
 function renderBrainPrototype() {
   if (!$("#brainPriority")) return;
 
@@ -6324,6 +6384,13 @@ function renderBrainPrototype() {
     todayTasks,
     adaptiveGuidance,
     contextSummary,
+  });
+  renderConversationTimeline({
+    recommendation,
+    memoryContext: brainMemoryContext,
+    contextSummary,
+    learningEntry,
+    reply,
   });
 }
 function renderAll() {
