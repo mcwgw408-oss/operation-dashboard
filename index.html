@@ -11,8 +11,8 @@
     <div class="app">
       <nav class="global-nav" aria-label="アプリ切り替え">
         <a class="global-nav-link current" aria-current="page" href="https://mcwgw408-oss.github.io/operation-dashboard/">🏠 ダッシュボード</a>
-        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/substack-labo/">Substack-Labo</a>
-        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/discovery-Labo/">Discovery-Labo</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/substack-labo/">サブスタックラボ</a>
+        <a class="global-nav-link" href="https://mcwgw408-oss.github.io/discovery-Labo/">発見ラボ</a>
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/action-Labo/">交流ログ</a>
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/observation-Labo/">発信観察</a>
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/Stock-Labo/">ストック管理</a>
@@ -60,9 +60,9 @@
           </details>
         </section>
 
-        <section class="daily-focus-panel" aria-label="Daily Focus">
+        <section class="daily-focus-panel" aria-label="今日の集中">
           <div class="daily-focus-heading">
-            <span>Daily Focus</span>
+            <span>今日の集中</span>
             <p>今日まず見ることを、既存の予定・提案・体調・記憶からまとめます。</p>
           </div>
           <div class="daily-focus-grid">
@@ -88,15 +88,15 @@
         <section class="dashboard-section-heading dashboard-proposal-heading span-2" aria-label="今日の提案">
           <div>
             <span>今日の提案</span>
-            <p>今日の提案と AI 返答を確認する場所です。</p>
+            <p>今日の提案とさくらの返答を確認する場所です。</p>
           </div>
         </section>
 
         <section class="panel brain-panel">
           <div class="panel-heading">
             <div>
-              <h2>Sakura AIの判断メモ</h2>
-              <p class="section-note">既存データを読むだけのAIブレイン試作パネルです。保存やデータ変更は行いません。</p>
+              <h2>さくらの判断メモ</h2>
+              <p class="section-note">既存データを読むだけの判断メモです。保存やデータ変更は行いません。</p>
             </div>
           </div>
           <div class="brain-layout">
@@ -105,7 +105,7 @@
               <small>今日の提案、返答、すぐ使うフィードバックです。</small>
             </div>
             <div class="brain-card priority-card">
-              <span class="brain-label">Brainが選んだ候補</span>
+              <span class="brain-label">さくらが選んだ候補</span>
               <strong id="brainPriority">まだ優先候補はありません</strong>
               <p id="brainPriorityNote">今日の予定・タスク・記憶から、まず注目する対象を選びます。</p>
               <details class="brain-decision-details" aria-label="候補の判断材料">
@@ -151,11 +151,11 @@
                       <ul id="explainMainReasons" class="brain-list"></ul>
                     </section>
                     <section>
-                      <h3>Energyの影響</h3>
+                      <h3>エネルギーの影響</h3>
                       <p id="explainEnergyImpact">通常の優先度で見ています。</p>
                     </section>
                     <section>
-                      <h3>Momentumの影響</h3>
+                      <h3>勢いの影響</h3>
                       <p id="explainMomentumImpact">大きな勢いの偏りはありません。</p>
                     </section>
                     <section class="explain-layer-wide">
@@ -183,20 +183,20 @@
                   <button type="button" data-learning-feedback="false">この提案は違った</button>
                 </div>
                 <textarea id="learningFeedbackNote" rows="3" placeholder="今日の状態メモ" aria-label="今日の状態メモ"></textarea>
-                <p id="learningFeedbackStatus" class="learning-feedback-status">この提案をLearning Logに記録します。</p>
+                <p id="learningFeedbackStatus" class="learning-feedback-status">この提案を学習ログに記録します。</p>
               </div>
             <div class="brain-section-heading">
-              <span>AIの内部状態（開発者向け）</span>
+              <span>さくらの内部状態（開発者向け）</span>
               <small>学習・記憶・思考・実行管理の詳細です。普段は閉じたままで大丈夫です。</small>
             </div>
               <details class="developer-state-panel">
                 <summary>
-                  <span>AIの内部状態（開発者向け）</span>
+                  <span>さくらの内部状態（開発者向け）</span>
                   <small>提案フィードバックの集計（必要なときだけ確認）</small>
                 </summary>
                 <div class="developer-state-body">
-              <div class="learning-summary-panel" aria-label="Learning Summary">
-                <span class="brain-label">Learning Summary</span>
+              <div class="learning-summary-panel" aria-label="学習の要約">
+                <span class="brain-label">学習の要約</span>
                 <div class="learning-summary-grid">
                   <div><span>総ログ</span><strong id="learningSummaryTotal">0件</strong></div>
                   <div><span>合っていた</span><strong id="learningSummaryAccepted">0件</strong></div>
@@ -204,48 +204,48 @@
                   <div><span>未回答</span><strong id="learningSummaryUnanswered">0件</strong></div>
                   <div><span>最近7件の一致率</span><strong id="learningSummaryRate">-</strong></div>
                   <div><span>最近多い提案</span><strong id="learningSummaryType">なし</strong></div>
-                  <div><span>平均Energy</span><strong id="learningSummaryEnergy">-</strong></div>
+                  <div><span>平均エネルギー</span><strong id="learningSummaryEnergy">-</strong></div>
                 </div>
               </div>
-              <div class="learning-hint-panel" aria-label="Learning Hint">
-                <span class="brain-label">Learning Hint</span>
+              <div class="learning-hint-panel" aria-label="学習ヒント">
+                <span class="brain-label">学習ヒント</span>
                 <p id="learningHintMessage">フィードバック数が少ないため、まだ学習中です。</p>
                 <div class="learning-hint-meta">
                   <span>信頼度 <strong id="learningHintConfidence">10%</strong></span>
-                  <span>source <strong id="learningHintSource">totalLogs</strong></span>
+                  <span>参照元 <strong id="learningHintSource">ログ全体</strong></span>
                 </div>
               </div>
-              <div class="learning-confidence-panel" aria-label="Learning Confidence">
-                <span class="brain-label">Learning Confidence</span>
+              <div class="learning-confidence-panel" aria-label="学習の確信度">
+                <span class="brain-label">学習の確信度</span>
                 <div class="learning-confidence-grid">
-                  <div><span>score</span><strong id="learningConfidenceScore">10%</strong></div>
-                  <div><span>level</span><strong id="learningConfidenceLevel">low</strong></div>
+                  <div><span>点数</span><strong id="learningConfidenceScore">10%</strong></div>
+                  <div><span>段階</span><strong id="learningConfidenceLevel">低い</strong></div>
                 </div>
                 <p id="learningConfidenceMessage">提案の学習メモはまだ学習中のため、参考情報として控えめに扱います。</p>
-                <small>source <strong id="learningConfidenceSource">totalLogs</strong></small>
+                <small>参照元 <strong id="learningConfidenceSource">ログ全体</strong></small>
               </div>
-              <div class="context-summary-panel" aria-label="Context Engine">
-                <span class="brain-label">Context Engine</span>
+              <div class="context-summary-panel" aria-label="文脈エンジン">
+                <span class="brain-label">文脈エンジン</span>
                 <h4>今日の文脈</h4>
                 <p id="contextSummaryText">今日の文脈を整理しています。</p>
                 <div class="context-summary-grid">
-                  <div><span>theme</span><strong id="contextSummaryTheme">-</strong></div>
-                  <div><span>signals</span><strong id="contextSummarySignals">-</strong></div>
+                  <div><span>テーマ</span><strong id="contextSummaryTheme">-</strong></div>
+                  <div><span>判断材料</span><strong id="contextSummarySignals">-</strong></div>
                 </div>
               </div>
-              <div class="adaptive-guidance-panel" aria-label="Adaptive Guidance">
-                <span class="brain-label">Adaptive Guidance</span>
+              <div class="adaptive-guidance-panel" aria-label="提案調整">
+                <span class="brain-label">提案調整</span>
                 <div class="adaptive-guidance-grid">
-                  <div><span>writing</span><strong id="adaptiveGuidanceWriting">0.50</strong></div>
-                  <div><span>coding</span><strong id="adaptiveGuidanceCoding">0.50</strong></div>
-                  <div><span>health</span><strong id="adaptiveGuidanceHealth">0.50</strong></div>
-                  <div><span>rest</span><strong id="adaptiveGuidanceRest">0.50</strong></div>
+                  <div><span>執筆</span><strong id="adaptiveGuidanceWriting">0.50</strong></div>
+                  <div><span>開発</span><strong id="adaptiveGuidanceCoding">0.50</strong></div>
+                  <div><span>体調</span><strong id="adaptiveGuidanceHealth">0.50</strong></div>
+                  <div><span>休息</span><strong id="adaptiveGuidanceRest">0.50</strong></div>
                 </div>
-                <p id="adaptiveGuidanceSummary">既存フィードバックから最近の傾向を集計します。Recommendationにはまだ反映していません。</p>
-                <small>source <strong id="adaptiveGuidanceSource">learningLog, conversationFeedback</strong></small>
+                <p id="adaptiveGuidanceSummary">既存フィードバックから最近の傾向を集計します。提案にはまだ反映していません。</p>
+                <small>参照元 <strong id="adaptiveGuidanceSource">提案学習ログ、返答フィードバック</strong></small>
               </div>
-              <div class="reflection-layer-panel" aria-label="Reflection Layer">
-                <span class="brain-label">Reflection Layer</span>
+              <div class="reflection-layer-panel" aria-label="振り返りレイヤー">
+                <span class="brain-label">振り返りレイヤー</span>
                 <h4>今日の振り返り</h4>
                 <ul id="reflectionLayerList" class="reflection-layer-list"></ul>
                 <div class="reflection-tomorrow-note">
@@ -253,8 +253,8 @@
                   <p id="reflectionTomorrowNote">フィードバックが増えると、明日に活かせることをここにまとめます。</p>
                 </div>
               </div>
-              <div class="conversation-timeline-panel" aria-label="Conversation Timeline">
-                <span class="brain-label">Conversation Timeline</span>
+              <div class="conversation-timeline-panel" aria-label="会話の流れ">
+                <span class="brain-label">会話の流れ</span>
                 <h4>最近の流れ</h4>
                 <ul id="conversationTimelineList" class="conversation-timeline-list"></ul>
               </div>
@@ -268,7 +268,7 @@
                 <span class="brain-label">記憶メモ</span>
                 <details class="developer-state-panel">
                   <summary>
-                    <span>AIの内部状態（開発者向け）</span>
+                    <span>さくらの内部状態（開発者向け）</span>
                     <small>記憶 / 文脈 / 返答設計</small>
                   </summary>
                   <div class="developer-state-body">
@@ -277,28 +277,28 @@
                   <ul id="shortMemoryList" class="brain-list"></ul>
                 </section>
                 <section>
-                  <h3>Project Memory</h3>
+                  <h3>プロジェクト記憶</h3>
                   <ul id="projectMemoryList" class="project-memory-list"></ul>
                 </section>
                 <section>
-                  <h3>Retrieved Memory</h3>
+                  <h3>呼び出した記憶</h3>
                   <ul id="retrievedMemoryList" class="brain-list"></ul>
                 </section>
                 <section class="brain-memory-context-panel">
                   <h3>記憶から見た今日の文脈</h3>
                   <div class="brain-memory-context-grid">
-                    <div><span>Project</span><strong id="brainMemoryContextProject">-</strong></div>
-                    <div><span>Retrieved</span><ul id="brainMemoryContextRetrieved" class="brain-list"></ul></div>
-                    <div><span>Recent</span><ul id="brainMemoryContextRecent" class="brain-list"></ul></div>
+                    <div><span>プロジェクト</span><strong id="brainMemoryContextProject">-</strong></div>
+                    <div><span>呼び出した記憶</span><ul id="brainMemoryContextRetrieved" class="brain-list"></ul></div>
+                    <div><span>最近の記憶</span><ul id="brainMemoryContextRecent" class="brain-list"></ul></div>
                   </div>
                 </section>
                 <section class="conversation-context-panel">
                   <h3>会話の文脈</h3>
                   <div class="conversation-context-grid">
-                    <div><span>Project</span><strong id="conversationContextProject">-</strong></div>
+                    <div><span>プロジェクト</span><strong id="conversationContextProject">-</strong></div>
                     <div><span>今日の提案</span><strong id="conversationContextRecommendation">-</strong></div>
-                    <div><span>Memory</span><strong id="conversationContextMemory">-</strong></div>
-                    <div><span>Learning</span><strong id="conversationContextLearning">-</strong></div>
+                    <div><span>記憶</span><strong id="conversationContextMemory">-</strong></div>
+                    <div><span>学習</span><strong id="conversationContextLearning">-</strong></div>
                   </div>
                 </section>
                 <section class="health-aware-conversation-panel">
@@ -315,11 +315,11 @@
                 <section class="reply-plan-panel">
                   <h3>返答の設計メモ</h3>
                   <div class="reply-plan-grid">
-                    <div><span>Opening</span><p id="replyPlanOpening">-</p></div>
-                    <div><span>Main</span><p id="replyPlanMainPoint">-</p></div>
-                    <div><span>Support</span><p id="replyPlanSupport">-</p></div>
-                    <div><span>Uncertainty</span><p id="replyPlanUncertainty">-</p></div>
-                    <div><span>Closing</span><p id="replyPlanClosing">-</p></div>
+                    <div><span>話し始め</span><p id="replyPlanOpening">-</p></div>
+                    <div><span>主な内容</span><p id="replyPlanMainPoint">-</p></div>
+                    <div><span>補足</span><p id="replyPlanSupport">-</p></div>
+                    <div><span>不確かな点</span><p id="replyPlanUncertainty">-</p></div>
+                    <div><span>締め方</span><p id="replyPlanClosing">-</p></div>
                   </div>
                 </section>
                   </div>
@@ -330,208 +330,208 @@
                   <div id="replyFeedbackMount"></div>
                   <details class="developer-state-panel">
                     <summary>
-                      <span>AIの内部状態（開発者向け）</span>
+                      <span>さくらの内部状態（開発者向け）</span>
                       <small>人格・思考・実行管理の詳細状態</small>
                     </summary>
                     <div class="developer-state-body">
-                  <div class="personality-profile-panel" aria-label="Personality Profile">
-                    <h4>Personality Profile</h4>
+                  <div class="personality-profile-panel" aria-label="人柄プロフィール">
+                    <h4>人柄プロフィール</h4>
                     <div class="personality-profile-grid">
-                      <div><span>Warmth</span><p id="personalityWarmth">-</p></div>
-                      <div><span>Curiosity</span><p id="personalityCuriosity">-</p></div>
-                      <div><span>Patience</span><p id="personalityPatience">-</p></div>
-                      <div><span>Directness</span><p id="personalityDirectness">-</p></div>
-                      <div><span>Humor</span><p id="personalityHumor">-</p></div>
-                      <div><span>Reflection</span><p id="personalityReflection">-</p></div>
-                      <div><span>Supportiveness</span><p id="personalitySupportiveness">-</p></div>
+                      <div><span>あたたかさ</span><p id="personalityWarmth">-</p></div>
+                      <div><span>好奇心</span><p id="personalityCuriosity">-</p></div>
+                      <div><span>忍耐</span><p id="personalityPatience">-</p></div>
+                      <div><span>率直さ</span><p id="personalityDirectness">-</p></div>
+                      <div><span>ユーモア</span><p id="personalityHumor">-</p></div>
+                      <div><span>振り返り</span><p id="personalityReflection">-</p></div>
+                      <div><span>支援の強さ</span><p id="personalitySupportiveness">-</p></div>
                     </div>
                   </div>
-                  <div class="relationship-profile-panel" aria-label="Relationship Profile">
-                    <h4>Relationship Profile</h4>
+                  <div class="relationship-profile-panel" aria-label="関係性プロフィール">
+                    <h4>関係性プロフィール</h4>
                     <div class="relationship-profile-grid">
-                      <div><span>Stage</span><p id="relationshipStage">-</p></div>
-                      <div><span>Familiarity</span><p id="relationshipFamiliarity">-</p></div>
-                      <div><span>Trust</span><p id="relationshipTrust">-</p></div>
-                      <div><span>Preferred Support</span><p id="relationshipPreferredSupport">-</p></div>
-                      <div><span>Communication Distance</span><p id="relationshipCommunicationDistance">-</p></div>
-                      <div><span>Last Interaction</span><p id="relationshipLastInteraction">-</p></div>
+                      <div><span>段階</span><p id="relationshipStage">-</p></div>
+                      <div><span>親しみ</span><p id="relationshipFamiliarity">-</p></div>
+                      <div><span>信頼</span><p id="relationshipTrust">-</p></div>
+                      <div><span>好みの支援</span><p id="relationshipPreferredSupport">-</p></div>
+                      <div><span>会話の距離感</span><p id="relationshipCommunicationDistance">-</p></div>
+                      <div><span>最後のやりとり</span><p id="relationshipLastInteraction">-</p></div>
                     </div>
                   </div>
-                  <div class="emotional-resonance-panel" aria-label="Emotional Resonance">
-                    <h4>Emotional Resonance</h4>
+                  <div class="emotional-resonance-panel" aria-label="感情の響き">
+                    <h4>感情の響き</h4>
                     <div class="emotional-resonance-grid">
-                      <div><span>Detected Mode</span><p id="emotionalResonanceMode">-</p></div>
-                      <div><span>Emotional Energy</span><p id="emotionalResonanceEnergy">-</p></div>
-                      <div><span>Support Level</span><p id="emotionalResonanceSupport">-</p></div>
-                      <div><span>Response Tone</span><p id="emotionalResonanceTone">-</p></div>
-                      <div><span>Reasoning</span><p id="emotionalResonanceReasoning">-</p></div>
+                      <div><span>検出した状態</span><p id="emotionalResonanceMode">-</p></div>
+                      <div><span>感情のエネルギー</span><p id="emotionalResonanceEnergy">-</p></div>
+                      <div><span>支援レベル</span><p id="emotionalResonanceSupport">-</p></div>
+                      <div><span>返答のトーン</span><p id="emotionalResonanceTone">-</p></div>
+                      <div><span>判断理由</span><p id="emotionalResonanceReasoning">-</p></div>
                     </div>
                   </div>
-                  <div class="identity-profile-panel" aria-label="Identity Profile">
-                    <h4>Identity Profile</h4>
+                  <div class="identity-profile-panel" aria-label="自己認識プロフィール">
+                    <h4>自己認識プロフィール</h4>
                     <div class="identity-profile-grid">
-                      <div><span>Identity Mode</span><p id="identityMode">-</p></div>
-                      <div><span>Core Traits</span><p id="identityCoreTraits">-</p></div>
-                      <div><span>Relationship Context</span><p id="identityRelationshipContext">-</p></div>
-                      <div><span>Current Tone</span><p id="identityCurrentTone">-</p></div>
-                      <div><span>Response Principle</span><p id="identityResponsePrinciple">-</p></div>
+                      <div><span>自己認識モード</span><p id="identityMode">-</p></div>
+                      <div><span>中心的な特徴</span><p id="identityCoreTraits">-</p></div>
+                      <div><span>関係性の文脈</span><p id="identityRelationshipContext">-</p></div>
+                      <div><span>現在のトーン</span><p id="identityCurrentTone">-</p></div>
+                      <div><span>返答方針</span><p id="identityResponsePrinciple">-</p></div>
                     </div>
                   </div>
-                  <div class="goal-state-panel" aria-label="Goal State">
-                    <h4>Goal State</h4>
+                  <div class="goal-state-panel" aria-label="目標の状態">
+                    <h4>目標の状態</h4>
                     <div class="goal-state-grid">
-                      <div><span>Current Goal</span><p id="goalCurrentGoal">-</p></div>
-                      <div><span>User Goal</span><p id="goalUserGoal">-</p></div>
-                      <div><span>Assistant Goal</span><p id="goalAssistantGoal">-</p></div>
-                      <div><span>Success Condition</span><p id="goalSuccessCondition">-</p></div>
-                      <div><span>Next Step</span><p id="goalNextStep">-</p></div>
-                      <div><span>Confidence</span><p id="goalConfidence">-</p></div>
+                      <div><span>現在の目標</span><p id="goalCurrentGoal">-</p></div>
+                      <div><span>ユーザーの目標</span><p id="goalUserGoal">-</p></div>
+                      <div><span>さくらの目標</span><p id="goalAssistantGoal">-</p></div>
+                      <div><span>成功条件</span><p id="goalSuccessCondition">-</p></div>
+                      <div><span>次の手順</span><p id="goalNextStep">-</p></div>
+                      <div><span>確信度</span><p id="goalConfidence">-</p></div>
                     </div>
                   </div>
-                  <div class="priority-state-panel" aria-label="Priority State">
-                    <h4>Priority State</h4>
+                  <div class="priority-state-panel" aria-label="優先度の状態">
+                    <h4>優先度の状態</h4>
                     <div class="priority-state-grid">
-                      <div><span>Primary Priority</span><p id="priorityPrimaryPriority">-</p></div>
-                      <div><span>Secondary Priority</span><p id="prioritySecondaryPriority">-</p></div>
-                      <div><span>Ignored Topics</span><p id="priorityIgnoredTopics">-</p></div>
-                      <div><span>Urgency</span><p id="priorityUrgency">-</p></div>
-                      <div><span>Reasoning</span><p id="priorityReasoning">-</p></div>
+                      <div><span>第一優先</span><p id="priorityPrimaryPriority">-</p></div>
+                      <div><span>第二優先</span><p id="prioritySecondaryPriority">-</p></div>
+                      <div><span>除外した話題</span><p id="priorityIgnoredTopics">-</p></div>
+                      <div><span>緊急度</span><p id="priorityUrgency">-</p></div>
+                      <div><span>判断理由</span><p id="priorityReasoning">-</p></div>
                     </div>
                   </div>
                   <div class="decision-state-panel" aria-label="会話方針の判断">
                     <h4>会話方針の判断</h4>
                     <div class="decision-state-grid">
-                      <div><span>Selected Approach</span><p id="decisionSelectedApproach">-</p></div>
-                      <div><span>Alternative Approaches</span><p id="decisionAlternativeApproaches">-</p></div>
-                      <div><span>Decision Reason</span><p id="decisionReason">-</p></div>
-                      <div><span>Confidence</span><p id="decisionConfidence">-</p></div>
-                      <div><span>Expected Outcome</span><p id="decisionExpectedOutcome">-</p></div>
+                      <div><span>選んだ方針</span><p id="decisionSelectedApproach">-</p></div>
+                      <div><span>他の候補方針</span><p id="decisionAlternativeApproaches">-</p></div>
+                      <div><span>判断理由</span><p id="decisionReason">-</p></div>
+                      <div><span>確信度</span><p id="decisionConfidence">-</p></div>
+                      <div><span>想定結果</span><p id="decisionExpectedOutcome">-</p></div>
                     </div>
                   </div>
-                  <div class="strategy-state-panel" aria-label="Strategy State">
-                    <h4>Strategy State</h4>
+                  <div class="strategy-state-panel" aria-label="戦略の状態">
+                    <h4>戦略の状態</h4>
                     <div class="strategy-state-grid">
-                      <div><span>Strategy Type</span><p id="strategyType">-</p></div>
-                      <div><span>Steps</span><p id="strategySteps">-</p></div>
-                      <div><span>Communication Plan</span><p id="strategyCommunicationPlan">-</p></div>
-                      <div><span>Risk</span><p id="strategyRisk">-</p></div>
-                      <div><span>Fallback</span><p id="strategyFallback">-</p></div>
+                      <div><span>戦略の種類</span><p id="strategyType">-</p></div>
+                      <div><span>手順</span><p id="strategySteps">-</p></div>
+                      <div><span>会話計画</span><p id="strategyCommunicationPlan">-</p></div>
+                      <div><span>リスク</span><p id="strategyRisk">-</p></div>
+                      <div><span>代替案</span><p id="strategyFallback">-</p></div>
                     </div>
                   </div>
-                  <div class="attention-state-panel" aria-label="Attention State">
-                    <h4>Attention State</h4>
+                  <div class="attention-state-panel" aria-label="注目状態">
+                    <h4>注目状態</h4>
                     <div class="attention-state-grid">
-                      <div><span>Focus Target</span><p id="attentionFocusTarget">-</p></div>
-                      <div><span>Secondary Focus</span><p id="attentionSecondaryFocus">-</p></div>
-                      <div><span>Avoid Focus</span><p id="attentionAvoidFocus">-</p></div>
-                      <div><span>Attention Reason</span><p id="attentionReason">-</p></div>
-                      <div><span>Response Cue</span><p id="attentionResponseCue">-</p></div>
+                      <div><span>注目対象</span><p id="attentionFocusTarget">-</p></div>
+                      <div><span>第二注目</span><p id="attentionSecondaryFocus">-</p></div>
+                      <div><span>避ける注目</span><p id="attentionAvoidFocus">-</p></div>
+                      <div><span>注目理由</span><p id="attentionReason">-</p></div>
+                      <div><span>返答の手がかり</span><p id="attentionResponseCue">-</p></div>
                     </div>
                   </div>
-                  <div class="cognitive-state-panel" aria-label="Cognitive State">
-                    <h4>Cognitive State</h4>
+                  <div class="cognitive-state-panel" aria-label="認知状態">
+                    <h4>認知状態</h4>
                     <div class="cognitive-state-grid">
-                      <div><span>Cognitive Mode</span><p id="cognitiveMode">-</p></div>
-                      <div><span>Active Goal</span><p id="cognitiveActiveGoal">-</p></div>
-                      <div><span>Active Priority</span><p id="cognitiveActivePriority">-</p></div>
-                      <div><span>Active Decision</span><p id="cognitiveActiveDecision">-</p></div>
-                      <div><span>Active Strategy</span><p id="cognitiveActiveStrategy">-</p></div>
-                      <div><span>Active Attention</span><p id="cognitiveActiveAttention">-</p></div>
-                      <div><span>Reasoning Summary</span><p id="cognitiveReasoningSummary">-</p></div>
+                      <div><span>認知モード</span><p id="cognitiveMode">-</p></div>
+                      <div><span>現在の目標</span><p id="cognitiveActiveGoal">-</p></div>
+                      <div><span>現在の優先度</span><p id="cognitiveActivePriority">-</p></div>
+                      <div><span>現在の判断</span><p id="cognitiveActiveDecision">-</p></div>
+                      <div><span>現在の戦略</span><p id="cognitiveActiveStrategy">-</p></div>
+                      <div><span>現在の注目</span><p id="cognitiveActiveAttention">-</p></div>
+                      <div><span>判断理由の要約</span><p id="cognitiveReasoningSummary">-</p></div>
                     </div>
                   </div>
-                  <div class="intent-state-panel" aria-label="Intent State">
-                    <h4>Intent State</h4>
+                  <div class="intent-state-panel" aria-label="意図の状態">
+                    <h4>意図の状態</h4>
                     <div class="intent-state-grid">
-                      <div><span>Primary Intent</span><p id="intentPrimaryIntent">-</p></div>
-                      <div><span>Secondary Intent</span><p id="intentSecondaryIntent">-</p></div>
-                      <div><span>Execution Type</span><p id="intentExecutionType">-</p></div>
-                      <div><span>Expected Result</span><p id="intentExpectedResult">-</p></div>
-                      <div><span>Reasoning</span><p id="intentReasoning">-</p></div>
+                      <div><span>第一意図</span><p id="intentPrimaryIntent">-</p></div>
+                      <div><span>第二意図</span><p id="intentSecondaryIntent">-</p></div>
+                      <div><span>実行の種類</span><p id="intentExecutionType">-</p></div>
+                      <div><span>想定結果</span><p id="intentExpectedResult">-</p></div>
+                      <div><span>判断理由</span><p id="intentReasoning">-</p></div>
                     </div>
                   </div>
-                  <div class="task-plan-state-panel" aria-label="Task Plan State">
-                    <h4>Task Plan State</h4>
+                  <div class="task-plan-state-panel" aria-label="タスク計画の状態">
+                    <h4>タスク計画の状態</h4>
                     <div class="task-plan-state-grid">
-                      <div><span>Objective</span><p id="taskPlanObjective">-</p></div>
-                      <div><span>Planned Steps</span><p id="taskPlanPlannedSteps">-</p></div>
-                      <div><span>Dependencies</span><p id="taskPlanDependencies">-</p></div>
-                      <div><span>Estimated Complexity</span><p id="taskPlanEstimatedComplexity">-</p></div>
-                      <div><span>Completion Criteria</span><p id="taskPlanCompletionCriteria">-</p></div>
+                      <div><span>目的</span><p id="taskPlanObjective">-</p></div>
+                      <div><span>予定している手順</span><p id="taskPlanPlannedSteps">-</p></div>
+                      <div><span>依存関係</span><p id="taskPlanDependencies">-</p></div>
+                      <div><span>見積もり複雑度</span><p id="taskPlanEstimatedComplexity">-</p></div>
+                      <div><span>完了条件</span><p id="taskPlanCompletionCriteria">-</p></div>
                     </div>
                   </div>
-                  <div class="workflow-state-panel" aria-label="Workflow State">
-                    <h4>Workflow State</h4>
+                  <div class="workflow-state-panel" aria-label="作業の流れ">
+                    <h4>作業の流れ</h4>
                     <div class="workflow-state-grid">
-                      <div><span>Workflow Status</span><p id="workflowStatus">-</p></div>
-                      <div><span>Current Step</span><p id="workflowCurrentStep">-</p></div>
-                      <div><span>Total Steps</span><p id="workflowTotalSteps">-</p></div>
-                      <div><span>Completed Steps</span><p id="workflowCompletedSteps">-</p></div>
-                      <div><span>Next Action</span><p id="workflowNextAction">-</p></div>
-                      <div><span>Retry Count</span><p id="workflowRetryCount">-</p></div>
+                      <div><span>作業状況</span><p id="workflowStatus">-</p></div>
+                      <div><span>現在の手順</span><p id="workflowCurrentStep">-</p></div>
+                      <div><span>手順の合計</span><p id="workflowTotalSteps">-</p></div>
+                      <div><span>完了した手順</span><p id="workflowCompletedSteps">-</p></div>
+                      <div><span>次にやること</span><p id="workflowNextAction">-</p></div>
+                      <div><span>再試行回数</span><p id="workflowRetryCount">-</p></div>
                     </div>
                   </div>
                   <div class="execution-decision-panel" aria-label="実行候補の判断">
                     <h4>実行候補の判断</h4>
                     <div class="execution-decision-grid">
-                      <div><span>Priority</span><p id="executionDecisionPriority">-</p></div>
-                      <div><span>Decision Status</span><p id="executionDecisionStatus">-</p></div>
-                      <div><span>Selected Title</span><p id="executionDecisionTitle">-</p></div>
-                      <div><span>Action Type</span><p id="executionDecisionActionType">-</p></div>
-                      <div><span>Confidence</span><p id="executionDecisionConfidence">-</p></div>
-                      <div><span>Decision Reason</span><p id="executionDecisionReason">-</p></div>
+                      <div><span>優先度</span><p id="executionDecisionPriority">-</p></div>
+                      <div><span>判断状況</span><p id="executionDecisionStatus">-</p></div>
+                      <div><span>選んだ項目</span><p id="executionDecisionTitle">-</p></div>
+                      <div><span>行動の種類</span><p id="executionDecisionActionType">-</p></div>
+                      <div><span>確信度</span><p id="executionDecisionConfidence">-</p></div>
+                      <div><span>判断理由</span><p id="executionDecisionReason">-</p></div>
                     </div>
                   </div>
-                  <div class="execution-state-panel" aria-label="Execution State">
-                    <h4>Execution State</h4>
+                  <div class="execution-state-panel" aria-label="実行状態">
+                    <h4>実行状態</h4>
                     <div class="execution-state-grid">
-                      <div><span>Status</span><p id="executionStatus">-</p></div>
-                      <div><span>Title</span><p id="executionTitle">-</p></div>
-                      <div><span>Action Type</span><p id="executionActionType">-</p></div>
-                      <div><span>Reason</span><p id="executionReason">-</p></div>
-                      <div><span>Executed At</span><p id="executionExecutedAt">-</p></div>
-                      <div><span>Result Note</span><p id="executionResultNote">-</p></div>
+                      <div><span>状態</span><p id="executionStatus">-</p></div>
+                      <div><span>項目名</span><p id="executionTitle">-</p></div>
+                      <div><span>行動の種類</span><p id="executionActionType">-</p></div>
+                      <div><span>理由</span><p id="executionReason">-</p></div>
+                      <div><span>実行日時</span><p id="executionExecutedAt">-</p></div>
+                      <div><span>結果メモ</span><p id="executionResultNote">-</p></div>
                     </div>
                   </div>
-                  <div class="execution-feedback-panel" aria-label="Execution Feedback">
-                    <h4>Execution Feedback</h4>
+                  <div class="execution-feedback-panel" aria-label="実行フィードバック">
+                    <h4>実行フィードバック</h4>
                     <div class="execution-feedback-grid">
-                      <label><span>Outcome</span>
+                      <label><span>結果</span>
                         <select id="executionFeedbackOutcome">
-                          <option value="pending">pending</option>
-                          <option value="completed">completed</option>
-                          <option value="partial">partial</option>
-                          <option value="failed">failed</option>
-                          <option value="skipped">skipped</option>
+                          <option value="pending">未確認</option>
+                          <option value="completed">完了</option>
+                          <option value="partial">一部完了</option>
+                          <option value="failed">うまくいかなかった</option>
+                          <option value="skipped">見送った</option>
                         </select>
                       </label>
-                      <label><span>Difficulty</span>
+                      <label><span>難しさ</span>
                         <select id="executionFeedbackDifficulty">
-                          <option value="unknown">unknown</option>
-                          <option value="easy">easy</option>
-                          <option value="normal">normal</option>
-                          <option value="hard">hard</option>
+                          <option value="unknown">わからない</option>
+                          <option value="easy">やさしい</option>
+                          <option value="normal">普通</option>
+                          <option value="hard">難しい</option>
                         </select>
                       </label>
-                      <label><span>Duration Minutes</span><input id="executionFeedbackDuration" type="number" min="0" inputmode="numeric" /></label>
-                      <label><span>Completed At</span><input id="executionFeedbackCompletedAt" type="datetime-local" /></label>
+                      <label><span>かかった時間（分）</span><input id="executionFeedbackDuration" type="number" min="0" inputmode="numeric" /></label>
+                      <label><span>完了した日時</span><input id="executionFeedbackCompletedAt" type="datetime-local" /></label>
                     </div>
-                    <label class="execution-feedback-note"><span>Note</span><textarea id="executionFeedbackNote" rows="3"></textarea></label>
-                    <p id="executionFeedbackStatus" class="execution-feedback-status">Execution の結果を手動で記録できます。</p>
+                    <label class="execution-feedback-note"><span>メモ</span><textarea id="executionFeedbackNote" rows="3"></textarea></label>
+                    <p id="executionFeedbackStatus" class="execution-feedback-status">実行結果を手動で記録できます。</p>
                   </div>
                   <div class="executive-summary-panel" aria-label="実行判断のまとめ">
                     <h4>実行判断のまとめ</h4>
                     <div class="executive-summary-grid">
-                      <div><span>Mode</span><p id="executiveSummaryMode">-</p></div>
-                      <div><span>Current Intent</span><p id="executiveSummaryIntent">-</p></div>
-                      <div><span>Objective</span><p id="executiveSummaryObjective">-</p></div>
-                      <div><span>Workflow</span><p id="executiveSummaryWorkflow">-</p></div>
-                      <div><span>Decision</span><p id="executiveSummaryDecision">-</p></div>
-                      <div><span>Execution</span><p id="executiveSummaryExecution">-</p></div>
-                      <div><span>Feedback</span><p id="executiveSummaryFeedback">-</p></div>
-                      <div><span>Next Action</span><p id="executiveSummaryNextAction">-</p></div>
-                      <div><span>Health</span><p id="executiveSummaryHealth">-</p></div>
-                      <div><span>Risk</span><p id="executiveSummaryRisk">-</p></div>
+                      <div><span>モード</span><p id="executiveSummaryMode">-</p></div>
+                      <div><span>現在の意図</span><p id="executiveSummaryIntent">-</p></div>
+                      <div><span>目的</span><p id="executiveSummaryObjective">-</p></div>
+                      <div><span>作業の流れ</span><p id="executiveSummaryWorkflow">-</p></div>
+                      <div><span>判断</span><p id="executiveSummaryDecision">-</p></div>
+                      <div><span>実行</span><p id="executiveSummaryExecution">-</p></div>
+                      <div><span>フィードバック</span><p id="executiveSummaryFeedback">-</p></div>
+                      <div><span>次にやること</span><p id="executiveSummaryNextAction">-</p></div>
+                      <div><span>体調</span><p id="executiveSummaryHealth">-</p></div>
+                      <div><span>リスク</span><p id="executiveSummaryRisk">-</p></div>
                     </div>
                   </div>
                   <div class="adaptive-intelligence-panel" aria-label="今日の調整方針">
@@ -623,7 +623,7 @@
                       </label>
                     </div>
                     <label class="health-check-note"><span>体のメモ</span><textarea id="healthBodyNote" rows="3"></textarea></label>
-                    <p class="health-reflection-note" id="healthReflectionNote">保存すると、今日の提案・体調をふまえた提案・AI返答の補助情報として反映されます。</p>
+                    <p class="health-reflection-note" id="healthReflectionNote">保存すると、今日の提案・体調をふまえた提案・さくらの返答の補助情報として反映されます。</p>
                     <p id="healthStateSummary" class="health-check-summary">-</p>
                     <p id="healthStateStatus" class="health-check-status">今日の体調メモを記録できます。</p>
                   </div>
@@ -660,52 +660,52 @@
                       <div><span>参照元</span><p id="healthContextSource">-</p></div>
                     </div>
                   </div>
-                  <div class="conversation-feedback-panel" aria-label="直前のAI返答フィードバック">
-                    <h4>直前のAI返答を評価</h4>
+                  <div class="conversation-feedback-panel" aria-label="直前のさくらの返答フィードバック">
+                    <h4>直前のさくらの返答を評価</h4>
                     <div class="conversation-feedback-actions">
-                      <button type="button" data-conversation-feedback="true">このAI返答は自然だった</button>
-                      <button type="button" data-conversation-feedback="false">このAI返答は違和感があった</button>
+                      <button type="button" data-conversation-feedback="true">この返答は自然だった</button>
+                      <button type="button" data-conversation-feedback="false">この返答は違和感があった</button>
                     </div>
-                    <textarea id="conversationFeedbackNote" rows="3" placeholder="直前のAI返答へのメモ" aria-label="直前のAI返答へのメモ"></textarea>
+                    <textarea id="conversationFeedbackNote" rows="3" placeholder="直前のさくらの返答へのメモ" aria-label="直前のさくらの返答へのメモ"></textarea>
                     <button class="ghost-button conversation-feedback-save" id="saveConversationFeedbackNote" type="button">返答メモを保存する</button>
-                    <p id="conversationFeedbackStatus" class="conversation-feedback-status">直前のAI返答の自然さを記録できます。</p>
+                    <p id="conversationFeedbackStatus" class="conversation-feedback-status">直前のさくらの返答の自然さを記録できます。</p>
                   </div>
                   <details class="developer-state-panel">
                     <summary>
-                      <span>AIの内部状態（開発者向け）</span>
+                      <span>さくらの内部状態（開発者向け）</span>
                       <small>返答フィードバックから見た会話分析</small>
                     </summary>
                     <div class="developer-state-body">
-                  <div class="conversation-improvement-panel" aria-label="Conversation Improvement">
-                    <h4>Improvement Hint</h4>
+                  <div class="conversation-improvement-panel" aria-label="会話改善">
+                    <h4>改善ヒント</h4>
                     <ul id="conversationImprovementHints" class="brain-list"></ul>
                   </div>
-                  <div class="conversation-reflection-panel" aria-label="Conversation Reflection">
-                    <h4>Conversation Reflection</h4>
+                  <div class="conversation-reflection-panel" aria-label="会話の振り返り">
+                    <h4>会話の振り返り</h4>
                     <div class="conversation-reflection-grid">
-                      <div><span>Summary</span><p id="conversationReflectionSummary">-</p></div>
-                      <div><span>Tone</span><p id="conversationReflectionTone">-</p></div>
-                      <div><span>User Need</span><p id="conversationReflectionUserNeed">-</p></div>
-                      <div><span>Next Reply Hint</span><p id="conversationReflectionNextReplyHint">-</p></div>
+                      <div><span>要約</span><p id="conversationReflectionSummary">-</p></div>
+                      <div><span>トーン</span><p id="conversationReflectionTone">-</p></div>
+                      <div><span>ユーザーの必要としていること</span><p id="conversationReflectionUserNeed">-</p></div>
+                      <div><span>次の返答ヒント</span><p id="conversationReflectionNextReplyHint">-</p></div>
                     </div>
                   </div>
-                  <div class="conversation-continuity-panel" aria-label="Conversation Continuity">
-                    <h4>Conversation Continuity</h4>
+                  <div class="conversation-continuity-panel" aria-label="会話のつながり">
+                    <h4>会話のつながり</h4>
                     <div class="conversation-continuity-grid">
-                      <div><span>Previous Topic</span><p id="conversationContinuityPreviousTopic">-</p></div>
-                      <div><span>Emotional State</span><p id="conversationContinuityEmotionalState">-</p></div>
-                      <div><span>Unresolved Need</span><p id="conversationContinuityUnresolvedNeed">-</p></div>
-                      <div><span>Next Opening Hint</span><p id="conversationContinuityNextOpeningHint">-</p></div>
-                      <div><span>Related Memory IDs</span><p id="conversationContinuityMemoryIds">-</p></div>
+                      <div><span>前回の話題</span><p id="conversationContinuityPreviousTopic">-</p></div>
+                      <div><span>感情状態</span><p id="conversationContinuityEmotionalState">-</p></div>
+                      <div><span>未解決の必要</span><p id="conversationContinuityUnresolvedNeed">-</p></div>
+                      <div><span>次の話し始めヒント</span><p id="conversationContinuityNextOpeningHint">-</p></div>
+                      <div><span>関連する記憶</span><p id="conversationContinuityMemoryIds">-</p></div>
                     </div>
                   </div>
-                  <div class="conversation-recovery-panel" aria-label="Conversation Recovery">
-                    <h4>Conversation Recovery</h4>
+                  <div class="conversation-recovery-panel" aria-label="会話の立て直し">
+                    <h4>会話の立て直し</h4>
                     <div class="conversation-recovery-grid">
-                      <div><span>Trigger</span><p id="conversationRecoveryTrigger">-</p></div>
-                      <div><span>Detected Issue</span><p id="conversationRecoveryDetectedIssue">-</p></div>
-                      <div><span>Recovery Strategy</span><p id="conversationRecoveryStrategy">-</p></div>
-                      <div><span>Suggested Opening</span><p id="conversationRecoverySuggestedOpening">-</p></div>
+                      <div><span>きっかけ</span><p id="conversationRecoveryTrigger">-</p></div>
+                      <div><span>検出した問題</span><p id="conversationRecoveryDetectedIssue">-</p></div>
+                      <div><span>立て直し方針</span><p id="conversationRecoveryStrategy">-</p></div>
+                      <div><span>話し始め案</span><p id="conversationRecoverySuggestedOpening">-</p></div>
                     </div>
                   </div>
                     </div>
@@ -713,12 +713,12 @@
                 </section>
                 <details class="developer-state-panel">
                   <summary>
-                    <span>AIの内部状態（開発者向け）</span>
+                    <span>さくらの内部状態（開発者向け）</span>
                     <small>記憶の整理状態</small>
                   </summary>
                   <div class="developer-state-body">
                 <section class="memory-consolidation-panel">
-                  <h3>Memory Consolidation</h3>
+                  <h3>記憶の整理</h3>
                   <div class="memory-consolidation-summary">
                     <span>整理候補</span>
                     <strong id="memoryConsolidationCandidateCount">0件</strong>
@@ -745,7 +745,7 @@
               <ul id="brainTodayEvents" class="brain-list"></ul>
             </div>
             <div class="brain-card">
-              <span class="brain-label">AIからの提案</span>
+              <span class="brain-label">さくらからの提案</span>
               <ul id="brainSuggestions" class="brain-list"></ul>
             </div>
             <div class="brain-card">
@@ -775,10 +775,10 @@
           <div class="panel-heading">
             <div>
               <h2>今日の入力メモ</h2>
-              <p class="section-note">今日の状態やAIに見てほしいことを自由に書けます。保存すると今日の記録に残ります。</p>
+              <p class="section-note">今日の状態やさくらに見てほしいことを自由に書けます。保存すると今日の記録に残ります。</p>
             </div>
           </div>
-          <textarea id="dailyInputText" rows="4" placeholder="今日の状態、気になっていること、AIに判断材料として見てほしいこと"></textarea>
+          <textarea id="dailyInputText" rows="4" placeholder="今日の状態、気になっていること、さくらに判断材料として見てほしいこと"></textarea>
           <div class="daily-input-actions">
             <button class="ghost-button" id="saveDailyInput" type="button">今日の入力を保存する</button>
             <p id="dailyInputStatus">未保存の入力はありません。</p>
@@ -794,23 +794,23 @@
           </div>
           <div class="launch-grid">
             <a class="launch-card" href="https://mcwgw408-oss.github.io/substack-labo/">
-              <strong>Substack-Labo</strong>
-              <span>Substack専用</span>
+              <strong>サブスタックラボ</strong>
+              <span>サブスタック専用</span>
             </a>
             <a class="launch-card" href="https://mcwgw408-oss.github.io/discovery-Labo/">
-              <strong>Discovery-Labo</strong>
+              <strong>発見ラボ</strong>
               <span>発見と整理</span>
             </a>
             <a class="launch-card" href="https://mcwgw408-oss.github.io/action-Labo/">
               <strong>交流ログ</strong>
-              <span>Substack以外の交流</span>
+              <span>サブスタック以外の交流</span>
             </a>
             <a class="launch-card" href="https://mcwgw408-oss.github.io/observation-Labo/">
-              <strong>発信観察Labo</strong>
+              <strong>発信観察ラボ</strong>
               <span>今後使う観察場所</span>
             </a>
             <a class="launch-card" href="https://mcwgw408-oss.github.io/Stock-Labo/">
-              <strong>ストック管理Labo</strong>
+              <strong>ストック管理ラボ</strong>
               <span>日用品・食材</span>
             </a>
           </div>
@@ -912,7 +912,7 @@
           <div class="panel-heading">
             <div>
               <h2>発信運営</h2>
-              <p class="section-note">記事、Notes、Chat、ライブ配信、おはスタック回りの今日の運用を記録します。</p>
+              <p class="section-note">記事、ノート、チャット、ライブ配信、おはスタック回りの今日の運用を記録します。</p>
             </div>
             <button class="ghost-button" id="savePublishingOps" type="button">保存</button>
           </div>
@@ -922,14 +922,14 @@
               <h3>今日の吉田塾ログ</h3>
               <div class="publishing-ops-fields compact">
                 <label>日付<input id="publishingOpsDate" type="date" /></label>
-                <label>note記事
+                <label>ノート記事
                   <select id="publishingOpsYoshidaNote">
                     <option>未確認</option>
                     <option>あり</option>
                     <option>なし</option>
                   </select>
                 </label>
-                <label>Substack記事
+                <label>サブスタック記事
                   <select id="publishingOpsYoshidaSubstack">
                     <option>未確認</option>
                     <option>あり</option>
@@ -951,8 +951,8 @@
             <section class="publishing-ops-block">
               <h3>今日の発信状況</h3>
               <div class="publishing-ops-fields">
-                <label>Notes 投稿数<input id="publishingOpsNotesCount" type="number" min="0" inputmode="numeric" /></label>
-                <label>Chat 投稿数<input id="publishingOpsChatCount" type="number" min="0" inputmode="numeric" /></label>
+                <label>ノート投稿数<input id="publishingOpsNotesCount" type="number" min="0" inputmode="numeric" /></label>
+                <label>チャット投稿数<input id="publishingOpsChatCount" type="number" min="0" inputmode="numeric" /></label>
                 <label>記事 投稿数<input id="publishingOpsArticleCount" type="number" min="0" inputmode="numeric" /></label>
                 <label>音声記事 投稿数<input id="publishingOpsAudioArticleCount" type="number" min="0" inputmode="numeric" /></label>
                 <label>おはスタック回り
@@ -967,9 +967,9 @@
 
             <section class="publishing-ops-block">
               <h3>発信アイデア</h3>
-              <label>あとでNotesにしたいこと<textarea id="publishingOpsNotesIdeas" rows="3"></textarea></label>
+              <label>あとでノートにしたいこと<textarea id="publishingOpsNotesIdeas" rows="3"></textarea></label>
               <label>記事にできそうなこと<textarea id="publishingOpsArticleIdeas" rows="3"></textarea></label>
-              <label>Chatで投げたいこと<textarea id="publishingOpsChatIdeas" rows="3"></textarea></label>
+              <label>チャットで投げたいこと<textarea id="publishingOpsChatIdeas" rows="3"></textarea></label>
             </section>
 
             <section class="publishing-ops-block">
@@ -983,10 +983,10 @@
           <p id="publishingOpsStatus" class="publishing-ops-status">未保存の変更はありません。</p>
         </section>
 
-        <section class="panel dashboard-health-input-panel span-2" aria-label="Health Check">
+        <section class="panel dashboard-health-input-panel span-2" aria-label="体調チェック">
           <div class="panel-heading">
             <div>
-              <h2>Health Check</h2>
+              <h2>体調チェック</h2>
               <p class="section-note">今日の体調を記録する入力エリアです。</p>
             </div>
           </div>
@@ -1003,18 +1003,18 @@
           <div id="memoryMemoInputMount"></div>
         </section>
 
-        <section class="dashboard-section-heading dashboard-analysis-heading span-2" aria-label="AI分析">
+        <section class="dashboard-section-heading dashboard-analysis-heading span-2" aria-label="さくらの分析">
           <div>
-            <span>AI分析</span>
+            <span>さくらの分析</span>
             <p>自動生成された分析や内部状態を確認する場所です。</p>
           </div>
         </section>
 
-        <section class="panel dashboard-ai-analysis-panel span-2" aria-label="Health Analysis">
+        <section class="panel dashboard-ai-analysis-panel span-2" aria-label="体調分析">
           <details class="health-analysis-details">
             <summary>
-              <span>Health Analysis</span>
-              <small>Health Insight / Health Trend / Health Context</small>
+              <span>体調分析</span>
+              <small>体調の気づき / 体調の流れ / 体調の文脈</small>
             </summary>
             <div id="healthAnalysisMount" class="health-analysis-body"></div>
           </details>
@@ -1029,7 +1029,7 @@
         </section>
 
         <section class="panel metrics-panel span-2">
-          <h2>DM</h2>
+          <h2>メッセージ</h2>
           <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
           <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
           <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
@@ -1039,7 +1039,7 @@
           <div class="panel-heading">
             <div>
               <h2>あとで見る / あとで読む</h2>
-              <p class="section-note">atode-Labo の代わりに、ここへ一時保存します。</p>
+              <p class="section-note">あとで見るラボの代わりに、ここへ一時保存します。</p>
             </div>
           </div>
           <form class="later-form" id="laterForm">
@@ -1048,7 +1048,7 @@
               <option value="読む">読む</option>
             </select>
             <input id="laterTitle" type="text" placeholder="タイトル" aria-label="あとで見る・読むタイトル" />
-            <input id="laterUrl" type="url" placeholder="URL（任意）" aria-label="URL" />
+            <input id="laterUrl" type="url" placeholder="リンク（任意）" aria-label="リンク" />
             <input id="laterMemo" type="text" placeholder="メモ（任意）" aria-label="メモ" />
             <button type="submit">追加</button>
           </form>
@@ -1060,7 +1060,7 @@
             <span id="laterSearchCount" hidden>検索 <strong>0</strong></span>
           </div>
           <div class="later-search">
-            <input id="laterSearch" type="search" placeholder="タイトル・URL・メモを検索" aria-label="あとで見る・あとで読むを検索" />
+            <input id="laterSearch" type="search" placeholder="タイトル・リンク・メモを検索" aria-label="あとで見る・あとで読むを検索" />
           </div>
           <div class="later-controls">
             <label><input id="showDoneLater" type="checkbox" /> 完了済みも表示</label>
@@ -1094,7 +1094,7 @@
         <section class="panel on-demand-panel span-2">
           <h2>必要な時だけ使う</h2>
           <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
-            <strong>記事Labo</strong>
+            <strong>記事ラボ</strong>
             <span>必要な時だけ開く</span>
           </a>
         </section>
@@ -1125,8 +1125,8 @@
           <div class="panel-heading">
             <h2>データ</h2>
             <div class="data-buttons">
-              <button class="ghost-button" id="downloadCsv" type="button">CSV</button>
-              <button class="ghost-button" id="exportBackup" type="button">JSON書き出し</button>
+              <button class="ghost-button" id="downloadCsv" type="button">表を書き出し</button>
+              <button class="ghost-button" id="exportBackup" type="button">バックアップを書き出し</button>
               <button class="ghost-button" id="importBackup" type="button">取り込み</button>
               <input id="importBackupFile" type="file" accept="application/json,.json" hidden />
             </div>
@@ -1138,14 +1138,14 @@
         <section class="panel sakura-panel">
           <div class="panel-heading">
             <div>
-              <h2>さくらAI</h2>
-              <p class="section-note">6つのLaboの「今」を1つにまとめて、さくらAIに渡します。</p>
+              <h2>さくら</h2>
+              <p class="section-note">6つのラボの「今」を1つにまとめて、さくらに渡します。</p>
             </div>
           </div>
-          <div class="sakura-switches" aria-label="AIに渡す情報の選択">
+          <div class="sakura-switches" aria-label="さくらに渡す情報の選択">
             <label class="check-row"><input id="snapReflection" type="checkbox" /> 今日の振り返りを含める</label>
             <label class="check-row"><input id="snapFeelings" type="checkbox" /> 気持ちの記録を含める（緊張・印象・嬉しかった瞬間）</label>
-            <label class="check-row"><input id="snapMailDm" type="checkbox" /> メール・DMの数値を含める</label>
+            <label class="check-row"><input id="snapMailDm" type="checkbox" /> メール・メッセージの数値を含める</label>
             <label class="check-row"><input id="snapStock" type="checkbox" /> ストック管理を含める</label>
           </div>
           <div class="sakura-controls">
@@ -1157,7 +1157,7 @@
             <button class="ghost-button" id="snapshotCopy" type="button">クリップボードにコピー</button>
           </div>
           <p class="section-note" id="snapshotLastCreated">まだ作成していません</p>
-          <p class="section-note">※ 本番のページ（github.io）で、いつも使うブラウザから作成してください。手元で開いたファイルからは他のLaboのデータが見えません。</p>
+          <p class="section-note">※ 本番のページで、いつも使うブラウザから作成してください。手元で開いたファイルからは他のラボのデータが見えません。</p>
         </section>
       </main>
     </div>
@@ -1229,7 +1229,7 @@
           <option value="読む">読む</option>
         </select>
         <input class="later-title" type="text" aria-label="タイトル" />
-        <input class="later-url" type="url" aria-label="URL" placeholder="URL" />
+        <input class="later-url" type="url" aria-label="リンク" placeholder="リンク" />
         <input class="later-memo" type="text" aria-label="メモ" placeholder="メモ" />
         <a class="ghost-button later-open" href="#" target="_blank" rel="noreferrer">開く</a>
         <button class="delete-button" type="button">削除</button>

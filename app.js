@@ -58,10 +58,12 @@ const defaultDailyTasks = [
   "メール確認",
   "DM確認（前日分まで）",
   "記事執筆（翌日公開分）",
-  "ボイスメッセージ（翌日公開分）",
   "Notes投稿",
   "おはスタック投稿",
   "チャット投稿",
+];
+const obsoleteDailyTasks = [
+  "ボイスメッセージ（翌日公開分）",
 ];
 const defaultProjects = [
   "無料アプリ改善",
@@ -83,9 +85,9 @@ const eventTypeLabels = {
 };
 const defaultProjectMemory = [
   {
-    project: "Sakura AI",
-    title: "Sakura AI Brainを継続開発中",
-    summary: "Brain、Priority、Recommendation、Explain、Learning、Memory Layerを段階的に育てています。",
+    project: "さくら",
+    title: "さくらの判断メモを継続開発中",
+    summary: "判断、優先度、提案、説明、学習、記憶レイヤーを段階的に育てています。",
     tags: ["sakura-ai", "brain"],
   },
   {
@@ -264,6 +266,9 @@ function blankDay() {
 function ensureDefaultDailyTasks(day) {
   let changed = false;
   day.dailyTasks ||= [];
+  const beforeCount = day.dailyTasks.length;
+  day.dailyTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title));
+  if (day.dailyTasks.length !== beforeCount) changed = true;
   defaultDailyTasks.forEach((title) => {
     if (!day.dailyTasks.some((item) => item.title === title)) {
       day.dailyTasks.push(newItem(title));
@@ -1571,7 +1576,7 @@ function renderFields() {
   }
   const dailyInputStatus = $("#dailyInputStatus");
   if (dailyInputStatus) {
-    dailyInputStatus.textContent = day.dailyInput ? "保存済みです。AI判断の材料として参照されます。" : "未保存の入力はありません。";
+    dailyInputStatus.textContent = day.dailyInput ? "保存済みです。さくらの判断材料として参照されます。" : "未保存の入力はありません。";
   }
   Object.entries(day.metrics).forEach(([key, value]) => {
     const field = $(`#${key}`);
@@ -1617,6 +1622,50 @@ function collectSearchText(day) {
     ...Object.values(day.publishingOps || {}),
     ...Object.values(day.reflection),
   ].join(" ");
+}
+
+function displayRecommendationType(type = "") {
+  const labels = {
+    schedule_context: "予定をふまえた提案",
+    rest_first: "休息優先",
+    start_small: "小さく始める",
+    start_tiny: "ごく小さく始める",
+    continue_flow: "流れを続ける",
+    write_from_idea: "アイデアから書く",
+    normal: "通常",
+    none: "なし",
+    "なし": "なし",
+  };
+  return labels[type] || type || "なし";
+}
+
+function displayAdaptiveCategory(category = "") {
+  const labels = {
+    writing: "執筆",
+    coding: "開発",
+    health: "体調",
+    rest: "休息",
+    none: "なし",
+  };
+  return labels[category] || category || "なし";
+}
+
+function displayLearningLevel(level = "") {
+  const labels = {
+    low: "低い",
+    medium: "中くらい",
+    high: "高い",
+  };
+  return labels[level] || level || "-";
+}
+
+function displayLearningSource(source = "") {
+  return String(source || "")
+    .replaceAll("totalLogs", "ログ全体")
+    .replaceAll("recentAcceptanceRate", "最近の一致率")
+    .replaceAll("commonRecommendationType", "多い提案タイプ")
+    .replaceAll("learningLog", "提案学習ログ")
+    .replaceAll("conversationFeedback", "返答フィードバック");
 }
 
 function renderHistory() {
@@ -1890,7 +1939,7 @@ function renderMemoryConsolidation(consolidation) {
   appendBrainItems(
     $("#memoryConsolidationGroups"),
     asArray(consolidation?.groups).map((group) => `${group.label} (${group.count})`),
-    "Memory groups are not available yet.",
+    "記憶グループはまだありません。",
   );
 }
 
@@ -2003,7 +2052,7 @@ function renderConversationContext(context) {
   setText("#conversationContextProject", context?.project);
   setText("#conversationContextRecommendation", context?.recommendation?.title || context?.recommendation?.type);
   setText("#conversationContextMemory", memoryDisplayTitle(context?.memoryContext?.retrieved?.[0]) || memoryDisplayTitle(context?.memoryContext?.recent?.[0]));
-  setText("#conversationContextLearning", context?.learningConfidence ? `Confidence ${context.learningConfidence.score}%` : "");
+  setText("#conversationContextLearning", context?.learningConfidence ? `確信度 ${context.learningConfidence.score}%` : "");
 }
 
 function buildReplyPlan(conversationContext = {}) {
@@ -2025,15 +2074,15 @@ function buildReplyPlan(conversationContext = {}) {
     mainPoint: conversationContext.recommendation?.actionText ||
       conversationContext.recommendation?.message ||
       conversationContext.recommendation?.title ||
-      "Recommendation を確認する",
+      "提案を確認する",
     support: [
-      memoryTitle ? `Memory: ${memoryTitle}` : "",
-      conversationContext.learningHint?.message ? `Learning: ${conversationContext.learningHint.message}` : "",
-      healthAware?.supportHint ? `Health: ${healthAware.supportHint}` : "",
+      memoryTitle ? `記憶: ${memoryTitle}` : "",
+      conversationContext.learningHint?.message ? `学習: ${conversationContext.learningHint.message}` : "",
+      healthAware?.supportHint ? `体調: ${healthAware.supportHint}` : "",
     ].filter(Boolean).join(" / ") || "補足情報はまだ少ない",
     uncertainty: confidence >= 60
-      ? `Learning Confidence ${confidence}%。参考情報として使える状態です。`
-      : `Learning Confidence ${confidence}%。まだ学習途中として控えめに扱います。`,
+      ? `学習の確信度は${confidence}%です。参考情報として使える状態です。`
+      : `学習の確信度は${confidence}%です。まだ学習途中として控えめに扱います。`,
     closing: "様子を見ながら、次の一歩につなげる",
   };
 }
@@ -2076,16 +2125,16 @@ function buildReplySupport(support) {
   const parts = replySentence(support).split(/\s*\/\s*/).filter(Boolean);
   if (!parts.length) return "";
   return parts.map((part) => {
-    const memoryMatch = part.match(/^Memory[:：]\s*(.+)$/);
+    const memoryMatch = part.match(/^(?:Memory|記憶)[:：]\s*(.+)$/);
     if (memoryMatch) return `以前の記録では「${memoryMatch[1]}」が参考になりそうです。`;
-    const learningMatch = part.match(/^Learning[:：]\s*(.+)$/);
-    if (learningMatch) return `Learning では「${learningMatch[1]}」という傾向も見ています。`;
+    const learningMatch = part.match(/^(?:Learning|学習)[:：]\s*(.+)$/);
+    if (learningMatch) return `学習では「${learningMatch[1]}」という傾向も見ています。`;
     return sentenceWithPeriod(part);
   }).join("\n");
 }
 
 function shouldIncludeReplyUncertainty(uncertainty) {
-  return /Confidence [0-5]?\d%|まだ|学習途中|控えめ/.test(uncertainty || "");
+  return /確信度は[0-5]?\d%|Confidence [0-5]?\d%|まだ|学習途中|控えめ/.test(uncertainty || "");
 }
 
 function conversationImprovementHintsFrom(improvements, limit = 3) {
@@ -4042,8 +4091,8 @@ function renderHealthState() {
   const status = $("#healthStateStatus");
   if (status) {
     status.textContent = health?.updatedAt
-      ? "Health Check を保存し、今日の提案・体調をふまえた提案・AI返答の補助情報に反映しました。"
-      : "今日の体調メモを記録できます。保存後、今日の提案・AI返答の補助情報になります。";
+      ? "体調チェックを保存し、今日の提案・体調をふまえた提案・さくらの返答の補助情報に反映しました。"
+      : "今日の体調メモを記録できます。保存後、今日の提案・さくらの返答の補助情報になります。";
   }
   const summaryTarget = $("#healthStateSummary");
   if (summaryTarget) summaryTarget.textContent = buildHealthSummaryUi(health);
@@ -4569,7 +4618,7 @@ function upsertConversationImprovement(feedback) {
 function renderConversationImprovementHints() {
   const target = $("#conversationImprovementHints");
   if (!target) return;
-  appendBrainItems(target, getRecentConversationImprovementHints(3), "Improvement Hint はまだありません。");
+  appendBrainItems(target, getRecentConversationImprovementHints(3), "改善ヒントはまだありません。");
 }
 
 function buildConversationReflection(context = {}, feedbacks = [], improvements = []) {
@@ -4577,7 +4626,7 @@ function buildConversationReflection(context = {}, feedbacks = [], improvements 
     .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
   const latestImprovement = [...asArray(improvements)]
     .sort((a, b) => String(b.updatedAt || b.createdAt).localeCompare(String(a.updatedAt || a.createdAt)))[0] || null;
-  const recommendationLabel = context?.recommendation?.title || context?.recommendation?.type || "Generated Reply";
+  const recommendationLabel = context?.recommendation?.title || context?.recommendation?.type || "生成された返答";
   const feedbackLabel = latestFeedback?.natural === true
     ? "自然"
     : latestFeedback?.natural === false
@@ -4658,7 +4707,7 @@ function buildConversationContinuityHint(context = {}, latestReflection = null, 
     context?.recommendation?.type ||
     context?.project ||
     memoryTitle ||
-    "Generated Reply";
+    "生成された返答";
   const emotionalState = latestReflection?.tone || "observing";
   const unresolvedNeed = latestReflection?.userNeed ||
     (memoryTitle ? `前回の記憶「${memoryTitle}」を踏まえて自然につなげる` : "次回の会話を自然に始める");
@@ -4826,15 +4875,15 @@ function renderConversationFeedback(reply) {
   if (saveButton) saveButton.disabled = !currentReplyText;
   if (!status) return;
   if (!currentReplyText) {
-    status.textContent = "Generated Reply がまだありません。";
+    status.textContent = "生成された返答がまだありません。";
   } else if (entry?.natural === true) {
-    status.textContent = "直前のAI返答は自然だった、と記録しました。";
+    status.textContent = "直前のさくらの返答は自然だった、と記録しました。";
   } else if (entry?.natural === false) {
-    status.textContent = "直前のAI返答は違和感があった、と記録しました。";
+    status.textContent = "直前のさくらの返答は違和感があった、と記録しました。";
   } else if (entry?.note) {
-    status.textContent = "直前のAI返答へのメモを記録しました。";
+    status.textContent = "直前のさくらの返答へのメモを記録しました。";
   } else {
-    status.textContent = "直前のAI返答の自然さを記録できます。";
+    status.textContent = "直前のさくらの返答の自然さを記録できます。";
   }
 }
 
@@ -5344,7 +5393,7 @@ function buildRecommendation(input) {
 function adaptRecommendationWithLearning(recommendation, learningHint, learningSummary) {
   const adapted = {
     ...recommendation,
-    adaptiveNote: "Learning Hintは参考情報として見ています。今日の判断はBrainの状態整理を優先しています。",
+    adaptiveNote: "学習ヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
   };
   const canAdapt = learningHint.confidence >= 60 &&
     learningSummary.recentAcceptanceRate >= 60 &&
@@ -5447,7 +5496,7 @@ function renderLearningFeedback(entry) {
   } else if (entry.accepted === false) {
     status.textContent = "この提案は違った、と記録しました。";
   } else {
-    status.textContent = "この提案をLearning Logに記録しました。";
+    status.textContent = "この提案を学習ログに記録しました。";
   }
 }
 
@@ -5566,7 +5615,7 @@ function renderLearningSummary(summary = buildLearningSummary()) {
   setText("#learningSummaryRejected", `${summary.rejectedCount}件`);
   setText("#learningSummaryUnanswered", `${summary.unansweredCount}件`);
   setText("#learningSummaryRate", summary.recentAcceptanceRate === null ? "-" : `${summary.recentAcceptanceRate}%`);
-  setText("#learningSummaryType", summary.commonRecommendationType);
+  setText("#learningSummaryType", displayRecommendationType(summary.commonRecommendationType));
   setText("#learningSummaryEnergy", summary.averageEnergy === null ? "-" : String(summary.averageEnergy));
 }
 
@@ -5576,7 +5625,7 @@ function renderLearningHint(hint = buildLearningHint()) {
   const source = $("#learningHintSource");
   if (message) message.textContent = hint.message;
   if (confidence) confidence.textContent = `${hint.confidence}%`;
-  if (source) source.textContent = hint.source;
+  if (source) source.textContent = displayLearningSource(hint.source);
 }
 
 function renderLearningConfidence(confidence = buildLearningConfidence()) {
@@ -5585,9 +5634,9 @@ function renderLearningConfidence(confidence = buildLearningConfidence()) {
   const message = $("#learningConfidenceMessage");
   const source = $("#learningConfidenceSource");
   if (score) score.textContent = `${confidence.score}%`;
-  if (level) level.textContent = confidence.level;
+  if (level) level.textContent = displayLearningLevel(confidence.level);
   if (message) message.textContent = confidence.message;
-  if (source) source.textContent = confidence.source;
+  if (source) source.textContent = displayLearningSource(confidence.source);
 }
 
 const ADAPTIVE_GUIDANCE_CATEGORY_RULES = {
@@ -5689,7 +5738,7 @@ function buildAdaptiveGuidanceScores({
     scores,
     signalCounts,
     topCategory,
-    sourceSummary: `learning:${asArray(learningItems).length} / conversation:${asArray(conversationItems).length}`,
+    sourceSummary: `提案学習:${asArray(learningItems).length} / 返答:${asArray(conversationItems).length}`,
   };
 }
 
@@ -5705,8 +5754,8 @@ function renderAdaptiveGuidanceLayer(guidance = buildAdaptiveGuidanceScores()) {
   setText(
     "#adaptiveGuidanceSummary",
     guidance.topCategory === "none"
-      ? "まだ十分なフィードバック傾向はありません。Recommendationにはまだ反映していません。"
-      : `最近は ${guidance.topCategory} への反応が相対的に高めです。Recommendationにはまだ反映していません。`,
+      ? "まだ十分なフィードバック傾向はありません。提案にはまだ反映していません。"
+      : `最近は「${displayAdaptiveCategory(guidance.topCategory)}」への反応が相対的に高めです。提案にはまだ反映していません。`,
   );
   setText("#adaptiveGuidanceSource", guidance.sourceSummary);
 }
@@ -5731,11 +5780,11 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}, hea
     input.hasNextActions ? "発信観察の次アクションがあります。" : "",
   ].filter(Boolean);
   if (memoryContext.used) {
-    seenInfo.push(`Memory を参照しています: ${brainMemoryContextNote(memoryContext)}`);
+    seenInfo.push(`記憶を参照しています: ${brainMemoryContextNote(memoryContext)}`);
   }
 
   if (healthAwareRecommendation?.explanationHint) {
-    seenInfo.push(`Health-Aware Recommendation: ${healthAwareRecommendation.explanationHint}`);
+    seenInfo.push(`体調をふまえた提案: ${healthAwareRecommendation.explanationHint}`);
   }
 
   const mainReasons = input.topCandidate
@@ -5750,15 +5799,15 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}, hea
   const learningHint = buildLearningHint(learningSummary);
   const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
   if (memoryContext.used) {
-    uncertainty.push("Memory は補助情報として参照しています。Priority 判断や Recommendation の種類は Memory で上書きしていません。");
+    uncertainty.push("記憶は補助情報として参照しています。優先度判断や提案の種類は記憶で上書きしていません。");
   }
   if (learningSummary.commonRecommendationType !== "なし" && learningSummary.recentAcceptanceRate !== null) {
-    uncertainty.push(`最近は「${learningSummary.commonRecommendationType}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
+    uncertainty.push(`最近は「${displayRecommendationType(learningSummary.commonRecommendationType)}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
   }
   uncertainty.push(`${learningHint.message} このヒントは過去のフィードバックから生成されています。まだ学習途中のため、参考情報として扱っています。`);
-  uncertainty.push(`Learning Confidenceは${learningConfidence.score}%です。Brainはこの信頼度を見ながら、学習結果を補助情報として扱います。`);
+  uncertainty.push(`学習の確信度は${learningConfidence.score}%です。さくらはこの信頼度を見ながら、学習結果を補助情報として扱います。`);
   if (recommendation.adaptiveNote) {
-    uncertainty.push("Learningは補助役として扱い、今日の候補・予定・Energyを見たBrainの判断を優先しています。");
+    uncertainty.push("学習は補助役として扱い、今日の候補・予定・エネルギーを見たさくらの判断を優先しています。");
   }
   if (!input.topCandidate) {
     uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
@@ -5771,7 +5820,7 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}, hea
   }
 
   if (healthAwareRecommendation?.cautionNote) {
-    uncertainty.push(`Health-Aware Recommendation: ${healthAwareRecommendation.cautionNote}`);
+    uncertainty.push(`体調をふまえた提案: ${healthAwareRecommendation.cautionNote}`);
   }
 
   return {
@@ -6018,30 +6067,30 @@ function buildExplainableGuidanceReasons({
   const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
 
   if (priorityCandidate?.title) {
-    reasons.push(`Priority: 今日の候補では「${priorityCandidate.title}」が強く出ています。`);
+    reasons.push(`優先度: 今日の候補では「${priorityCandidate.title}」が強く出ています。`);
   } else if (recommendation?.title) {
-    reasons.push(`Recommendation: 今日の提案は「${recommendation.title}」を中心にしています。`);
+    reasons.push(`提案: 今日の提案は「${recommendation.title}」を中心にしています。`);
   }
 
   if (adaptiveGuidance?.topCategory && adaptiveGuidance.topCategory !== "none") {
     const score = adaptiveGuidance.scores?.[adaptiveGuidance.topCategory];
-    reasons.push(`Adaptive Guidance: 最近は ${adaptiveGuidance.topCategory} の反応が高めです（${Number(score).toFixed(2)}）。`);
+    reasons.push(`提案調整: 最近は「${displayAdaptiveCategory(adaptiveGuidance.topCategory)}」の反応が高めです（${Number(score).toFixed(2)}）。`);
   }
 
   if (support || caution) {
-    reasons.push(`Health: ${support || caution}`);
+    reasons.push(`体調: ${support || caution}`);
   }
 
   if (memoryTitle) {
-    reasons.push(`Memory: 「${memoryTitle}」を補助情報として見ています。`);
+    reasons.push(`記憶: 「${memoryTitle}」を補助情報として見ています。`);
   }
 
   if (focusTask?.title) {
-    reasons.push(`Today Tasks: 次に触るタスクとして「${focusTask.title}」を見ています。`);
+    reasons.push(`今日やること: 次に触るタスクとして「${focusTask.title}」を見ています。`);
   }
 
   if (!reasons.length) {
-    reasons.push("Priority / Recommendation / Health / Memory / Today Tasks の既存情報から、軽めの提案にしています。");
+    reasons.push("優先度 / 提案 / 体調 / 記憶 / 今日やること の既存情報から、軽めの提案にしています。");
   }
 
   return reasons.slice(0, 5);
@@ -6092,9 +6141,9 @@ function buildReflectionLayerItems({
   }
 
   if (adaptiveGuidance.topCategory && adaptiveGuidance.topCategory !== "none") {
-    items.push(`Adaptive Guidance は ${adaptiveGuidance.topCategory} を少し強めに見ています。`);
+    items.push(`提案調整では「${displayAdaptiveCategory(adaptiveGuidance.topCategory)}」を少し強めに見ています。`);
   } else {
-    items.push("Adaptive Guidance はまだ十分な傾向を持っていません。");
+    items.push("提案調整はまだ十分な傾向を持っていません。");
   }
 
   if (learningEntry?.accepted === true && recommendation?.title) {
@@ -6175,7 +6224,7 @@ function buildConversationTimelineItems({
     const awkwardCount = recentFeedback.filter((entry) => entry.natural === false).length;
     items.push(`変化: 直近の返答フィードバックは自然 ${naturalCount}件 / 違和感 ${awkwardCount}件です。`);
   } else if (recentMemory) {
-    items.push(`変化: Memoryでは「${recentMemory}」が流れの手がかりです。`);
+    items.push(`変化: 記憶では「${recentMemory}」が流れの手がかりです。`);
   } else {
     items.push("変化: まだ会話フィードバックや記憶の手がかりは少なめです。");
   }
@@ -6187,13 +6236,13 @@ function buildConversationTimelineItems({
   }
 
   if (replyFeedback?.natural === false) {
-    items.push("AIが感じている方向性: 次の返答は説明を短くし、違和感を減らす方向です。");
+    items.push("さくらが感じている方向性: 次の返答は説明を短くし、違和感を減らす方向です。");
   } else if (learningEntry?.accepted === true) {
-    items.push("AIが感じている方向性: 似た文脈では今回の提案方向を続けられそうです。");
+    items.push("さくらが感じている方向性: 似た文脈では今回の提案方向を続けられそうです。");
   } else if (contextSummary?.adaptiveTopCategory && contextSummary.adaptiveTopCategory !== "none") {
-    items.push(`AIが感じている方向性: ${contextSummary.adaptiveTopCategory} の傾向を補助情報として見ています。`);
+    items.push(`さくらが感じている方向性: 「${displayAdaptiveCategory(contextSummary.adaptiveTopCategory)}」の傾向を補助情報として見ています。`);
   } else {
-    items.push("AIが感じている方向性: もう少しフィードバックを集めながら、流れを見極めます。");
+    items.push("さくらが感じている方向性: もう少しフィードバックを集めながら、流れを見極めます。");
   }
 
   return items.slice(0, 4);
@@ -6420,7 +6469,7 @@ function renderBrainPrototype() {
   }
   upsertShortMemory({
     type: "recommendation",
-    title: "Recommendation が出た",
+    title: "提案が出た",
     summary: [recommendation.message, recommendation.actionText].filter(Boolean).join(" "),
     source: "recommendation",
     importance: 2,
@@ -6466,7 +6515,7 @@ function renderBrainPrototype() {
   const newestRevisit = revisitPeople
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   const recentChanges = [
-    getLatestHealthState()?.updatedAt ? `体調入力: Health Check更新 ${brainFormatDateTime(getLatestHealthState().updatedAt)}` : "",
+    getLatestHealthState()?.updatedAt ? `体調入力: 体調チェック更新 ${brainFormatDateTime(getLatestHealthState().updatedAt)}` : "",
     day.dailyInput ? "今日の入力: 自由入力メモを参照" : "",
     newestHasshin?.nextAction ? `発信観察の次アクション: ${newestHasshin.nextAction}` : "",
     newestRevisit?.name ? `また見たい人: ${newestRevisit.name}` : "",
@@ -6580,7 +6629,7 @@ function bindEvents() {
       renderLearningStatus();
       upsertShortMemory({
         type: "learning_feedback",
-        title: "Learning feedback が記録された",
+        title: "提案フィードバックが記録された",
         summary: entry.accepted ? "この提案は合っていた、と記録されました。" : "この提案は違った、と記録されました。",
         source: "learningLog",
         importance: 3,
