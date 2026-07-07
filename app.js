@@ -179,14 +179,21 @@ function newLaterItem({ type = "見る", title = "", url = "", memo = "" } = {})
 }
 
 function newLearningItem() {
+  const now = new Date().toISOString();
   return {
-    createdAt: new Date().toISOString(),
+    createdAt: now,
     id: crypto.randomUUID(),
+    date: activeDate,
+    source: "",
     title: "",
-    url: "",
-    hook: "",
-    experiment: "",
-    intro: "",
+    summaryLine: "",
+    intent: "",
+    learned: "",
+    useForSelf: "",
+    useForPublishing: "",
+    sakuraMemory: "",
+    tags: "",
+    memo: "",
   };
 }
 
@@ -1246,41 +1253,59 @@ function renderLearnings() {
   if (!day.learnings.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = "今日の学びはまだありません。";
+    empty.textContent = "学びの蓄積はまだありません。";
     target.append(empty);
     return;
   }
   day.learnings.forEach((learning) => {
     const row = template.content.firstElementChild.cloneNode(true);
+    const date = row.querySelector(".learning-date");
+    const source = row.querySelector(".learning-source");
     const title = row.querySelector(".learning-title");
-    const url = row.querySelector(".learning-url");
-    const hook = row.querySelector(".learning-hook");
-    const experiment = row.querySelector(".learning-experiment");
-    const intro = row.querySelector(".learning-intro");
+    const summaryLine = row.querySelector(".learning-summary-line");
+    const intent = row.querySelector(".learning-intent");
+    const learned = row.querySelector(".learning-learned");
+    const useForSelf = row.querySelector(".learning-use-for-self");
+    const useForPublishing = row.querySelector(".learning-use-for-publishing");
+    const sakuraMemory = row.querySelector(".learning-sakura-memory");
+    const tags = row.querySelector(".learning-tags");
+    const memo = row.querySelector(".learning-memo");
+    date.value = learning.date || activeDate;
+    source.value = learning.source || learning.url || "";
     title.value = learning.title || "";
-    url.value = learning.url || "";
-    hook.value = learning.hook || "";
-    experiment.value = learning.experiment || "";
-    intro.value = learning.intro || "";
+    summaryLine.value = learning.summaryLine || learning.hook || "";
+    intent.value = learning.intent || "";
+    learned.value = learning.learned || "";
+    useForSelf.value = learning.useForSelf || "";
+    useForPublishing.value = learning.useForPublishing || learning.experiment || "";
+    sakuraMemory.value = learning.sakuraMemory || learning.intro || "";
+    tags.value = learning.tags || "";
+    memo.value = learning.memo || "";
     [
+      ["date", date],
+      ["source", source],
       ["title", title],
-      ["url", url],
-      ["hook", hook],
-      ["experiment", experiment],
-      ["intro", intro],
+      ["summaryLine", summaryLine],
+      ["intent", intent],
+      ["learned", learned],
+      ["useForSelf", useForSelf],
+      ["useForPublishing", useForPublishing],
+      ["sakuraMemory", sakuraMemory],
+      ["tags", tags],
+      ["memo", memo],
     ].forEach(([key, field]) => {
       field.addEventListener("input", () => {
         learning[key] = field.value;
         saveStore();
       });
     });
-    row.querySelector(".copy-learning-intro").addEventListener("click", async () => {
-      const text = intro.value.trim();
+    row.querySelector(".copy-learning-memory").addEventListener("click", async () => {
+      const text = sakuraMemory.value.trim();
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
       } catch {
-        intro.select();
+        sakuraMemory.select();
         document.execCommand("copy");
       }
     });
@@ -1477,7 +1502,17 @@ function collectSearchText(day) {
     ...(day.memos || []).map((memo) => memo.text),
     day.dailyInput || "",
     ...(day.learnings || []).flatMap((learning) => [
+      learning.date,
+      learning.source,
       learning.title,
+      learning.summaryLine,
+      learning.intent,
+      learning.learned,
+      learning.useForSelf,
+      learning.useForPublishing,
+      learning.sakuraMemory,
+      learning.tags,
+      learning.memo,
       learning.url,
       learning.hook,
       learning.experiment,
@@ -6773,7 +6808,17 @@ function downloadCsv() {
         (day.memos || []).map((memo) => memo.text).join(" / "),
         (day.learnings || [])
           .map((learning) => [
+            learning.date,
+            learning.source,
             learning.title,
+            learning.summaryLine,
+            learning.intent,
+            learning.learned,
+            learning.useForSelf,
+            learning.useForPublishing,
+            learning.sakuraMemory,
+            learning.tags,
+            learning.memo,
             learning.url,
             learning.hook,
             learning.experiment,

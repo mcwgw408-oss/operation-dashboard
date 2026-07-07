@@ -1038,10 +1038,10 @@
         <section class="panel learning-panel span-2">
           <div class="panel-heading">
             <div>
-              <h2>今日の学び</h2>
-              <p class="section-note">学んだことを、今日の記事でどう活かしたか残します。</p>
+              <h2>学びの蓄積</h2>
+              <p class="section-note">読んだことや聞いたことを、自分の言葉に変えて残します。</p>
             </div>
-            <button class="ghost-button" id="addLearning" type="button">追加</button>
+            <button class="ghost-button" id="addLearning" type="button">学びを追加</button>
           </div>
           <div id="learningList" class="learning-list"></div>
         </section>
@@ -1128,13 +1128,19 @@
 
     <template id="learningTemplate">
       <div class="learning-item">
-        <label>学んだ記事タイトル<input class="learning-title" type="text" /></label>
-        <label>学んだ記事URL<input class="learning-url" type="url" /></label>
-        <label>今日、一番引っかかったこと<textarea class="learning-hook" rows="3"></textarea></label>
-        <label>今日の記事で実験したこと<textarea class="learning-experiment" rows="3"></textarea></label>
-        <label class="learning-intro-field">記事の最後に入れる紹介文<textarea class="learning-intro" rows="4"></textarea></label>
+        <label>日付<input class="learning-date" type="date" /></label>
+        <label>情報源<input class="learning-source" type="text" placeholder="記事、本、配信、講座など" /></label>
+        <label>タイトル<input class="learning-title" type="text" /></label>
+        <label>タグ<input class="learning-tags" type="text" placeholder="考え方、体調、発信など" /></label>
+        <label>一言でいうと<textarea class="learning-summary-line" rows="2"></textarea></label>
+        <label>何を伝えたい内容だったか<textarea class="learning-intent" rows="3"></textarea></label>
+        <label>自分が学んだこと<textarea class="learning-learned" rows="3"></textarea></label>
+        <label>自分ならどう使うか<textarea class="learning-use-for-self" rows="3"></textarea></label>
+        <label>発信にどう活かすか<textarea class="learning-use-for-publishing" rows="3"></textarea></label>
+        <label>さくらに残したいこと<textarea class="learning-sakura-memory" rows="4"></textarea></label>
+        <label class="learning-memo-field">メモ<textarea class="learning-memo" rows="4"></textarea></label>
         <div class="learning-actions">
-          <button class="ghost-button copy-learning-intro" type="button">紹介文をコピー</button>
+          <button class="ghost-button copy-learning-memory" type="button">さくらに残したいことをコピー</button>
           <button class="delete-button" type="button">削除</button>
         </div>
       </div>

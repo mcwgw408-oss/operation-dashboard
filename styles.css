@@ -2990,12 +2990,14 @@ textarea {
   min-height: 82px;
 }
 
-.learning-intro-field,
+.learning-item label:has(textarea),
+.learning-memo-field,
 .learning-actions {
   grid-column: 1 / -1;
 }
 
-.learning-intro {
+.learning-sakura-memory,
+.learning-memo {
   min-height: 110px;
 }
 
@@ -3320,7 +3322,7 @@ textarea {
     margin-right: 0;
   }
 
-  .learning-intro-field,
+  .learning-memo-field,
   .learning-actions {
     grid-column: auto;
   }
