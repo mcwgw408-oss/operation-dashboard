@@ -970,6 +970,13 @@ function formatEventLabel(event) {
   ].filter(Boolean).join(" ");
 }
 
+function formatEventScheduleLine(event) {
+  return [
+    event.time,
+    event.title,
+  ].filter(Boolean).join(" ");
+}
+
 function dateKeyToLocalDate(dateKey) {
   if (!dateKey) return null;
   const [year, month, day] = String(dateKey).split("-").map(Number);
@@ -5089,7 +5096,7 @@ function collectPriorityCandidates(context) {
     item: { ...item, title: item.nextAction || item.title || item.memo },
     source: "hasshin-kansatsu-labo.entries",
     sourceLabel: "発信観察",
-    baseReason: "発信観察に次アクションが残っています。",
+    baseReason: item.nextAction ? `次のアクション: ${item.nextAction}` : "発信観察に具体的な次の行動があります。",
     basePoints: PRIORITY_ENGINE_WEIGHTS.hasshinNextAction,
   })));
   context.writingInProgress.forEach((item) => candidates.push(createPriorityCandidate({
@@ -5241,23 +5248,23 @@ function inferEventContext(todayEvents) {
     return {
       count: 0,
       level: "Open",
-      text: "今日の予定は少なめに見えます。",
+      text: "今日は予定はありません。",
       labels: [],
     };
   }
-  const labels = events.map(formatEventLabel);
+  const labels = events.map(formatEventScheduleLine);
   if (events.length >= 2) {
     return {
       count: events.length,
       level: "Busy",
-      text: `今日は予定が${events.length}件あるため、新しい作業を増やしすぎない提案にしています。`,
+      text: `今日の予定: ${labels.join(" / ")}`,
       labels,
     };
   }
   return {
     count: events.length,
     level: "Scheduled",
-    text: "今日は予定があるため、準備や休息の余白を残す提案にしています。",
+    text: `今日の予定: ${labels[0]}`,
     labels,
   };
 }
@@ -5290,7 +5297,7 @@ function chooseRecommendationType(input) {
   return "start_small";
 }
 
-function recommendationReasonForSource(source) {
+function recommendationReasonForSource(source, candidate = null) {
   const sourceReasons = {
     "operation-dashboard.todayTasks": "今日やることに入っています。",
     "operation-dashboard.dailyTasks": "毎日タスクとして残っています。",
@@ -5298,7 +5305,7 @@ function recommendationReasonForSource(source) {
     "operation-dashboard.laterItems": "あとで見る項目として残っています。",
     "operation-dashboard.persistentMemos": "最近更新されたメモがあります。",
     "discovery-labo.discoveries": "発酵中アイデアがあります。",
-    "hasshin-kansatsu-labo.entries": "次のアクションが残っています。",
+    "hasshin-kansatsu-labo.entries": candidate?.title ? `次のアクション: ${candidate.title}` : "発信観察に具体的な次の行動があります。",
     "substack-labo.writing": "執筆中の記事があります。",
     "koryu-log-labo.entries": "また見たい人の記録があります。",
   };
@@ -5306,17 +5313,20 @@ function recommendationReasonForSource(source) {
 }
 
 function buildRecommendationReasons(input) {
+  const scheduleReasons = input.hasTodayEvents
+    ? input.eventContext.labels.map((label) => `予定: ${label}`)
+    : [input.eventContext.text];
   if (!input.topCandidate) {
     const reasons = [
       "強く急ぐ候補は見つかっていません。",
       "今日は整理や回復を優先しても良さそうです。",
     ];
-    if (input.hasTodayEvents) reasons.unshift(input.eventContext.text);
+    reasons.unshift(...scheduleReasons);
     return reasons;
   }
 
-  const reasons = [recommendationReasonForSource(input.topCandidate.source)];
-  if (input.hasTodayEvents) reasons.push(input.eventContext.text);
+  const reasons = [recommendationReasonForSource(input.topCandidate.source, input.topCandidate)];
+  reasons.push(...scheduleReasons);
   if (input.hasFermentingIdeas && !reasons.includes("発酵中アイデアがあります。")) {
     reasons.push("発酵中アイデアがあります。");
   }
@@ -5336,7 +5346,7 @@ function generateRecommendationMessage(input, type) {
     if (input.hasTodayEvents) {
       return {
         title: "おはよう、さくら。",
-        message: "今日は予定があるため、新しい作業を増やすより、準備と休息を優先しても良さそうです。",
+        message: `${input.eventContext.text} 新しい作業を増やすより、準備と休息を優先しても良さそうです。`,
         actionText: "まず予定の時間と持ち物だけ確認しておきませんか？",
       };
     }
@@ -5363,7 +5373,7 @@ function generateRecommendationMessage(input, type) {
   if (type === "schedule_context") {
     return {
       title: "おはよう、さくら。",
-      message: `今日は予定があるため、「${title}」は余力があれば軽く触れるくらいで良さそうです。`,
+      message: `${input.eventContext.text} 「${title}」は余力があれば軽く触れるくらいで良さそうです。`,
       actionText: "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
     };
   }
