@@ -244,19 +244,19 @@ textarea {
 }
 
 .dashboard-health-input-panel {
-  order: 6;
-}
-
-.dashboard-memory-input-panel {
-  order: 7;
-}
-
-.dashboard-task-panel {
   order: 8;
 }
 
-.schedule-panel {
+.dashboard-memory-input-panel {
   order: 9;
+}
+
+.dashboard-task-panel {
+  order: 6;
+}
+
+.schedule-panel {
+  order: 10;
 }
 
 .dashboard-ai-analysis-panel,
@@ -3012,6 +3012,62 @@ textarea {
   gap: 8px;
 }
 
+.publishing-ops-panel {
+  display: grid;
+  gap: 14px;
+  order: 7;
+  grid-column: 1 / -1;
+}
+
+.publishing-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.publishing-ops-block {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.publishing-ops-block h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.publishing-ops-block label,
+.publishing-ops-fields label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.publishing-ops-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.publishing-ops-fields.compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.publishing-ops-block textarea {
+  min-height: 86px;
+}
+
+.publishing-ops-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .data-panel {
   min-height: 250px;
 }
@@ -3314,6 +3370,9 @@ textarea {
 
   .persistent-memo-actions,
   .learning-item,
+  .publishing-ops-grid,
+  .publishing-ops-fields,
+  .publishing-ops-fields.compact,
   .history-item {
     grid-template-columns: 1fr;
   }

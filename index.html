@@ -908,6 +908,81 @@
           <div id="dailyTasks" class="task-list"></div>
         </section>
 
+        <section class="panel publishing-ops-panel span-2" aria-label="発信運営">
+          <div class="panel-heading">
+            <div>
+              <h2>発信運営</h2>
+              <p class="section-note">記事、Notes、Chat、ライブ配信、おはスタック回りの今日の運用を記録します。</p>
+            </div>
+            <button class="ghost-button" id="savePublishingOps" type="button">保存</button>
+          </div>
+
+          <div class="publishing-ops-grid">
+            <section class="publishing-ops-block">
+              <h3>今日の吉田塾ログ</h3>
+              <div class="publishing-ops-fields compact">
+                <label>日付<input id="publishingOpsDate" type="date" /></label>
+                <label>note記事
+                  <select id="publishingOpsYoshidaNote">
+                    <option>未確認</option>
+                    <option>あり</option>
+                    <option>なし</option>
+                  </select>
+                </label>
+                <label>Substack記事
+                  <select id="publishingOpsYoshidaSubstack">
+                    <option>未確認</option>
+                    <option>あり</option>
+                    <option>なし</option>
+                  </select>
+                </label>
+                <label>ライブ配信
+                  <select id="publishingOpsYoshidaLive">
+                    <option>未確認</option>
+                    <option>あり</option>
+                    <option>なし</option>
+                  </select>
+                </label>
+              </div>
+              <label>今日の一番の学び<textarea id="publishingOpsYoshidaLearning" rows="4"></textarea></label>
+              <label>明日に活かすこと<textarea id="publishingOpsYoshidaTomorrow" rows="3"></textarea></label>
+            </section>
+
+            <section class="publishing-ops-block">
+              <h3>今日の発信状況</h3>
+              <div class="publishing-ops-fields">
+                <label>Notes 投稿数<input id="publishingOpsNotesCount" type="number" min="0" inputmode="numeric" /></label>
+                <label>Chat 投稿数<input id="publishingOpsChatCount" type="number" min="0" inputmode="numeric" /></label>
+                <label>記事 投稿数<input id="publishingOpsArticleCount" type="number" min="0" inputmode="numeric" /></label>
+                <label>音声記事 投稿数<input id="publishingOpsAudioArticleCount" type="number" min="0" inputmode="numeric" /></label>
+                <label>おはスタック回り
+                  <select id="publishingOpsMorningStack">
+                    <option>できなかった</option>
+                    <option>少しできた</option>
+                    <option>できた</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <section class="publishing-ops-block">
+              <h3>発信アイデア</h3>
+              <label>あとでNotesにしたいこと<textarea id="publishingOpsNotesIdeas" rows="3"></textarea></label>
+              <label>記事にできそうなこと<textarea id="publishingOpsArticleIdeas" rows="3"></textarea></label>
+              <label>Chatで投げたいこと<textarea id="publishingOpsChatIdeas" rows="3"></textarea></label>
+            </section>
+
+            <section class="publishing-ops-block">
+              <h3>運用改善メモ</h3>
+              <label>予約投稿の時間調整<textarea id="publishingOpsScheduledPostTiming" rows="3"></textarea></label>
+              <label>おはスタック回りの流れ<textarea id="publishingOpsMorningStackFlow" rows="3"></textarea></label>
+              <label>吉田塾の記事やライブとの兼ね合い<textarea id="publishingOpsYoshidaBalance" rows="3"></textarea></label>
+              <label>今日やってみて気づいたこと<textarea id="publishingOpsOperationFindings" rows="3"></textarea></label>
+            </section>
+          </div>
+          <p id="publishingOpsStatus" class="publishing-ops-status">未保存の変更はありません。</p>
+        </section>
+
         <section class="panel dashboard-health-input-panel span-2" aria-label="Health Check">
           <div class="panel-heading">
             <div>

@@ -197,6 +197,29 @@ function newLearningItem() {
   };
 }
 
+function defaultPublishingOps(date = activeDate) {
+  return {
+    date,
+    yoshidaNoteStatus: "未確認",
+    yoshidaSubstackStatus: "未確認",
+    yoshidaLiveStatus: "未確認",
+    yoshidaLearning: "",
+    yoshidaTomorrow: "",
+    notesCount: "",
+    chatCount: "",
+    articleCount: "",
+    audioArticleCount: "",
+    morningStackStatus: "できなかった",
+    notesIdeas: "",
+    articleIdeas: "",
+    chatIdeas: "",
+    scheduledPostTiming: "",
+    morningStackFlow: "",
+    yoshidaBalance: "",
+    operationFindings: "",
+  };
+}
+
 function newPersistentMemo() {
   const now = new Date().toISOString();
   return {
@@ -215,6 +238,7 @@ function blankDay() {
     projects: defaultProjects.map(newItem),
     memos: [],
     learnings: [],
+    publishingOps: defaultPublishingOps(),
     dailyInput: "",
     metrics: {
       mailUnread: "",
@@ -271,6 +295,22 @@ function ensureLearningList(day) {
     return true;
   }
   return false;
+}
+
+function ensurePublishingOps(day) {
+  if (!day.publishingOps || typeof day.publishingOps !== "object") {
+    day.publishingOps = defaultPublishingOps();
+    return true;
+  }
+  const defaults = defaultPublishingOps();
+  let changed = false;
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.publishingOps)) {
+      day.publishingOps[key] = value;
+      changed = true;
+    }
+  });
+  return changed;
 }
 
 function ensureTodayEvents(day) {
@@ -815,6 +855,9 @@ function getDay() {
   if (ensureLearningList(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
+  if (ensurePublishingOps(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
   if (ensureTodayEvents(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
@@ -1318,6 +1361,59 @@ function renderLearnings() {
   });
 }
 
+const publishingOpsFields = {
+  date: "#publishingOpsDate",
+  yoshidaNoteStatus: "#publishingOpsYoshidaNote",
+  yoshidaSubstackStatus: "#publishingOpsYoshidaSubstack",
+  yoshidaLiveStatus: "#publishingOpsYoshidaLive",
+  yoshidaLearning: "#publishingOpsYoshidaLearning",
+  yoshidaTomorrow: "#publishingOpsYoshidaTomorrow",
+  notesCount: "#publishingOpsNotesCount",
+  chatCount: "#publishingOpsChatCount",
+  articleCount: "#publishingOpsArticleCount",
+  audioArticleCount: "#publishingOpsAudioArticleCount",
+  morningStackStatus: "#publishingOpsMorningStack",
+  notesIdeas: "#publishingOpsNotesIdeas",
+  articleIdeas: "#publishingOpsArticleIdeas",
+  chatIdeas: "#publishingOpsChatIdeas",
+  scheduledPostTiming: "#publishingOpsScheduledPostTiming",
+  morningStackFlow: "#publishingOpsMorningStackFlow",
+  yoshidaBalance: "#publishingOpsYoshidaBalance",
+  operationFindings: "#publishingOpsOperationFindings",
+};
+
+function readPublishingOpsForm() {
+  return Object.fromEntries(Object.entries(publishingOpsFields).map(([key, selector]) => {
+    const field = $(selector);
+    return [key, field ? field.value : ""];
+  }));
+}
+
+function renderPublishingOps() {
+  const day = getDay();
+  const ops = { ...defaultPublishingOps(), ...(day.publishingOps || {}) };
+  Object.entries(publishingOpsFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (field && field.value !== (ops[key] || "")) {
+      field.value = ops[key] || "";
+    }
+  });
+  const status = $("#publishingOpsStatus");
+  if (status) {
+    status.textContent = "今日の発信運営を記録できます。";
+  }
+}
+
+function savePublishingOpsFromForm() {
+  const day = getDay();
+  day.publishingOps = { ...defaultPublishingOps(), ...readPublishingOpsForm() };
+  saveStore();
+  const status = $("#publishingOpsStatus");
+  if (status) {
+    status.textContent = "保存済みです。";
+  }
+}
+
 function renderLaterCounts() {
   const counts = laterItems.reduce(
     (summary, item) => {
@@ -1518,6 +1614,7 @@ function collectSearchText(day) {
       learning.experiment,
       learning.intro,
     ]),
+    ...Object.values(day.publishingOps || {}),
     ...Object.values(day.reflection),
   ].join(" ");
 }
@@ -6438,6 +6535,7 @@ function renderAll() {
   renderMailLastChecked();
   renderPersistentMemos();
   renderLearnings();
+  renderPublishingOps();
   renderLaterItems();
   renderFields();
   renderSummary();
@@ -6727,6 +6825,19 @@ function bindEvents() {
     if (!field) return;
     field.addEventListener("input", () => updateField("reflection", key, field));
   });
+  $("#savePublishingOps")?.addEventListener("click", savePublishingOpsFromForm);
+  Object.values(publishingOpsFields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    field.addEventListener("input", () => {
+      const status = $("#publishingOpsStatus");
+      if (status) status.textContent = "未保存の変更があります。";
+    });
+    field.addEventListener("change", () => {
+      const status = $("#publishingOpsStatus");
+      if (status) status.textContent = "未保存の変更があります。";
+    });
+  });
   $("#historySearch").addEventListener("input", renderHistory);
   $("#downloadCsv").addEventListener("click", downloadCsv);
   $("#exportBackup")?.addEventListener("click", handleExportBackup);
@@ -6775,6 +6886,7 @@ function downloadCsv() {
       "projects",
       "memos",
       "learnings",
+      "publishing_ops",
       "mail_morning_checked",
       "mail_noon_checked",
       "mail_night_checked",
@@ -6789,6 +6901,7 @@ function downloadCsv() {
     .sort(([a], [b]) => a.localeCompare(b))
     .forEach(([date, day]) => {
       ensureMetricDefaults(day);
+      ensurePublishingOps(day);
       const tracked = [
         ...day.dailyTasks,
         ...day.todayTasks,
@@ -6825,6 +6938,7 @@ function downloadCsv() {
             learning.intro,
           ].filter(Boolean).join(" | "))
           .join(" / "),
+        Object.values(day.publishingOps || {}).filter(Boolean).join(" | "),
         day.metrics.mailMorningChecked ? "1" : "0",
         day.metrics.mailNoonChecked ? "1" : "0",
         day.metrics.mailNightChecked ? "1" : "0",
