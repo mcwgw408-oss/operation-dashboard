@@ -1578,7 +1578,7 @@ function renderLaterItems() {
 function renderFields() {
   const day = getDay();
   const dailyInput = $("#dailyInputText");
-  if (dailyInput && dailyInput.value !== (day.dailyInput || "")) {
+  if (dailyInput && document.activeElement !== dailyInput && dailyInput.value !== (day.dailyInput || "")) {
     dailyInput.value = day.dailyInput || "";
   }
   const dailyInputStatus = $("#dailyInputStatus");
