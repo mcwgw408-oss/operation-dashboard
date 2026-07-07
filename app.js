@@ -6683,7 +6683,7 @@ function bindEvents() {
     renderHistory();
     renderBrainPrototype();
     const status = $("#dailyInputStatus");
-    if (status) status.textContent = "今日の入力を保存し、AI判断の材料に反映しました。";
+    if (status) status.textContent = "今日の入力を保存し、さくら判断の材料に反映しました。";
   });
   $("#executionFeedbackOutcome")?.addEventListener("change", (event) => {
     upsertExecutionFeedback({ outcome: event.target.value });
