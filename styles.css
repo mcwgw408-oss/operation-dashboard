@@ -2991,9 +2991,14 @@ textarea {
 }
 
 .learning-item label:has(textarea),
+.learning-learned-field,
 .learning-memo-field,
 .learning-actions {
   grid-column: 1 / -1;
+}
+
+.learning-learned {
+  min-height: 180px;
 }
 
 .learning-sakura-memory,
@@ -3322,6 +3327,7 @@ textarea {
     margin-right: 0;
   }
 
+  .learning-learned-field,
   .learning-memo-field,
   .learning-actions {
     grid-column: auto;
