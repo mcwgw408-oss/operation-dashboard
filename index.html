@@ -1105,6 +1105,12 @@
             </div>
             <button class="ghost-button" id="addPersistentMemo" type="button">追加</button>
           </div>
+          <div class="later-counts">
+            <span id="persistentMemoSearchCount" hidden>検索 <strong>0</strong></span>
+          </div>
+          <div class="later-search">
+            <input id="persistentMemoSearch" type="search" placeholder="メモを検索" aria-label="残るメモを検索" />
+          </div>
           <div id="persistentMemoList" class="persistent-memo-list"></div>
         </section>
 
@@ -1115,6 +1121,12 @@
               <p class="section-note">読んだことや聞いたことを、自分の言葉に変えて残します。</p>
             </div>
             <button class="ghost-button" id="addLearning" type="button">学びを追加</button>
+          </div>
+          <div class="later-counts">
+            <span id="learningSearchCount" hidden>検索 <strong>0</strong></span>
+          </div>
+          <div class="later-search">
+            <input id="learningSearch" type="search" placeholder="情報源・タイトル・学び・タグなどを検索" aria-label="学びの蓄積を検索" />
           </div>
           <div id="learningList" class="learning-list"></div>
         </section>

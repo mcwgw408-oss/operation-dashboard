@@ -112,6 +112,8 @@ let autoDedupeLater = loadAutoDedupeLater();
 let laterSearchQuery = "";
 let laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
 let persistentMemos = loadPersistentMemos();
+let persistentMemoSearchQuery = "";
+let learningSearchQuery = "";
 let learningLog = loadLearningLog();
 let memoryStore = loadMemoryStore();
 let conversationFeedback = loadConversationFeedback();
@@ -1253,14 +1255,29 @@ function renderPersistentMemos({ focusId } = {}) {
   if (!target) return;
   const template = $("#persistentMemoTemplate");
   target.replaceChildren();
-  if (!persistentMemos.length) {
+  const searchField = $("#persistentMemoSearch");
+  if (searchField && searchField.value !== persistentMemoSearchQuery) {
+    searchField.value = persistentMemoSearchQuery;
+  }
+  const searchQuery = normalizeLaterText(persistentMemoSearchQuery);
+  const visibleMemos = persistentMemos.filter((memo) =>
+    normalizeLaterText(memo.text || "").includes(searchQuery)
+  );
+  const searchCount = $("#persistentMemoSearchCount");
+  if (searchCount) {
+    searchCount.hidden = !searchQuery;
+    searchCount.querySelector("strong").textContent = visibleMemos.length;
+  }
+  if (!visibleMemos.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = "残るメモはまだありません。";
+    empty.textContent = searchQuery
+      ? "検索に一致する残るメモはありません。"
+      : "残るメモはまだありません。";
     target.append(empty);
     return;
   }
-  persistentMemos.forEach((memo) => {
+  visibleMemos.forEach((memo) => {
     const row = template.content.firstElementChild.cloneNode(true);
     const textarea = row.querySelector("textarea");
     const meta = row.querySelector(".persistent-memo-meta");
@@ -1307,14 +1324,48 @@ function renderLearnings() {
   if (!target) return;
   const template = $("#learningTemplate");
   target.replaceChildren();
-  if (!day.learnings.length) {
+  const searchField = $("#learningSearch");
+  if (searchField && searchField.value !== learningSearchQuery) {
+    searchField.value = learningSearchQuery;
+  }
+  const searchQuery = normalizeLaterText(learningSearchQuery);
+  const visibleLearnings = day.learnings.filter((learning) =>
+    [
+      learning.date,
+      learning.source,
+      learning.url,
+      learning.title,
+      learning.summaryLine,
+      learning.hook,
+      learning.intent,
+      learning.learned,
+      learning.useForSelf,
+      learning.useForPublishing,
+      learning.experiment,
+      learning.sakuraMemory,
+      learning.intro,
+      learning.tags,
+      learning.memo,
+    ]
+      .map((value) => normalizeLaterText(value || ""))
+      .join(" ")
+      .includes(searchQuery)
+  );
+  const searchCount = $("#learningSearchCount");
+  if (searchCount) {
+    searchCount.hidden = !searchQuery;
+    searchCount.querySelector("strong").textContent = visibleLearnings.length;
+  }
+  if (!visibleLearnings.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = "学びの蓄積はまだありません。";
+    empty.textContent = searchQuery
+      ? "検索に一致する学びはありません。"
+      : "学びの蓄積はまだありません。";
     target.append(empty);
     return;
   }
-  day.learnings.forEach((learning) => {
+  visibleLearnings.forEach((learning) => {
     const row = template.content.firstElementChild.cloneNode(true);
     const date = row.querySelector(".learning-date");
     const source = row.querySelector(".learning-source");
@@ -6929,6 +6980,14 @@ function bindEvents() {
   $("#addLearning")?.addEventListener("click", () => {
     getDay().learnings.unshift(newLearningItem());
     saveStore();
+    renderLearnings();
+  });
+  $("#persistentMemoSearch")?.addEventListener("input", (event) => {
+    persistentMemoSearchQuery = event.target.value;
+    renderPersistentMemos();
+  });
+  $("#learningSearch")?.addEventListener("input", (event) => {
+    learningSearchQuery = event.target.value;
     renderLearnings();
   });
   $("#laterForm")?.addEventListener("submit", (event) => {
