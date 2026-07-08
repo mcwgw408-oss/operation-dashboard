@@ -2618,12 +2618,21 @@ textarea {
 }
 
 .daily-input-panel textarea {
+  grid-column: 1;
   min-height: 160px;
   resize: vertical;
 }
 
 .daily-input-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.42fr);
+  align-items: start;
+  gap: 12px;
   order: 6;
+}
+
+.daily-input-panel .panel-heading {
+  grid-column: 1 / -1;
 }
 
 .dashboard .dashboard-input-heading {
@@ -2633,8 +2642,10 @@ textarea {
 .daily-input-actions {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
+  grid-column: 2;
 }
 
 .daily-input-actions p {
@@ -3489,6 +3500,15 @@ textarea {
   .inline-form,
   .inline-form.compact {
     width: 100%;
+  }
+
+  .daily-input-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-input-panel textarea,
+  .daily-input-actions {
+    grid-column: 1;
   }
 
   .event-form,
