@@ -68,6 +68,11 @@ const requiredIds = [
   "learningGlobalSearchList",
   "learningList",
   "addLearning",
+  "memoryLibrarySearch",
+  "memoryLibraryType",
+  "memoryLibraryCount",
+  "memoryLibraryList",
+  "memoryLibraryMore",
   "sakuraInnerToggle",
   "exportBackup",
   "importBackup",
@@ -111,6 +116,10 @@ for (const token of [
 check(appJs.includes("function upsertLearningMemory"), "学びから記憶へ追加する関数がありません");
 check(appJs.includes("const source = `learning:${learning.id}`;"), "学び由来記憶のsource規則がありません");
 check(appJs.includes('result.status === "updated"'), "学び由来記憶の更新状態表示がありません");
+check(appJs.includes("const MEMORY_LIBRARY_PAGE_SIZE = 10;"), "記憶一覧の初期表示件数が10件ではありません");
+const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShortMemory", "{", "}");
+check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");
+check(!forgetShortMemoryBody.includes("projectMemory"), "記憶削除処理がprojectMemoryに触れています");
 
 const requiredOrders = new Map([
   [".dashboard .dashboard-proposal-heading", "9"],
@@ -120,6 +129,7 @@ const requiredOrders = new Map([
   [".dashboard .brain-panel", "14"],
   [".dashboard .dashboard-input-heading", "30"],
   [".dashboard .dashboard-accumulation-heading", "59"],
+  [".dashboard .memory-library-panel", "64"],
   [".dashboard .dashboard-closed-heading", "79"],
 ]);
 for (const [selector, order] of requiredOrders) {
@@ -145,6 +155,8 @@ for (const selector of [
   ".learning-actions",
   ".learning-search-heading",
   ".learning-global-search-result",
+  ".memory-library-controls",
+  ".memory-library-footer",
 ]) {
   check(mobileCss.includes(selector), `モバイル規則に必須セレクタがありません: ${selector}`);
 }

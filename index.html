@@ -1155,6 +1155,30 @@
           <div id="learningList" class="learning-list"></div>
         </section>
 
+        <section class="panel memory-library-panel span-2" aria-label="さくらの記憶">
+          <div class="panel-heading">
+            <div>
+              <h2>さくらの記憶</h2>
+              <p class="section-note">さくらが今後の会話や提案で参照する記憶です。ここでは短期記憶だけを整理できます。</p>
+            </div>
+            <span class="memory-library-count"><strong id="memoryLibraryCount">0</strong>件</span>
+          </div>
+          <div class="memory-library-controls">
+            <input id="memoryLibrarySearch" type="search" placeholder="タイトル・内容・タグを検索" aria-label="さくらの記憶を検索" />
+            <select id="memoryLibraryType" aria-label="さくらの記憶を種類で絞り込む">
+              <option value="all">すべての種類</option>
+              <option value="manual">自分で追加</option>
+              <option value="learning">自分の学び</option>
+              <option value="event_context">今日の予定</option>
+              <option value="recommendation">今日の提案</option>
+              <option value="learning_feedback">提案フィードバック</option>
+              <option value="other">その他</option>
+            </select>
+          </div>
+          <div id="memoryLibraryList" class="memory-library-list"></div>
+          <button id="memoryLibraryMore" class="ghost-button memory-library-more" type="button" hidden>さらに10件表示</button>
+        </section>
+
         <section class="panel data-panel span-2">
           <details>
             <summary>データ</summary>

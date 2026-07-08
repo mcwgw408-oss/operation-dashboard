@@ -3124,6 +3124,82 @@ textarea {
   margin-bottom: 12px;
 }
 
+.memory-library-panel {
+  min-height: 0;
+}
+
+.memory-library-count {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.memory-library-count strong {
+  color: var(--text);
+  font-size: 17px;
+}
+
+.memory-library-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.memory-library-list {
+  display: grid;
+  gap: 10px;
+}
+
+.memory-library-item {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.memory-library-item h3,
+.memory-library-item p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.memory-library-item h3 {
+  font-size: 14px;
+}
+
+.memory-library-item p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.memory-library-meta,
+.memory-library-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.memory-library-type {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.memory-library-tags {
+  color: var(--muted);
+}
+
+.memory-library-more {
+  margin-top: 12px;
+}
+
 .publishing-ops-panel {
   display: grid;
   gap: 14px;
@@ -3442,6 +3518,10 @@ textarea {
   order: 63;
 }
 
+.dashboard .memory-library-panel {
+  order: 64;
+}
+
 .dashboard .dashboard-accumulation-heading {
   order: 59;
 }
@@ -3494,6 +3574,7 @@ textarea {
 .learning-panel,
 .later-panel,
 .persistent-memo-panel,
+.memory-library-panel,
 .reflection-panel,
 .sakura-panel,
 .home-launch-panel,
@@ -3659,6 +3740,19 @@ textarea {
 
   .learning-memory-status {
     margin-right: 0;
+  }
+
+  .memory-library-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .memory-library-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .memory-library-footer .delete-button {
+    align-self: stretch;
   }
 
   .learning-search-section,

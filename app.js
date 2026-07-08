@@ -37,6 +37,7 @@ const SNAPSHOT_SETTINGS_KEY = "sakura-snapshot-settings-v1";
 const SNAPSHOT_DETAIL_DAYS = 7;
 const SNAPSHOT_LOG_DAYS = 30;
 const LATER_INITIAL_DISPLAY_LIMIT = 10;
+const MEMORY_LIBRARY_PAGE_SIZE = 10;
 
 const EXTERNAL_APP_KEYS = {
   discoveries: "discovery-labo-discoveries",
@@ -117,6 +118,9 @@ let learningSearchQuery = "";
 let learningGlobalSearchQuery = "";
 let learningLog = loadLearningLog();
 let memoryStore = loadMemoryStore();
+let memoryLibrarySearchQuery = "";
+let memoryLibraryTypeFilter = "all";
+let memoryLibraryVisibleLimit = MEMORY_LIBRARY_PAGE_SIZE;
 let conversationFeedback = loadConversationFeedback();
 let conversationImprovements = loadConversationImprovements();
 let conversationReflections = loadConversationReflections();
@@ -1506,6 +1510,7 @@ function renderLearnings() {
       }
       memoryStatus.textContent = result.status === "updated" ? "更新しました。" : "追加しました。";
       renderMemoryLayer();
+      renderMemoryLibrary();
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
       day.learnings = day.learnings.filter((candidate) => candidate.id !== learning.id);
@@ -1991,6 +1996,132 @@ function upsertLearningMemory(learning, date = activeDate) {
     tags,
   });
   return { status: "added", memory };
+}
+
+const MEMORY_LIBRARY_TYPES = {
+  manual: "自分で追加",
+  learning: "自分の学び",
+  event_context: "今日の予定",
+  recommendation: "今日の提案",
+  learning_feedback: "提案フィードバック",
+};
+
+function memoryLibraryTypeLabel(type) {
+  return MEMORY_LIBRARY_TYPES[type] || "その他";
+}
+
+function memoryLibrarySourceLabel(memory) {
+  if (String(memory?.source || "").startsWith("learning:")) return "自分の学びから追加";
+  const labels = {
+    manual: "記憶入力から追加",
+    todayEvents: "今日の予定から作成",
+    recommendation: "今日の提案から作成",
+    learningLog: "提案フィードバックから作成",
+  };
+  return labels[memory?.source] || "さくらの内部処理から作成";
+}
+
+function memoryLibraryMatches(memory, query) {
+  if (!query) return true;
+  return [
+    memory?.date,
+    memory?.title,
+    memory?.summary,
+    ...asArray(memory?.tags),
+    memoryLibraryTypeLabel(memory?.type),
+    memoryLibrarySourceLabel(memory),
+  ]
+    .map((value) => normalizeLaterText(value || ""))
+    .join(" ")
+    .includes(query);
+}
+
+function forgetShortMemory(memoryId) {
+  if (!memoryId) return false;
+  const beforeCount = memoryStore.shortMemory.length;
+  memoryStore.shortMemory = memoryStore.shortMemory.filter((memory) => memory.id !== memoryId);
+  if (memoryStore.shortMemory.length === beforeCount) return false;
+  saveMemoryStore();
+  return true;
+}
+
+function renderMemoryLibrary() {
+  const target = $("#memoryLibraryList");
+  if (!target) return;
+  const searchField = $("#memoryLibrarySearch");
+  const typeField = $("#memoryLibraryType");
+  if (searchField && searchField.value !== memoryLibrarySearchQuery) {
+    searchField.value = memoryLibrarySearchQuery;
+  }
+  if (typeField && typeField.value !== memoryLibraryTypeFilter) {
+    typeField.value = memoryLibraryTypeFilter;
+  }
+  const query = normalizeLaterText(memoryLibrarySearchQuery);
+  const knownTypes = new Set(Object.keys(MEMORY_LIBRARY_TYPES));
+  const filtered = [...asArray(memoryStore.shortMemory)]
+    .sort((a, b) => memoryUpdatedTime(b) - memoryUpdatedTime(a))
+    .filter((memory) => {
+      const typeMatches = memoryLibraryTypeFilter === "all" ||
+        (memoryLibraryTypeFilter === "other"
+          ? !knownTypes.has(memory.type)
+          : memory.type === memoryLibraryTypeFilter);
+      return typeMatches && memoryLibraryMatches(memory, query);
+    });
+  const visible = filtered.slice(0, memoryLibraryVisibleLimit);
+  const count = $("#memoryLibraryCount");
+  if (count) count.textContent = String(filtered.length);
+  target.replaceChildren();
+  if (!visible.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = query || memoryLibraryTypeFilter !== "all"
+      ? "条件に一致する記憶はありません。"
+      : "さくらの記憶はまだありません。";
+    target.append(empty);
+  }
+  visible.forEach((memory) => {
+    const item = document.createElement("article");
+    item.className = "memory-library-item";
+    const meta = document.createElement("div");
+    meta.className = "memory-library-meta";
+    const date = document.createElement("span");
+    date.textContent = memory.date ? formatDateLabel(memory.date) : "日付なし";
+    const type = document.createElement("span");
+    type.className = "memory-library-type";
+    type.textContent = memoryLibraryTypeLabel(memory.type);
+    meta.append(date, type);
+    const title = document.createElement("h3");
+    title.textContent = memory.title || "タイトルのない記憶";
+    const summary = document.createElement("p");
+    summary.textContent = memory.summary || "";
+    const tags = document.createElement("p");
+    tags.className = "memory-library-tags";
+    tags.textContent = asArray(memory.tags).length
+      ? `タグ: ${asArray(memory.tags).join(" / ")}`
+      : "タグ: なし";
+    const footer = document.createElement("div");
+    footer.className = "memory-library-footer";
+    const source = document.createElement("span");
+    source.textContent = `${memoryLibrarySourceLabel(memory)} / 更新 ${brainFormatDateTime(memory.updatedAt || memory.createdAt)}`;
+    const forget = document.createElement("button");
+    forget.className = "delete-button";
+    forget.type = "button";
+    forget.textContent = "忘れる";
+    forget.disabled = !memory.id;
+    forget.addEventListener("click", () => {
+      const confirmed = confirm(
+        `「${memory.title || "タイトルのない記憶"}」をさくらの記憶から削除しますか？\n削除後は、今後の提案や会話で参照されなくなります。`,
+      );
+      if (!confirmed || !forgetShortMemory(memory.id)) return;
+      renderMemoryLibrary();
+      renderMemoryLayer();
+    });
+    footer.append(source, forget);
+    item.append(meta, title, summary, tags, footer);
+    target.append(item);
+  });
+  const more = $("#memoryLibraryMore");
+  if (more) more.hidden = visible.length >= filtered.length;
 }
 
 function normalizeMemoryTags(tags) {
@@ -6840,6 +6971,7 @@ function renderAll() {
   renderSummary();
   renderHistory();
   renderBrainPrototype();
+  renderMemoryLibrary();
   applySakuraInnerToggle();
 }
 
@@ -6917,6 +7049,7 @@ function bindEvents() {
         tags: ["learning", "feedback"],
       });
       renderMemoryLayer();
+      renderMemoryLibrary();
     });
   });
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
@@ -7027,6 +7160,7 @@ function bindEvents() {
     });
     $("#memoryMemoText").value = "";
     renderMemoryLayer();
+    renderMemoryLibrary();
   });
   $("#activeDate").addEventListener("change", (event) => {
     activeDate = event.target.value || toDateInputValue(new Date());
@@ -7110,6 +7244,20 @@ function bindEvents() {
   $("#learningGlobalSearch")?.addEventListener("input", (event) => {
     learningGlobalSearchQuery = event.target.value;
     renderLearningGlobalSearch();
+  });
+  $("#memoryLibrarySearch")?.addEventListener("input", (event) => {
+    memoryLibrarySearchQuery = event.target.value;
+    memoryLibraryVisibleLimit = MEMORY_LIBRARY_PAGE_SIZE;
+    renderMemoryLibrary();
+  });
+  $("#memoryLibraryType")?.addEventListener("change", (event) => {
+    memoryLibraryTypeFilter = event.target.value;
+    memoryLibraryVisibleLimit = MEMORY_LIBRARY_PAGE_SIZE;
+    renderMemoryLibrary();
+  });
+  $("#memoryLibraryMore")?.addEventListener("click", () => {
+    memoryLibraryVisibleLimit += MEMORY_LIBRARY_PAGE_SIZE;
+    renderMemoryLibrary();
   });
   $("#laterForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
