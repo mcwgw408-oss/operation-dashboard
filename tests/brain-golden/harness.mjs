@@ -106,30 +106,22 @@ globalThis.__brainGolden = {
     healthState = fixture.healthState || [];
     localStorage.seed(fixture.localStorage || {});
 
-    const day = store[activeDate] || {};
-    const dailyTasks = asArray(day.dailyTasks);
-    const todayTasks = asArray(day.todayTasks);
-    const todayEvents = asArray(day.todayEvents);
-    const projects = asArray(day.projects);
-    const completedToday = [...todayTasks, ...dailyTasks].filter((item) => item.done).length;
-    const openToday = todayTasks.filter(brainIsOpen);
-    const laterOpen = laterItems.filter((item) => !item.done);
-    const discoveries = asArray(readStoredJson(EXTERNAL_APP_KEYS.discoveries, []));
-    const fermentingIdeas = discoveries.filter((seed) =>
-      brainStatusMatches(seed.status, ["発酵中", "逋ｺ驟ｵ荳ｭ"]),
-    );
-    const writingItems = collectBrainWritingItems(readSubstackWorkspace());
-    const writingInProgress = writingItems.filter((item) =>
-      brainStatusMatches(item.status, ["執筆中", "蝓ｷ遲・ｸｭ"]),
-    );
-    const hasshinEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.hasshin, []));
-    const hasshinNextActions = hasshinEntries.filter((entry) => (entry.nextAction || "").trim());
-    const koryuEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.koryu, []));
-    const revisitPeople = koryuEntries.filter((entry) => brainStatusMatches(entry.revisit, ["はい", "縺ｯ縺・"]));
-    const recentMemos = persistentMemos.filter((memo) =>
-      brainDaysSince(memo.updatedAt || memo.createdAt) !== null &&
-      brainDaysSince(memo.updatedAt || memo.createdAt) <= 7
-    );
+    const brainContext = collectBrainContext();
+    const {
+      day,
+      dailyTasks,
+      todayTasks,
+      todayEvents,
+      projects,
+      completedToday,
+      openToday,
+      laterOpen,
+      fermentingIdeas,
+      writingInProgress,
+      hasshinNextActions,
+      revisitPeople,
+      recentMemos,
+    } = brainContext;
     const energyContext = inferEnergyContext(day, completedToday, openToday.length);
     const momentumContext = inferMomentumContext(day, writingInProgress, hasshinNextActions);
     const eventContext = inferEventContext(todayEvents);

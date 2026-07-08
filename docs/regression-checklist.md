@@ -132,6 +132,15 @@ git diff --check
 - [ ] `app.js` / `index.html` / `styles.css` に意図しない差分がない
 - [ ] `BACKUP_KEYS` / `createBackup()` / restore周辺に意図しない差分がない
 
+## Step12-c. Brain収集フェーズ一本化
+
+- [ ] `collectBrainContext()` が `renderBrainPrototype()` の直前にあり、Brain判断の収集値を返している
+- [ ] `collectBrainContext()` が `getDay()`、`saveStore()`、`localStorage.setItem()` を呼んでいない
+- [ ] `renderBrainPrototype()` と Brain golden test が同じ `collectBrainContext()` を使っている
+- [ ] Brain golden testの期待値JSONに差分がない
+- [ ] Priority採点、Recommendation type、Explain / Replyの判断順に意図しない変更がない
+- [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

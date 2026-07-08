@@ -296,3 +296,40 @@ Step12-b-2では、Step12-b-1の非DOMゴールデンテストに、補助文脈
 - `brainMemoryContext`
 - 学習・記憶反映後の `recommendation`
 - `healthAwareRecommendation`
+
+## Step12-c 実装範囲
+
+Step12-cでは、AI判断の収集フェーズを `collectBrainContext()` に一本化します。
+
+目的:
+
+- `renderBrainPrototype()` 冒頭で直接行っていたstore、外部localStorage、学習、記憶、体調stateの読み取りを1箇所へ集める。
+- Step12-bのBrain golden testも同じ収集関数を使い、ブラウザ描画側とテスト側の収集ロジック重複を減らす。
+- 判断結果は変えない。
+
+対象:
+
+- `activeDate`
+- `day`
+- `dailyTasks`, `todayTasks`, `todayEvents`, `projects`
+- `reflection`
+- `completedToday`, `openToday`, `laterOpen`
+- `persistentMemos`, `recentMemos`
+- `discoveries`, `fermentingIdeas`
+- `writingItems`, `writingInProgress`
+- `hasshinEntries`, `hasshinNextActions`
+- `koryuEntries`, `revisitPeople`
+- `learningLog`, `memoryStore`, `healthState`
+
+対象外:
+
+- Priorityの採点、順位付け、Recommendation typeの変更
+- `buildBrainDecision()` などの判断パイプライン抽出
+- DOM描画処理の整理
+- `syncCurrentLearningLog()` や `upsertShortMemory()` の副作用整理
+- 保存形式、localStorageキー、Backup / restoreの変更
+
+成功条件:
+
+- Step12-bの期待値JSONに差分が出ない。
+- `collectBrainContext()` は読み取り専用で、`getDay()`、`saveStore()`、`localStorage.setItem()` を呼ばない。

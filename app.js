@@ -6834,9 +6834,7 @@ function renderConversationTimeline(context = {}) {
   });
 }
 
-function renderBrainPrototype() {
-  if (!$("#brainPriority")) return;
-
+function collectBrainContext() {
   const day = store[activeDate] || {};
   const dailyTasks = asArray(day.dailyTasks);
   const todayTasks = asArray(day.todayTasks);
@@ -6858,10 +6856,58 @@ function renderBrainPrototype() {
   const hasshinNextActions = hasshinEntries.filter((entry) => (entry.nextAction || "").trim());
   const koryuEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.koryu, []));
   const revisitPeople = koryuEntries.filter((entry) => brainStatusMatches(entry.revisit, ["はい", "縺ｯ縺・"]));
+  const recentMemos = persistentMemos.filter((memo) => brainDaysSince(memo.updatedAt || memo.createdAt) !== null && brainDaysSince(memo.updatedAt || memo.createdAt) <= 7);
+  return {
+    activeDate,
+    day,
+    dailyTasks,
+    todayTasks,
+    todayEvents,
+    projects,
+    reflection,
+    completedToday,
+    openToday,
+    laterOpen,
+    persistentMemos,
+    recentMemos,
+    discoveries,
+    fermentingIdeas,
+    writingItems,
+    writingInProgress,
+    hasshinEntries,
+    hasshinNextActions,
+    koryuEntries,
+    revisitPeople,
+    learningLog,
+    memoryStore,
+    healthState,
+  };
+}
+
+function renderBrainPrototype() {
+  if (!$("#brainPriority")) return;
+
+  const brainContext = collectBrainContext();
+  const {
+    day,
+    dailyTasks,
+    todayTasks,
+    todayEvents,
+    projects,
+    completedToday,
+    openToday,
+    laterOpen,
+    persistentMemos,
+    reflection,
+    fermentingIdeas,
+    writingInProgress,
+    hasshinNextActions,
+    revisitPeople,
+    recentMemos,
+  } = brainContext;
   const newestMemo = persistentMemos
     .filter((memo) => memo.updatedAt || memo.createdAt)
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
-  const recentMemos = persistentMemos.filter((memo) => brainDaysSince(memo.updatedAt || memo.createdAt) !== null && brainDaysSince(memo.updatedAt || memo.createdAt) <= 7);
   const energyContext = inferEnergyContext(day, completedToday, openToday.length);
   const momentumContext = inferMomentumContext(day, writingInProgress, hasshinNextActions);
   const eventContext = inferEventContext(todayEvents);
