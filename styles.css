@@ -3721,6 +3721,19 @@ textarea {
   transform: none;
 }
 
+.brain-panel .brain-layout {
+  grid-template-columns: 1fr;
+}
+
+.brain-panel .brain-layout > *,
+.brain-panel .brain-card.recommendation-card {
+  grid-column: 1 / -1;
+}
+
+[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 720px) {
   .sakura-switches {
     flex-direction: column;
