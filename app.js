@@ -32,7 +32,7 @@ const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
 const SNAPSHOT_VERSION = 1;
-const SNAPSHOT_DICTIONARY_VERSION = "v1.2";
+const SNAPSHOT_DICTIONARY_VERSION = "v1.3";
 const SNAPSHOT_SETTINGS_KEY = "sakura-snapshot-settings-v1";
 const SNAPSHOT_DETAIL_DAYS = 7;
 const SNAPSHOT_LOG_DAYS = 30;
@@ -48,6 +48,7 @@ const EXTERNAL_APP_KEYS = {
   substackLegacy: "substack-labo-store",
   stock: "stock-labo-items-v1",
 };
+const OPERATION_COCKPIT_STORAGE_KEY = "operation-cockpit-v1";
 
 const snapshotSettingDefaults = {
   reflection: true,
@@ -7852,6 +7853,44 @@ function readStoredJson(key, fallback) {
   }
 }
 
+function readOperationCockpitStore() {
+  const value = readStoredJson(OPERATION_COCKPIT_STORAGE_KEY, {});
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function buildOperationCockpitRecentDays(source, fromKey, toKey) {
+  if (!source || typeof source !== "object" || Array.isArray(source)) return {};
+
+  const recentDays = {};
+  Object.entries(source)
+    .filter(([dateKey]) => /^\d{4}-\d{2}-\d{2}$/.test(dateKey) && dateKey >= fromKey && dateKey <= toKey)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .forEach(([dateKey, value]) => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return;
+
+      const intentFields = ["topPriority", "articleNote", "todayFocus", "growthTarget", "noticed"];
+      const hasIntentShape = intentFields.some((key) => typeof value[key] === "string");
+      const hasCommunityShape = value.communityChecks &&
+        typeof value.communityChecks === "object" &&
+        !Array.isArray(value.communityChecks);
+      if (!hasIntentShape && !hasCommunityShape) return;
+
+      const day = Object.fromEntries(
+        intentFields.map((key) => [key, typeof value[key] === "string" ? value[key] : ""]),
+      );
+      day.communityChecks = hasCommunityShape
+        ? Object.fromEntries(
+            Object.entries(value.communityChecks)
+              .filter(([, checked]) => typeof checked === "boolean"),
+          )
+        : {};
+      day.updatedAt = typeof value.updatedAt === "string" ? value.updatedAt : "";
+      recentDays[dateKey] = day;
+    });
+
+  return recentDays;
+}
+
 function readFirstStoredJson(keys, fallback) {
   for (const key of keys) {
     const value = readStoredJson(key, null);
@@ -8035,6 +8074,11 @@ function buildSakuraSnapshot(mode) {
   const fromKey = dateKeyDaysAgo(SNAPSHOT_DETAIL_DAYS - 1);
   const toKey = toDateInputValue(now);
   const logFromKey = dateKeyDaysAgo(SNAPSHOT_LOG_DAYS - 1);
+  const operationCockpitRecentDays = buildOperationCockpitRecentDays(
+    readOperationCockpitStore(),
+    fromKey,
+    toKey,
+  );
 
   // --- ダッシュボード：直近7日分の詳細＋それ以前は日数のみ ---
   const fullStore = readStoredJson(STORAGE_KEY, {});
@@ -8394,6 +8438,10 @@ function buildSakuraSnapshot(mode) {
       "hasshin-kansatsu-labo": { schemaVersion: 1, data: { entries: hasshinEntries } },
       "substack-labo": substackData ? { schemaVersion: 1, data: substackData } : null,
       "stock-labo": stockItems ? { schemaVersion: 1, data: { items: stockItems } } : null,
+      "operation-cockpit": {
+        schemaVersion: 1,
+        data: { recentDays: operationCockpitRecentDays },
+      },
     },
   };
 }

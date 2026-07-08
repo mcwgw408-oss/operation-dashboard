@@ -179,6 +179,18 @@ git diff --check
 - [ ] `index.html` / `styles.css` に差分がない
 - [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
 
+## Step13-a. operation-cockpit Snapshot読取連携
+
+- [ ] `operation-cockpit-v1` を読み取り専用adapter経由で参照している
+- [ ] 欠損、不正JSON、配列、未知の旧形式が空の`recentDays`になる
+- [ ] Snapshotの直近7日だけが含まれ、未来日と範囲外日が除外される
+- [ ] Intent 5項目、booleanの`communityChecks`、`updatedAt`以外を含めない
+- [ ] `snapshotVersion`が`1`のまま維持されている
+- [ ] `operation-cockpit`がSnapshot app payloadとしてschemaVersion 1で含まれる
+- [ ] `BACKUP_KEYS`、`createBackup()`、restore、`cockpit.js`のwriter責務に差分がない
+- [ ] Brain golden / Expression goldenに差分がない
+- [ ] `node tests/snapshot-golden/run-snapshot-golden.mjs` が成功する
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

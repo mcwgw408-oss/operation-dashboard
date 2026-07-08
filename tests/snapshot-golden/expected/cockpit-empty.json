@@ -1,0 +1,26 @@
+{
+  "format": "sakura-snapshot",
+  "snapshotVersion": 1,
+  "dictionaryVersion": "v1.3",
+  "mode": "morning",
+  "period": {
+    "detailDays": 7,
+    "from": "2026-06-28",
+    "to": "2026-07-04"
+  },
+  "appKeys": [
+    "discovery-labo",
+    "hasshin-kansatsu-labo",
+    "koryu-log-labo",
+    "operation-cockpit",
+    "operation-dashboard",
+    "stock-labo",
+    "substack-labo"
+  ],
+  "operationCockpit": {
+    "schemaVersion": 1,
+    "data": {
+      "recentDays": {}
+    }
+  }
+}

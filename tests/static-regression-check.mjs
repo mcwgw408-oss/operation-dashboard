@@ -122,6 +122,7 @@ const exportedKeys = [...createBackupBody.matchAll(/data\[([A-Z][A-Z0-9_]*_KEY)\
   .map((match) => match[1]);
 const missingExports = sortedDifference(backupKeys, exportedKeys);
 const unexpectedExports = sortedDifference(exportedKeys, backupKeys);
+check(!backupKeys.includes("OPERATION_COCKPIT_STORAGE_KEY"), "operation-cockpit must not be added to dashboard backup ownership");
 check(missingExports.length === 0, `BACKUP_KEYSにあるが書き出されないキー: ${missingExports.join(", ")}`);
 check(unexpectedExports.length === 0, `書き出されるがBACKUP_KEYSにないキー: ${unexpectedExports.join(", ")}`);
 
@@ -147,6 +148,20 @@ check(appJs.includes("function upsertLearningMemory"), "学びから記憶へ追
 check(appJs.includes("const source = `learning:${learning.id}`;"), "学び由来記憶のsource規則がありません");
 check(appJs.includes('result.status === "updated"'), "学び由来記憶の更新状態表示がありません");
 check(appJs.includes("const MEMORY_LIBRARY_PAGE_SIZE = 10;"), "記憶一覧の初期表示件数が10件ではありません");
+check(appJs.includes("const SNAPSHOT_VERSION = 1;"), "snapshotVersion must remain 1 for the additive cockpit app section");
+check(appJs.includes('const SNAPSHOT_DICTIONARY_VERSION = "v1.3";'), "snapshot dictionaryVersion must describe the cockpit app section");
+check(appJs.includes('const OPERATION_COCKPIT_STORAGE_KEY = "operation-cockpit-v1";'), "operation-cockpit read key is missing");
+check(appJs.includes('"operation-cockpit": {'), "operation-cockpit Snapshot app payload is missing");
+const readOperationCockpitStoreBody = extractDelimitedBlock(appJs, "function readOperationCockpitStore", "{", "}");
+const buildOperationCockpitRecentDaysBody = extractDelimitedBlock(appJs, "function buildOperationCockpitRecentDays", "{", "}");
+check(readOperationCockpitStoreBody.includes("readStoredJson"), "operation-cockpit adapter must use guarded JSON reading");
+check(!readOperationCockpitStoreBody.includes("localStorage.setItem"), "operation-cockpit adapter must not write localStorage");
+for (const forbiddenToken of ["localStorage", "saveStore(", "getDay("]) {
+  check(
+    !buildOperationCockpitRecentDaysBody.includes(forbiddenToken),
+    `operation-cockpit pure transform calls forbidden token: ${forbiddenToken}`,
+  );
+}
 const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShortMemory", "{", "}");
 check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");
 check(!forgetShortMemoryBody.includes("projectMemory"), "記憶削除処理がprojectMemoryに触れています");

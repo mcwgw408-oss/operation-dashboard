@@ -134,6 +134,10 @@ globalThis.__brainGolden = {
       },
     });
   },
+  runSnapshotFixture(fixture) {
+    localStorage.seed(fixture.localStorage || {});
+    return buildSakuraSnapshot(fixture.mode || "morning");
+  },
 };
 `;
 
@@ -174,6 +178,10 @@ export function createBrainGoldenHarness({ now = FIXED_NOW } = {}) {
     runExpressionFixture(fixture) {
       uuidCounter = 0;
       return context.__brainGolden.runExpressionFixture(fixture);
+    },
+    runSnapshotFixture(fixture) {
+      uuidCounter = 0;
+      return context.__brainGolden.runSnapshotFixture(fixture);
     },
   };
 }

@@ -78,6 +78,8 @@ The following app keys are required under `apps`:
 - `apps["substack-labo"]`
 - `apps["stock-labo"]`
 
+For dictionaryVersion `v1.3` and later, `apps["operation-cockpit"]` is also required. Its absence must remain valid for older snapshotVersion 1 dictionary versions.
+
 ### Required Data Fields Per App
 
 When the app section is non-null, it must contain:
@@ -95,6 +97,7 @@ Additional required `data` fields:
 | `hasshin-kansatsu-labo` | `entries` |
 | `substack-labo` | Either current workspace shape or legacy fallback shape |
 | `stock-labo` | `items` |
+| `operation-cockpit` | `recentDays` |
 
 ## Error Conditions
 
@@ -167,6 +170,7 @@ Arrays should be checked for app payload lists:
 - `koryu-log-labo.data.entries`
 - `hasshin-kansatsu-labo.data.entries`
 - `stock-labo.data.items`
+- `operation-cockpit.data.recentDays` must be an object keyed by `YYYY-MM-DD`
 
 ### Null Rules
 
@@ -183,6 +187,8 @@ Required non-null app sections:
 - `apps["discovery-labo"]`
 - `apps["koryu-log-labo"]`
 - `apps["hasshin-kansatsu-labo"]`
+
+`apps["operation-cockpit"]` is required and non-null only when dictionaryVersion is `v1.3` or later. Older snapshotVersion 1 documents may omit it.
 
 Allowed summary nulls:
 
