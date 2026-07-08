@@ -386,3 +386,22 @@ Step12-eでは「どう言うか」の分離を扱います。
 - `buildReplyPlan()` / `buildReply()`
 
 Step12-dでは、これらの文言、条件順、生成結果を変更しません。
+
+## Step12-e-1 表現出力の固定
+
+Step12-e-1では、表現層を分離する前の観測点として、現在のBrain出力を表現golden testに固定します。
+
+固定対象:
+
+- Recommendationのtitle、message、actionText、reasons
+- Explain Layerの表示詳細
+- 朝のひとこと
+- Daily Focusの優先テーマ、次の一歩、条件、対象タスク
+- Context Summary
+- `pickDailyFocusTask()` が選ぶFocus Task
+
+既存のBrain golden fixtureを再利用し、決定結果から描画直前の表現値を組み立てます。Step12-e-1では `app.js` の表現ロジック、文言、UI、保存処理を変更しません。
+
+`pickDailyFocusTask(todayTasks, dailyTasks)` は、`buildContextSummary()` と `renderDailyFocusLayer()` の両方から同じ引数と条件で呼ばれています。Step12-e-1では現状を確認してgolden testに固定するだけとし、関数の移動は行いません。
+
+Step12-e-2以降で、固定した出力を維持しながら表現生成の責務分離を進めます。

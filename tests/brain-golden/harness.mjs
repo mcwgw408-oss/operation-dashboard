@@ -57,6 +57,7 @@ function createFixedDate(fixedIso) {
 }
 
 function createDocumentStub() {
+  const capturedNodes = new Map();
   const emptyNode = {
     addEventListener() {},
     append() {},
@@ -69,6 +70,15 @@ function createDocumentStub() {
     style: {},
   };
   return {
+    captureSelectors(selectors = []) {
+      capturedNodes.clear();
+      for (const selector of selectors) {
+        capturedNodes.set(selector, { ...emptyNode, textContent: "" });
+      }
+    },
+    capturedText(selector) {
+      return capturedNodes.get(selector)?.textContent || "";
+    },
     body: emptyNode,
     createElement() {
       return { ...emptyNode, dataset: {}, remove() {}, select() {} };
@@ -76,8 +86,8 @@ function createDocumentStub() {
     execCommand() {
       return false;
     },
-    querySelector() {
-      return null;
+    querySelector(selector) {
+      return capturedNodes.get(selector) || null;
     },
     querySelectorAll() {
       return [];
@@ -95,19 +105,74 @@ function stripBrowserStartup(source) {
 }
 
 const exposedApi = `
+function seedBrainGoldenFixture(fixture) {
+  activeDate = fixture.activeDate;
+  store = fixture.store || {};
+  laterItems = fixture.laterItems || [];
+  persistentMemos = fixture.persistentMemos || [];
+  learningLog = fixture.learningLog || [];
+  memoryStore = fixture.memoryStore || { projectMemory: [], shortMemory: [] };
+  healthState = fixture.healthState || [];
+  localStorage.seed(fixture.localStorage || {});
+}
+
 globalThis.__brainGolden = {
   runFixture(fixture) {
-    activeDate = fixture.activeDate;
-    store = fixture.store || {};
-    laterItems = fixture.laterItems || [];
-    persistentMemos = fixture.persistentMemos || [];
-    learningLog = fixture.learningLog || [];
-    memoryStore = fixture.memoryStore || { projectMemory: [], shortMemory: [] };
-    healthState = fixture.healthState || [];
-    localStorage.seed(fixture.localStorage || {});
+    seedBrainGoldenFixture(fixture);
 
     const brainContext = collectBrainContext();
     return buildBrainDecision(brainContext);
+  },
+  runExpressionFixture(fixture) {
+    seedBrainGoldenFixture(fixture);
+
+    const brainContext = collectBrainContext();
+    const decision = buildBrainDecision(brainContext);
+    const adaptiveGuidance = buildAdaptiveGuidanceScores();
+    const expressionContext = {
+      priorityCandidate: decision.priorityCandidate,
+      recommendation: decision.recommendation,
+      healthAwareRecommendation: decision.healthAwareRecommendation,
+      memoryContext: decision.brainMemoryContext,
+      todayTasks: brainContext.todayTasks,
+      dailyTasks: brainContext.dailyTasks,
+      dailyInput: brainContext.day.dailyInput,
+      adaptiveGuidance,
+    };
+    const contextSummary = buildContextSummary(expressionContext);
+    const focusTask = pickDailyFocusTask(brainContext.todayTasks, brainContext.dailyTasks);
+    document.captureSelectors([
+      "#dailyFocusPriority",
+      "#dailyFocusNextAction",
+      "#dailyFocusCondition",
+      "#dailyFocusTask",
+    ]);
+    renderDailyFocusLayer({
+      ...expressionContext,
+      contextSummary,
+    });
+
+    return {
+      recommendation: decision.recommendation,
+      explainLayerDetails: buildExplainLayerDetails(
+        decision.recommendationInput,
+        decision.recommendation,
+        decision.brainMemoryContext,
+        decision.healthAwareRecommendation,
+      ),
+      morningGuidanceText: buildMorningGuidanceText({
+        ...expressionContext,
+        contextSummary,
+      }),
+      dailyFocus: {
+        priority: document.capturedText("#dailyFocusPriority"),
+        nextAction: document.capturedText("#dailyFocusNextAction"),
+        condition: document.capturedText("#dailyFocusCondition"),
+        task: document.capturedText("#dailyFocusTask"),
+      },
+      contextSummary,
+      focusTask,
+    };
   },
 };
 `;
@@ -145,6 +210,10 @@ export function createBrainGoldenHarness({ now = FIXED_NOW } = {}) {
     runFixture(fixture) {
       uuidCounter = 0;
       return context.__brainGolden.runFixture(fixture);
+    },
+    runExpressionFixture(fixture) {
+      uuidCounter = 0;
+      return context.__brainGolden.runExpressionFixture(fixture);
     },
   };
 }

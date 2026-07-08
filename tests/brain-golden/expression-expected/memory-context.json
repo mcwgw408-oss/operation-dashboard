@@ -1,0 +1,62 @@
+{
+  "recommendation": {
+    "title": "おはよう、さくら。",
+    "message": "今日は「Sakura AIの判断ログ記事」の流れを少し続けるタイミングかもしれません。 Substackの記憶も参照すると、「Sakura AI記事の流れ」の流れが続いています。",
+    "actionText": "まず15分だけ始めてみませんか？",
+    "reasons": [
+      "執筆中の記事があります。",
+      "今日は予定はありません。",
+      "今日は勢いがあります。"
+    ]
+  },
+  "explainLayerDetails": {
+    "seenInfo": [
+      "執筆中記事の候補を見ています。",
+      "今日やることの未完了は少なめです。",
+      "執筆中の記事があります。",
+      "記憶を参照しています: Substackの記憶も参照すると、「Sakura AI記事の流れ」の流れが続いています。",
+      "体調をふまえた提案: Health Context supports how to approach おはよう、さくら。; it does not change the recommendation type, count, or ranking."
+    ],
+    "mainReasons": [
+      "執筆中の記事があります。 そのため、この提案にしています。",
+      "今日は予定はありません。 そのため、この提案にしています。",
+      "今日は勢いがあります。 そのため、この提案にしています。"
+    ],
+    "energyImpact": "通常の優先度で表示しています。",
+    "momentumImpact": "最近の更新や次アクションがあり、流れが続いています。",
+    "uncertainty": [
+      "画面上とlocalStorageにある情報だけを見ています。",
+      "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
+      "記憶は補助情報として参照しています。優先度判断や提案の種類は記憶で上書きしていません。",
+      "提案フィードバックが少ないため、傾向はまだ参考段階です。 このヒントは過去の提案フィードバックから生成され、参考情報として扱われます。",
+      "提案傾向の確かさは10%です。さくらはこの値を見ながら、提案フィードバックの傾向を補助情報として扱います。",
+      "提案フィードバックの傾向は補助情報として扱い、今日の候補・予定・エネルギーを見たさくらの判断を優先しています。",
+      "体調をふまえた提案: Reference context only; this is not medical judgment or instruction."
+    ]
+  },
+  "morningGuidanceText": "おはようございます、今日は無理なく一つずつ始めましょう。\n参考情報のみです。医療判断や指示ではありません。",
+  "dailyFocus": {
+    "priority": "Sakura AIの判断ログ記事",
+    "nextAction": "まず15分だけ始めてみませんか？",
+    "condition": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。 「Sakura AI記事の流れ」も意識して、会話は軽く始めます。",
+    "task": "今日のタスクはまだありません。"
+  },
+  "contextSummary": {
+    "theme": "Sakura AIの判断ログ記事",
+    "focusTask": null,
+    "memoryTitle": "Sakura AI記事の流れ",
+    "support": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。",
+    "caution": "参考情報のみです。医療判断や指示ではありません。",
+    "dailyInputNote": "",
+    "taskCount": 0,
+    "adaptiveTopCategory": "none",
+    "text": "今日は「Sakura AIの判断ログ記事」が文脈の中心です。\n最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。 一つずつ進める流れが向いています。",
+    "signals": [
+      "priority",
+      "recommendation",
+      "health",
+      "memory"
+    ]
+  },
+  "focusTask": null
+}

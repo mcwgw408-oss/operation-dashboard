@@ -1,0 +1,70 @@
+{
+  "recommendation": {
+    "title": "おはよう、さくら。",
+    "message": "今日の予定: 10:30 編集打ち合わせ 「配信準備メモを整える」は余力があれば軽く触れるくらいで良さそうです。",
+    "actionText": "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
+    "reasons": [
+      "今日やることに入っています。",
+      "予定: 10:30 編集打ち合わせ"
+    ]
+  },
+  "explainLayerDetails": {
+    "seenInfo": [
+      "今日やることの候補を見ています。",
+      "今日やることに未完了が1件あります。",
+      "今日の予定が1件あります。",
+      "体調をふまえた提案: Health Context supports how to approach おはよう、さくら。; it does not change the recommendation type, count, or ranking."
+    ],
+    "mainReasons": [
+      "今日やることに入っています。 そのため、この提案にしています。",
+      "予定: 10:30 編集打ち合わせ そのため、この提案にしています。"
+    ],
+    "energyImpact": "通常の優先度で表示しています。",
+    "momentumImpact": "大きな勢いの偏りはないため、基本スコアを優先しています。",
+    "uncertainty": [
+      "画面上とlocalStorageにある情報だけを見ています。",
+      "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
+      "提案フィードバックが少ないため、傾向はまだ参考段階です。 このヒントは過去の提案フィードバックから生成され、参考情報として扱われます。",
+      "提案傾向の確かさは10%です。さくらはこの値を見ながら、提案フィードバックの傾向を補助情報として扱います。",
+      "提案フィードバックの傾向は補助情報として扱い、今日の候補・予定・エネルギーを見たさくらの判断を優先しています。",
+      "予定は着手候補ではなく、今日の余白や負荷を見る材料として扱っています。",
+      "エネルギーと勢いに大きな偏りが見えていないため、説明は控えめにしています。",
+      "体調をふまえた提案: Reference context only; this is not medical judgment or instruction."
+    ]
+  },
+  "morningGuidanceText": "おはようございます、今日は無理なく一つずつ始めましょう。\n参考情報のみです。医療判断や指示ではありません。",
+  "dailyFocus": {
+    "priority": "配信準備メモを整える",
+    "nextAction": "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
+    "condition": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。",
+    "task": "配信準備メモを整える"
+  },
+  "contextSummary": {
+    "theme": "配信準備メモを整える",
+    "focusTask": {
+      "id": "task-schedule-prepare",
+      "title": "配信準備メモを整える",
+      "done": false,
+      "priority": true
+    },
+    "memoryTitle": "",
+    "support": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。",
+    "caution": "参考情報のみです。医療判断や指示ではありません。",
+    "dailyInputNote": "",
+    "taskCount": 1,
+    "adaptiveTopCategory": "none",
+    "text": "今日は「配信準備メモを整える」が文脈の中心です。\n最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。 一つずつ進める流れが向いています。",
+    "signals": [
+      "priority",
+      "recommendation",
+      "health",
+      "tasks:1"
+    ]
+  },
+  "focusTask": {
+    "id": "task-schedule-prepare",
+    "title": "配信準備メモを整える",
+    "done": false,
+    "priority": true
+  }
+}

@@ -157,6 +157,16 @@ git diff --check
 - [ ] `index.html` / `styles.css` に差分がない
 - [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
 
+## Step12-e-1. Brain表現出力のgolden固定
+
+- [ ] `node tests/brain-golden/run-brain-expression-golden.mjs` が成功する
+- [ ] Recommendationのtitle、message、actionText、reasonsが固定されている
+- [ ] Explain Layer、朝のひとこと、Daily Focus、Context Summary、Focus Taskが固定されている
+- [ ] `pickDailyFocusTask(todayTasks, dailyTasks)` の呼び出し条件が `buildContextSummary()` と `renderDailyFocusLayer()` で同一である
+- [ ] 既存のBrain golden testが成功する
+- [ ] `app.js`、`index.html`、`styles.css` に差分がない
+- [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

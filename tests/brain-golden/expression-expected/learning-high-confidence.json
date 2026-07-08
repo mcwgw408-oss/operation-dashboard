@@ -1,0 +1,71 @@
+{
+  "recommendation": {
+    "title": "おはよう、さくら。",
+    "message": "今日は「未完了タスク 1」に少し触れてみるのが良さそうです。",
+    "actionText": "最近の傾向も踏まえて、まず15分だけ軽く始めてみませんか？",
+    "reasons": [
+      "今日やることに入っています。",
+      "今日は予定はありません。",
+      "今日は短時間で触れる形が合いそうです。"
+    ]
+  },
+  "explainLayerDetails": {
+    "seenInfo": [
+      "今日やることの候補を見ています。",
+      "今日やることに未完了が8件あります。",
+      "体調をふまえた提案: Health Context supports how to approach おはよう、さくら。; it does not change the recommendation type, count, or ranking."
+    ],
+    "mainReasons": [
+      "今日やることに入っています。 そのため、この提案にしています。",
+      "今日は予定はありません。 そのため、この提案にしています。",
+      "今日は短時間で触れる形が合いそうです。 そのため、この提案にしています。"
+    ],
+    "energyImpact": "未完了が多いため、短時間で触れる形に寄せています。",
+    "momentumImpact": "大きな勢いの偏りはないため、基本スコアを優先しています。",
+    "uncertainty": [
+      "画面上とlocalStorageにある情報だけを見ています。",
+      "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
+      "最近は「小さく始める」の提案が記録されており、一致率は100%です。",
+      "最近は小さな一歩の提案が合いやすい傾向があります。 このヒントは過去の提案フィードバックから生成され、参考情報として扱われます。",
+      "提案傾向の確かさは75%です。さくらはこの値を見ながら、提案フィードバックの傾向を補助情報として扱います。",
+      "提案フィードバックの傾向は補助情報として扱い、今日の候補・予定・エネルギーを見たさくらの判断を優先しています。",
+      "体調をふまえた提案: Reference context only; this is not medical judgment or instruction."
+    ]
+  },
+  "morningGuidanceText": "おはようございます、今日は無理なく一つずつ始めましょう。\n参考情報のみです。医療判断や指示ではありません。",
+  "dailyFocus": {
+    "priority": "未完了タスク 1",
+    "nextAction": "最近の傾向も踏まえて、まず15分だけ軽く始めてみませんか？",
+    "condition": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。",
+    "task": "未完了タスク 1"
+  },
+  "contextSummary": {
+    "theme": "未完了タスク 1",
+    "focusTask": {
+      "id": "open-task-1",
+      "title": "未完了タスク 1",
+      "done": false,
+      "priority": true
+    },
+    "memoryTitle": "",
+    "support": "最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。",
+    "caution": "参考情報のみです。医療判断や指示ではありません。",
+    "dailyInputNote": "",
+    "taskCount": 8,
+    "adaptiveTopCategory": "health",
+    "text": "今日は「未完了タスク 1」が文脈の中心です。\n最近の記録では、現在の提案を落ち着いて進められそう、という補助情報です。 一つずつ進める流れが向いています。",
+    "signals": [
+      "priority",
+      "recommendation",
+      "adaptive:health",
+      "health",
+      "tasks:8"
+    ]
+  },
+  "focusTask": {
+    "id": "open-task-1",
+    "title": "未完了タスク 1",
+    "done": false,
+    "priority": true
+  }
+}
