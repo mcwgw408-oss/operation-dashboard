@@ -1454,6 +1454,7 @@ function renderLearnings() {
     const sakuraMemory = row.querySelector(".learning-sakura-memory");
     const tags = row.querySelector(".learning-tags");
     const memo = row.querySelector(".learning-memo");
+    const memoryStatus = row.querySelector(".learning-memory-status");
     date.value = learning.date || activeDate;
     source.value = learning.source || learning.url || "";
     title.value = learning.title || "";
@@ -1492,6 +1493,19 @@ function renderLearnings() {
         sakuraMemory.select();
         document.execCommand("copy");
       }
+    });
+    row.querySelector(".add-learning-memory").addEventListener("click", () => {
+      const result = upsertLearningMemory(learning, activeDate);
+      if (result.status === "empty") {
+        memoryStatus.textContent = "「さくらに残したいこと」を入力してください。";
+        return;
+      }
+      if (result.status === "missing-id") {
+        memoryStatus.textContent = "この学びには識別情報がないため追加できません。";
+        return;
+      }
+      memoryStatus.textContent = result.status === "updated" ? "更新しました。" : "追加しました。";
+      renderMemoryLayer();
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
       day.learnings = day.learnings.filter((candidate) => candidate.id !== learning.id);
@@ -1935,6 +1949,48 @@ function upsertShortMemory({ date = activeDate, type, title, summary, source, im
   memoryStore.shortMemory = memoryStore.shortMemory.slice(0, 80);
   saveMemoryStore();
   return memory;
+}
+
+function learningMemoryTags(learning) {
+  const tags = String(learning?.tags || "")
+    .split(/[\s,、]+/)
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+  return [...new Set([...tags, "learning", "self-learning"])];
+}
+
+function upsertLearningMemory(learning, date = activeDate) {
+  const summary = String(learning?.sakuraMemory || learning?.intro || "").trim();
+  if (!summary) return { status: "empty", memory: null };
+  if (!learning?.id) return { status: "missing-id", memory: null };
+  const source = `learning:${learning.id}`;
+  const title = [learning.title, learning.summaryLine, learning.hook]
+    .map((value) => String(value || "").trim())
+    .find(Boolean) || "自分の学び";
+  const tags = learningMemoryTags(learning);
+  const existing = memoryStore.shortMemory.find((memory) => memory.source === source);
+  if (existing) {
+    const now = new Date().toISOString();
+    existing.date = date;
+    existing.type = "learning";
+    existing.title = title;
+    existing.summary = summary;
+    existing.importance = 3;
+    existing.tags = tags;
+    existing.updatedAt = now;
+    saveMemoryStore();
+    return { status: "updated", memory: existing };
+  }
+  const memory = upsertShortMemory({
+    date,
+    type: "learning",
+    title,
+    summary,
+    source,
+    importance: 3,
+    tags,
+  });
+  return { status: "added", memory };
 }
 
 function normalizeMemoryTags(tags) {
