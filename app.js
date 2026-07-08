@@ -114,6 +114,7 @@ let laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
 let persistentMemos = loadPersistentMemos();
 let persistentMemoSearchQuery = "";
 let learningSearchQuery = "";
+let learningGlobalSearchQuery = "";
 let learningLog = loadLearningLog();
 let memoryStore = loadMemoryStore();
 let conversationFeedback = loadConversationFeedback();
@@ -1318,6 +1319,90 @@ function renderPersistentMemos({ focusId } = {}) {
   });
 }
 
+function learningMatchesSearch(learning, query) {
+  if (!query) return true;
+  return [
+    learning.date,
+    learning.source,
+    learning.url,
+    learning.title,
+    learning.summaryLine,
+    learning.hook,
+    learning.intent,
+    learning.learned,
+    learning.useForSelf,
+    learning.useForPublishing,
+    learning.experiment,
+    learning.sakuraMemory,
+    learning.intro,
+    learning.tags,
+    learning.memo,
+  ]
+    .map((value) => normalizeLaterText(value || ""))
+    .join(" ")
+    .includes(query);
+}
+
+function renderLearningGlobalSearch() {
+  const target = $("#learningGlobalSearchResults");
+  if (!target) return;
+  const searchField = $("#learningGlobalSearch");
+  if (searchField && searchField.value !== learningGlobalSearchQuery) {
+    searchField.value = learningGlobalSearchQuery;
+  }
+  const searchQuery = normalizeLaterText(learningGlobalSearchQuery);
+  const results = searchQuery
+    ? Object.entries(store).flatMap(([dateKey, day]) =>
+        asArray(day?.learnings)
+          .filter((learning) =>
+            normalizeLaterText(dateKey).includes(searchQuery) ||
+            learningMatchesSearch(learning, searchQuery)
+          )
+          .map((learning) => ({ dateKey, learning }))
+      )
+    : [];
+  const searchCount = $("#learningGlobalSearchCount");
+  if (searchCount) {
+    searchCount.hidden = !searchQuery;
+    searchCount.querySelector("strong").textContent = results.length;
+  }
+  target.replaceChildren();
+  target.hidden = !searchQuery;
+  if (!searchQuery) return;
+  if (!results.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "全日付の学びに一致する結果はありません。";
+    target.append(empty);
+    return;
+  }
+  results.forEach(({ dateKey, learning }) => {
+    const button = document.createElement("button");
+    button.className = "learning-global-search-result";
+    button.type = "button";
+    const date = document.createElement("span");
+    date.className = "learning-global-search-date";
+    date.textContent = formatDateLabel(dateKey);
+    const title = document.createElement("strong");
+    title.textContent = learning.title || learning.summaryLine || "タイトル未入力の学び";
+    const summary = document.createElement("span");
+    summary.textContent = [
+      learning.source,
+      learning.learned || learning.summaryLine,
+      learning.tags,
+    ].filter(Boolean).join(" / ") || "内容は該当日の画面で確認できます。";
+    button.append(date, title, summary);
+    button.addEventListener("click", () => {
+      activeDate = dateKey;
+      learningSearchQuery = "";
+      $("#activeDate").value = activeDate;
+      renderAll();
+      $("#learningList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    target.append(button);
+  });
+}
+
 function renderLearnings() {
   const day = getDay();
   const target = $("#learningList");
@@ -1330,26 +1415,7 @@ function renderLearnings() {
   }
   const searchQuery = normalizeLaterText(learningSearchQuery);
   const visibleLearnings = day.learnings.filter((learning) =>
-    [
-      learning.date,
-      learning.source,
-      learning.url,
-      learning.title,
-      learning.summaryLine,
-      learning.hook,
-      learning.intent,
-      learning.learned,
-      learning.useForSelf,
-      learning.useForPublishing,
-      learning.experiment,
-      learning.sakuraMemory,
-      learning.intro,
-      learning.tags,
-      learning.memo,
-    ]
-      .map((value) => normalizeLaterText(value || ""))
-      .join(" ")
-      .includes(searchQuery)
+    learningMatchesSearch(learning, searchQuery)
   );
   const searchCount = $("#learningSearchCount");
   if (searchCount) {
@@ -6717,6 +6783,7 @@ function renderAll() {
   renderMailLastChecked();
   renderPersistentMemos();
   renderLearnings();
+  renderLearningGlobalSearch();
   renderPublishingOps();
   renderLaterItems();
   renderFields();
@@ -6989,6 +7056,10 @@ function bindEvents() {
   $("#learningSearch")?.addEventListener("input", (event) => {
     learningSearchQuery = event.target.value;
     renderLearnings();
+  });
+  $("#learningGlobalSearch")?.addEventListener("input", (event) => {
+    learningGlobalSearchQuery = event.target.value;
+    renderLearningGlobalSearch();
   });
   $("#laterForm")?.addEventListener("submit", (event) => {
     event.preventDefault();

@@ -2995,6 +2995,50 @@ textarea {
   gap: 8px;
 }
 
+.learning-global-search {
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+}
+
+.learning-global-search-results {
+  display: grid;
+  gap: 8px;
+}
+
+.learning-global-search-result {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  color: var(--text);
+  padding: 12px;
+  text-align: left;
+}
+
+.learning-global-search-result:hover {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.learning-global-search-result span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.learning-global-search-result strong {
+  font-size: 14px;
+}
+
+.learning-global-search-date {
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .publishing-ops-panel {
   display: grid;
   gap: 14px;
