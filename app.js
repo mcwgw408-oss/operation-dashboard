@@ -6884,10 +6884,7 @@ function collectBrainContext() {
   };
 }
 
-function renderBrainPrototype() {
-  if (!$("#brainPriority")) return;
-
-  const brainContext = collectBrainContext();
+function buildBrainDecision(brainContext) {
   const {
     day,
     dailyTasks,
@@ -6897,17 +6894,15 @@ function renderBrainPrototype() {
     completedToday,
     openToday,
     laterOpen,
-    persistentMemos,
-    reflection,
     fermentingIdeas,
     writingInProgress,
     hasshinNextActions,
     revisitPeople,
     recentMemos,
+    learningLog: brainLearningLog,
+    memoryStore: brainMemoryStore,
+    healthState: brainHealthState,
   } = brainContext;
-  const newestMemo = persistentMemos
-    .filter((memo) => memo.updatedAt || memo.createdAt)
-    .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   const energyContext = inferEnergyContext(day, completedToday, openToday.length);
   const momentumContext = inferMomentumContext(day, writingInProgress, hasshinNextActions);
   const eventContext = inferEventContext(todayEvents);
@@ -6939,22 +6934,90 @@ function renderBrainPrototype() {
       completedToday,
     },
   );
-  const learningSummary = buildLearningSummary();
-  const learningHint = buildLearningHint(learningSummary);
   const baseRecommendation = buildRecommendation(recommendationInput);
+  const learningSummary = buildLearningSummary(brainLearningLog);
+  const learningHint = buildLearningHint(learningSummary);
   const memoryRetrievalContext = buildMemoryRetrievalContext({
     priorityCandidate,
     recommendationType: baseRecommendation.type,
     eventContext,
   });
-  const brainMemoryContext = buildBrainMemoryContext(memoryRetrievalContext);
+  const brainMemoryContext = buildBrainMemoryContext(memoryRetrievalContext, brainMemoryStore);
   const recommendation = applyBrainMemoryContext(adaptRecommendationWithLearning(
     baseRecommendation,
     learningHint,
     learningSummary,
   ), brainMemoryContext);
+  const recentHealthStates = [...asArray(brainHealthState)]
+    .sort((a, b) =>
+      String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
+    );
+  const healthContext = buildHealthContext(
+    latestHealthStateFrom(brainHealthState),
+    buildHealthInsight(recentHealthStates.slice(0, 7)),
+    buildHealthTrend(recentHealthStates.slice(0, 14)),
+  );
+  const healthAwareRecommendation = buildHealthAwareRecommendation(
+    recommendation,
+    healthContext,
+  );
+
+  return {
+    energyContext,
+    momentumContext,
+    eventContext,
+    candidates,
+    rankedCandidates,
+    priorityCandidate,
+    explanation,
+    recommendationInput,
+    baseRecommendation,
+    learningSummary,
+    learningHint,
+    memoryRetrievalContext,
+    brainMemoryContext,
+    recommendation,
+    healthAwareRecommendation,
+  };
+}
+
+function renderBrainPrototype() {
+  if (!$("#brainPriority")) return;
+
+  const brainContext = collectBrainContext();
+  const {
+    day,
+    dailyTasks,
+    todayTasks,
+    todayEvents,
+    projects,
+    completedToday,
+    openToday,
+    laterOpen,
+    persistentMemos,
+    reflection,
+    fermentingIdeas,
+    writingInProgress,
+    hasshinNextActions,
+    revisitPeople,
+    recentMemos,
+  } = brainContext;
+  const {
+    energyContext,
+    momentumContext,
+    eventContext,
+    priorityCandidate,
+    explanation,
+    recommendationInput,
+    learningHint,
+    brainMemoryContext,
+    recommendation,
+    healthAwareRecommendation,
+  } = buildBrainDecision(brainContext);
+  const newestMemo = persistentMemos
+    .filter((memo) => memo.updatedAt || memo.createdAt)
+    .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   currentRecommendation = recommendation;
-  const healthAwareRecommendation = getLatestHealthAwareRecommendation(recommendation);
   const explainLayerDetails = buildExplainLayerDetails(
     recommendationInput,
     recommendation,

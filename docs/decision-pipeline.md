@@ -333,3 +333,56 @@ Step12-cでは、AI判断の収集フェーズを `collectBrainContext()` に一
 
 - Step12-bの期待値JSONに差分が出ない。
 - `collectBrainContext()` は読み取り専用で、`getDay()`、`saveStore()`、`localStorage.setItem()` を呼ばない。
+
+## Step12-d 実装範囲
+
+Step12-dでは、Epic 4の決定段を `buildBrainDecision(brainContext)` にまとめます。
+
+目的:
+
+- `collectBrainContext()` の収集結果から、Priority候補、順位、Recommendation、補助文脈までを1つの入口で組み立てる。
+- ブラウザ描画側とBrain golden testが同じ決定処理を使う。
+- 重み、条件順、sort順、理由文、message文、actionTextを変えずに責務境界を明確にする。
+
+`buildBrainDecision()` がまとめる処理:
+
+1. Energy、Momentum、Event Contextの生成
+2. Priority候補の生成、基本採点、補正、順位付け
+3. 最上位候補の説明生成
+4. Recommendation入力の正規化
+5. base Recommendationの生成
+6. Learning Summary / Hintによる提案強度の補助調整
+7. Memory Contextの検索とRecommendation messageへの補助追加
+8. Health ContextによるRecommendationへの接近方法の説明生成
+
+境界:
+
+- Health、Memory、Learningは現時点ではPriorityの順位とbase Recommendation typeを変更しない。
+- Learningは条件を満たす場合に `actionText` と `adaptiveNote` を調整する。
+- Memoryは `message` と `memoryNote` に補助情報を追加する。
+- Healthは `healthAwareRecommendation` で行動サイズや注意点を説明する。
+- `syncCurrentLearningLog()`、`upsertShortMemory()`、`upsertEmotionalResonance()` などの保存副作用は `buildBrainDecision()` に含めない。
+- DOM描画、Explain Layer、朝のひとこと、Reply生成は決定関数の外に残す。
+
+成功条件:
+
+- Brain golden testの期待値JSONに差分が出ない。
+- `rankedCandidates` 上位3件、`priorityCandidate`、`recommendationInput` が変わらない。
+- `baseRecommendation` のtype、reasons、message、actionTextが変わらない。
+- 記憶あり、体調低め、学習ログ高信頼fixtureでrankとbase Recommendation typeが変わらない。
+- localStorageキー、Backup / restore、UI構造に差分が出ない。
+
+## Step12-eへの送り
+
+Step12-eでは「どう言うか」の分離を扱います。
+
+対象候補:
+
+- `explainPriorityCandidate()`
+- `buildRecommendationReasons()`
+- `generateRecommendationMessage()`
+- `buildExplainLayerDetails()`
+- `buildMorningGuidanceText()`
+- `buildReplyPlan()` / `buildReply()`
+
+Step12-dでは、これらの文言、条件順、生成結果を変更しません。

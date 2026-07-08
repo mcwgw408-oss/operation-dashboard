@@ -141,6 +141,22 @@ git diff --check
 - [ ] Priority採点、Recommendation type、Explain / Replyの判断順に意図しない変更がない
 - [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
 
+## Step12-d. Brain決定フェーズ一本化
+
+- [ ] `buildBrainDecision(brainContext)` がPriority / Recommendationの決定段をまとめている
+- [ ] `renderBrainPrototype()` と Brain golden test が同じ `buildBrainDecision()` を使っている
+- [ ] `buildBrainDecision()` にDOM描画や保存副作用が含まれていない
+- [ ] `syncCurrentLearningLog()`、`upsertShortMemory()`、`upsertEmotionalResonance()` の呼び出し位置と挙動が変わっていない
+- [ ] Priorityの重み、条件順、sort順、理由文が変わっていない
+- [ ] `rankedCandidates` 上位3件、`priorityCandidate`、`recommendationInput` が変わっていない
+- [ ] `baseRecommendation` のtype、reasons、message、actionTextが変わっていない
+- [ ] 記憶ありfixtureでrank / base Recommendation typeが変わらず、`memoryNote` が維持されている
+- [ ] 体調低めfixtureでrank / base Recommendation typeが変わらず、`healthAwareRecommendation` が維持されている
+- [ ] 学習ログ高信頼fixtureでrank / base Recommendation typeが変わらず、`actionText` / `adaptiveNote` の調整が維持されている
+- [ ] Brain golden testの期待値JSONに差分がない
+- [ ] `index.html` / `styles.css` に差分がない
+- [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される
