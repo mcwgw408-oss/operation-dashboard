@@ -38,8 +38,10 @@
 ## 回帰確認
 
 Step8以降の画面構成、保存データ、バックアップを守るため、変更後は静的回帰チェックを実行します。
+Brain判断を触る場合は、先にゴールデンテストで現在の判断結果を固定します。
 
 ```bash
+node tests/brain-golden/run-brain-golden.mjs
 node tests/static-regression-check.mjs
 node --check app.js
 git diff --check

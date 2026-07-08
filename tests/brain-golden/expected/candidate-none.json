@@ -1,0 +1,105 @@
+{
+  "energyContext": {
+    "state": "Normal",
+    "modifier": 0
+  },
+  "momentumContext": {
+    "state": "Stable",
+    "modifier": 0
+  },
+  "eventContext": {
+    "level": "Open",
+    "count": 0,
+    "labels": []
+  },
+  "rankedCandidates": [],
+  "priorityCandidate": null,
+  "explanation": {
+    "summary": "未完了の候補が少ないため、今日は整える日として表示しています。",
+    "reasons": [
+      "今日の優先候補として強く出る項目はありません。"
+    ]
+  },
+  "recommendationInput": {
+    "topCandidate": null,
+    "priorityReasons": [
+      "今日の優先候補として強く出る項目はありません。"
+    ],
+    "energy": {
+      "state": "Normal",
+      "modifier": 0
+    },
+    "momentum": {
+      "state": "Stable",
+      "modifier": 0
+    },
+    "eventContext": {
+      "level": "Open",
+      "count": 0,
+      "labels": []
+    },
+    "hasTodayEvents": false,
+    "hasFermentingIdeas": false,
+    "hasWritingInProgress": false,
+    "hasNextActions": false,
+    "openTodayCount": 0,
+    "completedToday": 0
+  },
+  "baseRecommendation": {
+    "type": "organize_or_rest",
+    "title": "おはよう、さくら。",
+    "message": "今日は少し休みながら整理する日にしても良さそうです。",
+    "actionText": "まず今日やることを1つだけ眺めてみませんか？",
+    "adaptiveNote": "",
+    "memoryNote": "",
+    "reasons": [
+      "今日は予定はありません。",
+      "強く急ぐ候補は見つかっていません。",
+      "今日は整理や回復を優先しても良さそうです。"
+    ]
+  },
+  "learningSummary": {
+    "totalLogs": 0,
+    "acceptedCount": 0,
+    "rejectedCount": 0,
+    "unansweredCount": 0,
+    "recentAcceptanceRate": null,
+    "commonRecommendationType": "なし",
+    "averageEnergy": null
+  },
+  "learningHint": {
+    "message": "提案フィードバックが少ないため、傾向はまだ参考段階です。",
+    "confidence": 10,
+    "source": "totalLogs"
+  },
+  "brainMemoryContext": {
+    "project": "",
+    "tags": [],
+    "recommendationType": "organize_or_rest",
+    "eventType": "Open",
+    "used": false,
+    "retrieved": [],
+    "recent": []
+  },
+  "recommendation": {
+    "type": "organize_or_rest",
+    "title": "おはよう、さくら。",
+    "message": "今日は少し休みながら整理する日にしても良さそうです。",
+    "actionText": "まず今日やることを1つだけ眺めてみませんか？",
+    "adaptiveNote": "提案傾向のヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
+    "memoryNote": "",
+    "reasons": [
+      "今日は予定はありません。",
+      "強く急ぐ候補は見つかっていません。",
+      "今日は整理や回復を優先しても良さそうです。"
+    ]
+  },
+  "healthAwareRecommendation": {
+    "actionSizeHint": "normal_or_light",
+    "recommendationSupport": "Recent records suggest the current recommendation can stay steady as supporting context.",
+    "priorityReason": "Health Context does not add a strong constraint to this recommendation.",
+    "cautionNote": "Reference context only; this is not medical judgment or instruction.",
+    "explanationHint": "Health Context supports how to approach おはよう、さくら。; it does not change the recommendation type, count, or ranking.",
+    "sourceSummary": "Built from Health Context. Recent records suggest normal action size may be usable as context."
+  }
+}

@@ -13,11 +13,13 @@ Step8以降で整理した画面構成、保存データ、バックアップを
 ## 2. 自動確認
 
 ```bash
+node tests/brain-golden/run-brain-golden.mjs
 node tests/static-regression-check.mjs
 node --check app.js
 git diff --check
 ```
 
+- [ ] Brain golden testのfixture（候補なし、予定あり、未完了多数、執筆中、記憶あり、体調低め、学習ログ高信頼）が通る
 - [ ] 完了報告に、実行した静的検査の出力を貼り付ける
 - [ ] 重複IDがない
 - [ ] 主要機能が利用する必須DOM IDが存在する

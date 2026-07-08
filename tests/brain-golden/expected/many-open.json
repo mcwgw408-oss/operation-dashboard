@@ -1,0 +1,271 @@
+{
+  "energyContext": {
+    "state": "Low Energy",
+    "modifier": -15
+  },
+  "momentumContext": {
+    "state": "Stable",
+    "modifier": 0
+  },
+  "eventContext": {
+    "level": "Open",
+    "count": 0,
+    "labels": []
+  },
+  "rankedCandidates": [
+    {
+      "id": "open-task-1",
+      "source": "operation-dashboard.todayTasks",
+      "sourceLabel": "今日やること",
+      "title": "未完了タスク 1",
+      "priorityFlag": true,
+      "score": 78,
+      "adjustedScore": 63,
+      "status": "open",
+      "reasons": [
+        {
+          "points": 30,
+          "text": "今日やることに入っています。"
+        },
+        {
+          "points": 40,
+          "text": "優先マークが付いています。"
+        },
+        {
+          "points": 8,
+          "text": "今日更新されています。"
+        }
+      ],
+      "modifiers": [
+        {
+          "state": "Low Energy",
+          "modifier": -15
+        },
+        {
+          "state": "Stable",
+          "modifier": 0
+        }
+      ]
+    },
+    {
+      "id": "open-task-2",
+      "source": "operation-dashboard.todayTasks",
+      "sourceLabel": "今日やること",
+      "title": "未完了タスク 2",
+      "priorityFlag": false,
+      "score": 38,
+      "adjustedScore": 23,
+      "status": "open",
+      "reasons": [
+        {
+          "points": 30,
+          "text": "今日やることに入っています。"
+        },
+        {
+          "points": 8,
+          "text": "今日更新されています。"
+        }
+      ],
+      "modifiers": [
+        {
+          "state": "Low Energy",
+          "modifier": -15
+        },
+        {
+          "state": "Stable",
+          "modifier": 0
+        }
+      ]
+    },
+    {
+      "id": "open-task-3",
+      "source": "operation-dashboard.todayTasks",
+      "sourceLabel": "今日やること",
+      "title": "未完了タスク 3",
+      "priorityFlag": false,
+      "score": 30,
+      "adjustedScore": 15,
+      "status": "open",
+      "reasons": [
+        {
+          "points": 30,
+          "text": "今日やることに入っています。"
+        }
+      ],
+      "modifiers": [
+        {
+          "state": "Low Energy",
+          "modifier": -15
+        },
+        {
+          "state": "Stable",
+          "modifier": 0
+        }
+      ]
+    }
+  ],
+  "priorityCandidate": {
+    "id": "open-task-1",
+    "source": "operation-dashboard.todayTasks",
+    "sourceLabel": "今日やること",
+    "title": "未完了タスク 1",
+    "priorityFlag": true,
+    "score": 78,
+    "adjustedScore": 63,
+    "status": "open",
+    "reasons": [
+      {
+        "points": 30,
+        "text": "今日やることに入っています。"
+      },
+      {
+        "points": 40,
+        "text": "優先マークが付いています。"
+      },
+      {
+        "points": 8,
+        "text": "今日更新されています。"
+      }
+    ],
+    "modifiers": [
+      {
+        "state": "Low Energy",
+        "modifier": -15
+      },
+      {
+        "state": "Stable",
+        "modifier": 0
+      }
+    ]
+  },
+  "explanation": {
+    "summary": "今日やることから選ばれました。スコア 63 / 100 の最優先候補です。",
+    "reasons": [
+      "優先マークが付いています。",
+      "今日やることに入っています。",
+      "今日更新されています。",
+      "Low Energy: 未完了が多いため、短時間で触れる形に寄せています。"
+    ]
+  },
+  "recommendationInput": {
+    "topCandidate": {
+      "id": "open-task-1",
+      "source": "operation-dashboard.todayTasks",
+      "sourceLabel": "今日やること",
+      "title": "未完了タスク 1",
+      "priorityFlag": true,
+      "score": 78,
+      "adjustedScore": 63,
+      "status": "open",
+      "reasons": [
+        {
+          "points": 30,
+          "text": "今日やることに入っています。"
+        },
+        {
+          "points": 40,
+          "text": "優先マークが付いています。"
+        },
+        {
+          "points": 8,
+          "text": "今日更新されています。"
+        }
+      ],
+      "modifiers": [
+        {
+          "state": "Low Energy",
+          "modifier": -15
+        },
+        {
+          "state": "Stable",
+          "modifier": 0
+        }
+      ]
+    },
+    "priorityReasons": [
+      "優先マークが付いています。",
+      "今日やることに入っています。",
+      "今日更新されています。",
+      "Low Energy: 未完了が多いため、短時間で触れる形に寄せています。"
+    ],
+    "energy": {
+      "state": "Low Energy",
+      "modifier": -15
+    },
+    "momentum": {
+      "state": "Stable",
+      "modifier": 0
+    },
+    "eventContext": {
+      "level": "Open",
+      "count": 0,
+      "labels": []
+    },
+    "hasTodayEvents": false,
+    "hasFermentingIdeas": false,
+    "hasWritingInProgress": false,
+    "hasNextActions": false,
+    "openTodayCount": 8,
+    "completedToday": 0
+  },
+  "baseRecommendation": {
+    "type": "start_small",
+    "title": "おはよう、さくら。",
+    "message": "今日は「未完了タスク 1」に少し触れてみるのが良さそうです。",
+    "actionText": "まず15分だけ、軽く始めてみませんか？",
+    "adaptiveNote": "",
+    "memoryNote": "",
+    "reasons": [
+      "今日やることに入っています。",
+      "今日は予定はありません。",
+      "今日は短時間で触れる形が合いそうです。"
+    ]
+  },
+  "learningSummary": {
+    "totalLogs": 0,
+    "acceptedCount": 0,
+    "rejectedCount": 0,
+    "unansweredCount": 0,
+    "recentAcceptanceRate": null,
+    "commonRecommendationType": "なし",
+    "averageEnergy": null
+  },
+  "learningHint": {
+    "message": "提案フィードバックが少ないため、傾向はまだ参考段階です。",
+    "confidence": 10,
+    "source": "totalLogs"
+  },
+  "brainMemoryContext": {
+    "project": "",
+    "tags": [
+      "task",
+      "life"
+    ],
+    "recommendationType": "start_small",
+    "eventType": "Open",
+    "used": false,
+    "retrieved": [],
+    "recent": []
+  },
+  "recommendation": {
+    "type": "start_small",
+    "title": "おはよう、さくら。",
+    "message": "今日は「未完了タスク 1」に少し触れてみるのが良さそうです。",
+    "actionText": "まず15分だけ、軽く始めてみませんか？",
+    "adaptiveNote": "提案傾向のヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
+    "memoryNote": "",
+    "reasons": [
+      "今日やることに入っています。",
+      "今日は予定はありません。",
+      "今日は短時間で触れる形が合いそうです。"
+    ]
+  },
+  "healthAwareRecommendation": {
+    "actionSizeHint": "normal_or_light",
+    "recommendationSupport": "Recent records suggest the current recommendation can stay steady as supporting context.",
+    "priorityReason": "Health Context does not add a strong constraint to this recommendation.",
+    "cautionNote": "Reference context only; this is not medical judgment or instruction.",
+    "explanationHint": "Health Context supports how to approach おはよう、さくら。; it does not change the recommendation type, count, or ranking.",
+    "sourceSummary": "Built from Health Context. Recent records suggest normal action size may be usable as context."
+  }
+}

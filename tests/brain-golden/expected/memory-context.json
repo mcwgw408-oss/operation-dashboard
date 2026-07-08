@@ -1,0 +1,252 @@
+{
+  "energyContext": {
+    "state": "Normal",
+    "modifier": 0
+  },
+  "momentumContext": {
+    "state": "Rising",
+    "modifier": 8
+  },
+  "eventContext": {
+    "level": "Open",
+    "count": 0,
+    "labels": []
+  },
+  "rankedCandidates": [
+    {
+      "id": "writing-current-article",
+      "source": "substack-labo.writing",
+      "sourceLabel": "執筆中記事",
+      "title": "Sakura AIの判断ログ記事",
+      "priorityFlag": true,
+      "score": 66,
+      "adjustedScore": 74,
+      "status": "執筆中",
+      "reasons": [
+        {
+          "points": 18,
+          "text": "執筆中の記事です。"
+        },
+        {
+          "points": 40,
+          "text": "優先マークが付いています。"
+        },
+        {
+          "points": 8,
+          "text": "今日更新されています。"
+        }
+      ],
+      "modifiers": [
+        {
+          "state": "Normal",
+          "modifier": 0
+        },
+        {
+          "state": "Rising",
+          "modifier": 8
+        }
+      ]
+    }
+  ],
+  "priorityCandidate": {
+    "id": "writing-current-article",
+    "source": "substack-labo.writing",
+    "sourceLabel": "執筆中記事",
+    "title": "Sakura AIの判断ログ記事",
+    "priorityFlag": true,
+    "score": 66,
+    "adjustedScore": 74,
+    "status": "執筆中",
+    "reasons": [
+      {
+        "points": 18,
+        "text": "執筆中の記事です。"
+      },
+      {
+        "points": 40,
+        "text": "優先マークが付いています。"
+      },
+      {
+        "points": 8,
+        "text": "今日更新されています。"
+      }
+    ],
+    "modifiers": [
+      {
+        "state": "Normal",
+        "modifier": 0
+      },
+      {
+        "state": "Rising",
+        "modifier": 8
+      }
+    ]
+  },
+  "explanation": {
+    "summary": "執筆中記事から選ばれました。スコア 74 / 100 の最優先候補です。",
+    "reasons": [
+      "優先マークが付いています。",
+      "執筆中の記事です。",
+      "今日更新されています。",
+      "Rising: 最近の更新や次アクションがあり、流れが続いています。"
+    ]
+  },
+  "recommendationInput": {
+    "topCandidate": {
+      "id": "writing-current-article",
+      "source": "substack-labo.writing",
+      "sourceLabel": "執筆中記事",
+      "title": "Sakura AIの判断ログ記事",
+      "priorityFlag": true,
+      "score": 66,
+      "adjustedScore": 74,
+      "status": "執筆中",
+      "reasons": [
+        {
+          "points": 18,
+          "text": "執筆中の記事です。"
+        },
+        {
+          "points": 40,
+          "text": "優先マークが付いています。"
+        },
+        {
+          "points": 8,
+          "text": "今日更新されています。"
+        }
+      ],
+      "modifiers": [
+        {
+          "state": "Normal",
+          "modifier": 0
+        },
+        {
+          "state": "Rising",
+          "modifier": 8
+        }
+      ]
+    },
+    "priorityReasons": [
+      "優先マークが付いています。",
+      "執筆中の記事です。",
+      "今日更新されています。",
+      "Rising: 最近の更新や次アクションがあり、流れが続いています。"
+    ],
+    "energy": {
+      "state": "Normal",
+      "modifier": 0
+    },
+    "momentum": {
+      "state": "Rising",
+      "modifier": 8
+    },
+    "eventContext": {
+      "level": "Open",
+      "count": 0,
+      "labels": []
+    },
+    "hasTodayEvents": false,
+    "hasFermentingIdeas": false,
+    "hasWritingInProgress": true,
+    "hasNextActions": false,
+    "openTodayCount": 0,
+    "completedToday": 0
+  },
+  "baseRecommendation": {
+    "type": "continue_flow",
+    "title": "おはよう、さくら。",
+    "message": "今日は「Sakura AIの判断ログ記事」の流れを少し続けるタイミングかもしれません。",
+    "actionText": "まず15分だけ始めてみませんか？",
+    "adaptiveNote": "",
+    "memoryNote": "",
+    "reasons": [
+      "執筆中の記事があります。",
+      "今日は予定はありません。",
+      "今日は勢いがあります。"
+    ]
+  },
+  "learningSummary": {
+    "totalLogs": 0,
+    "acceptedCount": 0,
+    "rejectedCount": 0,
+    "unansweredCount": 0,
+    "recentAcceptanceRate": null,
+    "commonRecommendationType": "なし",
+    "averageEnergy": null
+  },
+  "learningHint": {
+    "message": "提案フィードバックが少ないため、傾向はまだ参考段階です。",
+    "confidence": 10,
+    "source": "totalLogs"
+  },
+  "brainMemoryContext": {
+    "project": "Substack",
+    "tags": [
+      "substack",
+      "writing"
+    ],
+    "recommendationType": "continue_flow",
+    "eventType": "Open",
+    "used": true,
+    "retrieved": [
+      {
+        "project": "Substack",
+        "title": "Sakura AI記事の流れ",
+        "summary": "判断ログを記事化する流れを継続している。",
+        "source": "project-memory",
+        "importance": 4,
+        "tags": [
+          "substack",
+          "writing"
+        ]
+      },
+      {
+        "project": "",
+        "title": "昨日も記事を少し進めた",
+        "summary": "完了よりも15分進める提案が合っていた。",
+        "source": "recommendation",
+        "importance": 3,
+        "tags": [
+          "recommendation",
+          "continue_flow",
+          "writing"
+        ]
+      }
+    ],
+    "recent": [
+      {
+        "project": "",
+        "title": "昨日も記事を少し進めた",
+        "summary": "完了よりも15分進める提案が合っていた。",
+        "source": "recommendation",
+        "importance": 3,
+        "tags": [
+          "recommendation",
+          "continue_flow",
+          "writing"
+        ]
+      }
+    ]
+  },
+  "recommendation": {
+    "type": "continue_flow",
+    "title": "おはよう、さくら。",
+    "message": "今日は「Sakura AIの判断ログ記事」の流れを少し続けるタイミングかもしれません。 Substackの記憶も参照すると、「Sakura AI記事の流れ」の流れが続いています。",
+    "actionText": "まず15分だけ始めてみませんか？",
+    "adaptiveNote": "提案傾向のヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
+    "memoryNote": "Substackの記憶も参照すると、「Sakura AI記事の流れ」の流れが続いています。",
+    "reasons": [
+      "執筆中の記事があります。",
+      "今日は予定はありません。",
+      "今日は勢いがあります。"
+    ]
+  },
+  "healthAwareRecommendation": {
+    "actionSizeHint": "normal_or_light",
+    "recommendationSupport": "Recent records suggest the current recommendation can stay steady as supporting context.",
+    "priorityReason": "Health Context does not add a strong constraint to this recommendation.",
+    "cautionNote": "Reference context only; this is not medical judgment or instruction.",
+    "explanationHint": "Health Context supports how to approach おはよう、さくら。; it does not change the recommendation type, count, or ranking.",
+    "sourceSummary": "Built from Health Context. Recent records suggest normal action size may be usable as context."
+  }
+}

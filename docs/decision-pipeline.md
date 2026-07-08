@@ -230,3 +230,69 @@ Step12-bでは、変更前に「変わっていないこと」を証明するた
 - 時刻、ID、localStorageの初期補完がスナップショットを不安定にする。
 - 体調と記憶はRecommendationの順位を変えないが、表示文には影響するため、出力差分を分けて読む必要がある。
 
+## Step12-b-1 実装範囲
+
+Step12-b-1では、Brain判断を変更する前の安全網として、非DOMの判断関数だけを固定環境で呼ぶゴールデンテスト土台を追加します。
+
+対象外:
+
+- `renderBrainPrototype()` 全体の直接実行
+- DOM描画
+- `syncCurrentLearningLog()` による保存副作用
+- `upsertShortMemory()` による記憶更新
+- `reply` 生成
+- 記憶あり、体調低め、学習ログ高信頼fixture
+
+固定環境:
+
+- `activeDate` をfixtureごとに固定する。
+- `Date` / `Date.now()` を固定する。
+- `crypto.randomUUID()` を固定連番にする。
+- `localStorage` はMapベースのfake実装を使う。
+- `store`, `laterItems`, `persistentMemos`, `learningLog`, `memoryStore`, `healthState` はfixtureで明示する。
+
+初回fixture:
+
+| fixture | 期待する確認 |
+|---|---|
+| 候補なし | `organize_or_rest` になる |
+| 予定あり | `schedule_context` になる |
+| 未完了多数 | `Low Energy` と `start_small` になる |
+| 執筆中 | `continue_flow` になる |
+
+ゴールデン化する出力:
+
+- `energyContext`
+- `momentumContext`
+- `eventContext`
+- `rankedCandidates` 上位3件
+- `priorityCandidate`
+- `explanation`
+- `recommendationInput`
+- `baseRecommendation`
+- `learningSummary`
+- `learningHint`
+
+実行コマンド:
+
+```bash
+node tests/brain-golden/run-brain-golden.mjs
+```
+
+## Step12-b-2 実装範囲
+
+Step12-b-2では、Step12-b-1の非DOMゴールデンテストに、補助文脈の確認を追加します。
+
+追加fixture:
+
+| fixture | 期待する確認 |
+|---|---|
+| 記憶あり | `brainMemoryContext` と `recommendation.memoryNote` が出るが、`baseRecommendation.type` と上位候補は変えない |
+| 体調低め | `healthAwareRecommendation.actionSizeHint` が小さめになるが、`baseRecommendation.type` と上位候補は変えない |
+| 学習ログ高信頼 | `recommendation.actionText` / `adaptiveNote` が学習反映で変わるが、`baseRecommendation.type` と上位候補は変えない |
+
+追加でゴールデン化する出力:
+
+- `brainMemoryContext`
+- 学習・記憶反映後の `recommendation`
+- `healthAwareRecommendation`
