@@ -3057,6 +3057,7 @@ textarea {
 .learning-global-search-result {
   display: grid;
   gap: 5px;
+  min-width: 0;
   width: 100%;
   min-height: 0;
   border: 1px solid var(--line);
@@ -3069,6 +3070,7 @@ textarea {
 
 .learning-global-search-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -3083,10 +3085,12 @@ textarea {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .learning-global-search-result strong {
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .learning-global-search-date {
@@ -3104,6 +3108,8 @@ textarea {
   justify-self: end;
   color: var(--green) !important;
   font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .learning-list-heading {
@@ -3641,6 +3647,43 @@ textarea {
   .learning-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .learning-search-section,
+  .learning-global-search {
+    padding: 11px;
+  }
+
+  .learning-search-heading,
+  .learning-global-search-results-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .learning-search-heading .later-counts {
+    width: 100%;
+  }
+
+  .learning-global-search-results {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .learning-global-search-result {
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .learning-global-search-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .learning-global-search-action {
+    justify-self: start;
+    margin-top: 3px;
   }
 
   .launch-grid,
