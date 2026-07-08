@@ -5,7 +5,7 @@
   --bg: #f7f8f4;
   --panel: #ffffff;
   --text: #3c443e;
-  --muted: #8b948c;
+  --muted: #737e76;
   --line: #e9ece5;
 
   --green: #6b9c7d;
@@ -285,7 +285,7 @@ textarea {
   margin: 0;
   white-space: pre-line;
   color: var(--text);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.65;
 }
@@ -397,8 +397,8 @@ textarea {
 }
 
 .summary-cell {
-  min-height: 92px;
-  padding: 18px 20px;
+  min-height: 82px;
+  padding: 15px 18px;
   border-right: 1px solid var(--line);
 }
 
@@ -408,13 +408,13 @@ textarea {
 
 .summary-cell span {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .summary-cell strong {
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
@@ -437,16 +437,14 @@ textarea {
 
 .dashboard-section-heading {
   grid-column: 1 / -1;
-  border: 1px solid #dfe8ef;
-  border-radius: var(--radius-item);
-  background: rgba(255, 255, 255, 0.82);
-  padding: 11px 14px;
+  margin-top: 52px;
+  padding: 0 2px;
 }
 
 .dashboard-section-heading span {
   display: block;
   color: var(--text);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 800;
 }
 
@@ -458,18 +456,11 @@ textarea {
 }
 
 .dashboard-proposal-heading {
-  border-color: var(--green-line);
-  background: var(--green-soft);
+  margin-top: 48px;
 }
 
 .dashboard-input-heading {
   order: 6;
-  border-color: var(--blue-line);
-  background: var(--blue-soft);
-}
-
-.dashboard-analysis-heading {
-  border-color: #e7edf4;
 }
 
 .home-launch-panel {
@@ -672,7 +663,7 @@ textarea {
 
 .health-aware-recommendation-grid span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -785,7 +776,7 @@ textarea {
   color: var(--green);
 }
 
-.brain-card .first-agent-response {
+.first-agent-response {
   border-radius: 8px;
   background: #fff2f6;
   color: #8a4c61;
@@ -898,7 +889,7 @@ textarea {
 .developer-state-panel summary::before {
   content: "▶";
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .developer-state-panel[open] summary::before {
@@ -911,7 +902,7 @@ textarea {
 
 .developer-state-panel summary small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   text-align: right;
 }
@@ -949,7 +940,7 @@ textarea {
 
 .learning-summary-grid span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1158,7 +1149,7 @@ textarea {
 .adaptive-guidance-panel small,
 .context-summary-grid span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -3372,6 +3363,43 @@ textarea {
 
 .dashboard .data-panel {
   order: 86;
+}
+
+/* ===== Step 6: 長時間使うための視覚調整 ===== */
+.morning-guidance-panel,
+.summary-panel,
+.daily-focus-panel,
+.brain-panel,
+.publishing-ops-panel,
+.daily-input-panel,
+.dashboard-task-panel,
+.dashboard-health-input-panel,
+.dashboard-memory-input-panel,
+.schedule-panel,
+.panel:has(#dailyTasks),
+.metrics-panel {
+  border-color: transparent;
+  box-shadow: var(--shadow-card);
+}
+
+.learning-panel,
+.later-panel,
+.persistent-memo-panel,
+.reflection-panel,
+.sakura-panel,
+.home-launch-panel,
+.on-demand-panel,
+.panel:has(#projects),
+.dashboard-ai-analysis-panel,
+.data-panel {
+  box-shadow: none;
+}
+
+.panel:has(#dailyTasks),
+.metrics-panel {
+  align-self: start;
+  min-height: 0;
+  padding: 16px;
 }
 
 @media (max-width: 1080px) {
