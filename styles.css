@@ -259,8 +259,7 @@ textarea {
   order: 10;
 }
 
-.dashboard-ai-analysis-panel,
-.dashboard-analysis-heading {
+.dashboard-ai-analysis-panel {
   order: 40;
 }
 
@@ -438,6 +437,9 @@ textarea {
 .dashboard-section-heading {
   grid-column: 1 / -1;
   margin-top: 52px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   padding: 0 2px;
 }
 
@@ -446,13 +448,6 @@ textarea {
   color: var(--text);
   font-size: 18px;
   font-weight: 800;
-}
-
-.dashboard-section-heading p {
-  margin: 3px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
 }
 
 .dashboard-proposal-heading {
@@ -3348,8 +3343,16 @@ textarea {
   order: 63;
 }
 
+.dashboard .dashboard-accumulation-heading {
+  order: 59;
+}
+
 .dashboard .reflection-panel {
   order: 60;
+}
+
+.dashboard .dashboard-closed-heading {
+  order: 79;
 }
 
 .dashboard .sakura-panel {
@@ -3366,10 +3369,6 @@ textarea {
 
 .dashboard > .panel:has(#projects) {
   order: 83;
-}
-
-.dashboard .dashboard-analysis-heading {
-  order: 84;
 }
 
 .dashboard .dashboard-ai-analysis-panel {
