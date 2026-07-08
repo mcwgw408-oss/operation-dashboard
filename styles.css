@@ -219,10 +219,6 @@ textarea {
   gap: 16px;
 }
 
-.dashboard > * {
-  order: 20;
-}
-
 .summary-panel {
 }
 
@@ -442,14 +438,6 @@ textarea {
 
 .dashboard-proposal-heading {
   margin-top: 48px;
-}
-
-.dashboard-input-heading {
-  order: 6;
-}
-
-.home-launch-panel {
-  order: 20;
 }
 
 .health-analysis-details {
@@ -2613,7 +2601,6 @@ textarea {
   grid-template-columns: minmax(0, 1fr) minmax(180px, 0.42fr);
   align-items: start;
   gap: 12px;
-  order: 6;
 }
 
 .daily-input-panel .panel-heading {
@@ -3011,7 +2998,6 @@ textarea {
 .publishing-ops-panel {
   display: grid;
   gap: 14px;
-  order: 7;
   grid-column: 1 / -1;
 }
 
