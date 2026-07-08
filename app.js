@@ -36,6 +36,7 @@ const SNAPSHOT_DICTIONARY_VERSION = "v1.2";
 const SNAPSHOT_SETTINGS_KEY = "sakura-snapshot-settings-v1";
 const SNAPSHOT_DETAIL_DAYS = 7;
 const SNAPSHOT_LOG_DAYS = 30;
+const LATER_INITIAL_DISPLAY_LIMIT = 10;
 
 const EXTERNAL_APP_KEYS = {
   discoveries: "discovery-labo-discoveries",
@@ -109,6 +110,7 @@ let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
 let autoDedupeLater = loadAutoDedupeLater();
 let laterSearchQuery = "";
+let laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
 let persistentMemos = loadPersistentMemos();
 let learningLog = loadLearningLog();
 let memoryStore = loadMemoryStore();
@@ -1503,6 +1505,8 @@ function renderLaterItems() {
   const searchQuery = normalizeLaterText(laterSearchQuery);
   const statusItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
   const visibleItems = statusItems.filter((item) => laterMatchesSearch(item, searchQuery));
+  const displayItems = searchQuery ? visibleItems : visibleItems.slice(0, laterVisibleLimit);
+  const hiddenCount = Math.max(0, visibleItems.length - displayItems.length);
   const searchCount = $("#laterSearchCount");
   if (searchCount) {
     searchCount.hidden = !searchQuery;
@@ -1519,7 +1523,7 @@ function renderLaterItems() {
     target.append(empty);
     return;
   }
-  visibleItems.forEach((item) => {
+  displayItems.forEach((item) => {
     const row = template.content.firstElementChild.cloneNode(true);
     row.classList.toggle("done", item.done);
     const check = row.querySelector(".later-check");
@@ -1573,6 +1577,17 @@ function renderLaterItems() {
     });
     target.append(row);
   });
+  if (hiddenCount > 0) {
+    const more = document.createElement("button");
+    more.type = "button";
+    more.className = "ghost-button later-show-more";
+    more.textContent = `さらに10件表示（残り${hiddenCount}件）`;
+    more.addEventListener("click", () => {
+      laterVisibleLimit += LATER_INITIAL_DISPLAY_LIMIT;
+      renderLaterItems();
+    });
+    target.append(more);
+  }
 }
 
 function renderFields() {
@@ -1673,6 +1688,35 @@ function displayLearningSource(source = "") {
     .replaceAll("commonRecommendationType", "多い提案タイプ")
     .replaceAll("learningLog", "提案学習ログ")
     .replaceAll("conversationFeedback", "返答フィードバック");
+}
+
+function displayStateLabel(value = "") {
+  const labels = {
+    low: "低い",
+    medium: "中くらい",
+    high: "高い",
+    normal: "通常",
+    pending: "未確認",
+    ready: "準備できている",
+    running: "進行中",
+    waiting: "待機中",
+    completed: "完了",
+    failed: "うまくいかなかった",
+    skipped: "見送った",
+    partial: "一部完了",
+    proposed: "提案中",
+    review: "確認",
+    reviewed: "確認済み",
+    ready_for_review: "確認待ち",
+    observing: "観察中",
+    manual_confirm: "手動確認",
+    easy: "やさしい",
+    hard: "難しい",
+    unknown: "わからない",
+    careful_integration: "慎重に統合",
+    steady_integration: "安定して統合",
+  };
+  return labels[value] || value || "-";
 }
 
 function renderHistory() {
@@ -2828,7 +2872,7 @@ function buildPriorityState(goal = getLatestGoalState(), context = {}, identity 
   const hasUncertainty = confidence < 40 || Boolean(context?.replyPlan?.uncertainty);
   const ignoredTopics = [
     hasUncertainty ? "確信度が低い断定" : "",
-    context?.recommendation ? "Recommendation と無関係な話題転換" : "",
+    context?.recommendation ? "今日の提案と無関係な話題転換" : "",
   ].filter(Boolean);
   const urgency = confidence < 35
     ? "low"
@@ -2843,10 +2887,10 @@ function buildPriorityState(goal = getLatestGoalState(), context = {}, identity 
     identity?.responsePrinciple ||
     "返答の自然さと目的の一貫性を保つ";
   const reasoning = [
-    goal?.userGoal ? `User goal: ${goal.userGoal}` : "",
-    identity?.currentTone ? `Tone: ${identity.currentTone}` : "",
-    context?.project ? `Context: ${context.project}` : "",
-    `Confidence: ${confidence}%`,
+    goal?.userGoal ? `ユーザーの目標: ${goal.userGoal}` : "",
+    identity?.currentTone ? `トーン: ${identity.currentTone}` : "",
+    context?.project ? `文脈: ${context.project}` : "",
+    `確信度: ${confidence}%`,
   ].filter(Boolean).join(" / ");
   const now = new Date().toISOString();
   return {
@@ -2895,7 +2939,7 @@ function renderPriorityState() {
   setText("#priorityPrimaryPriority", priority?.primaryPriority);
   setText("#prioritySecondaryPriority", priority?.secondaryPriority);
   setText("#priorityIgnoredTopics", asArray(priority?.ignoredTopics).join(" / "));
-  setText("#priorityUrgency", priority?.urgency);
+  setText("#priorityUrgency", displayStateLabel(priority?.urgency));
   setText("#priorityReasoning", priority?.reasoning);
 }
 
@@ -2921,9 +2965,9 @@ function buildDecisionState(
   )));
   const decisionReason = [
     priority?.reasoning,
-    identity?.currentTone ? `Identity tone: ${identity.currentTone}` : "",
-    goal?.assistantGoal ? `Assistant goal: ${goal.assistantGoal}` : "",
-  ].filter(Boolean).join(" / ") || "Goal State と Priority State に沿って判断します。";
+    identity?.currentTone ? `関係性のトーン: ${identity.currentTone}` : "",
+    goal?.assistantGoal ? `さくらの目標: ${goal.assistantGoal}` : "",
+  ].filter(Boolean).join(" / ") || "目標の状態と優先度の状態に沿って判断します。";
   const expectedOutcome = goal?.successCondition ||
     priority?.secondaryPriority ||
     "ユーザーが次に進みやすく、返答の目的がぶれない状態になる";
@@ -3081,10 +3125,10 @@ function buildAttentionState(
   const attentionReason = [
     strategy?.strategyType ? `Strategy: ${strategy.strategyType}` : "",
     priority?.reasoning,
-    context?.project && !String(priority?.reasoning || "").includes(`Context: ${context.project}`)
-      ? `Context: ${context.project}`
+    context?.project && !String(priority?.reasoning || "").includes(`文脈: ${context.project}`)
+      ? `文脈: ${context.project}`
       : "",
-  ].filter(Boolean).join(" / ") || "Goal、Priority、Decision、Strategy の現在値に基づきます。";
+  ].filter(Boolean).join(" / ") || "目標、優先度、判断、戦略の現在値に基づきます。";
   const responseCue = strategy?.communicationPlan ||
     decision?.decisionReason ||
     "焦点を一つに絞り、短く自然に返答する";
@@ -3156,11 +3200,11 @@ function buildCognitiveState(
   const activeStrategy = strategy?.strategyType || "";
   const activeAttention = attention?.focusTarget || "";
   const reasoningSummary = [
-    goal?.userGoal ? `Goal: ${goal.userGoal}` : "",
-    priority?.urgency ? `Priority urgency: ${priority.urgency}` : "",
-    decision?.confidence !== undefined ? `Decision confidence: ${decision.confidence}%` : "",
-    attention?.responseCue ? `Cue: ${attention.responseCue}` : "",
-  ].filter(Boolean).join(" / ") || "Goal、Priority、Decision、Strategy、Attention を統合しています。";
+    goal?.userGoal ? `目標: ${goal.userGoal}` : "",
+    priority?.urgency ? `優先度の強さ: ${displayStateLabel(priority.urgency)}` : "",
+    decision?.confidence !== undefined ? `判断の確信度: ${decision.confidence}%` : "",
+    attention?.responseCue ? `返答の手がかり: ${attention.responseCue}` : "",
+  ].filter(Boolean).join(" / ") || "目標、優先度、判断、戦略、注目を統合しています。";
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
@@ -3238,9 +3282,9 @@ function buildIntentState(cognitive = getLatestCognitiveState(), identity = getL
     "ユーザーが目的と次の一歩を自然に受け取れる";
   const reasoning = [
     cognitive?.reasoningSummary,
-    identity?.currentTone ? `Identity tone: ${identity.currentTone}` : "",
-    context?.project ? `Context: ${context.project}` : "",
-  ].filter(Boolean).join(" / ") || "Cognitive State、Identity Profile、Conversation Context に基づきます。";
+    identity?.currentTone ? `関係性のトーン: ${identity.currentTone}` : "",
+    context?.project ? `文脈: ${context.project}` : "",
+  ].filter(Boolean).join(" / ") || "認知状態、関係性プロフィール、会話の文脈に基づきます。";
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
@@ -3302,15 +3346,15 @@ function buildTaskPlanState(intent = getLatestIntentState(), cognitive = getLate
     intent?.executionType ? `Execute as ${intent.executionType}` : "",
   ].filter(Boolean);
   const dependencies = [
-    cognitive?.cognitiveMode ? `Cognitive mode: ${cognitive.cognitiveMode}` : "",
-    intent?.reasoning ? "Intent reasoning" : "",
+    cognitive?.cognitiveMode ? `認知モード: ${cognitive.cognitiveMode}` : "",
+    intent?.reasoning ? "意図の理由" : "",
   ].filter(Boolean);
   const estimatedComplexity = intent?.executionType?.includes("careful") || cognitive?.cognitiveMode?.includes("careful")
     ? "medium"
     : "low";
   const completionCriteria = intent?.expectedResult ||
     cognitive?.reasoningSummary ||
-    "返答が Intent と Cognitive State に沿っている";
+    "返答が意図と認知状態に沿っている";
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
@@ -3419,7 +3463,7 @@ function renderWorkflowState() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#workflowStatus", workflow?.workflowStatus);
+  setText("#workflowStatus", displayStateLabel(workflow?.workflowStatus));
   setText("#workflowCurrentStep", workflow?.currentStep !== undefined ? String(workflow.currentStep) : "");
   setText("#workflowTotalSteps", workflow?.totalSteps !== undefined ? String(workflow.totalSteps) : "");
   setText("#workflowCompletedSteps", workflow?.completedSteps !== undefined ? String(workflow.completedSteps) : "");
@@ -3440,8 +3484,8 @@ function buildExecutionDecision(workflow = getLatestWorkflowState()) {
     priority: workflowStatus === "ready" ? "normal" : "low",
     decisionStatus: "proposed",
     decisionReason: selectedTitle
-      ? `Workflow status is ${workflowStatus || "unknown"}, so "${selectedTitle}" is proposed for review.`
-      : `Workflow status is ${workflowStatus || "unknown"}, so the next execution candidate needs review.`,
+      ? `作業状況は「${displayStateLabel(workflowStatus || "unknown")}」です。「${selectedTitle}」を確認候補にしています。`
+      : `作業状況は「${displayStateLabel(workflowStatus || "unknown")}」です。次の実行候補を確認する必要があります。`,
     confidence: "medium",
     createdAt: now,
     updatedAt: now,
@@ -3478,11 +3522,11 @@ function renderExecutionDecision() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#executionDecisionPriority", decision?.priority);
-  setText("#executionDecisionStatus", decision?.decisionStatus);
+  setText("#executionDecisionPriority", displayStateLabel(decision?.priority));
+  setText("#executionDecisionStatus", displayStateLabel(decision?.decisionStatus));
   setText("#executionDecisionTitle", decision?.selectedTitle);
-  setText("#executionDecisionActionType", decision?.selectedActionType);
-  setText("#executionDecisionConfidence", decision?.confidence);
+  setText("#executionDecisionActionType", displayStateLabel(decision?.selectedActionType));
+  setText("#executionDecisionConfidence", displayStateLabel(decision?.confidence));
   setText("#executionDecisionReason", decision?.decisionReason);
 }
 
@@ -3538,9 +3582,9 @@ function renderExecutionState() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#executionStatus", execution?.status);
+  setText("#executionStatus", displayStateLabel(execution?.status));
   setText("#executionTitle", execution?.title);
-  setText("#executionActionType", execution?.actionType);
+  setText("#executionActionType", displayStateLabel(execution?.actionType));
   setText("#executionReason", execution?.reason);
   setText("#executionExecutedAt", execution?.executedAt);
   setText("#executionResultNote", execution?.resultNote);
@@ -3639,13 +3683,13 @@ function buildExecutiveSummary(
     health?.date ||
     activeDate;
   const decisionParts = [
-    decision?.priority ? `priority: ${decision.priority}` : "",
-    decision?.decisionStatus ? `status: ${decision.decisionStatus}` : "",
+    decision?.priority ? `優先度: ${displayStateLabel(decision.priority)}` : "",
+    decision?.decisionStatus ? `状態: ${displayStateLabel(decision.decisionStatus)}` : "",
     decision?.decisionReason || "",
   ].filter(Boolean);
   const feedbackParts = [
-    feedback?.outcome || "",
-    feedback?.difficulty ? `difficulty: ${feedback.difficulty}` : "",
+    feedback?.outcome ? displayStateLabel(feedback.outcome) : "",
+    feedback?.difficulty ? `難しさ: ${displayStateLabel(feedback.difficulty)}` : "",
     feedback?.note || "",
   ].filter(Boolean);
   const executionStatus = execution?.status || "pending";
@@ -3656,12 +3700,12 @@ function buildExecutiveSummary(
       ? "ready_for_review"
       : workflowStatus || "observing";
   const risk = [
-    feedback?.difficulty === "hard" ? "Feedback marked hard." : "",
-    feedback?.outcome === "failed" ? "Execution failed." : "",
-    workflowStatus === "failed" ? "Workflow failed." : "",
+    feedback?.difficulty === "hard" ? "実行が難しいと記録されています。" : "",
+    feedback?.outcome === "failed" ? "実行がうまくいかなかったと記録されています。" : "",
+    workflowStatus === "failed" ? "作業の流れがうまく進んでいません。" : "",
     healthContext.currentRisk || healthSummary.risk,
-    !execution ? "Execution candidate is not available." : "",
-  ].filter(Boolean).join(" ") || "No immediate risk detected.";
+    !execution ? "実行候補がまだありません。" : "",
+  ].filter(Boolean).join(" ") || "今すぐ注意する大きなリスクはありません。";
 
   return {
     date: summaryDate,
@@ -3685,12 +3729,12 @@ function renderExecutiveSummary() {
     const target = $(selector);
     if (target) target.textContent = value || "-";
   };
-  setText("#executiveSummaryMode", executiveSummary.executiveMode);
+  setText("#executiveSummaryMode", displayStateLabel(executiveSummary.executiveMode));
   setText("#executiveSummaryIntent", executiveSummary.currentIntent);
   setText("#executiveSummaryObjective", executiveSummary.currentObjective);
-  setText("#executiveSummaryWorkflow", executiveSummary.workflowStatus);
+  setText("#executiveSummaryWorkflow", displayStateLabel(executiveSummary.workflowStatus));
   setText("#executiveSummaryDecision", executiveSummary.decisionSummary);
-  setText("#executiveSummaryExecution", executiveSummary.executionStatus);
+  setText("#executiveSummaryExecution", displayStateLabel(executiveSummary.executionStatus));
   setText("#executiveSummaryFeedback", executiveSummary.feedbackOutcome);
   setText("#executiveSummaryNextAction", executiveSummary.nextAction);
   setText("#executiveSummaryHealth", executiveSummary.healthContext);
@@ -3774,7 +3818,7 @@ function buildAdaptiveIntelligence(inputs = {}) {
     supportLevel,
     attentionTarget,
     reasoning,
-    sourceSummary: "Built from Conversation, Identity, Cognitive, Executive, and Health context.",
+    sourceSummary: "会話・関係性・認知・実行判断・体調の文脈から作成。",
     updatedAt: new Date().toISOString(),
   };
 }
@@ -3829,13 +3873,13 @@ function adaptiveIntelligenceUiValue(value) {
 
 function adaptiveIntelligenceUiText(value) {
   return String(value || "-")
-    .replace(/Built from Conversation, Identity, Cognitive, Executive, and Health context\./g, "Conversation / Identity / Cognitive / Executive / Health の文脈から作成。")
-    .replace(/executive:([a-z_]+)/g, (_, label) => `Executive: ${adaptiveIntelligenceUiValue(label)}`)
-    .replace(/cognitive:([a-z_]+)/g, (_, label) => `Cognitive: ${adaptiveIntelligenceUiValue(label)}`)
+    .replace(/Built from Conversation, Identity, Cognitive, Executive, and Health context\./g, "会話・関係性・認知・実行判断・体調の文脈から作成。")
+    .replace(/executive:([a-z_]+)/g, (_, label) => `実行判断: ${adaptiveIntelligenceUiValue(label)}`)
+    .replace(/cognitive:([a-z_]+)/g, (_, label) => `認知: ${adaptiveIntelligenceUiValue(label)}`)
     .replace(/capacity:([a-z_]+)/g, (_, label) => `行動しやすさ: ${healthUiValue(label)}`)
     .replace(/recovery:([a-z_]+)/g, (_, label) => `回復状態: ${healthUiValue(label)}`)
     .replace(/momentum:([a-z_]+)/g, (_, label) => `回復の流れ: ${healthTrendUiValue(label)}`)
-    .replace(/feedback:([a-z_]+)/g, (_, label) => `Feedback: ${adaptiveIntelligenceUiValue(label)}`);
+    .replace(/feedback:([a-z_]+)/g, (_, label) => `フィードバック: ${adaptiveIntelligenceUiValue(label)}`);
 }
 
 function renderAdaptiveIntelligence(adaptiveIntelligence = getLatestAdaptiveIntelligence()) {
@@ -4015,7 +4059,7 @@ function buildHealthSummary(health = getLatestHealthState()) {
   if (!health) {
     return {
       date: activeDate,
-      healthContext: "Health Check is not recorded yet.",
+      healthContext: "ヘルスチェックはまだ記録されていません。",
       recoveryFeeling: "unknown",
       energyLevel: "medium",
       stressLevel: "unknown",
@@ -5826,7 +5870,7 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}, hea
     uncertainty.push("予定は着手候補ではなく、今日の余白や負荷を見る材料として扱っています。");
   }
   if (input.energy.state === "Normal" && input.momentum.state === "Stable") {
-    uncertainty.push("EnergyとMomentumに大きな偏りが見えていないため、説明は控えめにしています。");
+    uncertainty.push("エネルギーと勢いに大きな偏りが見えていないため、説明は控えめにしています。");
   }
 
   if (healthAwareRecommendation?.cautionNote) {
@@ -6891,6 +6935,7 @@ function bindEvents() {
     event.preventDefault();
     const title = $("#laterTitle").value.trim();
     if (!title) return;
+    laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
     laterItems.unshift(newLaterItem({
       type: $("#laterType").value,
       title,
@@ -6906,11 +6951,13 @@ function bindEvents() {
   });
   $("#showDoneLater")?.addEventListener("change", (event) => {
     showDoneLater = event.target.checked;
+    laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
     saveLaterView();
     renderLaterItems();
   });
   $("#laterSearch")?.addEventListener("input", (event) => {
     laterSearchQuery = event.target.value;
+    if (!laterSearchQuery.trim()) laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
     renderLaterItems();
   });
   $("#autoDedupeLater")?.addEventListener("change", (event) => {

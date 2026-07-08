@@ -526,7 +526,7 @@ textarea {
   position: absolute;
   top: 18px;
   right: 20px;
-  content: "Phase2";
+  content: "試作";
   border: 1px solid rgba(168, 196, 176, 0.58);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
@@ -3230,6 +3230,11 @@ textarea {
 .later-list {
   display: grid;
   gap: 9px;
+}
+
+.later-show-more {
+  justify-self: center;
+  margin-top: 4px;
 }
 
 .later-item {
