@@ -1344,8 +1344,9 @@ function learningMatchesSearch(learning, query) {
 }
 
 function renderLearningGlobalSearch() {
-  const target = $("#learningGlobalSearchResults");
-  if (!target) return;
+  const resultsPanel = $("#learningGlobalSearchResults");
+  const target = $("#learningGlobalSearchList");
+  if (!resultsPanel || !target) return;
   const searchField = $("#learningGlobalSearch");
   if (searchField && searchField.value !== learningGlobalSearchQuery) {
     searchField.value = learningGlobalSearchQuery;
@@ -1367,7 +1368,7 @@ function renderLearningGlobalSearch() {
     searchCount.querySelector("strong").textContent = results.length;
   }
   target.replaceChildren();
-  target.hidden = !searchQuery;
+  resultsPanel.hidden = !searchQuery;
   if (!searchQuery) return;
   if (!results.length) {
     const empty = document.createElement("p");
@@ -1383,15 +1384,24 @@ function renderLearningGlobalSearch() {
     const date = document.createElement("span");
     date.className = "learning-global-search-date";
     date.textContent = formatDateLabel(dateKey);
+    const readOnly = document.createElement("span");
+    readOnly.className = "learning-global-search-readonly";
+    readOnly.textContent = "読み取り専用";
+    const meta = document.createElement("span");
+    meta.className = "learning-global-search-meta";
+    meta.append(date, readOnly);
     const title = document.createElement("strong");
     title.textContent = learning.title || learning.summaryLine || "タイトル未入力の学び";
+    const source = document.createElement("span");
+    source.textContent = `情報源: ${learning.source || learning.url || "未入力"}`;
     const summary = document.createElement("span");
-    summary.textContent = [
-      learning.source,
-      learning.learned || learning.summaryLine,
-      learning.tags,
-    ].filter(Boolean).join(" / ") || "内容は該当日の画面で確認できます。";
-    button.append(date, title, summary);
+    summary.textContent = `要約: ${learning.summaryLine || learning.learned || "未入力"}`;
+    const tags = document.createElement("span");
+    tags.textContent = `タグ: ${learning.tags || "なし"}`;
+    const action = document.createElement("span");
+    action.className = "learning-global-search-action";
+    action.textContent = "この日を開く";
+    button.append(meta, title, source, summary, tags, action);
     button.addEventListener("click", () => {
       activeDate = dateKey;
       learningSearchQuery = "";

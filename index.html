@@ -1122,21 +1122,36 @@
             </div>
             <button class="ghost-button" id="addLearning" type="button">学びを追加</button>
           </div>
-          <div class="later-counts">
-            <span id="learningSearchCount" hidden>検索 <strong>0</strong></span>
-          </div>
-          <div class="later-search">
-            <input id="learningSearch" type="search" placeholder="この日の学びを検索" aria-label="学びの蓄積を検索" />
+          <div class="learning-search-section">
+            <div class="learning-search-heading">
+              <h3>この日の学び</h3>
+              <div class="later-counts">
+                <span id="learningSearchCount" hidden>検索 <strong>0</strong></span>
+              </div>
+            </div>
+            <div class="later-search">
+              <input id="learningSearch" type="search" placeholder="この日の学びを検索" aria-label="学びの蓄積を検索" />
+            </div>
           </div>
           <div class="learning-global-search">
-            <div class="later-counts">
-              <span id="learningGlobalSearchCount" hidden>全日付検索 <strong>0</strong></span>
+            <div class="learning-search-heading">
+              <h3>すべての学びから探す</h3>
+              <div class="later-counts">
+                <span id="learningGlobalSearchCount" hidden>検索 <strong>0</strong></span>
+              </div>
             </div>
             <div class="later-search">
               <input id="learningGlobalSearch" type="search" placeholder="すべての日付の学びを検索" aria-label="すべての日付の学びを検索" />
             </div>
-            <div id="learningGlobalSearchResults" class="learning-global-search-results" hidden></div>
+            <div id="learningGlobalSearchResults" class="learning-global-search-results" hidden>
+              <div class="learning-global-search-results-heading">
+                <h3>検索結果</h3>
+                <span>読み取り専用</span>
+              </div>
+              <div id="learningGlobalSearchList" class="learning-global-search-list"></div>
+            </div>
           </div>
+          <h3 class="learning-list-heading">この日の学び一覧</h3>
           <div id="learningList" class="learning-list"></div>
         </section>
 
