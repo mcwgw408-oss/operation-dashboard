@@ -3269,6 +3269,111 @@ textarea {
   min-height: 70px;
 }
 
+/* ===== Step 1: ゾーン別の表示順 ===== */
+.dashboard .morning-guidance-panel {
+  order: 10;
+}
+
+.dashboard .summary-panel {
+  order: 11;
+}
+
+.dashboard .daily-focus-panel {
+  order: 12;
+}
+
+.dashboard .dashboard-proposal-heading {
+  order: 13;
+}
+
+.dashboard .brain-panel {
+  order: 14;
+}
+
+.dashboard .dashboard-input-heading {
+  order: 30;
+}
+
+.dashboard .publishing-ops-panel {
+  order: 31;
+}
+
+.dashboard .daily-input-panel {
+  order: 32;
+}
+
+.dashboard .dashboard-task-panel {
+  order: 33;
+}
+
+.dashboard .dashboard-health-input-panel {
+  order: 34;
+}
+
+.dashboard .dashboard-memory-input-panel {
+  order: 35;
+}
+
+.dashboard .schedule-panel {
+  order: 36;
+}
+
+.dashboard > .panel:has(#dailyTasks) {
+  order: 37;
+}
+
+.dashboard > .metrics-panel:has(#mailMorningChecked) {
+  order: 38;
+}
+
+.dashboard > .metrics-panel:has(#dmPending) {
+  order: 39;
+}
+
+.dashboard .learning-panel {
+  order: 61;
+}
+
+.dashboard .later-panel {
+  order: 62;
+}
+
+.dashboard .persistent-memo-panel {
+  order: 63;
+}
+
+.dashboard .reflection-panel {
+  order: 60;
+}
+
+.dashboard .sakura-panel {
+  order: 80;
+}
+
+.dashboard .home-launch-panel {
+  order: 81;
+}
+
+.dashboard .on-demand-panel {
+  order: 82;
+}
+
+.dashboard > .panel:has(#projects) {
+  order: 83;
+}
+
+.dashboard .dashboard-analysis-heading {
+  order: 84;
+}
+
+.dashboard .dashboard-ai-analysis-panel {
+  order: 85;
+}
+
+.dashboard .data-panel {
+  order: 86;
+}
+
 @media (max-width: 1080px) {
   .dashboard {
     grid-template-columns: repeat(2, minmax(0, 1fr));
