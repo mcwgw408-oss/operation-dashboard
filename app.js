@@ -6628,6 +6628,7 @@ function renderAll() {
   renderSummary();
   renderHistory();
   renderBrainPrototype();
+  applySakuraInnerToggle();
 }
 
 function moveDashboardNode(selector, targetSelector) {
@@ -6647,11 +6648,41 @@ function arrangeDashboardUxSections() {
   moveDashboardNode(".conversation-feedback-panel", "#replyFeedbackMount");
 }
 
+function sakuraInnerToggleTargets() {
+  const targets = [
+    ...document.querySelectorAll(".developer-state-panel"),
+    ...document.querySelectorAll(".brain-decision-details"),
+    ...document.querySelectorAll(".health-aware-recommendation-panel"),
+    ...document.querySelectorAll(".explain-layer-panel"),
+  ];
+  document.querySelectorAll(".brain-section-heading").forEach((heading) => {
+    const text = heading.textContent || "";
+    if (text.includes("さくらの内部状態") || text.includes("必要なとき見る情報")) {
+      targets.push(heading);
+    }
+  });
+  const memoryLabel = document.querySelector(".memory-layer-panel > .brain-label");
+  if (memoryLabel) targets.push(memoryLabel);
+  return targets;
+}
+
+function applySakuraInnerToggle() {
+  const toggle = $("#sakuraInnerToggle");
+  const isVisible = Boolean(toggle?.checked);
+  sakuraInnerToggleTargets().forEach((target) => {
+    target.hidden = !isVisible;
+    if (!isVisible && target.tagName === "DETAILS") {
+      target.open = false;
+    }
+  });
+}
+
 function bindEvents() {
   $("#explainLayerToggle")?.addEventListener("click", () => {
     const body = $("#explainLayerBody");
     setExplainLayerExpanded(Boolean(body?.hidden));
   });
+  $("#sakuraInnerToggle")?.addEventListener("change", applySakuraInnerToggle);
   document.querySelectorAll("[data-first-agent-reply]").forEach((button) => {
     button.addEventListener("click", () => {
       showFirstAgentResponse(button.dataset.firstAgentReply);
