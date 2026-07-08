@@ -1373,7 +1373,7 @@ function renderLearningGlobalSearch() {
   if (!results.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = "全日付の学びに一致する結果はありません。";
+    empty.textContent = "全日付の自分の学びに一致する結果はありません。";
     target.append(empty);
     return;
   }
@@ -1437,7 +1437,7 @@ function renderLearnings() {
     empty.className = "empty-note";
     empty.textContent = searchQuery
       ? "検索に一致する学びはありません。"
-      : "学びの蓄積はまだありません。";
+      : "自分の学びはまだありません。";
     target.append(empty);
     return;
   }
@@ -2259,8 +2259,8 @@ function buildReplyPlan(conversationContext = {}) {
       healthAware?.supportHint ? `体調: ${healthAware.supportHint}` : "",
     ].filter(Boolean).join(" / ") || "補足情報はまだ少ない",
     uncertainty: confidence >= 60
-      ? `学習の確信度は${confidence}%です。参考情報として使える状態です。`
-      : `学習の確信度は${confidence}%です。まだ学習途中として控えめに扱います。`,
+      ? `提案傾向の確かさは${confidence}%です。参考情報として使える状態です。`
+      : `提案傾向の確かさは${confidence}%です。まだ参考段階として控えめに扱います。`,
     closing: "様子を見ながら、次の一歩につなげる",
   };
 }
@@ -2306,7 +2306,7 @@ function buildReplySupport(support) {
     const memoryMatch = part.match(/^(?:Memory|記憶)[:：]\s*(.+)$/);
     if (memoryMatch) return `以前の記録では「${memoryMatch[1]}」が参考になりそうです。`;
     const learningMatch = part.match(/^(?:Learning|学習)[:：]\s*(.+)$/);
-    if (learningMatch) return `学習では「${learningMatch[1]}」という傾向も見ています。`;
+    if (learningMatch) return `提案フィードバックでは「${learningMatch[1]}」という傾向も見ています。`;
     return sentenceWithPeriod(part);
   }).join("\n");
 }
@@ -5574,7 +5574,7 @@ function buildRecommendation(input) {
 function adaptRecommendationWithLearning(recommendation, learningHint, learningSummary) {
   const adapted = {
     ...recommendation,
-    adaptiveNote: "学習ヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
+    adaptiveNote: "提案傾向のヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
   };
   const canAdapt = learningHint.confidence >= 60 &&
     learningSummary.recentAcceptanceRate >= 60 &&
@@ -5738,8 +5738,8 @@ function buildLearningConfidence(summary = buildLearningSummary(), hint = null) 
     score,
     level,
     message: score >= 50
-      ? "Learning Layerは参考情報として使える状態です。"
-      : "Learning Layerはまだ学習中のため、参考情報として控えめに扱います。",
+      ? "提案フィードバックの傾向は参考情報として使える状態です。"
+      : "提案フィードバックの傾向はまだ参考段階のため、控えめに扱います。",
     source: [...new Set([
       "totalLogs",
       answeredCount ? "feedbackCount" : "",
@@ -5753,7 +5753,7 @@ function buildLearningHint(summary = buildLearningSummary()) {
   const confidence = learningConfidenceScore(summary.totalLogs);
   if (summary.totalLogs < 3 || summary.recentAcceptanceRate === null) {
     return {
-      message: "フィードバック数が少ないため、まだ学習中です。",
+      message: "提案フィードバックが少ないため、傾向はまだ参考段階です。",
       confidence,
       source: "totalLogs",
     };
@@ -5985,10 +5985,10 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}, hea
   if (learningSummary.commonRecommendationType !== "なし" && learningSummary.recentAcceptanceRate !== null) {
     uncertainty.push(`最近は「${displayRecommendationType(learningSummary.commonRecommendationType)}」の提案が記録されており、一致率は${learningSummary.recentAcceptanceRate}%です。`);
   }
-  uncertainty.push(`${learningHint.message} このヒントは過去のフィードバックから生成されています。まだ学習途中のため、参考情報として扱っています。`);
-  uncertainty.push(`学習の確信度は${learningConfidence.score}%です。さくらはこの信頼度を見ながら、学習結果を補助情報として扱います。`);
+  uncertainty.push(`${learningHint.message} このヒントは過去の提案フィードバックから生成され、参考情報として扱われます。`);
+  uncertainty.push(`提案傾向の確かさは${learningConfidence.score}%です。さくらはこの値を見ながら、提案フィードバックの傾向を補助情報として扱います。`);
   if (recommendation.adaptiveNote) {
-    uncertainty.push("学習は補助役として扱い、今日の候補・予定・エネルギーを見たさくらの判断を優先しています。");
+    uncertainty.push("提案フィードバックの傾向は補助情報として扱い、今日の候補・予定・エネルギーを見たさくらの判断を優先しています。");
   }
   if (!input.topCandidate) {
     uncertainty.push("候補が少ないため、優先順位は軽めに扱っています。");
