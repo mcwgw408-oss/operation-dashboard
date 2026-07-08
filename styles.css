@@ -2626,8 +2626,7 @@ textarea {
   order: 6;
 }
 
-.dashboard .dashboard-input-heading,
-.dashboard .daily-input-panel {
+.dashboard .dashboard-input-heading {
   grid-column: 1 / -1;
 }
 
