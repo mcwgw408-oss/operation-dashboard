@@ -1,0 +1,160 @@
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const indexHtml = readFileSync(resolve(root, "index.html"), "utf8");
+const appJs = readFileSync(resolve(root, "app.js"), "utf8");
+const stylesCss = readFileSync(resolve(root, "styles.css"), "utf8");
+const failures = [];
+
+function check(condition, message) {
+  if (!condition) failures.push(message);
+}
+
+function extractDelimitedBlock(source, marker, openCharacter, closeCharacter) {
+  const markerIndex = source.indexOf(marker);
+  if (markerIndex < 0) return "";
+  const start = source.indexOf(openCharacter, markerIndex);
+  if (start < 0) return "";
+  let depth = 0;
+  for (let index = start; index < source.length; index += 1) {
+    if (source[index] === openCharacter) depth += 1;
+    if (source[index] === closeCharacter) depth -= 1;
+    if (depth === 0) return source.slice(start + 1, index);
+  }
+  return "";
+}
+
+function sortedDifference(left, right) {
+  const rightSet = new Set(right);
+  return [...new Set(left)].filter((item) => !rightSet.has(item)).sort();
+}
+
+const ids = [...indexHtml.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
+const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))].sort();
+check(duplicateIds.length === 0, `index.htmlに重複IDがあります: ${duplicateIds.join(", ")}`);
+
+const requiredIds = [
+  "activeDate",
+  "morningGuidanceText",
+  "explainableGuidanceReasons",
+  "dailyFocusPriority",
+  "dailyFocusNextAction",
+  "dailyFocusCondition",
+  "dailyFocusTask",
+  "brainRecommendationTitle",
+  "brainRecommendationMessage",
+  "brainRecommendationAction",
+  "brainPriority",
+  "firstAgentResponse",
+  "generatedReplyMount",
+  "generatedReplyText",
+  "replyFeedbackMount",
+  "conversationFeedbackNote",
+  "learningFeedbackNote",
+  "dailyInputText",
+  "dailyTasks",
+  "healthCheckInputMount",
+  "memoryMemoForm",
+  "memoryMemoText",
+  "laterSearch",
+  "laterList",
+  "persistentMemoSearch",
+  "persistentMemoList",
+  "learningSearch",
+  "learningGlobalSearch",
+  "learningGlobalSearchResults",
+  "learningGlobalSearchList",
+  "learningList",
+  "addLearning",
+  "sakuraInnerToggle",
+  "exportBackup",
+  "importBackup",
+  "importBackupFile",
+];
+const idSet = new Set(ids);
+const missingIds = requiredIds.filter((id) => !idSet.has(id));
+check(missingIds.length === 0, `必須DOM IDがありません: ${missingIds.join(", ")}`);
+
+const backupKeysBlock = extractDelimitedBlock(appJs, "const BACKUP_KEYS =", "[", "]");
+check(Boolean(backupKeysBlock), "BACKUP_KEYS配列を取得できません");
+const backupKeys = [...backupKeysBlock.matchAll(/\b([A-Z][A-Z0-9_]*_KEY)\b/g)]
+  .map((match) => match[1]);
+const createBackupBody = extractDelimitedBlock(appJs, "function createBackup()", "{", "}");
+check(Boolean(createBackupBody), "createBackup()本体を取得できません");
+const exportedKeys = [...createBackupBody.matchAll(/data\[([A-Z][A-Z0-9_]*_KEY)\]\s*=/g)]
+  .map((match) => match[1]);
+const missingExports = sortedDifference(backupKeys, exportedKeys);
+const unexpectedExports = sortedDifference(exportedKeys, backupKeys);
+check(missingExports.length === 0, `BACKUP_KEYSにあるが書き出されないキー: ${missingExports.join(", ")}`);
+check(unexpectedExports.length === 0, `書き出されるがBACKUP_KEYSにないキー: ${unexpectedExports.join(", ")}`);
+
+for (const key of [
+  "STORAGE_KEY",
+  "LEARNING_LOG_STORAGE_KEY",
+  "MEMORY_STORE_STORAGE_KEY",
+  "SNAPSHOT_SETTINGS_KEY",
+]) {
+  check(backupKeys.includes(key), `必須バックアップキーがありません: ${key}`);
+}
+
+for (const token of [
+  "copy-learning-memory",
+  "add-learning-memory",
+  "learning-memory-status",
+  'id="learningGlobalSearchResults"',
+  'id="learningGlobalSearchList"',
+]) {
+  check(indexHtml.includes(token), `学び・記憶UIがありません: ${token}`);
+}
+check(appJs.includes("function upsertLearningMemory"), "学びから記憶へ追加する関数がありません");
+check(appJs.includes("const source = `learning:${learning.id}`;"), "学び由来記憶のsource規則がありません");
+check(appJs.includes('result.status === "updated"'), "学び由来記憶の更新状態表示がありません");
+
+const requiredOrders = new Map([
+  [".dashboard .dashboard-proposal-heading", "9"],
+  [".dashboard .morning-guidance-panel", "10"],
+  [".dashboard .summary-panel", "11"],
+  [".dashboard .daily-focus-panel", "12"],
+  [".dashboard .brain-panel", "14"],
+  [".dashboard .dashboard-input-heading", "30"],
+  [".dashboard .dashboard-accumulation-heading", "59"],
+  [".dashboard .dashboard-closed-heading", "79"],
+]);
+for (const [selector, order] of requiredOrders) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`${escapedSelector}\\s*\\{[^}]*\\border:\\s*${order}\\s*;`, "s");
+  check(pattern.test(stylesCss), `CSS orderが見つからないか変更されています: ${selector} = ${order}`);
+}
+
+const mobileBlocks = [];
+let searchIndex = 0;
+const mobileMarker = "@media (max-width: 720px)";
+while ((searchIndex = stylesCss.indexOf(mobileMarker, searchIndex)) >= 0) {
+  mobileBlocks.push(extractDelimitedBlock(stylesCss.slice(searchIndex), mobileMarker, "{", "}"));
+  searchIndex += mobileMarker.length;
+}
+const mobileCss = mobileBlocks.join("\n");
+check(mobileBlocks.length > 0, "720px以下のモバイルメディアクエリがありません");
+for (const selector of [
+  ".dashboard",
+  ".daily-focus-grid",
+  ".daily-input-panel",
+  ".learning-item",
+  ".learning-actions",
+  ".learning-search-heading",
+  ".learning-global-search-result",
+]) {
+  check(mobileCss.includes(selector), `モバイル規則に必須セレクタがありません: ${selector}`);
+}
+check(/\.dashboard[\s\S]*?grid-template-columns:\s*1fr\s*;/.test(mobileCss), "モバイルでdashboardが1列になっていません");
+check(/\.learning-actions[\s\S]*?flex-direction:\s*column\s*;/.test(mobileCss), "モバイルで学び操作欄が縦並びになっていません");
+
+if (failures.length) {
+  console.error("Static regression check: FAILED");
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  process.exitCode = 1;
+} else {
+  console.log(`Static regression check: OK (${ids.length} IDs, ${backupKeys.length} backup keys)`);
+}

@@ -34,3 +34,15 @@
 8. スナップショットをダウンロードできること
 9. Substackデータに `emailList` が含まれていないこと
 10. ストックOFF時に `"stock-labo": null` になること
+
+## 回帰確認
+
+Step8以降の画面構成、保存データ、バックアップを守るため、変更後は静的回帰チェックを実行します。
+
+```bash
+node tests/static-regression-check.mjs
+node --check app.js
+git diff --check
+```
+
+実ブラウザで確認する操作とデータ保護手順は、[回帰確認チェックリスト](docs/regression-checklist.md)を参照してください。
