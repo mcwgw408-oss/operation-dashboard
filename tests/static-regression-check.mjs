@@ -73,6 +73,9 @@ const requiredIds = [
   "memoryLibraryCount",
   "memoryLibraryList",
   "memoryLibraryMore",
+  "publishingOpsRecentRange",
+  "publishingOpsRecentSummary",
+  "publishingOpsRecentList",
   "sakuraInnerToggle",
   "exportBackup",
   "importBackup",
@@ -121,6 +124,47 @@ const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShort
 check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");
 check(!forgetShortMemoryBody.includes("projectMemory"), "記憶削除処理がprojectMemoryに触れています");
 
+for (const token of [
+  "最近7日の発信運営",
+  'id="publishingOpsRecentRange"',
+  'id="publishingOpsRecentSummary"',
+  'id="publishingOpsRecentList"',
+]) {
+  check(indexHtml.includes(token), `recent publishing ops UI is missing: ${token}`);
+}
+check(appJs.includes("const PUBLISHING_OPS_RECENT_DAYS = 7;"), "recent publishing ops period is not fixed to 7 days");
+check(appJs.includes("function buildPublishingOpsRecentFlow"), "recent publishing ops aggregation function is missing");
+check(appJs.includes("function renderPublishingOpsRecentFlow"), "recent publishing ops render function is missing");
+check(appJs.includes("store[dateKey]?.publishingOps"), "recent publishing ops must read only store[dateKey].publishingOps");
+check(appJs.includes("Number(value)"), "recent publishing ops counts must be numeric");
+for (const token of [
+  "ノート投稿数",
+  "チャット投稿数",
+  "記事投稿数",
+  "音声記事投稿数",
+  "おはスタック「できた／少しできた」の日数",
+  "記録なし",
+]) {
+  check(appJs.includes(token) || indexHtml.includes(token), `recent publishing ops label is missing: ${token}`);
+}
+const buildPublishingOpsRecentFlowBody = extractDelimitedBlock(appJs, "function buildPublishingOpsRecentFlow", "{", "}");
+const renderPublishingOpsRecentFlowBody = extractDelimitedBlock(appJs, "function renderPublishingOpsRecentFlow", "{", "}");
+for (const [label, body] of [
+  ["aggregation", buildPublishingOpsRecentFlowBody],
+  ["render", renderPublishingOpsRecentFlowBody],
+]) {
+  for (const forbiddenToken of [
+    "getDay(",
+    "ensurePublishingOps(",
+    "saveStore(",
+    "localStorage.setItem",
+  ]) {
+    check(!body.includes(forbiddenToken), `recent publishing ops ${label} calls forbidden token: ${forbiddenToken}`);
+  }
+}
+const savePublishingOpsFromFormBody = extractDelimitedBlock(appJs, "function savePublishingOpsFromForm", "{", "}");
+check(savePublishingOpsFromFormBody.includes("renderPublishingOpsRecentFlow();"), "recent publishing ops is not refreshed after save");
+
 const requiredOrders = new Map([
   [".dashboard .dashboard-proposal-heading", "9"],
   [".dashboard .morning-guidance-panel", "10"],
@@ -157,6 +201,10 @@ for (const selector of [
   ".learning-global-search-result",
   ".memory-library-controls",
   ".memory-library-footer",
+  ".publishing-ops-recent-summary",
+  ".publishing-ops-recent-counts",
+  ".publishing-ops-recent-statuses",
+  ".publishing-ops-recent-heading",
 ]) {
   check(mobileCss.includes(selector), `モバイル規則に必須セレクタがありません: ${selector}`);
 }

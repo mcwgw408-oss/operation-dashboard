@@ -1542,11 +1542,208 @@ const publishingOpsFields = {
   operationFindings: "#publishingOpsOperationFindings",
 };
 
+const PUBLISHING_OPS_RECENT_DAYS = 7;
+const publishingOpsCountFields = [
+  ["notesCount", "ノート投稿数"],
+  ["chatCount", "チャット投稿数"],
+  ["articleCount", "記事投稿数"],
+  ["audioArticleCount", "音声記事投稿数"],
+];
+const publishingOpsTextSections = [
+  ["今日の一番の学び", ["yoshidaLearning"]],
+  ["明日に活かすこと", ["yoshidaTomorrow"]],
+  ["発信アイデア", ["notesIdeas", "articleIdeas", "chatIdeas"]],
+  ["運用上の気づき", ["operationFindings"]],
+];
+
 function readPublishingOpsForm() {
   return Object.fromEntries(Object.entries(publishingOpsFields).map(([key, selector]) => {
     const field = $(selector);
     return [key, field ? field.value : ""];
   }));
+}
+
+function shiftDateKey(dateKey, offsetDays) {
+  const date = dateKeyToLocalDate(dateKey) || new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return toDateInputValue(date);
+}
+
+function buildRecentPublishingOpsDateKeys(baseDateKey = activeDate) {
+  return Array.from({ length: PUBLISHING_OPS_RECENT_DAYS }, (_, index) =>
+    shiftDateKey(baseDateKey, -index));
+}
+
+function toPublishingOpsNumber(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return 0;
+  return Math.floor(number);
+}
+
+function cleanPublishingOpsText(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function excerptPublishingOpsText(value, maxLength = 56) {
+  const text = cleanPublishingOpsText(value);
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength)}…`;
+}
+
+function getPublishingOpsTextEntries(ops) {
+  return publishingOpsTextSections.flatMap(([label, keys]) => {
+    const values = keys
+      .map((key) => excerptPublishingOpsText(ops[key]))
+      .filter(Boolean);
+    return values.length ? [{ label, text: values.join(" / ") }] : [];
+  });
+}
+
+function getPublishingOpsYoshidaLogStatus(ops) {
+  const statuses = [
+    ops.yoshidaNoteStatus,
+    ops.yoshidaSubstackStatus,
+    ops.yoshidaLiveStatus,
+  ].map(cleanPublishingOpsText);
+  if (statuses.includes("あり")) return "あり";
+  if (statuses.includes("なし")) return "なし";
+  return "未確認";
+}
+
+function hasPublishingOpsRecord(rawOps, ops) {
+  if (!rawOps || typeof rawOps !== "object") return false;
+  const hasCounts = publishingOpsCountFields.some(([key]) => toPublishingOpsNumber(rawOps[key]) > 0);
+  const hasMorningStack = ["できた", "少しできた"].includes(cleanPublishingOpsText(rawOps.morningStackStatus));
+  const hasYoshidaLog = [
+    rawOps.yoshidaNoteStatus,
+    rawOps.yoshidaSubstackStatus,
+    rawOps.yoshidaLiveStatus,
+  ].map(cleanPublishingOpsText).some((status) => status === "あり" || status === "なし");
+  const hasText = getPublishingOpsTextEntries(ops).length > 0;
+  return hasCounts || hasMorningStack || hasYoshidaLog || hasText;
+}
+
+function buildPublishingOpsRecentFlow(baseDateKey = activeDate) {
+  const dateKeys = buildRecentPublishingOpsDateKeys(baseDateKey);
+  const summary = {
+    notesCount: 0,
+    chatCount: 0,
+    articleCount: 0,
+    audioArticleCount: 0,
+    morningStackDoneDays: 0,
+  };
+  const days = dateKeys.map((dateKey) => {
+    const rawOps = store[dateKey]?.publishingOps;
+    const ops = { ...defaultPublishingOps(dateKey), ...(rawOps && typeof rawOps === "object" ? rawOps : {}) };
+    const counts = Object.fromEntries(publishingOpsCountFields.map(([key]) => [key, toPublishingOpsNumber(ops[key])]));
+    publishingOpsCountFields.forEach(([key]) => {
+      summary[key] += counts[key];
+    });
+    if (["できた", "少しできた"].includes(cleanPublishingOpsText(ops.morningStackStatus))) {
+      summary.morningStackDoneDays += 1;
+    }
+    return {
+      dateKey,
+      counts,
+      morningStackStatus: cleanPublishingOpsText(ops.morningStackStatus) || "できなかった",
+      yoshidaLogStatus: getPublishingOpsYoshidaLogStatus(ops),
+      textEntries: getPublishingOpsTextEntries(ops),
+      hasRecord: hasPublishingOpsRecord(rawOps, ops),
+    };
+  });
+  return { dateKeys, summary, days };
+}
+
+function createPublishingOpsRecentMetric(label, value) {
+  const item = document.createElement("div");
+  item.className = "publishing-ops-recent-metric";
+  const number = document.createElement("strong");
+  number.textContent = String(value);
+  const caption = document.createElement("span");
+  caption.textContent = label;
+  item.append(number, caption);
+  return item;
+}
+
+function renderPublishingOpsRecentFlow() {
+  const range = $("#publishingOpsRecentRange");
+  const summaryTarget = $("#publishingOpsRecentSummary");
+  const listTarget = $("#publishingOpsRecentList");
+  if (!range || !summaryTarget || !listTarget) return;
+
+  const { dateKeys, summary, days } = buildPublishingOpsRecentFlow(activeDate);
+  const oldestDateKey = dateKeys[dateKeys.length - 1];
+  const newestDateKey = dateKeys[0];
+  range.textContent = `${oldestDateKey} 〜 ${newestDateKey}`;
+
+  summaryTarget.replaceChildren(
+    createPublishingOpsRecentMetric("ノート投稿数", summary.notesCount),
+    createPublishingOpsRecentMetric("チャット投稿数", summary.chatCount),
+    createPublishingOpsRecentMetric("記事投稿数", summary.articleCount),
+    createPublishingOpsRecentMetric("音声記事投稿数", summary.audioArticleCount),
+    createPublishingOpsRecentMetric("おはスタック「できた／少しできた」の日数", summary.morningStackDoneDays),
+  );
+
+  const cards = days.map((day) => {
+    const card = document.createElement("article");
+    card.className = `publishing-ops-recent-card${day.hasRecord ? "" : " is-empty"}`;
+
+    const header = document.createElement("div");
+    header.className = "publishing-ops-recent-card-header";
+    const title = document.createElement("strong");
+    title.textContent = formatDateLabel(day.dateKey);
+    const badge = document.createElement("span");
+    badge.textContent = day.hasRecord ? "記録あり" : "記録なし";
+    header.append(title, badge);
+
+    const counts = document.createElement("dl");
+    counts.className = "publishing-ops-recent-counts";
+    publishingOpsCountFields.forEach(([key, label]) => {
+      const wrapper = document.createElement("div");
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const description = document.createElement("dd");
+      description.textContent = String(day.counts[key]);
+      wrapper.append(term, description);
+      counts.append(wrapper);
+    });
+
+    const statusList = document.createElement("dl");
+    statusList.className = "publishing-ops-recent-statuses";
+    [
+      ["おはスタック状況", day.morningStackStatus],
+      ["吉田塾ログ", day.yoshidaLogStatus],
+    ].forEach(([label, value]) => {
+      const wrapper = document.createElement("div");
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const description = document.createElement("dd");
+      description.textContent = value;
+      wrapper.append(term, description);
+      statusList.append(wrapper);
+    });
+
+    card.append(header, counts, statusList);
+    if (day.textEntries.length) {
+      const texts = document.createElement("div");
+      texts.className = "publishing-ops-recent-texts";
+      day.textEntries.forEach((entry) => {
+        const item = document.createElement("p");
+        const label = document.createElement("span");
+        label.textContent = entry.label;
+        item.append(label, document.createTextNode(entry.text));
+        texts.append(item);
+      });
+      card.append(texts);
+    } else if (!day.hasRecord) {
+      const empty = document.createElement("p");
+      empty.className = "publishing-ops-recent-empty";
+      empty.textContent = "記録なし";
+      card.append(empty);
+    }
+    return card;
+  });
+  listTarget.replaceChildren(...cards);
 }
 
 function renderPublishingOps() {
@@ -1562,6 +1759,7 @@ function renderPublishingOps() {
   if (status) {
     status.textContent = "今日の発信運営を記録できます。";
   }
+  renderPublishingOpsRecentFlow();
 }
 
 function savePublishingOpsFromForm() {
@@ -1572,6 +1770,7 @@ function savePublishingOpsFromForm() {
   if (status) {
     status.textContent = "保存済みです。";
   }
+  renderPublishingOpsRecentFlow();
 }
 
 function renderLaterCounts() {
