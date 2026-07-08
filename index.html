@@ -786,34 +786,41 @@
         </section>
 
         <section class="panel home-launch-panel">
-          <div class="panel-heading">
-            <div>
-              <h2>最初に開く入口</h2>
-              <p class="section-note">毎日使う場所だけをここに集めます。</p>
+          <details>
+            <summary>最初に開く入口 / 必要な時だけ使う</summary>
+            <div class="panel-heading">
+              <div>
+                <h2>最初に開く入口</h2>
+                <p class="section-note">毎日使う場所と、必要な時だけ使う場所をここに集めます。</p>
+              </div>
             </div>
-          </div>
-          <div class="launch-grid">
-            <a class="launch-card" href="https://mcwgw408-oss.github.io/substack-labo/">
-              <strong>サブスタックラボ</strong>
-              <span>サブスタック専用</span>
-            </a>
-            <a class="launch-card" href="https://mcwgw408-oss.github.io/discovery-Labo/">
-              <strong>発見ラボ</strong>
-              <span>発見と整理</span>
-            </a>
-            <a class="launch-card" href="https://mcwgw408-oss.github.io/action-Labo/">
-              <strong>交流ログ</strong>
-              <span>サブスタック以外の交流</span>
-            </a>
-            <a class="launch-card" href="https://mcwgw408-oss.github.io/observation-Labo/">
-              <strong>発信観察ラボ</strong>
-              <span>今後使う観察場所</span>
-            </a>
-            <a class="launch-card" href="https://mcwgw408-oss.github.io/Stock-Labo/">
-              <strong>ストック管理ラボ</strong>
-              <span>日用品・食材</span>
-            </a>
-          </div>
+            <div class="launch-grid">
+              <a class="launch-card" href="https://mcwgw408-oss.github.io/substack-labo/">
+                <strong>サブスタックラボ</strong>
+                <span>サブスタック専用</span>
+              </a>
+              <a class="launch-card" href="https://mcwgw408-oss.github.io/discovery-Labo/">
+                <strong>発見ラボ</strong>
+                <span>発見と整理</span>
+              </a>
+              <a class="launch-card" href="https://mcwgw408-oss.github.io/action-Labo/">
+                <strong>交流ログ</strong>
+                <span>サブスタック以外の交流</span>
+              </a>
+              <a class="launch-card" href="https://mcwgw408-oss.github.io/observation-Labo/">
+                <strong>発信観察ラボ</strong>
+                <span>今後使う観察場所</span>
+              </a>
+              <a class="launch-card" href="https://mcwgw408-oss.github.io/Stock-Labo/">
+                <strong>ストック管理ラボ</strong>
+                <span>日用品・食材</span>
+              </a>
+              <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
+                <strong>記事ラボ</strong>
+                <span>必要な時だけ開く</span>
+              </a>
+            </div>
+          </details>
         </section>
 
         <section class="panel dashboard-task-panel span-2">
@@ -890,10 +897,13 @@
               <input id="recurringNote" type="text" placeholder="メモ" aria-label="定期予定メモ" />
               <button type="submit">定期予定に追加</button>
             </form>
-            <section class="recurring-template-panel" aria-label="定期予定テンプレート">
-              <h4>保存した定期予定</h4>
-              <div id="recurringScheduleList" class="recurring-schedule-list"></div>
-            </section>
+            <details>
+              <summary>保存した定期予定</summary>
+              <section class="recurring-template-panel" aria-label="定期予定テンプレート">
+                <h4>保存した定期予定</h4>
+                <div id="recurringScheduleList" class="recurring-schedule-list"></div>
+              </section>
+            </details>
           </div>
         </section>
 
@@ -1081,22 +1091,17 @@
         </section>
 
         <section class="panel span-2">
-          <div class="panel-heading">
-            <h2>育てるプロジェクト</h2>
-            <form class="inline-form compact" data-add-list="projects">
-              <input type="text" placeholder="プロジェクト追加" aria-label="プロジェクトを追加" />
-              <button type="submit">追加</button>
-            </form>
-          </div>
-          <div id="projects" class="task-list compact-list"></div>
-        </section>
-
-        <section class="panel on-demand-panel span-2">
-          <h2>必要な時だけ使う</h2>
-          <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
-            <strong>記事ラボ</strong>
-            <span>必要な時だけ開く</span>
-          </a>
+          <details>
+            <summary>育てるプロジェクト</summary>
+            <div class="panel-heading">
+              <h2>育てるプロジェクト</h2>
+              <form class="inline-form compact" data-add-list="projects">
+                <input type="text" placeholder="プロジェクト追加" aria-label="プロジェクトを追加" />
+                <button type="submit">追加</button>
+              </form>
+            </div>
+            <div id="projects" class="task-list compact-list"></div>
+          </details>
         </section>
 
         <section class="panel persistent-memo-panel span-2">
@@ -1122,42 +1127,48 @@
         </section>
 
         <section class="panel data-panel span-2">
-          <div class="panel-heading">
-            <h2>データ</h2>
-            <div class="data-buttons">
-              <button class="ghost-button" id="downloadCsv" type="button">表を書き出し</button>
-              <button class="ghost-button" id="exportBackup" type="button">バックアップを書き出し</button>
-              <button class="ghost-button" id="importBackup" type="button">取り込み</button>
-              <input id="importBackupFile" type="file" accept="application/json,.json" hidden />
+          <details>
+            <summary>データ</summary>
+            <div class="panel-heading">
+              <h2>データ</h2>
+              <div class="data-buttons">
+                <button class="ghost-button" id="downloadCsv" type="button">表を書き出し</button>
+                <button class="ghost-button" id="exportBackup" type="button">バックアップを書き出し</button>
+                <button class="ghost-button" id="importBackup" type="button">取り込み</button>
+                <input id="importBackupFile" type="file" accept="application/json,.json" hidden />
+              </div>
             </div>
-          </div>
-          <input id="historySearch" type="search" placeholder="過去データを検索" aria-label="過去データを検索" />
-          <div id="historyList" class="history-list"></div>
+            <input id="historySearch" type="search" placeholder="過去データを検索" aria-label="過去データを検索" />
+            <div id="historyList" class="history-list"></div>
+          </details>
         </section>
 
         <section class="panel sakura-panel">
-          <div class="panel-heading">
-            <div>
-              <h2>さくら</h2>
-              <p class="section-note">6つのラボの「今」を1つにまとめて、さくらに渡します。</p>
+          <details>
+            <summary>さくら</summary>
+            <div class="panel-heading">
+              <div>
+                <h2>さくら</h2>
+                <p class="section-note">6つのラボの「今」を1つにまとめて、さくらに渡します。</p>
+              </div>
             </div>
-          </div>
-          <div class="sakura-switches" aria-label="さくらに渡す情報の選択">
-            <label class="check-row"><input id="snapReflection" type="checkbox" /> 今日の振り返りを含める</label>
-            <label class="check-row"><input id="snapFeelings" type="checkbox" /> 気持ちの記録を含める（緊張・印象・嬉しかった瞬間）</label>
-            <label class="check-row"><input id="snapMailDm" type="checkbox" /> メール・メッセージの数値を含める</label>
-            <label class="check-row"><input id="snapStock" type="checkbox" /> ストック管理を含める</label>
-          </div>
-          <div class="sakura-controls">
-            <div class="sakura-modes" role="group" aria-label="時間帯">
-              <button id="snapModeMorning" class="mode-button" type="button">朝</button>
-              <button id="snapModeNight" class="mode-button" type="button">夜</button>
+            <div class="sakura-switches" aria-label="さくらに渡す情報の選択">
+              <label class="check-row"><input id="snapReflection" type="checkbox" /> 今日の振り返りを含める</label>
+              <label class="check-row"><input id="snapFeelings" type="checkbox" /> 気持ちの記録を含める（緊張・印象・嬉しかった瞬間）</label>
+              <label class="check-row"><input id="snapMailDm" type="checkbox" /> メール・メッセージの数値を含める</label>
+              <label class="check-row"><input id="snapStock" type="checkbox" /> ストック管理を含める</label>
             </div>
-            <button class="ghost-button" id="snapshotDownload" type="button">ダウンロード</button>
-            <button class="ghost-button" id="snapshotCopy" type="button">クリップボードにコピー</button>
-          </div>
-          <p class="section-note" id="snapshotLastCreated">まだ作成していません</p>
-          <p class="section-note">※ 本番のページで、いつも使うブラウザから作成してください。手元で開いたファイルからは他のラボのデータが見えません。</p>
+            <div class="sakura-controls">
+              <div class="sakura-modes" role="group" aria-label="時間帯">
+                <button id="snapModeMorning" class="mode-button" type="button">朝</button>
+                <button id="snapModeNight" class="mode-button" type="button">夜</button>
+              </div>
+              <button class="ghost-button" id="snapshotDownload" type="button">ダウンロード</button>
+              <button class="ghost-button" id="snapshotCopy" type="button">クリップボードにコピー</button>
+            </div>
+            <p class="section-note" id="snapshotLastCreated">まだ作成していません</p>
+            <p class="section-note">※ 本番のページで、いつも使うブラウザから作成してください。手元で開いたファイルからは他のラボのデータが見えません。</p>
+          </details>
         </section>
       </main>
     </div>
