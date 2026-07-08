@@ -100,25 +100,6 @@
             </div>
           </div>
           <div class="brain-layout">
-            <div class="brain-section-heading">
-              <span>毎日見る情報</span>
-              <small>今日の提案、返答、すぐ使うフィードバックです。</small>
-            </div>
-            <div class="brain-card priority-card">
-              <span class="brain-label">さくらが選んだ候補</span>
-              <strong id="brainPriority">まだ優先候補はありません</strong>
-              <p id="brainPriorityNote">今日の予定・タスク・記憶から、まず注目する対象を選びます。</p>
-              <details class="brain-decision-details" aria-label="候補の判断材料">
-                <summary>判断材料を見る</summary>
-                <div><span>スコア</span><p id="brainPriorityScore">-</p></div>
-                <div><span>判断材料</span><ul id="brainPriorityMaterials" class="brain-list"></ul></div>
-                <p id="brainPriorityScoreHelp">スコアは候補の種類・更新状況・体調や勢いを合わせた目安です。</p>
-              </details>
-            </div>
-            <div class="brain-card reason-card">
-              <span class="brain-label">候補にした理由</span>
-              <ul id="brainPriorityReasons" class="brain-list"></ul>
-            </div>
             <div class="brain-card recommendation-card">
               <span class="brain-label">今日の提案</span>
               <strong id="brainRecommendationTitle">今日は少し整える日</strong>
@@ -165,26 +146,42 @@
                   </div>
                 </div>
               </div>
-              <div class="first-agent-panel" aria-label="最初の返答">
-                <span class="brain-label">最初の返答</span>
-                <div class="first-agent-actions">
-                  <button type="button" data-first-agent-reply="try">😊 やってみる</button>
-                  <button type="button" data-first-agent-reply="later">🤔 あとで</button>
-                  <button type="button" data-first-agent-reply="rest">😴 今日は休む</button>
-                  <button type="button" data-first-agent-reply="other">✨ 別のことをする</button>
-                </div>
-                <p id="firstAgentResponse" class="first-agent-response" hidden></p>
+            </div>
+            <div class="brain-card reason-card">
+              <span class="brain-label">候補にした理由</span>
+              <ul id="brainPriorityReasons" class="brain-list"></ul>
+            </div>
+            <div class="brain-card priority-card">
+              <span class="brain-label">さくらが選んだ候補</span>
+              <strong id="brainPriority">まだ優先候補はありません</strong>
+              <p id="brainPriorityNote">今日の予定・タスク・記憶から、まず注目する対象を選びます。</p>
+              <details class="brain-decision-details" aria-label="候補の判断材料">
+                <summary>判断材料を見る</summary>
+                <div><span>スコア</span><p id="brainPriorityScore">-</p></div>
+                <div><span>判断材料</span><ul id="brainPriorityMaterials" class="brain-list"></ul></div>
+                <p id="brainPriorityScoreHelp">スコアは候補の種類・更新状況・体調や勢いを合わせた目安です。</p>
+              </details>
+            </div>
+            <div class="first-agent-panel" aria-label="最初の返答">
+              <span class="brain-label">最初の返答</span>
+              <div class="first-agent-actions">
+                <button type="button" data-first-agent-reply="try">😊 やってみる</button>
+                <button type="button" data-first-agent-reply="later">🤔 あとで</button>
+                <button type="button" data-first-agent-reply="rest">😴 今日は休む</button>
+                <button type="button" data-first-agent-reply="other">✨ 別のことをする</button>
               </div>
-              <div id="generatedReplyMount" class="daily-action-mount"></div>
-              <div class="learning-feedback-panel" aria-label="提案の学習メモ">
-                <span class="brain-label">提案の学習メモ</span>
-                <div class="learning-feedback-actions">
-                  <button type="button" data-learning-feedback="true">この提案は合っていた</button>
-                  <button type="button" data-learning-feedback="false">この提案は違った</button>
-                </div>
-                <textarea id="learningFeedbackNote" rows="3" placeholder="今日の状態メモ" aria-label="今日の状態メモ"></textarea>
-                <p id="learningFeedbackStatus" class="learning-feedback-status">この提案を学習ログに記録します。</p>
+              <p id="firstAgentResponse" class="first-agent-response" hidden></p>
+            </div>
+            <div id="generatedReplyMount" class="daily-action-mount"></div>
+            <div class="learning-feedback-panel" aria-label="提案の学習メモ">
+              <span class="brain-label">提案の学習メモ</span>
+              <div class="learning-feedback-actions">
+                <button type="button" data-learning-feedback="true">この提案は合っていた</button>
+                <button type="button" data-learning-feedback="false">この提案は違った</button>
               </div>
+              <textarea id="learningFeedbackNote" rows="3" placeholder="今日の状態メモ" aria-label="今日の状態メモ"></textarea>
+              <p id="learningFeedbackStatus" class="learning-feedback-status">この提案を学習ログに記録します。</p>
+            </div>
             <div class="brain-section-heading">
               <span>さくらの内部状態（開発者向け）</span>
               <small>学習・記憶・思考・実行管理の詳細です。普段は閉じたままで大丈夫です。</small>
