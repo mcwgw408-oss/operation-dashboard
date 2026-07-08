@@ -49,6 +49,7 @@ function enclosingFunctionName(source, index) {
 for (const docPath of [
   "docs/app-js-map.md",
   "docs/design-rules.md",
+  "docs/decision-pipeline.md",
 ]) {
   check(existsSync(resolve(root, docPath)), `保守docsがありません: ${docPath}`);
 }

@@ -51,3 +51,4 @@ git diff --check
 
 - [app.js Map](docs/app-js-map.md): `app.js` の責務、保存入口、Backup / Snapshot入口、実行時移設一覧
 - [Design Rules](docs/design-rules.md): 4ゾーン構成、保存キー追加、CSS order、静的検査の運用ルール
+- [Decision Pipeline](docs/decision-pipeline.md): Epic 4の4段漏斗、AI判断フロー、Step12-bゴールデンテスト方針
