@@ -18,11 +18,15 @@ node --check app.js
 git diff --check
 ```
 
+- [ ] 完了報告に、実行した静的検査の出力を貼り付ける
 - [ ] 重複IDがない
 - [ ] 主要機能が利用する必須DOM IDが存在する
 - [ ] `BACKUP_KEYS` と `createBackup()` の書き出し対象が一致する
 - [ ] 学び、記憶、検索の主要DOMと操作クラスが存在する
 - [ ] 朝の表示順を決めるCSS orderが維持されている
+- [ ] dashboard直下の主要要素にCSS order指定漏れがない
+- [ ] 既知の英語空文言が検出された場合は、残務として報告する
+- [ ] `localStorage.setItem` の直接使用が許可範囲外に増えていない
 - [ ] 720px以下の主要モバイル規則が存在する
 
 ## 3. 日付別データ
@@ -110,9 +114,21 @@ git diff --check
 
 - [ ] `git diff --check` が成功する
 - [ ] `node --check app.js` が成功する
+- [ ] `node tests/static-regression-check.mjs` の出力を完了報告に貼り付ける
 - [ ] commit対象が依頼範囲だけである
 - [ ] push後に `git status --short --branch` がcleanである
 - [ ] `main` と `origin/main` が同期している
+
+## Step11-d. Epic 3保守ルール固定
+
+- [ ] `docs/app-js-map.md` が存在し、`app.js` の責務、保存入口、Backup / Snapshot入口、実行時移設一覧を確認できる
+- [ ] `docs/design-rules.md` が存在し、4ゾーン、朝の一本道、保存キー追加、CSS order、UI文言、1Step=1コミットのルールを確認できる
+- [ ] READMEから `docs/app-js-map.md` と `docs/design-rules.md` へ辿れる
+- [ ] `app.js` 分割は今回行わず、別Epicへ送る方針が明記されている
+- [ ] `cockpit.html` / `cockpit.js` は未接続の Intent Layer 候補として残す
+- [ ] cockpit関連ファイルの削除判断、表示文字化け修正、dashboard統合判断は別タスクで扱う
+- [ ] `app.js` / `index.html` / `styles.css` に意図しない差分がない
+- [ ] `BACKUP_KEYS` / `createBackup()` / restore周辺に意図しない差分がない
 
 ## Step11-b. 最近7日の発信運営
 

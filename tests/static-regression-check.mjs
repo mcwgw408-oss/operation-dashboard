@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,9 +7,14 @@ const indexHtml = readFileSync(resolve(root, "index.html"), "utf8");
 const appJs = readFileSync(resolve(root, "app.js"), "utf8");
 const stylesCss = readFileSync(resolve(root, "styles.css"), "utf8");
 const failures = [];
+const warnings = [];
 
 function check(condition, message) {
   if (!condition) failures.push(message);
+}
+
+function warn(condition, message) {
+  if (condition) warnings.push(message);
 }
 
 function extractDelimitedBlock(source, marker, openCharacter, closeCharacter) {
@@ -29,6 +34,23 @@ function extractDelimitedBlock(source, marker, openCharacter, closeCharacter) {
 function sortedDifference(left, right) {
   const rightSet = new Set(right);
   return [...new Set(left)].filter((item) => !rightSet.has(item)).sort();
+}
+
+function lineNumberAt(source, index) {
+  return source.slice(0, index).split("\n").length;
+}
+
+function enclosingFunctionName(source, index) {
+  const prefix = source.slice(0, index);
+  const matches = [...prefix.matchAll(/^(?:async\s+)?function\s+([A-Za-z0-9_]+)\s*\(/gm)];
+  return matches.at(-1)?.[1] || "";
+}
+
+for (const docPath of [
+  "docs/app-js-map.md",
+  "docs/design-rules.md",
+]) {
+  check(existsSync(resolve(root, docPath)), `保守docsがありません: ${docPath}`);
 }
 
 const ids = [...indexHtml.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
@@ -170,13 +192,15 @@ const savePublishingOpsFromFormBody = extractDelimitedBlock(appJs, "function sav
 check(savePublishingOpsFromFormBody.includes("renderPublishingOpsRecentFlow();"), "recent publishing ops is not refreshed after save");
 
 check(indexHtml.includes('class="dashboard-page-nav"'), "ページ内ナビがありません");
-for (const target of [
+const dashboardZoneTargets = [
   "#dashboard-start",
   "#dashboard-input",
   "#dashboard-accumulation",
   "#dashboard-closed",
-]) {
+];
+for (const target of dashboardZoneTargets) {
   check(indexHtml.includes(`href="${target}"`), `ページ内ナビのリンクがありません: ${target}`);
+  check(indexHtml.includes(`id="${target.slice(1)}"`), `ページ内ナビ対象の見出しIDがありません: ${target}`);
 }
 
 const requiredOrders = new Map([
@@ -187,15 +211,60 @@ const requiredOrders = new Map([
   [".dashboard .daily-focus-panel", "12"],
   [".dashboard .brain-panel", "14"],
   [".dashboard .dashboard-input-heading", "30"],
+  [".dashboard .publishing-ops-panel", "31"],
+  [".dashboard .daily-input-panel", "32"],
+  [".dashboard .dashboard-task-panel", "33"],
+  [".dashboard .dashboard-health-input-panel", "34"],
+  [".dashboard .dashboard-memory-input-panel", "35"],
+  [".dashboard .schedule-panel", "36"],
+  [".dashboard > .panel:has(#dailyTasks)", "37"],
+  [".dashboard > .metrics-panel:has(#mailMorningChecked)", "38"],
+  [".dashboard > .metrics-panel:has(#dmPending)", "39"],
   [".dashboard .dashboard-accumulation-heading", "59"],
+  [".dashboard .reflection-panel", "60"],
+  [".dashboard .learning-panel", "61"],
+  [".dashboard .later-panel", "62"],
+  [".dashboard .persistent-memo-panel", "63"],
   [".dashboard .memory-library-panel", "64"],
   [".dashboard .dashboard-closed-heading", "79"],
+  [".dashboard .sakura-panel", "80"],
+  [".dashboard .home-launch-panel", "81"],
+  [".dashboard > .panel:has(#projects)", "83"],
+  [".dashboard .dashboard-ai-analysis-panel", "85"],
+  [".dashboard .data-panel", "86"],
 ]);
 for (const [selector, order] of requiredOrders) {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp(`${escapedSelector}\\s*\\{[^}]*\\border:\\s*${order}\\s*;`, "s");
   check(pattern.test(stylesCss), `CSS orderが見つからないか変更されています: ${selector} = ${order}`);
 }
+check(/\.dashboard\s+\.dashboard-page-nav\s*\{[^}]*\border:\s*8\s*;/s.test(stylesCss), "ページ内ナビのorder 8が維持されていません");
+
+const knownEnglishEmptyMessages = [
+  "Retrieved memory is not available yet.",
+  "Recent memory is not available yet.",
+];
+for (const message of knownEnglishEmptyMessages) {
+  warn(indexHtml.includes(message) || appJs.includes(message), `既知の英語空文言が残っています: ${message}`);
+}
+
+const allowedSetItemFunctionNames = new Set([
+  "loadPersonalityProfile",
+  "loadRelationshipProfile",
+  "getDay",
+  "renderHistory",
+  "handleImportBackupFile",
+]);
+const forbiddenSetItemCalls = [...appJs.matchAll(/localStorage\.setItem\s*\(/g)]
+  .map((match) => ({
+    line: lineNumberAt(appJs, match.index),
+    functionName: enclosingFunctionName(appJs, match.index),
+  }))
+  .filter(({ functionName }) => !functionName.startsWith("save") && !allowedSetItemFunctionNames.has(functionName));
+check(
+  forbiddenSetItemCalls.length === 0,
+  `許可範囲外のlocalStorage.setItemがあります: ${forbiddenSetItemCalls.map((call) => `${call.functionName || "(global)"}:${call.line}`).join(", ")}`,
+);
 
 const mobileBlocks = [];
 let searchIndex = 0;
@@ -235,5 +304,6 @@ if (failures.length) {
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exitCode = 1;
 } else {
+  warnings.forEach((warning) => console.warn(`Static regression check warning: ${warning}`));
   console.log(`Static regression check: OK (${ids.length} IDs, ${backupKeys.length} backup keys)`);
 }

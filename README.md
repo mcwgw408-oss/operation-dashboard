@@ -46,3 +46,8 @@ git diff --check
 ```
 
 実ブラウザで確認する操作とデータ保護手順は、[回帰確認チェックリスト](docs/regression-checklist.md)を参照してください。
+
+## 保守メモ
+
+- [app.js Map](docs/app-js-map.md): `app.js` の責務、保存入口、Backup / Snapshot入口、実行時移設一覧
+- [Design Rules](docs/design-rules.md): 4ゾーン構成、保存キー追加、CSS order、静的検査の運用ルール
