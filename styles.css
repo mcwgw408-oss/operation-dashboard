@@ -3236,12 +3236,6 @@ textarea {
   pointer-events: none;
 }
 
-.on-demand-panel {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-}
-
 .compact-link {
   min-height: 70px;
 }
@@ -3339,10 +3333,6 @@ textarea {
   order: 81;
 }
 
-.dashboard .on-demand-panel {
-  order: 82;
-}
-
 .dashboard > .panel:has(#projects) {
   order: 83;
 }
@@ -3378,7 +3368,6 @@ textarea {
 .reflection-panel,
 .sakura-panel,
 .home-launch-panel,
-.on-demand-panel,
 .panel:has(#projects),
 .dashboard-ai-analysis-panel,
 .data-panel {
