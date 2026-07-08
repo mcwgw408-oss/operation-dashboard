@@ -31,6 +31,13 @@
       </header>
 
       <main class="dashboard">
+        <nav class="dashboard-page-nav" aria-label="ページ内移動">
+          <a href="#dashboard-start">今日のはじまり</a>
+          <a href="#dashboard-input">今日を書く</a>
+          <a href="#dashboard-accumulation">ためる</a>
+          <a href="#dashboard-closed">閉じているもの</a>
+        </nav>
+
         <section class="summary-panel">
           <div class="summary-cell">
             <span>今日の日付</span>
@@ -85,7 +92,7 @@
           </div>
         </section>
 
-        <section class="dashboard-section-heading dashboard-proposal-heading span-2" aria-label="今日のはじまり">
+        <section id="dashboard-start" class="dashboard-section-heading dashboard-proposal-heading span-2" aria-label="今日のはじまり">
           <div>
             <span>今日のはじまり</span>
           </div>
@@ -759,7 +766,7 @@
             </div>
         </section>
 
-        <section class="dashboard-section-heading dashboard-input-heading span-2" aria-label="ここから、今日を書く">
+        <section id="dashboard-input" class="dashboard-section-heading dashboard-input-heading span-2" aria-label="ここから、今日を書く">
           <div>
             <span>ここから、今日を書く</span>
           </div>
@@ -1079,7 +1086,7 @@
           <div id="laterList" class="later-list"></div>
         </section>
 
-        <section class="dashboard-section-heading dashboard-accumulation-heading span-2" aria-label="今日をためていく">
+        <section id="dashboard-accumulation" class="dashboard-section-heading dashboard-accumulation-heading span-2" aria-label="今日をためていく">
           <div>
             <span>今日をためていく</span>
           </div>
@@ -1207,7 +1214,7 @@
           </details>
         </section>
 
-        <section class="dashboard-section-heading dashboard-closed-heading span-2" aria-label="ふだんは閉じているもの">
+        <section id="dashboard-closed" class="dashboard-section-heading dashboard-closed-heading span-2" aria-label="ふだんは閉じているもの">
           <div>
             <span>ふだんは閉じているもの</span>
           </div>

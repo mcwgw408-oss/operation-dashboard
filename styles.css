@@ -219,6 +219,32 @@ textarea {
   gap: 16px;
 }
 
+.dashboard-page-nav {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
+  white-space: nowrap;
+}
+
+.dashboard-page-nav a {
+  flex: 0 0 auto;
+  border: 1px solid var(--green-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.dashboard-page-nav a:hover {
+  background: var(--green-soft);
+}
+
 .summary-panel {
 }
 
@@ -427,6 +453,7 @@ textarea {
   background: transparent;
   box-shadow: none;
   padding: 0 2px;
+  scroll-margin-top: 18px;
 }
 
 .dashboard-section-heading span {
@@ -3594,6 +3621,10 @@ textarea {
 }
 
 /* ===== Step 1: ゾーン別の表示順 ===== */
+.dashboard .dashboard-page-nav {
+  order: 8;
+}
+
 .dashboard .morning-guidance-panel {
   order: 10;
 }
@@ -3777,6 +3808,17 @@ textarea {
   .summary-panel,
   .daily-focus-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-page-nav {
+    margin: 0 -2px;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+
+  .dashboard-page-nav a {
+    padding: 6px 11px;
+    font-size: 12px;
   }
 
   .daily-focus-heading {
