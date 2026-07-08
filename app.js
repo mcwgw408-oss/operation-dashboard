@@ -6218,10 +6218,6 @@ function buildDailyFocusCondition(healthAwareRecommendation, memoryContext, dail
 }
 
 function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwareRecommendation, memoryContext, contextSummary = null, dailyInput = "" } = {}) {
-  const priority = dailyFocusValue(contextSummary?.theme) ||
-    dailyFocusValue(priorityCandidate?.title) ||
-    dailyFocusValue(recommendation?.title);
-  const action = dailyFocusValue(recommendation?.actionText);
   const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
   const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
   const dailyInputNote = dailyFocusValue(dailyInput);
@@ -6229,31 +6225,19 @@ function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwa
     memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
     memoryDisplayTitle(memoryContext?.recent?.[0]),
   );
-  const lines = [];
+  const lines = ["おはようございます、今日は無理なく一つずつ始めましょう。"];
 
-  if (priority) {
-    lines.push(`今日は「${priority}」を中心に進めるとよさそうです。`);
-  } else {
-    lines.push("今日は無理に増やさず、最初の一歩をひとつ決めましょう。");
-  }
-
-  if (action) {
-    lines.push(action);
+  if (caution) {
+    lines.push(caution);
   } else if (support) {
     lines.push(support);
-  } else if (caution) {
-    lines.push(caution);
-  } else {
-    lines.push("小さく始めて、流れが出たら次へ進みましょう。");
-  }
-
-  if (dailyInputNote && lines.length < 3) {
+  } else if (dailyInputNote) {
     lines.push("今日の入力メモも参考にしています。");
-  } else if (memoryTitle && lines.length < 3) {
+  } else if (memoryTitle) {
     lines.push(`記憶では「${memoryTitle}」も見ています。`);
   }
 
-  return lines.slice(0, 3).join("\n");
+  return lines.slice(0, 2).join("\n");
 }
 
 function renderMorningGuidanceLayer({
