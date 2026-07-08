@@ -224,43 +224,33 @@ textarea {
 }
 
 .summary-panel {
-  order: 1;
 }
 
 .morning-guidance-panel {
-  order: 2;
 }
 
 .daily-focus-panel {
-  order: 3;
 }
 
 .dashboard-proposal-heading {
-  order: 4;
 }
 
 .brain-panel {
-  order: 5;
 }
 
 .dashboard-health-input-panel {
-  order: 8;
 }
 
 .dashboard-memory-input-panel {
-  order: 9;
 }
 
 .dashboard-task-panel {
-  order: 6;
 }
 
 .schedule-panel {
-  order: 10;
 }
 
 .dashboard-ai-analysis-panel {
-  order: 40;
 }
 
 .morning-guidance-panel {
