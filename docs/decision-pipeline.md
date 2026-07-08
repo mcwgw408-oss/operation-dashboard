@@ -402,6 +402,36 @@ Step12-e-1では、表現層を分離する前の観測点として、現在のB
 
 既存のBrain golden fixtureを再利用し、決定結果から描画直前の表現値を組み立てます。Step12-e-1では `app.js` の表現ロジック、文言、UI、保存処理を変更しません。
 
-`pickDailyFocusTask(todayTasks, dailyTasks)` は、`buildContextSummary()` と `renderDailyFocusLayer()` の両方から同じ引数と条件で呼ばれています。Step12-e-1では現状を確認してgolden testに固定するだけとし、関数の移動は行いません。
+Step12-e-1時点では、`pickDailyFocusTask(todayTasks, dailyTasks)` が `buildContextSummary()` と `renderDailyFocusLayer()` の両方から同じ引数と条件で呼ばれていることを確認しました。この段階では関数を移動せず、現状をgolden testに固定しました。
 
 Step12-e-2以降で、固定した出力を維持しながら表現生成の責務分離を進めます。
+
+## Step12-e-2 表現層の集約
+
+Step12-e-2では、Step12-e-1で固定した表現出力を `buildBrainExpression()` に集約します。
+
+入力:
+
+- `brainContext`
+- `brainDecision`
+- Learning同期後のAdaptive Guidance
+- Explain Layerが参照するLearning同期前のSummary / Hint / Confidence
+
+出力:
+
+- 決定済みRecommendationのtitle、message、actionText、reasons
+- Explain Layer Details
+- Context Summary
+- Morning Guidance Text
+- Daily Focusの表示値
+- Focus Task
+
+`pickDailyFocusTask()` の優先条件は変更せず、`buildBrainExpression()` 内で一度だけ選択した結果をContext SummaryとDaily Focusで共有します。
+
+境界:
+
+- Recommendation type、Priority、Learning適用、Memory適用、Health適用は `buildBrainDecision()` 側に残す。
+- `buildBrainExpression()` はDOM操作と保存処理を行わない。
+- render関数は構築済みの表現値をDOMへ反映する。
+- Reply、Reflection、Explainable GuidanceはStep12-e-2の対象外とする。
+- localStorage、Backup、restore、UI構造は変更しない。

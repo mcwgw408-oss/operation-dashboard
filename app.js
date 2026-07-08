@@ -6337,7 +6337,13 @@ function renderLearningStatus() {
   renderAdaptiveGuidanceLayer();
 }
 
-function buildExplainLayerDetails(input, recommendation, memoryContext = {}, healthAwareRecommendation = null) {
+function buildExplainLayerDetails(
+  input,
+  recommendation,
+  memoryContext = {},
+  healthAwareRecommendation = null,
+  learningContext = null,
+) {
   const seenInfo = [
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
     input.openTodayCount ? `今日やることに未完了が${input.openTodayCount}件あります。` : "今日やることの未完了は少なめです。",
@@ -6362,9 +6368,9 @@ function buildExplainLayerDetails(input, recommendation, memoryContext = {}, hea
     "画面上とlocalStorageにある情報だけを見ています。",
     "今日の体調や気持ちは、記録されている範囲だけを手がかりにしています。",
   ];
-  const learningSummary = buildLearningSummary();
-  const learningHint = buildLearningHint(learningSummary);
-  const learningConfidence = buildLearningConfidence(learningSummary, learningHint);
+  const learningSummary = learningContext?.summary || buildLearningSummary();
+  const learningHint = learningContext?.hint || buildLearningHint(learningSummary);
+  const learningConfidence = learningContext?.confidence || buildLearningConfidence(learningSummary, learningHint);
   if (memoryContext.used) {
     uncertainty.push("記憶は補助情報として参照しています。優先度判断や提案の種類は記憶で上書きしていません。");
   }
@@ -6464,8 +6470,11 @@ function buildContextSummary({
   dailyTasks = [],
   dailyInput = "",
   adaptiveGuidance = buildAdaptiveGuidanceScores(),
+  selectedFocusTask,
 } = {}) {
-  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  const focusTask = selectedFocusTask === undefined
+    ? pickDailyFocusTask(todayTasks, dailyTasks)
+    : selectedFocusTask;
   const dailyInputNote = dailyFocusValue(dailyInput);
   const memoryTitle = dailyFocusValue(
     memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
@@ -6511,8 +6520,7 @@ function buildContextSummary({
   };
 }
 
-function renderContextSummary(context = {}) {
-  const summary = buildContextSummary(context);
+function renderContextSummary(summary = {}) {
   const text = $("#contextSummaryText");
   const theme = $("#contextSummaryTheme");
   const signals = $("#contextSummarySignals");
@@ -6570,52 +6578,86 @@ function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwa
   return lines.slice(0, 2).join("\n");
 }
 
-function renderMorningGuidanceLayer({
-  priorityCandidate = null,
-  recommendation = null,
-  healthAwareRecommendation = null,
-  memoryContext = null,
-  contextSummary = null,
-  dailyInput = "",
+function buildBrainExpression({
+  brainContext,
+  brainDecision,
+  adaptiveGuidance = buildAdaptiveGuidanceScores(),
+  explainLearningContext = null,
 } = {}) {
-  const target = $("#morningGuidanceText");
-  if (!target) return;
-  target.textContent = buildMorningGuidanceText({
+  const {
+    day,
+    todayTasks,
+    dailyTasks,
+  } = brainContext;
+  const {
+    priorityCandidate,
+    recommendationInput,
+    recommendation,
+    brainMemoryContext,
+    healthAwareRecommendation,
+  } = brainDecision;
+  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  const expressionContext = {
     priorityCandidate,
     recommendation,
     healthAwareRecommendation,
-    memoryContext,
-    contextSummary,
-    dailyInput,
+    memoryContext: brainMemoryContext,
+    todayTasks,
+    dailyTasks,
+    dailyInput: day.dailyInput,
+    adaptiveGuidance,
+  };
+  const contextSummary = buildContextSummary({
+    ...expressionContext,
+    selectedFocusTask: focusTask,
   });
+
+  return {
+    recommendation,
+    explainLayerDetails: buildExplainLayerDetails(
+      recommendationInput,
+      recommendation,
+      brainMemoryContext,
+      healthAwareRecommendation,
+      explainLearningContext,
+    ),
+    contextSummary,
+    morningGuidanceText: buildMorningGuidanceText({
+      ...expressionContext,
+      contextSummary,
+    }),
+    dailyFocus: {
+      priority:
+        dailyFocusValue(contextSummary?.theme) ||
+        dailyFocusValue(priorityCandidate?.title) ||
+        dailyFocusValue(recommendation?.title) ||
+        "今日はまず整えることを優先します。",
+      nextAction:
+        dailyFocusValue(recommendation?.actionText) ||
+        (focusTask ? `「${focusTask.title}」を5分だけ始める` : "最初の一手を1つだけ決める"),
+      condition: buildDailyFocusCondition(
+        healthAwareRecommendation,
+        brainMemoryContext,
+        day.dailyInput,
+      ),
+      task: focusTask?.title || "今日のタスクはまだありません。",
+    },
+    focusTask,
+  };
 }
 
-function renderDailyFocusLayer({
-  priorityCandidate = null,
-  recommendation = null,
-  healthAwareRecommendation = null,
-  memoryContext = null,
-  todayTasks = [],
-  dailyTasks = [],
-  contextSummary = null,
-  dailyInput = "",
-} = {}) {
+function renderMorningGuidanceLayer(morningGuidanceText = "") {
+  const target = $("#morningGuidanceText");
+  if (!target) return;
+  target.textContent = morningGuidanceText;
+}
+
+function renderDailyFocusLayer(dailyFocus = {}) {
   if (!$("#dailyFocusPriority")) return;
-  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
-  $("#dailyFocusPriority").textContent =
-    dailyFocusValue(contextSummary?.theme) ||
-    dailyFocusValue(priorityCandidate?.title) ||
-    dailyFocusValue(recommendation?.title) ||
-    "今日はまず整えることを優先します。";
-  $("#dailyFocusNextAction").textContent =
-    dailyFocusValue(recommendation?.actionText) ||
-    (focusTask ? `「${focusTask.title}」を5分だけ始める` : "最初の一手を1つだけ決める");
-  $("#dailyFocusCondition").textContent = buildDailyFocusCondition(
-    healthAwareRecommendation,
-    memoryContext,
-    dailyInput,
-  );
-  $("#dailyFocusTask").textContent = focusTask?.title || "今日のタスクはまだありません。";
+  $("#dailyFocusPriority").textContent = dailyFocus.priority;
+  $("#dailyFocusNextAction").textContent = dailyFocus.nextAction;
+  $("#dailyFocusCondition").textContent = dailyFocus.condition;
+  $("#dailyFocusTask").textContent = dailyFocus.task;
 }
 
 function buildExplainableGuidanceReasons({
@@ -7018,18 +7060,39 @@ function renderBrainPrototype() {
     .filter((memo) => memo.updatedAt || memo.createdAt)
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   currentRecommendation = recommendation;
-  const explainLayerDetails = buildExplainLayerDetails(
-    recommendationInput,
-    recommendation,
-    brainMemoryContext,
-    healthAwareRecommendation,
-  );
+  const explainLearningSummary = buildLearningSummary();
+  const explainLearningHint = buildLearningHint(explainLearningSummary);
+  const explainLearningConfidence = buildLearningConfidence(explainLearningSummary, explainLearningHint);
   const learningEntry = syncCurrentLearningLog(recommendationInput, recommendation, {
     taskCount: todayTasks.length,
   });
   const latestLearningSummary = buildLearningSummary();
   const latestLearningHint = buildLearningHint(latestLearningSummary);
   const latestLearningConfidence = buildLearningConfidence(latestLearningSummary, latestLearningHint);
+  const adaptiveGuidance = buildAdaptiveGuidanceScores();
+  const brainExpression = buildBrainExpression({
+    brainContext,
+    brainDecision: {
+      priorityCandidate,
+      recommendationInput,
+      recommendation,
+      brainMemoryContext,
+      healthAwareRecommendation,
+    },
+    adaptiveGuidance,
+    explainLearningContext: {
+      summary: explainLearningSummary,
+      hint: explainLearningHint,
+      confidence: explainLearningConfidence,
+    },
+  });
+  const {
+    recommendation: recommendationExpression,
+    explainLayerDetails,
+    contextSummary,
+    morningGuidanceText,
+    dailyFocus,
+  } = brainExpression;
   const healthAwareConversation = getLatestHealthAwareConversation();
   const conversationContext = buildConversationContext({
     project: brainMemoryContext.project || priorityCandidate?.title || "",
@@ -7091,22 +7154,21 @@ function renderBrainPrototype() {
   );
   appendBrainItems($("#brainPriorityReasons"), explanation.reasons, "理由はまだありません。");
 
-  $("#brainRecommendationTitle").textContent = recommendation.title;
-  $("#brainRecommendationMessage").textContent = recommendation.message;
-  $("#brainRecommendationAction").textContent = recommendation.actionText;
+  $("#brainRecommendationTitle").textContent = recommendationExpression.title;
+  $("#brainRecommendationMessage").textContent = recommendationExpression.message;
+  $("#brainRecommendationAction").textContent = recommendationExpression.actionText;
   const adaptiveNote = $("#brainAdaptiveNote");
   if (adaptiveNote) {
-    adaptiveNote.textContent = recommendation.adaptiveNote || "";
-    adaptiveNote.hidden = !recommendation.adaptiveNote;
+    adaptiveNote.textContent = recommendationExpression.adaptiveNote || "";
+    adaptiveNote.hidden = !recommendationExpression.adaptiveNote;
   }
-  appendBrainItems($("#brainRecommendationReasons"), recommendation.reasons, "今日は理由を少なくして、軽く整える提案です。");
+  appendBrainItems($("#brainRecommendationReasons"), recommendationExpression.reasons, "今日は理由を少なくして、軽く整える提案です。");
   renderHealthAwareRecommendation(healthAwareRecommendation);
   renderExplainLayerDetails(explainLayerDetails);
   renderLearningFeedback(learningEntry);
   renderLearningSummary(latestLearningSummary);
   renderLearningHint(latestLearningHint);
   renderLearningConfidence(latestLearningConfidence);
-  const adaptiveGuidance = buildAdaptiveGuidanceScores();
   renderAdaptiveGuidanceLayer(adaptiveGuidance);
   renderConversationContext(conversationContext);
   renderReplyPlan(replyPlan);
@@ -7207,34 +7269,9 @@ function renderBrainPrototype() {
     day.updatedAt ? `今日の記録更新: ${brainFormatDateTime(day.updatedAt)}` : "",
   ];
   appendBrainItems($("#brainRecentChanges"), recentChanges, "最近の変化はまだありません。");
-  const contextSummary = renderContextSummary({
-    priorityCandidate,
-    recommendation,
-    healthAwareRecommendation,
-    memoryContext: brainMemoryContext,
-    todayTasks,
-    dailyTasks,
-    dailyInput: day.dailyInput,
-    adaptiveGuidance,
-  });
-  renderDailyFocusLayer({
-    priorityCandidate,
-    recommendation,
-    healthAwareRecommendation,
-    memoryContext: brainMemoryContext,
-    todayTasks,
-    dailyTasks,
-    contextSummary,
-    dailyInput: day.dailyInput,
-  });
-  renderMorningGuidanceLayer({
-    priorityCandidate,
-    recommendation,
-    healthAwareRecommendation,
-    memoryContext: brainMemoryContext,
-    contextSummary,
-    dailyInput: day.dailyInput,
-  });
+  renderContextSummary(contextSummary);
+  renderDailyFocusLayer(dailyFocus);
+  renderMorningGuidanceLayer(morningGuidanceText);
   renderExplainableGuidanceLayer({
     priorityCandidate,
     recommendation,

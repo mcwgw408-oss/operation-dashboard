@@ -57,7 +57,6 @@ function createFixedDate(fixedIso) {
 }
 
 function createDocumentStub() {
-  const capturedNodes = new Map();
   const emptyNode = {
     addEventListener() {},
     append() {},
@@ -70,15 +69,6 @@ function createDocumentStub() {
     style: {},
   };
   return {
-    captureSelectors(selectors = []) {
-      capturedNodes.clear();
-      for (const selector of selectors) {
-        capturedNodes.set(selector, { ...emptyNode, textContent: "" });
-      }
-    },
-    capturedText(selector) {
-      return capturedNodes.get(selector)?.textContent || "";
-    },
     body: emptyNode,
     createElement() {
       return { ...emptyNode, dataset: {}, remove() {}, select() {} };
@@ -86,8 +76,8 @@ function createDocumentStub() {
     execCommand() {
       return false;
     },
-    querySelector(selector) {
-      return capturedNodes.get(selector) || null;
+    querySelector() {
+      return null;
     },
     querySelectorAll() {
       return [];
@@ -127,52 +117,22 @@ globalThis.__brainGolden = {
     seedBrainGoldenFixture(fixture);
 
     const brainContext = collectBrainContext();
-    const decision = buildBrainDecision(brainContext);
+    const brainDecision = buildBrainDecision(brainContext);
     const adaptiveGuidance = buildAdaptiveGuidanceScores();
-    const expressionContext = {
-      priorityCandidate: decision.priorityCandidate,
-      recommendation: decision.recommendation,
-      healthAwareRecommendation: decision.healthAwareRecommendation,
-      memoryContext: decision.brainMemoryContext,
-      todayTasks: brainContext.todayTasks,
-      dailyTasks: brainContext.dailyTasks,
-      dailyInput: brainContext.day.dailyInput,
-      adaptiveGuidance,
-    };
-    const contextSummary = buildContextSummary(expressionContext);
-    const focusTask = pickDailyFocusTask(brainContext.todayTasks, brainContext.dailyTasks);
-    document.captureSelectors([
-      "#dailyFocusPriority",
-      "#dailyFocusNextAction",
-      "#dailyFocusCondition",
-      "#dailyFocusTask",
-    ]);
-    renderDailyFocusLayer({
-      ...expressionContext,
-      contextSummary,
-    });
+    const explainLearningSummary = buildLearningSummary();
+    const explainLearningHint = buildLearningHint(explainLearningSummary);
+    const explainLearningConfidence = buildLearningConfidence(explainLearningSummary, explainLearningHint);
 
-    return {
-      recommendation: decision.recommendation,
-      explainLayerDetails: buildExplainLayerDetails(
-        decision.recommendationInput,
-        decision.recommendation,
-        decision.brainMemoryContext,
-        decision.healthAwareRecommendation,
-      ),
-      morningGuidanceText: buildMorningGuidanceText({
-        ...expressionContext,
-        contextSummary,
-      }),
-      dailyFocus: {
-        priority: document.capturedText("#dailyFocusPriority"),
-        nextAction: document.capturedText("#dailyFocusNextAction"),
-        condition: document.capturedText("#dailyFocusCondition"),
-        task: document.capturedText("#dailyFocusTask"),
+    return buildBrainExpression({
+      brainContext,
+      brainDecision,
+      adaptiveGuidance,
+      explainLearningContext: {
+        summary: explainLearningSummary,
+        hint: explainLearningHint,
+        confidence: explainLearningConfidence,
       },
-      contextSummary,
-      focusTask,
-    };
+    });
   },
 };
 `;

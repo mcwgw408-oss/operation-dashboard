@@ -167,6 +167,18 @@ git diff --check
 - [ ] `app.js`、`index.html`、`styles.css` に差分がない
 - [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
 
+## Step12-e-2. Brain表現層の集約
+
+- [ ] `buildBrainExpression()` がRecommendation、Explain Layer、Context Summary、Morning Guidance、Daily Focusを返す
+- [ ] `buildBrainExpression()` にDOM操作や保存副作用が含まれていない
+- [ ] Learning同期前のExplain参照と同期後のAdaptive Guidance参照が維持されている
+- [ ] `pickDailyFocusTask()` の優先条件が変わらず、Context SummaryとDaily Focusで同じ結果を共有している
+- [ ] render関数が構築済みの表現値をDOMへ反映している
+- [ ] Brain golden / Expression goldenの期待値JSONに差分がない
+- [ ] Reply、Reflection、Explainable Guidanceの生成処理に差分がない
+- [ ] `index.html` / `styles.css` に差分がない
+- [ ] localStorageキー・`BACKUP_KEYS`・`createBackup()`・restore周辺に差分がない
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される
