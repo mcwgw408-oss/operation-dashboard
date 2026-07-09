@@ -138,6 +138,10 @@ globalThis.__brainGolden = {
     localStorage.seed(fixture.localStorage || {});
     return buildSakuraSnapshot(fixture.mode || "morning");
   },
+  runContextFixture(fixture) {
+    seedBrainGoldenFixture(fixture);
+    return collectBrainContext().cockpitIntent;
+  },
 };
 `;
 
@@ -182,6 +186,10 @@ export function createBrainGoldenHarness({ now = FIXED_NOW } = {}) {
     runSnapshotFixture(fixture) {
       uuidCounter = 0;
       return context.__brainGolden.runSnapshotFixture(fixture);
+    },
+    runContextFixture(fixture) {
+      uuidCounter = 0;
+      return context.__brainGolden.runContextFixture(fixture);
     },
   };
 }

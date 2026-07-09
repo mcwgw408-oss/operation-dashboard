@@ -191,6 +191,17 @@ git diff --check
 - [ ] Brain golden / Expression goldenに差分がない
 - [ ] `node tests/snapshot-golden/run-snapshot-golden.mjs` が成功する
 
+## Step13-b. operation-cockpit IntentのBrain Context接続
+
+- [ ] `collectBrainContext()` が表示対象日の`cockpitIntent`を返す
+- [ ] `cockpitIntent`にはIntent 5項目、date、updatedAtだけが含まれる
+- [ ] 欠損、不正JSON、未知の旧形式、対象日なしが`null`になる
+- [ ] `buildBrainDecision()`と`buildBrainExpression()`が`cockpitIntent`を参照しない
+- [ ] Cockpitあり/なしでBrain golden結果が一致する
+- [ ] Cockpitあり/なしでExpression golden結果が一致する
+- [ ] `node tests/brain-golden/run-cockpit-context-check.mjs` が成功する
+- [ ] localStorage書き込み、`BACKUP_KEYS`、Backup / restore、`cockpit.js`に差分がない
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

@@ -154,6 +154,10 @@ check(appJs.includes('const OPERATION_COCKPIT_STORAGE_KEY = "operation-cockpit-v
 check(appJs.includes('"operation-cockpit": {'), "operation-cockpit Snapshot app payload is missing");
 const readOperationCockpitStoreBody = extractDelimitedBlock(appJs, "function readOperationCockpitStore", "{", "}");
 const buildOperationCockpitRecentDaysBody = extractDelimitedBlock(appJs, "function buildOperationCockpitRecentDays", "{", "}");
+const buildOperationCockpitIntentContextBody = extractDelimitedBlock(appJs, "function buildOperationCockpitIntentContext", "{", "}");
+const collectBrainContextBody = extractDelimitedBlock(appJs, "function collectBrainContext", "{", "}");
+const buildBrainDecisionBody = extractDelimitedBlock(appJs, "function buildBrainDecision", "{", "}");
+const buildBrainExpressionBody = extractDelimitedBlock(appJs, "function buildBrainExpression", "{", "}");
 check(readOperationCockpitStoreBody.includes("readStoredJson"), "operation-cockpit adapter must use guarded JSON reading");
 check(!readOperationCockpitStoreBody.includes("localStorage.setItem"), "operation-cockpit adapter must not write localStorage");
 for (const forbiddenToken of ["localStorage", "saveStore(", "getDay("]) {
@@ -161,7 +165,14 @@ for (const forbiddenToken of ["localStorage", "saveStore(", "getDay("]) {
     !buildOperationCockpitRecentDaysBody.includes(forbiddenToken),
     `operation-cockpit pure transform calls forbidden token: ${forbiddenToken}`,
   );
+  check(
+    !buildOperationCockpitIntentContextBody.includes(forbiddenToken),
+    `operation-cockpit Intent transform calls forbidden token: ${forbiddenToken}`,
+  );
 }
+check(collectBrainContextBody.includes("cockpitIntent"), "Brain Context must expose cockpitIntent");
+check(!buildBrainDecisionBody.includes("cockpitIntent"), "Brain Decision must not use cockpitIntent in Step13-b");
+check(!buildBrainExpressionBody.includes("cockpitIntent"), "Brain Expression must not use cockpitIntent in Step13-b");
 const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShortMemory", "{", "}");
 check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");
 check(!forgetShortMemoryBody.includes("projectMemory"), "記憶削除処理がprojectMemoryに触れています");

@@ -435,3 +435,26 @@ Step12-e-2では、Step12-e-1で固定した表現出力を `buildBrainExpressio
 - render関数は構築済みの表現値をDOMへ反映する。
 - Reply、Reflection、Explainable GuidanceはStep12-e-2の対象外とする。
 - localStorage、Backup、restore、UI構造は変更しない。
+
+## Step13-b operation-cockpit IntentのContext接続
+
+Step13-bでは、`operation-cockpit-v1` の表示対象日Intentを `collectBrainContext()` の `cockpitIntent` として追加します。
+
+`cockpitIntent`:
+
+- `date`
+- `topPriority`
+- `articleNote`
+- `todayFocus`
+- `growthTarget`
+- `noticed`
+- `updatedAt`
+
+欠損、不正JSON、未知の旧形式、対象日のrecordなしの場合は `null` とします。`communityChecks`、通常checks、mail checks、creator checks、creator masterはBrain Contextへ含めません。
+
+境界:
+
+- 読み取りと正規化は `readOperationCockpitStore()`、`buildOperationCockpitRecentDays()`、`buildOperationCockpitIntentContext()` を経由する。
+- `collectBrainContext()` は保存、修復、migrationを行わない。
+- `buildBrainDecision()` と `buildBrainExpression()` は `cockpitIntent` を参照しない。
+- Priority、Recommendation、表示文言、Snapshot、Backup / restoreは変更しない。

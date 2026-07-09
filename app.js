@@ -6900,6 +6900,10 @@ function collectBrainContext() {
   const koryuEntries = asArray(readStoredJson(EXTERNAL_APP_KEYS.koryu, []));
   const revisitPeople = koryuEntries.filter((entry) => brainStatusMatches(entry.revisit, ["はい", "縺ｯ縺・"]));
   const recentMemos = persistentMemos.filter((memo) => brainDaysSince(memo.updatedAt || memo.createdAt) !== null && brainDaysSince(memo.updatedAt || memo.createdAt) <= 7);
+  const cockpitIntent = buildOperationCockpitIntentContext(
+    readOperationCockpitStore(),
+    activeDate,
+  );
   return {
     activeDate,
     day,
@@ -6921,6 +6925,7 @@ function collectBrainContext() {
     hasshinNextActions,
     koryuEntries,
     revisitPeople,
+    cockpitIntent,
     learningLog,
     memoryStore,
     healthState,
@@ -7889,6 +7894,21 @@ function buildOperationCockpitRecentDays(source, fromKey, toKey) {
     });
 
   return recentDays;
+}
+
+function buildOperationCockpitIntentContext(source, dateKey) {
+  const day = buildOperationCockpitRecentDays(source, dateKey, dateKey)[dateKey];
+  if (!day) return null;
+
+  return {
+    date: dateKey,
+    topPriority: day.topPriority,
+    articleNote: day.articleNote,
+    todayFocus: day.todayFocus,
+    growthTarget: day.growthTarget,
+    noticed: day.noticed,
+    updatedAt: day.updatedAt,
+  };
 }
 
 function readFirstStoredJson(keys, fallback) {
