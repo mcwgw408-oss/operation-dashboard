@@ -54,6 +54,11 @@ for (const docPath of [
   check(existsSync(resolve(root, docPath)), `保守docsがありません: ${docPath}`);
 }
 
+check(
+  existsSync(resolve(root, "tests/later-items-sort-check.mjs")),
+  "あとで見る・あとで読むの表示順単体テストが検査セットから外れています: tests/later-items-sort-check.mjs",
+);
+
 const ids = [...indexHtml.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
 const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))].sort();
 check(duplicateIds.length === 0, `index.htmlに重複IDがあります: ${duplicateIds.join(", ")}`);
