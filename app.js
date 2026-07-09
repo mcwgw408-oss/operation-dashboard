@@ -7169,6 +7169,7 @@ function renderBrainPrototype() {
     explanation,
     recommendationInput,
     learningHint,
+    memoryRetrievalContext,
     brainMemoryContext,
     recommendation,
     healthAwareRecommendation,
