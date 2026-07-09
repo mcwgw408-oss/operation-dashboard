@@ -1824,6 +1824,25 @@ function laterMatchesSearch(item, query) {
     .includes(query);
 }
 
+function laterCreatedTime(item) {
+  const time = new Date(item?.createdAt || item?.created || item?.createdDate || "").getTime();
+  return Number.isNaN(time) ? null : time;
+}
+
+function sortLaterItemsForDisplay(items) {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort((left, right) => {
+      const leftTime = laterCreatedTime(left.item);
+      const rightTime = laterCreatedTime(right.item);
+      if (leftTime !== null && rightTime !== null && leftTime !== rightTime) return leftTime - rightTime;
+      if (leftTime === null && rightTime !== null) return -1;
+      if (leftTime !== null && rightTime === null) return 1;
+      return left.index - right.index;
+    })
+    .map(({ item }) => item);
+}
+
 function removeLaterDuplicates() {
   const seen = new Set();
   const before = laterItems.length;
@@ -1850,7 +1869,9 @@ function renderLaterItems() {
   if (searchField && searchField.value !== laterSearchQuery) searchField.value = laterSearchQuery;
   const searchQuery = normalizeLaterText(laterSearchQuery);
   const statusItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
-  const visibleItems = statusItems.filter((item) => laterMatchesSearch(item, searchQuery));
+  const visibleItems = sortLaterItemsForDisplay(
+    statusItems.filter((item) => laterMatchesSearch(item, searchQuery)),
+  );
   const displayItems = searchQuery ? visibleItems : visibleItems.slice(0, laterVisibleLimit);
   const hiddenCount = Math.max(0, visibleItems.length - displayItems.length);
   const searchCount = $("#laterSearchCount");
