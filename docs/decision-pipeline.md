@@ -491,3 +491,13 @@ Intentなし:
 
 - Recommendation、Explain Layer、Context Summary、Morning Guidance、Daily Focusの既存出力を変更しない。
 - 空欄への催促や言及を追加しない。
+
+## Step13-c-3 Intent保存後の再生成境界
+
+dashboardは`operation-cockpit-v1`の`storage`イベントを読み取り専用で監視します。
+
+- 最初の返答が未選択: `renderBrainPrototype()`を再実行し、保存されたIntentから提案を作り直す。
+- 最初の返答が選択済み: 再生成せず、警告やエラーも表示しない。
+- Cockpit以外のstorage key変更: この境界では再生成しない。
+
+`cockpit.js`のwriter、localStorage形式、Intent候補、Recommendation判断は変更しません。

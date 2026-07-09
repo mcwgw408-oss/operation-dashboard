@@ -142,6 +142,9 @@ globalThis.__brainGolden = {
     seedBrainGoldenFixture(fixture);
     return collectBrainContext().cockpitIntent;
   },
+  intentRegenerationBoundary(storageKey, firstAgentReply) {
+    return shouldRegenerateBrainForIntentChange(storageKey, firstAgentReply);
+  },
 };
 `;
 
@@ -190,6 +193,9 @@ export function createBrainGoldenHarness({ now = FIXED_NOW } = {}) {
     runContextFixture(fixture) {
       uuidCounter = 0;
       return context.__brainGolden.runContextFixture(fixture);
+    },
+    intentRegenerationBoundary(storageKey, firstAgentReply) {
+      return context.__brainGolden.intentRegenerationBoundary(storageKey, firstAgentReply);
     },
   };
 }

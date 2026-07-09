@@ -177,6 +177,8 @@ check(collectBrainContextBody.includes("cockpitIntent"), "Brain Context must exp
 check(buildBrainDecisionBody.includes("cockpitIntent"), "Brain Decision must use cockpitIntent in Step13-c");
 check(!buildBrainExpressionBody.includes("cockpitIntent"), "Brain Expression must not read raw cockpitIntent");
 check(buildBrainExpressionBody.includes("intentDecision"), "Brain Expression must use the normalized intentDecision");
+check(appJs.includes("function shouldRegenerateBrainForIntentChange"), "Intent regeneration boundary is missing");
+check(appJs.includes('window.addEventListener("storage", handleOperationCockpitStorageChange);'), "Cockpit storage changes must be observed");
 const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShortMemory", "{", "}");
 check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");
 check(!forgetShortMemoryBody.includes("projectMemory"), "記憶削除処理がprojectMemoryに触れています");

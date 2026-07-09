@@ -220,6 +220,15 @@ git diff --check
 - [ ] 判断メモにIntent受領と歩幅決定が記録される
 - [ ] `node tests/brain-golden/run-brain-intent-golden.mjs` が成功する
 
+## Step13-c-3. Intent保存後の再生成境界
+
+- [ ] Intent保存通知で、最初の返答前だけBrain提案を再生成する
+- [ ] 最初の返答後はIntentが変わっても提案を再生成しない
+- [ ] 再生成しない場合に警告やエラーを表示しない
+- [ ] Cockpit以外のstorage変更では再生成しない
+- [ ] `cockpit.js`とlocalStorage形式に差分がない
+- [ ] `node tests/brain-golden/run-intent-regeneration-check.mjs` が成功する
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

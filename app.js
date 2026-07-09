@@ -6478,6 +6478,18 @@ function showFirstAgentResponse(reply) {
   target.hidden = !message;
 }
 
+function shouldRegenerateBrainForIntentChange(
+  storageKey,
+  firstAgentReply = currentFirstAgentReply,
+) {
+  return storageKey === OPERATION_COCKPIT_STORAGE_KEY && !firstAgentReply;
+}
+
+function handleOperationCockpitStorageChange(event) {
+  if (!shouldRegenerateBrainForIntentChange(event?.key)) return;
+  renderBrainPrototype();
+}
+
 function dailyFocusValue(value) {
   const text = String(value || "").trim();
   return text && text !== "-" ? text : "";
@@ -7474,6 +7486,7 @@ function applySakuraInnerToggle() {
 }
 
 function bindEvents() {
+  window.addEventListener("storage", handleOperationCockpitStorageChange);
   $("#explainLayerToggle")?.addEventListener("click", () => {
     const body = $("#explainLayerBody");
     setExplainLayerExpanded(Boolean(body?.hidden));
