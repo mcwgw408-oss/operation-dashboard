@@ -158,7 +158,9 @@ const buildOperationCockpitRecentDaysBody = extractDelimitedBlock(appJs, "functi
 const buildOperationCockpitIntentContextBody = extractDelimitedBlock(appJs, "function buildOperationCockpitIntentContext", "{", "}");
 const collectBrainContextBody = extractDelimitedBlock(appJs, "function collectBrainContext", "{", "}");
 const buildBrainDecisionBody = extractDelimitedBlock(appJs, "function buildBrainDecision", "{", "}");
-const buildBrainExpressionBody = extractDelimitedBlock(appJs, "function buildBrainExpression", "{", "}");
+const buildBrainExpressionStart = appJs.indexOf("function buildBrainExpression");
+const buildBrainExpressionEnd = appJs.indexOf("function renderMorningGuidanceLayer", buildBrainExpressionStart);
+const buildBrainExpressionBody = appJs.slice(buildBrainExpressionStart, buildBrainExpressionEnd);
 check(readOperationCockpitStoreBody.includes("readStoredJson"), "operation-cockpit adapter must use guarded JSON reading");
 check(!readOperationCockpitStoreBody.includes("localStorage.setItem"), "operation-cockpit adapter must not write localStorage");
 for (const forbiddenToken of ["localStorage", "saveStore(", "getDay("]) {
@@ -173,7 +175,8 @@ for (const forbiddenToken of ["localStorage", "saveStore(", "getDay("]) {
 }
 check(collectBrainContextBody.includes("cockpitIntent"), "Brain Context must expose cockpitIntent");
 check(buildBrainDecisionBody.includes("cockpitIntent"), "Brain Decision must use cockpitIntent in Step13-c");
-check(!buildBrainExpressionBody.includes("cockpitIntent"), "Brain Expression must not use cockpitIntent in Step13-b");
+check(!buildBrainExpressionBody.includes("cockpitIntent"), "Brain Expression must not read raw cockpitIntent");
+check(buildBrainExpressionBody.includes("intentDecision"), "Brain Expression must use the normalized intentDecision");
 const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShortMemory", "{", "}");
 check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");
 check(!forgetShortMemoryBody.includes("projectMemory"), "記憶削除処理がprojectMemoryに触れています");

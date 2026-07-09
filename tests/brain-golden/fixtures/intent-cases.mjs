@@ -1,7 +1,7 @@
 import candidateNone from "./candidate-none.mjs";
 
 export const INTENT_DIRECTION = "今週のリリースを仕上げる";
-export const INTENT_RECEIVED_MARKER = "意図を受け取";
+export const INTENT_RECEIVED_MARKER = "受け取";
 export const STEP_SIZE_MARKER = "歩幅";
 export const SAFETY_MESSAGE = "その方向でいきましょう。今日は少し小さめの入口から始めると良さそうです。";
 

@@ -6612,6 +6612,47 @@ function buildMorningGuidanceText({ priorityCandidate, recommendation, healthAwa
   return lines.slice(0, 2).join("\n");
 }
 
+const INTENT_SAFETY_MESSAGE = "その方向でいきましょう。今日は少し小さめの入口から始めると良さそうです。";
+
+function buildIntentAwareRecommendation(recommendation, intentDecision) {
+  if (!intentDecision) return recommendation;
+
+  const directionReceipt = `今日の意図「${intentDecision.direction}」を受け取りました。`;
+  const stepMessage = intentDecision.safetyAdjustment
+    ? INTENT_SAFETY_MESSAGE
+    : `その方向へ進むための今日の一歩として、${recommendation.actionText}`;
+  const intentReason = intentDecision.safetyAdjustment
+    ? "今日の意図を方向として受け取り、既存の体調記録をもとに歩幅を小さめにしました。"
+    : "今日の意図を方向として受け取り、現在の状況から実行できる歩幅を決めました。";
+
+  return {
+    ...recommendation,
+    message: `${directionReceipt}\n${stepMessage}`,
+    actionText: intentDecision.safetyAdjustment
+      ? "まず5分だけ、その方向の入口に触れてみましょう。"
+      : recommendation.actionText,
+    reasons: [...asArray(recommendation.reasons), intentReason],
+  };
+}
+
+function applyIntentToExplainLayer(details, intentDecision) {
+  if (!intentDecision) return details;
+
+  return {
+    ...details,
+    seenInfo: [
+      ...details.seenInfo,
+      `今日の意図「${intentDecision.direction}」を原文のまま受け取っています。`,
+    ],
+    mainReasons: [
+      ...details.mainReasons,
+      intentDecision.safetyAdjustment
+        ? "意図の方向は変えず、既存の体調記録をもとに今日の歩幅だけを小さくしています。"
+        : "意図の方向は変えず、現在の状況から今日実行できる歩幅を提案しています。",
+    ],
+  };
+}
+
 function buildBrainExpression({
   brainContext,
   brainDecision,
@@ -6629,11 +6670,16 @@ function buildBrainExpression({
     recommendation,
     brainMemoryContext,
     healthAwareRecommendation,
+    intentDecision,
   } = brainDecision;
+  const recommendationExpression = buildIntentAwareRecommendation(
+    recommendation,
+    intentDecision,
+  );
   const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
   const expressionContext = {
     priorityCandidate,
-    recommendation,
+    recommendation: recommendationExpression,
     healthAwareRecommendation,
     memoryContext: brainMemoryContext,
     todayTasks,
@@ -6645,16 +6691,17 @@ function buildBrainExpression({
     ...expressionContext,
     selectedFocusTask: focusTask,
   });
+  const explainLayerDetails = buildExplainLayerDetails(
+    recommendationInput,
+    recommendationExpression,
+    brainMemoryContext,
+    healthAwareRecommendation,
+    explainLearningContext,
+  );
 
   return {
-    recommendation,
-    explainLayerDetails: buildExplainLayerDetails(
-      recommendationInput,
-      recommendation,
-      brainMemoryContext,
-      healthAwareRecommendation,
-      explainLearningContext,
-    ),
+    recommendation: recommendationExpression,
+    explainLayerDetails: applyIntentToExplainLayer(explainLayerDetails, intentDecision),
     contextSummary,
     morningGuidanceText: buildMorningGuidanceText({
       ...expressionContext,
@@ -6664,10 +6711,10 @@ function buildBrainExpression({
       priority:
         dailyFocusValue(contextSummary?.theme) ||
         dailyFocusValue(priorityCandidate?.title) ||
-        dailyFocusValue(recommendation?.title) ||
+        dailyFocusValue(recommendationExpression?.title) ||
         "今日はまず整えることを優先します。",
       nextAction:
-        dailyFocusValue(recommendation?.actionText) ||
+        dailyFocusValue(recommendationExpression?.actionText) ||
         (focusTask ? `「${focusTask.title}」を5分だけ始める` : "最初の一手を1つだけ決める"),
       condition: buildDailyFocusCondition(
         healthAwareRecommendation,
@@ -7113,6 +7160,7 @@ function renderBrainPrototype() {
     brainMemoryContext,
     recommendation,
     healthAwareRecommendation,
+    intentDecision,
   } = buildBrainDecision(brainContext);
   const newestMemo = persistentMemos
     .filter((memo) => memo.updatedAt || memo.createdAt)
@@ -7136,6 +7184,7 @@ function renderBrainPrototype() {
       recommendation,
       brainMemoryContext,
       healthAwareRecommendation,
+      intentDecision,
     },
     adaptiveGuidance,
     explainLearningContext: {
