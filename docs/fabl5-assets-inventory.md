@@ -221,6 +221,12 @@ Snapshot summaryに含まれる集計:
 - Snapshotのapp keyを `operation-cockpit` として追加するか。
 - cockpitのクリエイターリストをAIに渡すか、privacy対象にするか。
 
+## Fable 5 設計・レビュー文書
+
+- [review-playbook.md](./review-playbook.md): operation-dashboardの完成レビュー手順、確認観点、報告要件。
+- [design-decisions.md](./design-decisions.md): 画面、データ、コード構造、判断パイプライン、Intentに関する設計判断の理由集。
+- [open-questions.md](./open-questions.md): 未決事項、失効した指示、決着済み事項の台帳。
+
 ## 結論
 
 現時点でSakura AI Brainが活用しやすい資産は、すでにSnapshotとBrain Prototypeにかなり接続されています。
