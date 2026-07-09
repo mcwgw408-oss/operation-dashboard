@@ -202,6 +202,14 @@ git diff --check
 - [ ] `node tests/brain-golden/run-cockpit-context-check.mjs` が成功する
 - [ ] localStorage書き込み、`BACKUP_KEYS`、Backup / restore、`cockpit.js`に差分がない
 
+## Step13-c. Intent判断接続の着手前データ保護
+
+- [ ] `OPERATION_COCKPIT_STORAGE_KEY` が `BACKUP_KEYS` に登録されている
+- [ ] `createBackup()` が `operation-cockpit-v1` を書き出す
+- [ ] restoreが既存の`BACKUP_KEYS`ループでCockpitデータを復元する
+- [ ] Cockpitキーを含まない旧Backupも引き続き取り込める
+- [ ] `cockpit.js`のwriter責務とlocalStorage形式に差分がない
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

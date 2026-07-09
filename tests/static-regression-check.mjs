@@ -122,7 +122,7 @@ const exportedKeys = [...createBackupBody.matchAll(/data\[([A-Z][A-Z0-9_]*_KEY)\
   .map((match) => match[1]);
 const missingExports = sortedDifference(backupKeys, exportedKeys);
 const unexpectedExports = sortedDifference(exportedKeys, backupKeys);
-check(!backupKeys.includes("OPERATION_COCKPIT_STORAGE_KEY"), "operation-cockpit must not be added to dashboard backup ownership");
+check(backupKeys.includes("OPERATION_COCKPIT_STORAGE_KEY"), "operation-cockpit must be protected by dashboard backup");
 check(missingExports.length === 0, `BACKUP_KEYSにあるが書き出されないキー: ${missingExports.join(", ")}`);
 check(unexpectedExports.length === 0, `書き出されるがBACKUP_KEYSにないキー: ${unexpectedExports.join(", ")}`);
 
@@ -131,6 +131,7 @@ for (const key of [
   "LEARNING_LOG_STORAGE_KEY",
   "MEMORY_STORE_STORAGE_KEY",
   "SNAPSHOT_SETTINGS_KEY",
+  "OPERATION_COCKPIT_STORAGE_KEY",
 ]) {
   check(backupKeys.includes(key), `必須バックアップキーがありません: ${key}`);
 }
