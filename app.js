@@ -5606,6 +5606,37 @@ function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePo
   };
 }
 
+function buildCockpitIntentCandidate(cockpitIntent) {
+  if (!cockpitIntent) return null;
+  const directionFields = [
+    ["topPriority", cockpitIntent.topPriority],
+    ["todayFocus", cockpitIntent.todayFocus],
+    ["articleNote", cockpitIntent.articleNote],
+    ["growthTarget", cockpitIntent.growthTarget],
+    ["noticed", cockpitIntent.noticed],
+  ];
+  const [intentField, direction] = directionFields.find(([, value]) => String(value || "").trim()) || [];
+  if (!direction) return null;
+
+  return {
+    ...createPriorityCandidate({
+      item: {
+        id: `operation-cockpit.intent:${cockpitIntent.date || activeDate}`,
+        title: direction,
+        date: cockpitIntent.date || activeDate,
+        updatedAt: cockpitIntent.updatedAt || "",
+        priority: true,
+      },
+      source: "operation-cockpit.intent",
+      sourceLabel: "今日の意図",
+      baseReason: "朝に書いた今日の方向です。",
+      basePoints: 100,
+    }),
+    intentDirection: true,
+    intentField,
+  };
+}
+
 function collectPriorityCandidates(context) {
   const candidates = [];
   context.todayTasks.forEach((item) => candidates.push(createPriorityCandidate({
@@ -5738,10 +5769,12 @@ function inferMomentumContext(day, writingInProgress, hasshinNextActions) {
 }
 
 function applyPriorityModifiers(candidate, energyContext, momentumContext) {
-  const adjustedScore = Math.max(
-    0,
-    Math.min(100, candidate.score + energyContext.modifier + momentumContext.modifier),
-  );
+  const adjustedScore = candidate.intentDirection
+    ? 100
+    : Math.max(
+        0,
+        Math.min(100, candidate.score + energyContext.modifier + momentumContext.modifier),
+      );
   return {
     ...candidate,
     adjustedScore,
@@ -6947,6 +6980,7 @@ function buildBrainDecision(brainContext) {
     hasshinNextActions,
     revisitPeople,
     recentMemos,
+    cockpitIntent,
     learningLog: brainLearningLog,
     memoryStore: brainMemoryStore,
     healthState: brainHealthState,
@@ -6965,6 +6999,8 @@ function buildBrainDecision(brainContext) {
     writingInProgress,
     revisitPeople,
   });
+  const intentCandidate = buildCockpitIntentCandidate(cockpitIntent);
+  if (intentCandidate) candidates.unshift(intentCandidate);
   const rankedCandidates = rankPriorityCandidates(candidates, energyContext, momentumContext);
   const priorityCandidate = rankedCandidates[0];
   const explanation = explainPriorityCandidate(priorityCandidate);
@@ -7000,14 +7036,23 @@ function buildBrainDecision(brainContext) {
     .sort((a, b) =>
       String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
     );
+  const latestHealthState = latestHealthStateFrom(brainHealthState);
   const healthContext = buildHealthContext(
-    latestHealthStateFrom(brainHealthState),
+    latestHealthState,
     buildHealthInsight(recentHealthStates.slice(0, 7)),
     buildHealthTrend(recentHealthStates.slice(0, 14)),
   );
   const healthAwareRecommendation = buildHealthAwareRecommendation(
     recommendation,
     healthContext,
+  );
+  const intentSafetyAdjustment = Boolean(
+    intentCandidate &&
+    latestHealthState &&
+    (
+      ["very_low", "low", "unstable"].includes(latestHealthState.energyLevel) ||
+      ["depleted", "low"].includes(latestHealthState.recoveryFeeling)
+    ),
   );
 
   return {
@@ -7026,6 +7071,13 @@ function buildBrainDecision(brainContext) {
     brainMemoryContext,
     recommendation,
     healthAwareRecommendation,
+    intentDecision: intentCandidate
+      ? {
+          direction: intentCandidate.title,
+          sourceField: intentCandidate.intentField,
+          safetyAdjustment: intentSafetyAdjustment,
+        }
+      : null,
   };
 }
 

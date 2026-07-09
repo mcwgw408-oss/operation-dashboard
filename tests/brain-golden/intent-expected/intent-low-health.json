@@ -1,0 +1,9 @@
+{
+  "direction": "今週のリリースを仕上げる",
+  "priorityTitle": "今週のリリースを仕上げる",
+  "directionRepeated": true,
+  "intentReceivedInMessage": true,
+  "intentReceivedInJudgmentMemo": true,
+  "stepSizeRecorded": true,
+  "safetyMessageIncluded": true
+}

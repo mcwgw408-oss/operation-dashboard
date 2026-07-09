@@ -172,7 +172,7 @@ for (const forbiddenToken of ["localStorage", "saveStore(", "getDay("]) {
   );
 }
 check(collectBrainContextBody.includes("cockpitIntent"), "Brain Context must expose cockpitIntent");
-check(!buildBrainDecisionBody.includes("cockpitIntent"), "Brain Decision must not use cockpitIntent in Step13-b");
+check(buildBrainDecisionBody.includes("cockpitIntent"), "Brain Decision must use cockpitIntent in Step13-c");
 check(!buildBrainExpressionBody.includes("cockpitIntent"), "Brain Expression must not use cockpitIntent in Step13-b");
 const forgetShortMemoryBody = extractDelimitedBlock(appJs, "function forgetShortMemory", "{", "}");
 check(forgetShortMemoryBody.includes("memoryStore.shortMemory"), "記憶削除処理がshortMemoryを対象にしていません");

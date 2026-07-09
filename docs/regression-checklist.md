@@ -210,6 +210,16 @@ git diff --check
 - [ ] Cockpitキーを含まない旧Backupも引き続き取り込める
 - [ ] `cockpit.js`のwriter責務とlocalStorage形式に差分がない
 
+## Step13-c-4. Intent判断・表現golden
+
+- [ ] 意図なしで既存Brain / Expression出力がバイト一致する
+- [ ] 意図あり・体調普通で方向がIntentに一致し、原文復唱と受領記録がある
+- [ ] 意図あり・体調低でも体調普通と同じ候補が選ばれる
+- [ ] 意図あり・体調低で確定安全文言が含まれる
+- [ ] 意図あり・体調シグナルなしでは安全確認が発火しない
+- [ ] 判断メモにIntent受領と歩幅決定が記録される
+- [ ] `node tests/brain-golden/run-brain-intent-golden.mjs` が成功する
+
 ## Step11-b. 最近7日の発信運営
 
 - [ ] 発信運営パネル内に「最近7日の発信運営」が表示される

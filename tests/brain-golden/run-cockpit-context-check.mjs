@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { createBrainGoldenHarness } from "./harness.mjs";
-import { normalizeBrainGoldenResult } from "./normalize.mjs";
-import { normalizeBrainExpressionGoldenResult } from "./expression-normalize.mjs";
 import candidateNone from "./fixtures/candidate-none.mjs";
 
 const validCockpitStore = {
@@ -63,17 +61,5 @@ assert.deepEqual(JSON.parse(JSON.stringify(cockpitIntent)), {
 assert.equal(harness.runContextFixture(candidateNone), null);
 assert.equal(harness.runContextFixture(malformedCockpit), null);
 assert.equal(harness.runContextFixture(legacyCockpit), null);
-
-const brainWithoutCockpit = normalizeBrainGoldenResult(harness.runFixture(candidateNone));
-const brainWithCockpit = normalizeBrainGoldenResult(harness.runFixture(withCockpit));
-assert.deepEqual(brainWithCockpit, brainWithoutCockpit);
-
-const expressionWithoutCockpit = normalizeBrainExpressionGoldenResult(
-  harness.runExpressionFixture(candidateNone),
-);
-const expressionWithCockpit = normalizeBrainExpressionGoldenResult(
-  harness.runExpressionFixture(withCockpit),
-);
-assert.deepEqual(expressionWithCockpit, expressionWithoutCockpit);
 
 console.log("cockpit context check passed");

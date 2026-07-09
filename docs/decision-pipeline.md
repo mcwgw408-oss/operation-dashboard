@@ -458,3 +458,19 @@ Step13-bでは、`operation-cockpit-v1` の表示対象日Intentを `collectBrai
 - `collectBrainContext()` は保存、修復、migrationを行わない。
 - `buildBrainDecision()` と `buildBrainExpression()` は `cockpitIntent` を参照しない。
 - Priority、Recommendation、表示文言、Snapshot、Backup / restoreは変更しない。
+
+## Step13-c-1 operation-cockpit IntentのDecision接続
+
+Intentがある場合は、原文の方向を `operation-cockpit.intent` 候補としてPriority候補へ追加します。Intent候補は最上位を維持し、Energy / Momentum / Healthによって別方向へ差し替えません。
+
+方向の優先順:
+
+1. `topPriority`
+2. `todayFocus`
+3. `articleNote`
+4. `growthTarget`
+5. `noticed`
+
+既存Health Stateの`energyLevel`が`very_low` / `low` / `unstable`、または`recoveryFeeling`が`depleted` / `low`の場合だけ、`intentDecision.safetyAdjustment`を有効にします。Health Stateがない場合は発火しません。このフラグは方向を変えず、Step13-c-2の歩幅表現だけに使います。
+
+Intentがない場合は、候補生成、採点、Recommendationを含む既存Decision結果を変更しません。
