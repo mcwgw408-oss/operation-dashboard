@@ -7507,8 +7507,25 @@ function applySakuraInnerToggle() {
   });
 }
 
+function updateBackToTopVisibility() {
+  const button = $("#backToTop");
+  if (!button) return;
+  button.hidden = window.scrollY < 600;
+}
+
+function scrollBackToTop() {
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({
+    top: 0,
+    behavior: reduceMotion ? "auto" : "smooth",
+  });
+}
+
 function bindEvents() {
   window.addEventListener("storage", handleOperationCockpitStorageChange);
+  window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+  $("#backToTop")?.addEventListener("click", scrollBackToTop);
+  updateBackToTopVisibility();
   $("#explainLayerToggle")?.addEventListener("click", () => {
     const body = $("#explainLayerBody");
     setExplainLayerExpanded(Boolean(body?.hidden));
