@@ -962,11 +962,13 @@ function renderTaskList(listId) {
       item.done = checkbox.checked;
       saveStore();
       renderTaskList(listId);
+      renderBrainPrototype();
     });
     title.addEventListener("input", () => {
       item.title = title.value;
       saveStore();
     });
+    title.addEventListener("change", renderBrainPrototype);
     priority.addEventListener("click", () => {
       day[listId].forEach((candidate) => {
         if (candidate.id !== item.id) candidate.priority = false;
@@ -974,11 +976,13 @@ function renderTaskList(listId) {
       item.priority = !item.priority;
       saveStore();
       renderTaskList(listId);
+      renderBrainPrototype();
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
       day[listId] = day[listId].filter((candidate) => candidate.id !== item.id);
       saveStore();
       renderTaskList(listId);
+      renderBrainPrototype();
     });
     row.querySelectorAll(".move-button").forEach((button) => {
       button.addEventListener("click", () => {
@@ -989,6 +993,7 @@ function renderTaskList(listId) {
         day[listId].splice(nextIndex, 0, moving);
         saveStore();
         renderTaskList(listId);
+        renderBrainPrototype();
       });
     });
     target.append(row);
@@ -2020,6 +2025,14 @@ function renderFields() {
   });
   Object.entries(day.reflection).forEach(([key, value]) => {
     $(`#${key}`).value = value;
+  });
+}
+
+function renderTodayOnlyDateLabels() {
+  const label = formatDateLabel(activeDate);
+  ["#todayTaskDateLabel", "#todayEventDateLabel"].forEach((selector) => {
+    const target = $(selector);
+    if (target) target.textContent = label;
   });
 }
 
@@ -7513,6 +7526,7 @@ function renderAll() {
   getDay();
   autoAddDueRecurringSchedules();
   $("#activeDate").value = activeDate;
+  renderTodayOnlyDateLabels();
   listIds.forEach(renderTaskList);
   renderEventList();
   renderRecurringSchedule();
@@ -7757,6 +7771,7 @@ function bindEvents() {
       input.value = "";
       saveStore();
       renderTaskList(form.dataset.addList);
+      renderBrainPrototype();
     });
   });
   $("#eventForm")?.addEventListener("submit", (event) => {

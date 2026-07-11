@@ -3472,6 +3472,10 @@ textarea {
   font-size: 13px;
 }
 
+.today-only-date-note strong {
+  color: var(--text);
+}
+
 .home-launch-panel,
 .later-panel {
   grid-column: 1 / -1;
@@ -3673,15 +3677,15 @@ textarea {
 }
 
 .dashboard .dashboard-health-input-panel {
-  order: 34;
-}
-
-.dashboard .dashboard-memory-input-panel {
   order: 35;
 }
 
-.dashboard .schedule-panel {
+.dashboard .dashboard-memory-input-panel {
   order: 36;
+}
+
+.dashboard .schedule-panel {
+  order: 34;
 }
 
 .dashboard > .panel:has(#dailyTasks) {

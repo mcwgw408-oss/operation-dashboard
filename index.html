@@ -826,9 +826,12 @@
 
         <section class="panel dashboard-task-panel span-2">
           <div class="panel-heading">
-            <h2>今日のタスク</h2>
+            <div>
+              <h2>今日だけの用事</h2>
+              <p class="section-note today-only-date-note"><strong id="todayTaskDateLabel"></strong>にだけ保存されます。買い出しなど、時間が決まっていない用事を入れます。翌日には引き継がれません。</p>
+            </div>
             <form class="inline-form" data-add-list="todayTasks">
-              <input type="text" placeholder="洗濯 / 買い物 / Codex" aria-label="今日のタスクを追加" />
+              <input type="text" placeholder="買い出し / 支払い / 記事の準備" aria-label="今日だけの用事を追加" />
               <button type="submit">追加</button>
             </form>
           </div>
@@ -838,8 +841,8 @@
         <section class="panel schedule-panel span-2">
           <div class="panel-heading">
             <div>
-              <h2>今日の予定</h2>
-              <p class="section-note">時間が決まっている予定を記録します。ヘルパー、訪問看護、通院などをここに入れます。</p>
+              <h2>今日だけの予定（単発）</h2>
+              <p class="section-note today-only-date-note"><strong id="todayEventDateLabel"></strong>にだけ保存されます。Zoom、ライブ配信、記事公開、外出、通院など、時間が決まっている予定を入れます。翌日には引き継がれません。</p>
             </div>
           </div>
           <form id="eventForm" class="event-form">
@@ -852,7 +855,7 @@
               <option value="broadcast">コラボ・配信</option>
               <option value="other">その他</option>
             </select>
-            <input id="eventTitle" type="text" placeholder="ヘルパー / 訪問看護 / 精神科" aria-label="予定名" />
+            <input id="eventTitle" type="text" placeholder="Zoom / ライブ配信 / 買い出し" aria-label="予定名" />
             <input id="eventNote" type="text" placeholder="メモ" aria-label="予定メモ" />
             <button type="submit">追加</button>
           </form>

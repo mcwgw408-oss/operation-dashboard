@@ -87,6 +87,8 @@ const requiredIds = [
   "conversationFeedbackNote",
   "learningFeedbackNote",
   "dailyInputText",
+  "todayTaskDateLabel",
+  "todayEventDateLabel",
   "dailyTasks",
   "healthCheckInputMount",
   "memoryMemoForm",
@@ -243,6 +245,17 @@ for (const label of [
 ]) {
   check(appJs.includes(label) || indexHtml.includes(label), `保存・更新表示がありません: ${label}`);
 }
+for (const label of [
+  "今日だけの用事",
+  "今日だけの予定（単発）",
+  "翌日には引き継がれません",
+]) {
+  check(indexHtml.includes(label), `今日だけの予定・用事の説明がありません: ${label}`);
+}
+check(appJs.includes("function renderTodayOnlyDateLabels"), "今日だけの予定・用事に対象日を表示する処理がありません");
+const renderTaskListBody = extractDelimitedBlock(appJs, "function renderTaskList", "{", "}");
+check(renderTaskListBody.includes("renderBrainPrototype();"), "用事の変更後に判断メモが更新されません");
+check(/renderTaskList\(form\.dataset\.addList\);\s*renderBrainPrototype\(\);/s.test(appJs), "用事の追加後に判断メモが更新されません");
 const publishingOpsPanelIndex = indexHtml.indexOf('class="panel publishing-ops-panel span-2"');
 const publishingOpsHistoryIndex = indexHtml.indexOf('class="panel publishing-ops-history-panel span-2"');
 const accumulationHeadingIndex = indexHtml.indexOf('id="dashboard-accumulation"');
@@ -273,9 +286,9 @@ const requiredOrders = new Map([
   [".dashboard .publishing-ops-panel", "31"],
   [".dashboard .daily-input-panel", "32"],
   [".dashboard .dashboard-task-panel", "33"],
-  [".dashboard .dashboard-health-input-panel", "34"],
-  [".dashboard .dashboard-memory-input-panel", "35"],
-  [".dashboard .schedule-panel", "36"],
+  [".dashboard .schedule-panel", "34"],
+  [".dashboard .dashboard-health-input-panel", "35"],
+  [".dashboard .dashboard-memory-input-panel", "36"],
   [".dashboard > .panel:has(#dailyTasks)", "37"],
   [".dashboard > .metrics-panel:has(#mailMorningChecked)", "38"],
   [".dashboard > .metrics-panel:has(#dmPending)", "39"],
