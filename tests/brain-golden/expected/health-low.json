@@ -1,7 +1,7 @@
 {
   "energyContext": {
-    "state": "Low Energy",
-    "modifier": -15
+    "state": "Recovery",
+    "modifier": -30
   },
   "momentumContext": {
     "state": "Stable",
@@ -20,7 +20,7 @@
       "title": "未完了タスク 1",
       "priorityFlag": true,
       "score": 78,
-      "adjustedScore": 63,
+      "adjustedScore": 48,
       "status": "open",
       "reasons": [
         {
@@ -38,8 +38,8 @@
       ],
       "modifiers": [
         {
-          "state": "Low Energy",
-          "modifier": -15
+          "state": "Recovery",
+          "modifier": -30
         },
         {
           "state": "Stable",
@@ -54,7 +54,7 @@
       "title": "未完了タスク 2",
       "priorityFlag": false,
       "score": 38,
-      "adjustedScore": 23,
+      "adjustedScore": 8,
       "status": "open",
       "reasons": [
         {
@@ -68,8 +68,8 @@
       ],
       "modifiers": [
         {
-          "state": "Low Energy",
-          "modifier": -15
+          "state": "Recovery",
+          "modifier": -30
         },
         {
           "state": "Stable",
@@ -84,7 +84,7 @@
       "title": "未完了タスク 3",
       "priorityFlag": false,
       "score": 30,
-      "adjustedScore": 15,
+      "adjustedScore": 0,
       "status": "open",
       "reasons": [
         {
@@ -94,8 +94,8 @@
       ],
       "modifiers": [
         {
-          "state": "Low Energy",
-          "modifier": -15
+          "state": "Recovery",
+          "modifier": -30
         },
         {
           "state": "Stable",
@@ -105,92 +105,52 @@
     }
   ],
   "priorityCandidate": {
-    "id": "open-task-1",
-    "source": "operation-dashboard.todayTasks",
-    "sourceLabel": "今日やること",
-    "title": "未完了タスク 1",
+    "id": "daily-condition:2026-07-04",
+    "source": "operation-dashboard.health",
+    "sourceLabel": "選択日の体調・睡眠",
+    "title": "休息を優先する",
     "priorityFlag": true,
-    "score": 78,
-    "adjustedScore": 63,
+    "score": 100,
+    "adjustedScore": 100,
     "status": "open",
     "reasons": [
       {
-        "points": 30,
-        "text": "今日やることに入っています。"
-      },
-      {
-        "points": 40,
-        "text": "優先マークが付いています。"
-      },
-      {
-        "points": 8,
-        "text": "今日更新されています。"
+        "points": 100,
+        "text": "選択日の体調・睡眠から、今日は回復と予定の余白を優先します。"
       }
     ],
-    "modifiers": [
-      {
-        "state": "Low Energy",
-        "modifier": -15
-      },
-      {
-        "state": "Stable",
-        "modifier": 0
-      }
-    ]
+    "modifiers": []
   },
   "explanation": {
-    "summary": "今日やることから選ばれました。スコア 63 / 100 の最優先候補です。",
+    "summary": "選択日の体調・睡眠から選ばれました。スコア 100 / 100 の最優先候補です。",
     "reasons": [
-      "優先マークが付いています。",
-      "今日やることに入っています。",
-      "今日更新されています。",
-      "Low Energy: 未完了が多いため、短時間で触れる形に寄せています。"
+      "選択日の体調・睡眠から、今日は回復と予定の余白を優先します。"
     ]
   },
   "recommendationInput": {
     "topCandidate": {
-      "id": "open-task-1",
-      "source": "operation-dashboard.todayTasks",
-      "sourceLabel": "今日やること",
-      "title": "未完了タスク 1",
+      "id": "daily-condition:2026-07-04",
+      "source": "operation-dashboard.health",
+      "sourceLabel": "選択日の体調・睡眠",
+      "title": "休息を優先する",
       "priorityFlag": true,
-      "score": 78,
-      "adjustedScore": 63,
+      "score": 100,
+      "adjustedScore": 100,
       "status": "open",
       "reasons": [
         {
-          "points": 30,
-          "text": "今日やることに入っています。"
-        },
-        {
-          "points": 40,
-          "text": "優先マークが付いています。"
-        },
-        {
-          "points": 8,
-          "text": "今日更新されています。"
+          "points": 100,
+          "text": "選択日の体調・睡眠から、今日は回復と予定の余白を優先します。"
         }
       ],
-      "modifiers": [
-        {
-          "state": "Low Energy",
-          "modifier": -15
-        },
-        {
-          "state": "Stable",
-          "modifier": 0
-        }
-      ]
+      "modifiers": []
     },
     "priorityReasons": [
-      "優先マークが付いています。",
-      "今日やることに入っています。",
-      "今日更新されています。",
-      "Low Energy: 未完了が多いため、短時間で触れる形に寄せています。"
+      "選択日の体調・睡眠から、今日は回復と予定の余白を優先します。"
     ],
     "energy": {
-      "state": "Low Energy",
-      "modifier": -15
+      "state": "Recovery",
+      "modifier": -30
     },
     "momentum": {
       "state": "Stable",
@@ -209,16 +169,16 @@
     "completedToday": 0
   },
   "baseRecommendation": {
-    "type": "start_small",
+    "type": "rest_first",
     "title": "おはよう、さくら。",
-    "message": "今日は「未完了タスク 1」に少し触れてみるのが良さそうです。",
-    "actionText": "まず15分だけ、軽く始めてみませんか？",
+    "message": "今日の状態をふまえると、今日は回復を優先して良さそうです。",
+    "actionText": "新しい作業を増やさず、まず休める形を整えましょう。",
     "adaptiveNote": "",
     "memoryNote": "",
     "reasons": [
-      "今日やることに入っています。",
+      "選択日の体調・睡眠から、休息を優先しています。",
       "今日は予定はありません。",
-      "今日は短時間で触れる形が合いそうです。"
+      "今日は回復を優先した方が良さそうです。"
     ]
   },
   "learningSummary": {
@@ -237,27 +197,24 @@
   },
   "brainMemoryContext": {
     "project": "",
-    "tags": [
-      "task",
-      "life"
-    ],
-    "recommendationType": "start_small",
+    "tags": [],
+    "recommendationType": "rest_first",
     "eventType": "Open",
     "used": false,
     "retrieved": [],
     "recent": []
   },
   "recommendation": {
-    "type": "start_small",
+    "type": "rest_first",
     "title": "おはよう、さくら。",
-    "message": "今日は「未完了タスク 1」に少し触れてみるのが良さそうです。",
-    "actionText": "まず15分だけ、軽く始めてみませんか？",
+    "message": "今日の状態をふまえると、今日は回復を優先して良さそうです。",
+    "actionText": "新しい作業を増やさず、まず休める形を整えましょう。",
     "adaptiveNote": "提案傾向のヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
     "memoryNote": "",
     "reasons": [
-      "今日やることに入っています。",
+      "選択日の体調・睡眠から、休息を優先しています。",
       "今日は予定はありません。",
-      "今日は短時間で触れる形が合いそうです。"
+      "今日は回復を優先した方が良さそうです。"
     ]
   },
   "healthAwareRecommendation": {

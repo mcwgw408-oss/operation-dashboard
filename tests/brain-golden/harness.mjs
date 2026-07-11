@@ -134,6 +134,38 @@ globalThis.__brainGolden = {
       },
     });
   },
+  runReplyFixture(fixture) {
+    seedBrainGoldenFixture(fixture);
+
+    const brainContext = collectBrainContext();
+    const brainDecision = buildBrainDecision(brainContext);
+    const expression = buildBrainExpression({
+      brainContext,
+      brainDecision,
+      adaptiveGuidance: buildAdaptiveGuidanceScores(),
+      explainLearningContext: {
+        summary: buildLearningSummary(),
+        hint: buildLearningHint(buildLearningSummary()),
+        confidence: buildLearningConfidence(buildLearningSummary(), buildLearningHint(buildLearningSummary())),
+      },
+    });
+    const healthAwareConversation = buildHealthAwareConversation(brainDecision.healthContext);
+    const conversationContext = buildConversationContext({
+      project: brainDecision.brainMemoryContext.project || brainDecision.priorityCandidate?.title || "",
+      recommendation: expression.recommendation,
+      explanation: brainDecision.explanation,
+      learningHint: brainDecision.learningHint,
+      learningConfidence: buildLearningConfidence(brainDecision.learningSummary, brainDecision.learningHint),
+      memoryContext: brainDecision.brainMemoryContext,
+      healthAwareConversation,
+      dailyInputContext: brainDecision.dailyInputContext,
+      todayTasks: brainContext.todayTasks,
+      todayEvents: brainContext.todayEvents,
+    });
+    const replyPlan = buildReplyPlan(conversationContext);
+    const reply = buildReply(replyPlan);
+    return { brainDecision, expression, conversationContext, replyPlan, reply };
+  },
   runSnapshotFixture(fixture) {
     localStorage.seed(fixture.localStorage || {});
     return buildSakuraSnapshot(fixture.mode || "morning");
@@ -185,6 +217,10 @@ export function createBrainGoldenHarness({ now = FIXED_NOW } = {}) {
     runExpressionFixture(fixture) {
       uuidCounter = 0;
       return context.__brainGolden.runExpressionFixture(fixture);
+    },
+    runReplyFixture(fixture) {
+      uuidCounter = 0;
+      return context.__brainGolden.runReplyFixture(fixture);
     },
     runSnapshotFixture(fixture) {
       uuidCounter = 0;

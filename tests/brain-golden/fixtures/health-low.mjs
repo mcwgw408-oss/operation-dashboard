@@ -5,6 +5,21 @@ export default {
   name: "health-low",
   healthState: [
     {
+      id: "health-2026-07-05",
+      date: "2026-07-05",
+      sleepHours: "8",
+      sleepQuality: "good",
+      recoveryFeeling: "recovered",
+      nutritionSatisfaction: "good",
+      medicationStatus: "unknown",
+      energyLevel: "high",
+      mood: "steady",
+      stressLevel: "low",
+      bodyNote: "翌日の記録",
+      createdAt: "2026-07-05T07:00:00.000Z",
+      updatedAt: "2026-07-05T08:30:00.000Z",
+    },
+    {
       id: "health-2026-07-04",
       date: "2026-07-04",
       sleepHours: "5",

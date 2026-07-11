@@ -51,86 +51,48 @@
     }
   ],
   "priorityCandidate": {
-    "id": "task-schedule-prepare",
-    "source": "operation-dashboard.todayTasks",
-    "sourceLabel": "今日やること",
-    "title": "配信準備メモを整える",
+    "id": "daily-condition:2026-07-04",
+    "source": "operation-dashboard.todayEvents",
+    "sourceLabel": "今日だけの予定",
+    "title": "今日の予定を無理なく進める",
     "priorityFlag": true,
-    "score": 78,
-    "adjustedScore": 78,
+    "score": 100,
+    "adjustedScore": 100,
     "status": "open",
     "reasons": [
       {
-        "points": 30,
-        "text": "今日やることに入っています。"
-      },
-      {
-        "points": 40,
-        "text": "優先マークが付いています。"
-      },
-      {
-        "points": 8,
-        "text": "今日更新されています。"
+        "points": 100,
+        "text": "今日の予定: 10:30 編集打ち合わせ まず予定を一日の軸にします。"
       }
     ],
-    "modifiers": [
-      {
-        "state": "Normal",
-        "modifier": 0
-      },
-      {
-        "state": "Stable",
-        "modifier": 0
-      }
-    ]
+    "modifiers": []
   },
   "explanation": {
-    "summary": "今日やることから選ばれました。スコア 78 / 100 の最優先候補です。",
+    "summary": "今日だけの予定から選ばれました。スコア 100 / 100 の最優先候補です。",
     "reasons": [
-      "優先マークが付いています。",
-      "今日やることに入っています。",
-      "今日更新されています。"
+      "今日の予定: 10:30 編集打ち合わせ まず予定を一日の軸にします。"
     ]
   },
   "recommendationInput": {
     "topCandidate": {
-      "id": "task-schedule-prepare",
-      "source": "operation-dashboard.todayTasks",
-      "sourceLabel": "今日やること",
-      "title": "配信準備メモを整える",
+      "id": "daily-condition:2026-07-04",
+      "source": "operation-dashboard.todayEvents",
+      "sourceLabel": "今日だけの予定",
+      "title": "今日の予定を無理なく進める",
       "priorityFlag": true,
-      "score": 78,
-      "adjustedScore": 78,
+      "score": 100,
+      "adjustedScore": 100,
       "status": "open",
       "reasons": [
         {
-          "points": 30,
-          "text": "今日やることに入っています。"
-        },
-        {
-          "points": 40,
-          "text": "優先マークが付いています。"
-        },
-        {
-          "points": 8,
-          "text": "今日更新されています。"
+          "points": 100,
+          "text": "今日の予定: 10:30 編集打ち合わせ まず予定を一日の軸にします。"
         }
       ],
-      "modifiers": [
-        {
-          "state": "Normal",
-          "modifier": 0
-        },
-        {
-          "state": "Stable",
-          "modifier": 0
-        }
-      ]
+      "modifiers": []
     },
     "priorityReasons": [
-      "優先マークが付いています。",
-      "今日やることに入っています。",
-      "今日更新されています。"
+      "今日の予定: 10:30 編集打ち合わせ まず予定を一日の軸にします。"
     ],
     "energy": {
       "state": "Normal",
@@ -157,12 +119,12 @@
   "baseRecommendation": {
     "type": "schedule_context",
     "title": "おはよう、さくら。",
-    "message": "今日の予定: 10:30 編集打ち合わせ 「配信準備メモを整える」は余力があれば軽く触れるくらいで良さそうです。",
+    "message": "今日の予定: 10:30 編集打ち合わせ 今日はこの予定を一日の軸にして、ほかの作業は余力に合わせて良さそうです。",
     "actionText": "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
     "adaptiveNote": "",
     "memoryNote": "",
     "reasons": [
-      "今日やることに入っています。",
+      "今日だけの予定を一日の軸にしています。",
       "予定: 10:30 編集打ち合わせ"
     ]
   },
@@ -183,8 +145,6 @@
   "brainMemoryContext": {
     "project": "生活改善",
     "tags": [
-      "task",
-      "life",
       "schedule"
     ],
     "recommendationType": "schedule_context",
@@ -196,12 +156,12 @@
   "recommendation": {
     "type": "schedule_context",
     "title": "おはよう、さくら。",
-    "message": "今日の予定: 10:30 編集打ち合わせ 「配信準備メモを整える」は余力があれば軽く触れるくらいで良さそうです。",
+    "message": "今日の予定: 10:30 編集打ち合わせ 今日はこの予定を一日の軸にして、ほかの作業は余力に合わせて良さそうです。",
     "actionText": "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
     "adaptiveNote": "提案傾向のヒントは参考情報として見ています。今日の判断はさくらの状態整理を優先しています。",
     "memoryNote": "",
     "reasons": [
-      "今日やることに入っています。",
+      "今日だけの予定を一日の軸にしています。",
       "予定: 10:30 編集打ち合わせ"
     ]
   },

@@ -2098,6 +2098,7 @@ function collectSearchText(day) {
 function displayRecommendationType(type = "") {
   const labels = {
     schedule_context: "予定をふまえた提案",
+    schedule_and_recover: "予定と休息を両立する提案",
     rest_first: "休息優先",
     start_small: "小さく始める",
     start_tiny: "ごく小さく始める",
@@ -2672,6 +2673,7 @@ function buildConversationContext({
   learningConfidence = null,
   memoryContext = null,
   healthAwareConversation = null,
+  dailyInputContext = null,
   todayTasks = [],
   todayEvents = [],
 } = {}) {
@@ -2700,6 +2702,7 @@ function buildConversationContext({
     } : null,
     memoryContext,
     healthAwareConversation,
+    dailyInputContext,
     todayTasks: asArray(todayTasks).map((task) => ({
       title: task.title || "",
       done: Boolean(task.done),
@@ -2724,7 +2727,7 @@ function renderConversationContext(context) {
 }
 
 function buildReplyPlan(conversationContext = {}) {
-  const firstEvent = asArray(conversationContext.todayEvents).find((event) => event.title);
+  const scheduledEvents = asArray(conversationContext.todayEvents).filter((event) => event.title);
   const firstTask = asArray(conversationContext.todayTasks).find((task) => task.title && !task.done);
   const memoryTitle = memoryDisplayTitle(conversationContext.memoryContext?.retrieved?.[0]) ||
     memoryDisplayTitle(conversationContext.memoryContext?.recent?.[0]);
@@ -2732,18 +2735,23 @@ function buildReplyPlan(conversationContext = {}) {
   const healthAware = conversationContext.healthAwareConversation || null;
 
   return {
-    opening: firstEvent
-      ? `今日の予定: ${firstEvent.title}`
-      : conversationContext.project
-        ? `プロジェクト: ${conversationContext.project}`
-        : firstTask
-          ? `今日のタスク: ${firstTask.title}`
-          : "今日の状況を軽く確認する",
-    mainPoint: conversationContext.recommendation?.actionText ||
-      conversationContext.recommendation?.message ||
+    opening: scheduledEvents.length
+      ? `今日の予定: ${scheduledEvents.map((event) => [event.time, event.title].filter(Boolean).join(" ")).join(" / ")}`
+      : conversationContext.recommendation?.type === "rest_first"
+        ? "今日は体調と休息を中心にする"
+        : conversationContext.project
+          ? `プロジェクト: ${conversationContext.project}`
+          : firstTask
+            ? `今日のタスク: ${firstTask.title}`
+            : "今日の状況を軽く確認する",
+    mainPoint: [
+      conversationContext.recommendation?.message,
+      conversationContext.recommendation?.actionText,
+    ].filter(Boolean).join(" ") ||
       conversationContext.recommendation?.title ||
       "提案を確認する",
     support: [
+      conversationContext.dailyInputContext?.summary ? `今日の入力: ${conversationContext.dailyInputContext.summary}` : "",
       memoryTitle ? `記憶: ${memoryTitle}` : "",
       conversationContext.learningHint?.message ? `学習: ${conversationContext.learningHint.message}` : "",
       healthAware?.supportHint ? `体調: ${healthAware.supportHint}` : "",
@@ -2793,6 +2801,8 @@ function buildReplySupport(support) {
   const parts = replySentence(support).split(/\s*\/\s*/).filter(Boolean);
   if (!parts.length) return "";
   return parts.map((part) => {
+    const dailyInputMatch = part.match(/^今日の入力[:：]\s*(.+)$/);
+    if (dailyInputMatch) return `今日の入力では「${dailyInputMatch[1]}」も確認しています。`;
     const memoryMatch = part.match(/^(?:Memory|記憶)[:：]\s*(.+)$/);
     if (memoryMatch) return `以前の記録では「${memoryMatch[1]}」が参考になりそうです。`;
     const learningMatch = part.match(/^(?:Learning|学習)[:：]\s*(.+)$/);
@@ -5842,10 +5852,53 @@ function scorePriorityCandidate(candidate) {
   return { ...candidate, score: clampedScore, rawScore: score, reasons };
 }
 
-function inferEnergyContext(day, completedToday, openTodayCount) {
+function buildDailyInputDecisionContext(value = "") {
+  const text = String(value || "").trim();
+  const firstLine = text.split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
+  return {
+    text,
+    summary: firstLine.length > 72 ? `${firstLine.slice(0, 72)}…` : firstLine,
+    recoverySignal: /休|疲|眠|寝不足|無理|しんど|回復|頭痛|体調/.test(text),
+    lifeSignal: /買い出し|買い物|洗濯|掃除|支払い|通院|訪問看護|外出|役所/.test(text),
+    publishingSignal: /記事|Substack|note|Notes|投稿|配信/.test(text),
+  };
+}
+
+function buildDailyInputCandidate(dailyInputContext, day) {
+  if (!dailyInputContext?.summary || (!dailyInputContext.lifeSignal && !dailyInputContext.publishingSignal)) {
+    return null;
+  }
+  return createPriorityCandidate({
+    item: {
+      id: `daily-input:${activeDate}`,
+      title: dailyInputContext.summary,
+      date: activeDate,
+      updatedAt: day.dailyInputUpdatedAt || day.updatedAt || "",
+    },
+    source: "operation-dashboard.dailyInput",
+    sourceLabel: "今日の入力",
+    baseReason: "今日の入力に、その日に扱いたい内容が書かれています。",
+    basePoints: 28,
+  });
+}
+
+function inferEnergyContext(day, completedToday, openTodayCount, health = null, dailyInputContext = null) {
   const totalOpen = openTodayCount + asArray(day.dailyTasks).filter(brainIsOpen).length;
   const reflection = day.reflection || {};
   const reflectionText = [reflection.didToday, reflection.blockedToday, reflection.tomorrowPlan].join(" ");
+  const sleepHours = Number(health?.sleepHours);
+  const healthNeedsRecovery = Boolean(health) && (
+    ["very_low", "low", "unstable"].includes(health.energyLevel) ||
+    ["depleted", "low"].includes(health.recoveryFeeling) ||
+    ["high", "overwhelming"].includes(health.stressLevel) ||
+    (Number.isFinite(sleepHours) && sleepHours > 0 && sleepHours < 3)
+  );
+  if (healthNeedsRecovery) {
+    return { state: "Recovery", modifier: -30, text: "選択日の体調・睡眠から、今日は回復と予定の余白を優先します。" };
+  }
+  if (dailyInputContext?.recoverySignal) {
+    return { state: "Recovery", modifier: -30, text: "今日の入力に体調や休息の手がかりがあるため、無理をしない判断を優先します。" };
+  }
   if (/休|疲|無理|しんど|回復/.test(reflectionText)) {
     return { state: "Recovery", modifier: -30, text: "回復を優先したい記録があるため、重い提案を控えめにしています。" };
   }
@@ -5963,6 +6016,45 @@ function inferEventContext(todayEvents) {
   };
 }
 
+function buildDailyConditionCandidate(eventContext, energyContext) {
+  const hasEvents = eventContext.count > 0;
+  const needsRecovery = energyContext.state === "Recovery";
+  if (!hasEvents && !needsRecovery) return null;
+  const title = hasEvents && needsRecovery
+    ? "予定と休息の両立"
+    : needsRecovery
+      ? "休息を優先する"
+      : "今日の予定を無理なく進める";
+  const source = hasEvents ? "operation-dashboard.todayEvents" : "operation-dashboard.health";
+  const sourceLabel = hasEvents ? "今日だけの予定" : "選択日の体調・睡眠";
+  const reasonText = hasEvents && needsRecovery
+    ? `${eventContext.text} 体調・睡眠もふまえ、予定以外を増やさない判断です。`
+    : hasEvents
+      ? `${eventContext.text} まず予定を一日の軸にします。`
+      : energyContext.text;
+  return {
+    id: `daily-condition:${activeDate}`,
+    item: { id: `daily-condition:${activeDate}`, title },
+    source,
+    sourceLabel,
+    title,
+    done: false,
+    status: "open",
+    priorityFlag: true,
+    createdAt: activeDate,
+    updatedAt: new Date().toISOString(),
+    ageDays: 0,
+    stalenessDays: 0,
+    baseReason: reasonText,
+    basePoints: 100,
+    score: 100,
+    rawScore: 100,
+    adjustedScore: 100,
+    reasons: [{ points: 100, text: reasonText }],
+    modifiers: [],
+  };
+}
+
 function buildRecommendationInput(priorityCandidate, explanation, energyContext, momentumContext, context) {
   return {
     topCandidate: priorityCandidate || null,
@@ -5981,8 +6073,9 @@ function buildRecommendationInput(priorityCandidate, explanation, energyContext,
 
 function chooseRecommendationType(input) {
   if (!input.topCandidate) return "organize_or_rest";
-  if (input.hasTodayEvents && input.eventContext.level !== "Open") return "schedule_context";
+  if (input.hasTodayEvents && input.energy.state === "Recovery") return "schedule_and_recover";
   if (input.energy.state === "Recovery") return "rest_first";
+  if (input.hasTodayEvents && input.eventContext.level !== "Open") return "schedule_context";
   if (input.energy.state === "Low Energy") return "start_small";
   if (input.momentum.state === "Rising" && (input.hasWritingInProgress || input.hasNextActions)) {
     return "continue_flow";
@@ -5994,6 +6087,9 @@ function chooseRecommendationType(input) {
 function recommendationReasonForSource(source, candidate = null) {
   const sourceReasons = {
     "operation-dashboard.todayTasks": "今日やることに入っています。",
+    "operation-dashboard.todayEvents": "今日だけの予定を一日の軸にしています。",
+    "operation-dashboard.health": "選択日の体調・睡眠から、休息を優先しています。",
+    "operation-dashboard.dailyInput": "今日の入力に、その日に扱いたい内容があります。",
     "operation-dashboard.dailyTasks": "毎日タスクとして残っています。",
     "operation-dashboard.projects": "育てているプロジェクトに入っています。",
     "operation-dashboard.laterItems": "あとで見る項目として残っています。",
@@ -6053,8 +6149,8 @@ function generateRecommendationMessage(input, type) {
   if (type === "rest_first") {
     return {
       title: "おはよう、さくら。",
-      message: `「${title}」が候補ですが、今日は回復を優先して良さそうです。`,
-      actionText: "完了を目指さず、開くだけでも十分です。",
+      message: "今日の状態をふまえると、今日は回復を優先して良さそうです。",
+      actionText: "新しい作業を増やさず、まず休める形を整えましょう。",
     };
   }
   if (type === "continue_flow") {
@@ -6067,8 +6163,15 @@ function generateRecommendationMessage(input, type) {
   if (type === "schedule_context") {
     return {
       title: "おはよう、さくら。",
-      message: `${input.eventContext.text} 「${title}」は余力があれば軽く触れるくらいで良さそうです。`,
+      message: `${input.eventContext.text} 今日はこの予定を一日の軸にして、ほかの作業は余力に合わせて良さそうです。`,
       actionText: "大きな作業より、予定の準備や少し休むことを優先しても良さそうです。",
+    };
+  }
+  if (type === "schedule_and_recover") {
+    return {
+      title: "おはよう、さくら。",
+      message: `${input.eventContext.text} 体調と睡眠もふまえ、今日は予定以外を増やさず、前後の休息を優先して良さそうです。`,
+      actionText: "まず予定に必要な準備だけ確認し、休める時間を残しましょう。",
     };
   }
   if (type === "write_from_idea") {
@@ -7129,6 +7232,7 @@ function collectBrainContext() {
 
 function buildBrainDecision(brainContext) {
   const {
+    activeDate: brainActiveDate,
     day,
     dailyTasks,
     todayTasks,
@@ -7147,7 +7251,20 @@ function buildBrainDecision(brainContext) {
     memoryStore: brainMemoryStore,
     healthState: brainHealthState,
   } = brainContext;
-  const energyContext = inferEnergyContext(day, completedToday, openToday.length);
+  const recentHealthStates = [...asArray(brainHealthState)]
+    .sort((a, b) =>
+      String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
+    );
+  const applicableHealthStates = recentHealthStates.filter((item) => !item.date || item.date <= brainActiveDate);
+  const activeHealthState = asArray(brainHealthState).find((item) => item.date === brainActiveDate) || null;
+  const dailyInputContext = buildDailyInputDecisionContext(day.dailyInput);
+  const energyContext = inferEnergyContext(
+    day,
+    completedToday,
+    openToday.length,
+    activeHealthState,
+    dailyInputContext,
+  );
   const momentumContext = inferMomentumContext(day, writingInProgress, hasshinNextActions);
   const eventContext = inferEventContext(todayEvents);
   const candidates = collectPriorityCandidates({
@@ -7161,10 +7278,13 @@ function buildBrainDecision(brainContext) {
     writingInProgress,
     revisitPeople,
   });
+  const dailyInputCandidate = buildDailyInputCandidate(dailyInputContext, day);
+  if (dailyInputCandidate) candidates.unshift(dailyInputCandidate);
   const intentCandidate = buildCockpitIntentCandidate(cockpitIntent);
   if (intentCandidate) candidates.unshift(intentCandidate);
   const rankedCandidates = rankPriorityCandidates(candidates, energyContext, momentumContext);
-  const priorityCandidate = rankedCandidates[0];
+  const conditionCandidate = buildDailyConditionCandidate(eventContext, energyContext);
+  const priorityCandidate = conditionCandidate || rankedCandidates[0];
   const explanation = explainPriorityCandidate(priorityCandidate);
   const recommendationInput = buildRecommendationInput(
     priorityCandidate,
@@ -7194,15 +7314,10 @@ function buildBrainDecision(brainContext) {
     learningHint,
     learningSummary,
   ), brainMemoryContext);
-  const recentHealthStates = [...asArray(brainHealthState)]
-    .sort((a, b) =>
-      String(b.date || b.updatedAt || b.createdAt).localeCompare(String(a.date || a.updatedAt || a.createdAt)),
-    );
-  const latestHealthState = latestHealthStateFrom(brainHealthState);
   const healthContext = buildHealthContext(
-    latestHealthState,
-    buildHealthInsight(recentHealthStates.slice(0, 7)),
-    buildHealthTrend(recentHealthStates.slice(0, 14)),
+    activeHealthState,
+    buildHealthInsight(applicableHealthStates.slice(0, 7)),
+    buildHealthTrend(applicableHealthStates.slice(0, 14)),
   );
   const healthAwareRecommendation = buildHealthAwareRecommendation(
     recommendation,
@@ -7210,10 +7325,10 @@ function buildBrainDecision(brainContext) {
   );
   const intentSafetyAdjustment = Boolean(
     intentCandidate &&
-    latestHealthState &&
+    activeHealthState &&
     (
-      ["very_low", "low", "unstable"].includes(latestHealthState.energyLevel) ||
-      ["depleted", "low"].includes(latestHealthState.recoveryFeeling)
+      ["very_low", "low", "unstable"].includes(activeHealthState.energyLevel) ||
+      ["depleted", "low"].includes(activeHealthState.recoveryFeeling)
     ),
   );
 
@@ -7233,6 +7348,9 @@ function buildBrainDecision(brainContext) {
     brainMemoryContext,
     recommendation,
     healthAwareRecommendation,
+    activeHealthState,
+    healthContext,
+    dailyInputContext,
     intentDecision: intentCandidate
       ? {
           direction: intentCandidate.title,
@@ -7276,12 +7394,14 @@ function renderBrainPrototype() {
     brainMemoryContext,
     recommendation,
     healthAwareRecommendation,
+    activeHealthState,
+    healthContext,
+    dailyInputContext,
     intentDecision,
   } = buildBrainDecision(brainContext);
   const newestMemo = persistentMemos
     .filter((memo) => memo.updatedAt || memo.createdAt)
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
-  currentRecommendation = recommendation;
   const explainLearningSummary = buildLearningSummary();
   const explainLearningHint = buildLearningHint(explainLearningSummary);
   const explainLearningConfidence = buildLearningConfidence(explainLearningSummary, explainLearningHint);
@@ -7316,15 +7436,17 @@ function renderBrainPrototype() {
     morningGuidanceText,
     dailyFocus,
   } = brainExpression;
-  const healthAwareConversation = getLatestHealthAwareConversation();
+  currentRecommendation = recommendationExpression;
+  const healthAwareConversation = buildHealthAwareConversation(healthContext);
   const conversationContext = buildConversationContext({
     project: brainMemoryContext.project || priorityCandidate?.title || "",
-    recommendation,
+    recommendation: recommendationExpression,
     explanation,
     learningHint: latestLearningHint,
     learningConfidence: latestLearningConfidence,
     memoryContext: brainMemoryContext,
     healthAwareConversation,
+    dailyInputContext,
     todayTasks,
     todayEvents,
   });
@@ -7354,10 +7476,10 @@ function renderBrainPrototype() {
     getLatestExecutionDecision(),
     getLatestExecutionState(),
     getLatestExecutionFeedback(),
-    getLatestHealthState(),
+    activeHealthState,
     buildHealthInsight(getRecentHealthStates()),
     getLatestHealthTrend(),
-    getLatestHealthContext(),
+    healthContext,
     healthAwareConversation,
     healthAwareRecommendation,
   );

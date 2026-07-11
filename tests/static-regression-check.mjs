@@ -373,6 +373,11 @@ check(/\.dashboard-section-heading[\s\S]*?scroll-margin-top:\s*18px\s*;/.test(st
 check(/\.back-to-top\s*\{[^}]*position:\s*fixed\s*;/s.test(stylesCss), "上へ戻るボタンが画面に固定されていません");
 check(appJs.includes('window.scrollY < 600'), "上へ戻るボタンの表示開始位置がありません");
 check(appJs.includes('$("#backToTop")?.addEventListener("click", scrollBackToTop);'), "上へ戻るボタンのクリック処理がありません");
+check(appJs.includes("function buildDailyInputDecisionContext"), "今日の入力を一日の判断材料にする処理がありません");
+check(appJs.includes('find((item) => item.date === brainActiveDate)'), "判断メモが選択日の体調を参照していません");
+check(appJs.includes("function buildDailyConditionCandidate"), "予定・体調を作業候補より先に扱う処理がありません");
+check(appJs.includes("recommendation: recommendationExpression"), "生成された返答が判断メモの最終提案を参照していません");
+check(existsSync(resolve(root, "tests/brain-golden/run-daily-decision-reply-check.mjs")), "一日の判断と生成された返答の連動テストがありません");
 check(/\.learning-actions[\s\S]*?flex-direction:\s*column\s*;/.test(mobileCss), "モバイルで学び操作欄が縦並びになっていません");
 
 if (failures.length) {

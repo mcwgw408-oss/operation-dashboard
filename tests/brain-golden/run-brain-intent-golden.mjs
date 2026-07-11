@@ -79,9 +79,13 @@ for (const testCase of intentCases) {
 
 const normalPriority = results.get("intent-normal-health")?.brain.priorityCandidate?.title;
 const lowPriority = results.get("intent-low-health")?.brain.priorityCandidate?.title;
-if (normalPriority !== lowPriority) {
-  failures.push("intent-direction-health-invariance");
-  console.error("mismatch: intent direction changed under low health");
+if (normalPriority !== INTENT_DIRECTION) {
+  failures.push("intent-direction-normal-health");
+  console.error("mismatch: intent direction was not prioritized under normal health");
+}
+if (lowPriority !== "休息を優先する") {
+  failures.push("intent-health-safety-priority");
+  console.error("mismatch: low health did not place recovery before execution");
 }
 
 if (failures.length) {
