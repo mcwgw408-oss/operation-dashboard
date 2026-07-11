@@ -251,7 +251,9 @@ function blankDay() {
     memos: [],
     learnings: [],
     publishingOps: defaultPublishingOps(),
+    publishingOpsUpdatedAt: "",
     dailyInput: "",
+    dailyInputUpdatedAt: "",
     metrics: {
       mailUnread: "",
       mailProcessed: "",
@@ -313,18 +315,22 @@ function ensureLearningList(day) {
 }
 
 function ensurePublishingOps(day) {
+  let changed = false;
   if (!day.publishingOps || typeof day.publishingOps !== "object") {
     day.publishingOps = defaultPublishingOps();
-    return true;
+    changed = true;
   }
   const defaults = defaultPublishingOps();
-  let changed = false;
   Object.entries(defaults).forEach(([key, value]) => {
     if (!(key in day.publishingOps)) {
       day.publishingOps[key] = value;
       changed = true;
     }
   });
+  if (!("publishingOpsUpdatedAt" in day)) {
+    day.publishingOpsUpdatedAt = "";
+    changed = true;
+  }
   return changed;
 }
 
@@ -337,11 +343,16 @@ function ensureTodayEvents(day) {
 }
 
 function ensureDailyInput(day) {
+  let changed = false;
   if (!("dailyInput" in day)) {
     day.dailyInput = "";
-    return true;
+    changed = true;
   }
-  return false;
+  if (!("dailyInputUpdatedAt" in day)) {
+    day.dailyInputUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
 }
 
 function loadStore() {
@@ -889,6 +900,18 @@ function formatDateLabel(dateText) {
     month: "long",
     day: "numeric",
     weekday: "short",
+  }).format(date);
+}
+
+function formatSavedAt(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 }
 
@@ -1756,21 +1779,46 @@ function renderPublishingOps() {
       field.value = ops[key] || "";
     }
   });
-  const status = $("#publishingOpsStatus");
-  if (status) {
-    status.textContent = "今日の発信運営を記録できます。";
-  }
+  renderPublishingOpsSaveState(day);
   renderPublishingOpsRecentFlow();
+}
+
+function hasSavedPublishingOps(day) {
+  const ops = { ...defaultPublishingOps(), ...(day?.publishingOps || {}) };
+  return Boolean(day?.publishingOpsUpdatedAt) || hasPublishingOpsRecord(day?.publishingOps, ops);
+}
+
+function renderPublishingOpsSaveState(day, confirmation = "") {
+  const saved = hasSavedPublishingOps(day);
+  const button = $("#savePublishingOps");
+  const status = $("#publishingOpsStatus");
+  const savedAt = formatSavedAt(day?.publishingOpsUpdatedAt);
+  if (button) {
+    button.textContent = saved ? "本日の記録を更新する" : "本日の記録を保存する";
+  }
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = "本日の発信運営はまだ保存されていません。";
+  }
 }
 
 function savePublishingOpsFromForm() {
   const day = getDay();
+  const wasSaved = hasSavedPublishingOps(day);
   day.publishingOps = { ...defaultPublishingOps(), ...readPublishingOpsForm() };
+  day.publishingOpsUpdatedAt = new Date().toISOString();
   saveStore();
-  const status = $("#publishingOpsStatus");
-  if (status) {
-    status.textContent = "保存済みです。";
-  }
+  const action = wasSaved ? "更新" : "保存";
+  renderPublishingOpsSaveState(
+    day,
+    `本日の記録を${action}しました。最終更新 ${formatSavedAt(day.publishingOpsUpdatedAt)}`,
+  );
   renderPublishingOpsRecentFlow();
 }
 
@@ -1963,10 +2011,7 @@ function renderFields() {
   if (dailyInput && document.activeElement !== dailyInput && dailyInput.value !== (day.dailyInput || "")) {
     dailyInput.value = day.dailyInput || "";
   }
-  const dailyInputStatus = $("#dailyInputStatus");
-  if (dailyInputStatus) {
-    dailyInputStatus.textContent = day.dailyInput ? "保存済みです。さくらの判断材料として参照されます。" : "未保存の入力はありません。";
-  }
+  renderDailyInputSaveState(day);
   Object.entries(day.metrics).forEach(([key, value]) => {
     const field = $(`#${key}`);
     if (!field) return;
@@ -1976,6 +2021,30 @@ function renderFields() {
   Object.entries(day.reflection).forEach(([key, value]) => {
     $(`#${key}`).value = value;
   });
+}
+
+function hasSavedDailyInput(day) {
+  return Boolean(day?.dailyInputUpdatedAt) || Boolean(String(day?.dailyInput || "").trim());
+}
+
+function renderDailyInputSaveState(day, confirmation = "") {
+  const saved = hasSavedDailyInput(day);
+  const button = $("#saveDailyInput");
+  const status = $("#dailyInputStatus");
+  const savedAt = formatSavedAt(day?.dailyInputUpdatedAt);
+  if (button) {
+    button.textContent = saved ? "本日の入力を更新する" : "本日の入力を保存する";
+  }
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}。さくらの判断材料として参照されます。`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = "本日の入力はまだ保存されていません。";
+  }
 }
 
 function collectSearchText(day) {
@@ -7591,17 +7660,23 @@ function bindEvents() {
   });
   $("#dailyInputText")?.addEventListener("input", () => {
     const status = $("#dailyInputStatus");
-    if (status) status.textContent = "未保存の入力があります。「今日の入力を保存する」を押してください。";
+    const action = hasSavedDailyInput(getDay()) ? "本日の入力を更新する" : "本日の入力を保存する";
+    if (status) status.textContent = `未保存の入力があります。「${action}」を押してください。`;
   });
   $("#saveDailyInput")?.addEventListener("click", () => {
     const day = getDay();
+    const wasSaved = hasSavedDailyInput(day);
     day.dailyInput = $("#dailyInputText")?.value || "";
+    day.dailyInputUpdatedAt = new Date().toISOString();
     saveStore();
     renderSummary();
     renderHistory();
     renderBrainPrototype();
-    const status = $("#dailyInputStatus");
-    if (status) status.textContent = "今日の入力を保存し、さくら判断の材料に反映しました。";
+    const action = wasSaved ? "更新" : "保存";
+    renderDailyInputSaveState(
+      day,
+      `本日の入力を${action}しました。最終更新 ${formatSavedAt(day.dailyInputUpdatedAt)}。さくらの判断材料に反映しました。`,
+    );
   });
   $("#executionFeedbackOutcome")?.addEventListener("change", (event) => {
     upsertExecutionFeedback({ outcome: event.target.value });

@@ -230,6 +230,19 @@ for (const [label, body] of [
 }
 const savePublishingOpsFromFormBody = extractDelimitedBlock(appJs, "function savePublishingOpsFromForm", "{", "}");
 check(savePublishingOpsFromFormBody.includes("renderPublishingOpsRecentFlow();"), "recent publishing ops is not refreshed after save");
+check(appJs.includes('publishingOpsUpdatedAt: ""'), "発信運営の更新日時初期値がありません");
+check(appJs.includes('dailyInputUpdatedAt: ""'), "今日の入力の更新日時初期値がありません");
+check(savePublishingOpsFromFormBody.includes("day.publishingOpsUpdatedAt = new Date().toISOString();"), "発信運営の更新日時が保存されません");
+check(appJs.includes('day.dailyInputUpdatedAt = new Date().toISOString();'), "今日の入力の更新日時が保存されません");
+for (const label of [
+  "本日の記録を保存する",
+  "本日の記録を更新する",
+  "本日の入力を保存する",
+  "本日の入力を更新する",
+  "最終更新",
+]) {
+  check(appJs.includes(label) || indexHtml.includes(label), `保存・更新表示がありません: ${label}`);
+}
 const publishingOpsPanelIndex = indexHtml.indexOf('class="panel publishing-ops-panel span-2"');
 const publishingOpsHistoryIndex = indexHtml.indexOf('class="panel publishing-ops-history-panel span-2"');
 const accumulationHeadingIndex = indexHtml.indexOf('id="dashboard-accumulation"');
