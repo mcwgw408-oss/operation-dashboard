@@ -3289,6 +3289,16 @@ textarea {
   padding-top: 14px;
 }
 
+.publishing-ops-history-panel {
+  display: grid;
+  grid-column: 1 / -1;
+}
+
+.publishing-ops-history-panel .publishing-ops-recent-flow {
+  border-top: 0;
+  padding-top: 0;
+}
+
 .publishing-ops-recent-heading {
   display: flex;
   align-items: flex-start;
@@ -3296,6 +3306,7 @@ textarea {
   gap: 12px;
 }
 
+.publishing-ops-recent-heading h2,
 .publishing-ops-recent-heading h3 {
   margin: 0;
   font-size: 15px;
@@ -3685,6 +3696,10 @@ textarea {
   order: 39;
 }
 
+.dashboard .publishing-ops-history-panel {
+  order: 40;
+}
+
 .dashboard .learning-panel {
   order: 61;
 }
@@ -3739,6 +3754,7 @@ textarea {
 .daily-focus-panel,
 .brain-panel,
 .publishing-ops-panel,
+.publishing-ops-history-panel,
 .daily-input-panel,
 .dashboard-task-panel,
 .dashboard-health-input-panel,

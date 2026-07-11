@@ -992,17 +992,6 @@
             </section>
           </div>
           <p id="publishingOpsStatus" class="publishing-ops-status">未保存の変更はありません。</p>
-          <section class="publishing-ops-recent-flow" aria-label="最近7日の発信運営">
-            <div class="publishing-ops-recent-heading">
-              <div>
-                <h3>最近7日の発信運営</h3>
-                <p class="section-note">選択中の日付を含む過去7日間の保存済み記録です。</p>
-              </div>
-              <span id="publishingOpsRecentRange" class="publishing-ops-recent-range"></span>
-            </div>
-            <div id="publishingOpsRecentSummary" class="publishing-ops-recent-summary" aria-label="最近7日の発信運営 集計"></div>
-            <div id="publishingOpsRecentList" class="publishing-ops-recent-list" aria-label="最近7日の発信運営 日別"></div>
-          </section>
         </section>
 
         <section class="panel dashboard-health-input-panel span-2" aria-label="体調チェック">
@@ -1048,6 +1037,20 @@
           <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
           <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
           <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
+        </section>
+
+        <section class="panel publishing-ops-history-panel span-2" aria-label="発信運営の保存済み記録">
+          <div class="publishing-ops-recent-flow">
+            <div class="publishing-ops-recent-heading">
+              <div>
+                <h2>発信運営の保存済み記録</h2>
+                <p class="section-note">選択中の日付を含む、最近7日間の記録です。</p>
+              </div>
+              <span id="publishingOpsRecentRange" class="publishing-ops-recent-range"></span>
+            </div>
+            <div id="publishingOpsRecentSummary" class="publishing-ops-recent-summary" aria-label="最近7日の発信運営 集計"></div>
+            <div id="publishingOpsRecentList" class="publishing-ops-recent-list" aria-label="最近7日の発信運営 日別"></div>
+          </div>
         </section>
 
         <section class="panel later-panel">
