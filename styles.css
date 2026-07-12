@@ -3426,6 +3426,125 @@ textarea {
   gap: 6px;
 }
 
+.operation-experiment-panel {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.operation-experiment-overview,
+.operation-experiment-daily-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.operation-experiment-overview label,
+.operation-experiment-daily-fields label,
+.operation-experiment-metrics label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.operation-experiment-purpose,
+.operation-experiment-observation {
+  grid-column: 1 / -1;
+}
+
+.operation-experiment-purpose textarea {
+  min-height: 64px;
+}
+
+.operation-experiment-daily {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.operation-experiment-daily-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.operation-experiment-daily-heading h3,
+.operation-experiment-recent h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.operation-experiment-daily-heading span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.operation-experiment-daily-fields {
+  grid-template-columns: repeat(2, minmax(0, 180px)) minmax(220px, 1fr);
+}
+
+.operation-experiment-observation {
+  grid-column: auto;
+}
+
+.operation-experiment-metrics {
+  border-top: 1px dashed var(--line);
+  padding-top: 10px;
+}
+
+.operation-experiment-metrics summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.operation-experiment-metrics > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.operation-experiment-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.operation-experiment-recent {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.operation-experiment-recent-list {
+  display: grid;
+  gap: 8px;
+}
+
+.operation-experiment-recent-row {
+  display: grid;
+  grid-template-columns: 110px repeat(3, minmax(90px, 0.5fr)) minmax(180px, 1fr);
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.operation-experiment-recent-row span {
+  color: var(--muted);
+}
+
+.operation-experiment-recent-row.is-empty {
+  opacity: 0.62;
+}
+
 .publishing-ops-recent-texts p,
 .publishing-ops-recent-empty {
   margin: 0;
@@ -3668,40 +3787,44 @@ textarea {
   order: 31;
 }
 
-.dashboard .daily-input-panel {
+.dashboard .operation-experiment-panel {
   order: 32;
 }
 
-.dashboard .dashboard-task-panel {
+.dashboard .daily-input-panel {
   order: 33;
 }
 
-.dashboard .dashboard-health-input-panel {
-  order: 35;
-}
-
-.dashboard .dashboard-memory-input-panel {
-  order: 36;
-}
-
-.dashboard .schedule-panel {
+.dashboard .dashboard-task-panel {
   order: 34;
 }
 
-.dashboard > .panel:has(#dailyTasks) {
+.dashboard .schedule-panel {
+  order: 35;
+}
+
+.dashboard .dashboard-health-input-panel {
+  order: 36;
+}
+
+.dashboard .dashboard-memory-input-panel {
   order: 37;
 }
 
-.dashboard > .metrics-panel:has(#mailMorningChecked) {
+.dashboard > .panel:has(#dailyTasks) {
   order: 38;
 }
 
-.dashboard > .metrics-panel:has(#dmPending) {
+.dashboard > .metrics-panel:has(#mailMorningChecked) {
   order: 39;
 }
 
-.dashboard .publishing-ops-history-panel {
+.dashboard > .metrics-panel:has(#dmPending) {
   order: 40;
+}
+
+.dashboard .publishing-ops-history-panel {
+  order: 41;
 }
 
 .dashboard .learning-panel {
@@ -3922,6 +4045,9 @@ textarea {
   .persistent-memo-actions,
   .learning-item,
   .publishing-ops-grid,
+  .operation-experiment-overview,
+  .operation-experiment-daily-fields,
+  .operation-experiment-metrics > div,
   .publishing-ops-fields,
   .publishing-ops-fields.compact,
   .publishing-ops-recent-summary,
@@ -3929,6 +4055,18 @@ textarea {
   .publishing-ops-recent-statuses,
   .history-item {
     grid-template-columns: 1fr;
+  }
+
+  .operation-experiment-observation {
+    grid-column: 1;
+  }
+
+  .operation-experiment-recent-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .operation-experiment-recent-row strong:last-child {
+    grid-column: 1 / -1;
   }
 
   .publishing-ops-recent-heading,

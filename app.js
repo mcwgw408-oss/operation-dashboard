@@ -28,6 +28,7 @@ const EXECUTION_FEEDBACK_STORAGE_KEY = "sakura-execution-feedback-v1";
 const HEALTH_STATE_STORAGE_KEY = "sakura-health-state-v1";
 const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
 const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
+const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -147,6 +148,7 @@ let executionFeedback = loadExecutionFeedback();
 let healthState = loadHealthState();
 let recurringSchedule = loadRecurringSchedule();
 let recurringAutoAddLog = loadRecurringAutoAddLog();
+let operationExperimentStore = loadOperationExperimentStore();
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -230,6 +232,37 @@ function defaultPublishingOps(date = activeDate) {
     morningStackFlow: "",
     yoshidaBalance: "",
     operationFindings: "",
+  };
+}
+
+function defaultOperationExperimentStore() {
+  return {
+    experiments: [{
+      id: "notes-10-per-day",
+      name: "Notesを1日10投稿",
+      purpose: "記事を増やすのではなく、入口を増やして交流や購読につながるかを検証する",
+      status: "active",
+      startDate: "",
+      endDate: "",
+      channel: "substack",
+      targetMetric: "交流・購読への反応",
+      createdAt: new Date().toISOString(),
+    }],
+    dailyLogs: {},
+  };
+}
+
+function blankOperationExperimentLog() {
+  return {
+    execution: "",
+    reaction: "",
+    observation: "",
+    notesCount: "",
+    subscribers: "",
+    replies: "",
+    restacks: "",
+    otherReactions: "",
+    updatedAt: "",
   };
 }
 
@@ -679,6 +712,24 @@ function loadRecurringAutoAddLog() {
   }
 }
 
+function loadOperationExperimentStore() {
+  const defaults = defaultOperationExperimentStore();
+  try {
+    const saved = JSON.parse(localStorage.getItem(OPERATION_EXPERIMENT_STORAGE_KEY));
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return defaults;
+    return {
+      experiments: Array.isArray(saved.experiments) && saved.experiments.length
+        ? saved.experiments
+        : defaults.experiments,
+      dailyLogs: saved.dailyLogs && typeof saved.dailyLogs === "object" && !Array.isArray(saved.dailyLogs)
+        ? saved.dailyLogs
+        : {},
+    };
+  } catch {
+    return defaults;
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -863,6 +914,10 @@ function saveRecurringSchedule() {
 
 function saveRecurringAutoAddLog() {
   localStorage.setItem(RECURRING_AUTO_ADD_LOG_STORAGE_KEY, JSON.stringify(recurringAutoAddLog));
+}
+
+function saveOperationExperimentStore() {
+  localStorage.setItem(OPERATION_EXPERIMENT_STORAGE_KEY, JSON.stringify(operationExperimentStore));
 }
 
 function saveMemoryStore() {
@@ -1835,6 +1890,115 @@ function savePublishingOpsFromForm() {
     `本日の記録を${action}しました。最終更新 ${formatSavedAt(day.publishingOpsUpdatedAt)}`,
   );
   renderPublishingOpsRecentFlow();
+  renderOperationExperiment();
+}
+
+const operationExperimentDefinitionFields = {
+  name: "#operationExperimentName",
+  status: "#operationExperimentStatus",
+  startDate: "#operationExperimentStartDate",
+  endDate: "#operationExperimentEndDate",
+  purpose: "#operationExperimentPurpose",
+};
+
+const operationExperimentLogFields = {
+  execution: "#operationExperimentExecution",
+  reaction: "#operationExperimentReaction",
+  observation: "#operationExperimentObservation",
+  subscribers: "#operationExperimentSubscribers",
+  replies: "#operationExperimentReplies",
+  restacks: "#operationExperimentRestacks",
+  otherReactions: "#operationExperimentOtherReactions",
+};
+
+const operationExperimentExecutionLabels = {
+  done: "できた",
+  partial: "一部できた",
+  "not-done": "しなかった",
+};
+
+const operationExperimentReactionLabels = {
+  low: "少ない",
+  usual: "いつも通り",
+  high: "多い",
+};
+
+function getCurrentOperationExperiment() {
+  return operationExperimentStore.experiments.find((experiment) => experiment.status === "active") ||
+    operationExperimentStore.experiments[0] || null;
+}
+
+function getOperationExperimentLog(dateKey, experimentId) {
+  return {
+    ...blankOperationExperimentLog(),
+    ...(operationExperimentStore.dailyLogs?.[dateKey]?.[experimentId] || {}),
+  };
+}
+
+function getCurrentNotesCountForExperiment() {
+  const field = $(publishingOpsFields.notesCount);
+  return field ? field.value : (getDay().publishingOps?.notesCount ?? "");
+}
+
+function renderOperationExperimentRecent(experiment) {
+  const target = $("#operationExperimentRecentList");
+  if (!target || !experiment) return;
+  const rows = buildRecentPublishingOpsDateKeys(activeDate).map((dateKey) => {
+    const log = getOperationExperimentLog(dateKey, experiment.id);
+    const rawLog = operationExperimentStore.dailyLogs?.[dateKey]?.[experiment.id];
+    const notesCount = rawLog?.notesCount ?? store[dateKey]?.publishingOps?.notesCount ?? "";
+    const row = document.createElement("div");
+    row.className = `operation-experiment-recent-row${rawLog ? "" : " is-empty"}`;
+    const date = document.createElement("strong");
+    date.textContent = formatDateLabel(dateKey);
+    const notes = document.createElement("span");
+    notes.textContent = `Notes ${notesCount === "" ? "-" : notesCount}件`;
+    const execution = document.createElement("span");
+    execution.textContent = operationExperimentExecutionLabels[log.execution] || "実施 未記録";
+    const reaction = document.createElement("span");
+    reaction.textContent = operationExperimentReactionLabels[log.reaction] || "反応 不明";
+    const observation = document.createElement("strong");
+    observation.textContent = log.observation || "記録なし";
+    row.append(date, notes, execution, reaction, observation);
+    return row;
+  });
+  target.replaceChildren(...rows);
+}
+
+function renderOperationExperiment() {
+  const experiment = getCurrentOperationExperiment();
+  if (!experiment) return;
+  Object.entries(operationExperimentDefinitionFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (field) field.value = experiment[key] || "";
+  });
+  const log = getOperationExperimentLog(activeDate, experiment.id);
+  Object.entries(operationExperimentLogFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (field) field.value = log[key] ?? "";
+  });
+  const notesCount = getCurrentNotesCountForExperiment();
+  $("#operationExperimentDate").textContent = formatDateLabel(activeDate);
+  $("#operationExperimentNotesCount").textContent = `発信運営のノート投稿数: ${notesCount === "" ? "未記録" : `${notesCount}件`}`;
+  $("#operationExperimentStatusMessage").textContent = "今日の実験を記録できます。";
+  renderOperationExperimentRecent(experiment);
+}
+
+function saveOperationExperimentFromForm() {
+  const experiment = getCurrentOperationExperiment();
+  if (!experiment) return;
+  Object.entries(operationExperimentDefinitionFields).forEach(([key, selector]) => {
+    experiment[key] = $(selector)?.value || "";
+  });
+  const log = Object.fromEntries(Object.entries(operationExperimentLogFields).map(([key, selector]) =>
+    [key, $(selector)?.value || ""]));
+  log.notesCount = getCurrentNotesCountForExperiment();
+  log.updatedAt = new Date().toISOString();
+  operationExperimentStore.dailyLogs[activeDate] ||= {};
+  operationExperimentStore.dailyLogs[activeDate][experiment.id] = log;
+  saveOperationExperimentStore();
+  $("#operationExperimentStatusMessage").textContent = "保存済みです。";
+  renderOperationExperimentRecent(experiment);
 }
 
 function renderLaterCounts() {
@@ -7677,6 +7841,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  renderOperationExperiment();
   renderLaterItems();
   renderFields();
   renderSummary();
@@ -8073,6 +8238,17 @@ function bindEvents() {
       if (status) status.textContent = "未保存の変更があります。";
     });
   });
+  $("#saveOperationExperiment")?.addEventListener("click", saveOperationExperimentFromForm);
+  [...Object.values(operationExperimentDefinitionFields), ...Object.values(operationExperimentLogFields)].forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    const markDirty = () => {
+      const status = $("#operationExperimentStatusMessage");
+      if (status) status.textContent = "未保存の変更があります。";
+    };
+    field.addEventListener("input", markDirty);
+    field.addEventListener("change", markDirty);
+  });
   $("#historySearch").addEventListener("input", renderHistory);
   $("#downloadCsv").addEventListener("click", downloadCsv);
   $("#exportBackup")?.addEventListener("click", handleExportBackup);
@@ -8208,6 +8384,7 @@ const BACKUP_SCHEMA_VERSION = 1;
 const BACKUP_DICTIONARY_VERSION = "v1";
 const BACKUP_KEYS = [
   STORAGE_KEY,
+  OPERATION_EXPERIMENT_STORAGE_KEY,
   LATER_STORAGE_KEY,
   PERSISTENT_MEMO_STORAGE_KEY,
   LEARNING_LOG_STORAGE_KEY,
@@ -8314,6 +8491,7 @@ function readFirstStoredJson(keys, fallback) {
 function createBackup() {
   const data = {};
   data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
+  data[OPERATION_EXPERIMENT_STORAGE_KEY] = readStoredJson(OPERATION_EXPERIMENT_STORAGE_KEY, defaultOperationExperimentStore());
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[LEARNING_LOG_STORAGE_KEY] = readStoredJson(LEARNING_LOG_STORAGE_KEY, []);

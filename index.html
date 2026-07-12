@@ -997,6 +997,74 @@
           <p id="publishingOpsStatus" class="publishing-ops-status">本日の発信運営はまだ保存されていません。</p>
         </section>
 
+        <section class="panel operation-experiment-panel span-2" aria-label="運営実験">
+          <div class="panel-heading">
+            <div>
+              <h2>運営実験</h2>
+              <p class="section-note">運営で試していることと、その日の反応を軽く記録します。</p>
+            </div>
+            <button class="ghost-button" id="saveOperationExperiment" type="button">保存</button>
+          </div>
+
+          <div class="operation-experiment-overview">
+            <label>実験名<input id="operationExperimentName" type="text" /></label>
+            <label>状態
+              <select id="operationExperimentStatus">
+                <option value="active">実施中</option>
+                <option value="paused">保留</option>
+                <option value="completed">終了</option>
+              </select>
+            </label>
+            <label>開始日<input id="operationExperimentStartDate" type="date" /></label>
+            <label>終了日<input id="operationExperimentEndDate" type="date" /></label>
+            <label class="operation-experiment-purpose">目的・仮説<textarea id="operationExperimentPurpose" rows="2"></textarea></label>
+          </div>
+
+          <div class="operation-experiment-daily">
+            <div class="operation-experiment-daily-heading">
+              <div>
+                <h3>今日の記録</h3>
+                <p id="operationExperimentNotesCount" class="section-note">発信運営のノート投稿数: 0件</p>
+              </div>
+              <span id="operationExperimentDate"></span>
+            </div>
+            <div class="operation-experiment-daily-fields">
+              <label>実施
+                <select id="operationExperimentExecution">
+                  <option value="">未記録</option>
+                  <option value="done">できた</option>
+                  <option value="partial">一部できた</option>
+                  <option value="not-done">しなかった</option>
+                </select>
+              </label>
+              <label>反応
+                <select id="operationExperimentReaction">
+                  <option value="">不明</option>
+                  <option value="low">少ない</option>
+                  <option value="usual">いつも通り</option>
+                  <option value="high">多い</option>
+                </select>
+              </label>
+              <label class="operation-experiment-observation">気づき<input id="operationExperimentObservation" type="text" placeholder="今日感じたことを一言" /></label>
+            </div>
+            <details class="operation-experiment-metrics">
+              <summary>数字も記録する</summary>
+              <div>
+                <label>今日の新規購読者数<input id="operationExperimentSubscribers" type="number" min="0" inputmode="numeric" /></label>
+                <label>返信・コメント数<input id="operationExperimentReplies" type="number" min="0" inputmode="numeric" /></label>
+                <label>リスタック数<input id="operationExperimentRestacks" type="number" min="0" inputmode="numeric" /></label>
+                <label>その他の反応数<input id="operationExperimentOtherReactions" type="number" min="0" inputmode="numeric" /></label>
+              </div>
+            </details>
+          </div>
+          <p id="operationExperimentStatusMessage" class="operation-experiment-status">今日の実験を記録できます。</p>
+
+          <section class="operation-experiment-recent" aria-label="最近7日の運営実験">
+            <h3>最近7日の記録</h3>
+            <div id="operationExperimentRecentList" class="operation-experiment-recent-list"></div>
+          </section>
+        </section>
+
         <section class="panel dashboard-health-input-panel span-2" aria-label="体調チェック">
           <div class="panel-heading">
             <div>
