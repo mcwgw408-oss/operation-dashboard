@@ -29,6 +29,7 @@ const HEALTH_STATE_STORAGE_KEY = "sakura-health-state-v1";
 const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
 const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
+const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -109,6 +110,8 @@ const defaultProjectMemory = [
 ];
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
+let customDailyTasks = loadCustomDailyTasks();
+saveCustomDailyTasks();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
 let autoDedupeLater = loadAutoDedupeLater();
@@ -315,7 +318,7 @@ function ensureDefaultDailyTasks(day) {
   const beforeCount = day.dailyTasks.length;
   day.dailyTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title));
   if (day.dailyTasks.length !== beforeCount) changed = true;
-  defaultDailyTasks.forEach((title) => {
+  [...defaultDailyTasks, ...customDailyTasks].forEach((title) => {
     if (!day.dailyTasks.some((item) => item.title === title)) {
       day.dailyTasks.push(newItem(title));
       changed = true;
@@ -395,6 +398,21 @@ function loadStore() {
   } catch {
     return {};
   }
+}
+
+function loadCustomDailyTasks() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CUSTOM_DAILY_TASKS_STORAGE_KEY));
+    if (Array.isArray(saved)) return saved.filter((title) => typeof title === "string" && title.trim());
+  } catch {
+    // Fall through to migration from existing daily records.
+  }
+  const builtInTitles = new Set([...defaultDailyTasks, ...obsoleteDailyTasks]);
+  const migrated = [...new Set(Object.values(store).flatMap((day) =>
+    asArray(day?.dailyTasks)
+      .map((item) => String(item?.title || "").trim())
+      .filter((title) => title && !builtInTitles.has(title))))];
+  return migrated;
 }
 
 function loadLaterItems() {
@@ -920,6 +938,41 @@ function saveOperationExperimentStore() {
   localStorage.setItem(OPERATION_EXPERIMENT_STORAGE_KEY, JSON.stringify(operationExperimentStore));
 }
 
+function saveCustomDailyTasks() {
+  localStorage.setItem(CUSTOM_DAILY_TASKS_STORAGE_KEY, JSON.stringify(customDailyTasks));
+}
+
+function addCustomDailyTask(title) {
+  if (defaultDailyTasks.includes(title) || customDailyTasks.includes(title)) return;
+  customDailyTasks.push(title);
+  saveCustomDailyTasks();
+}
+
+function updateCustomDailyTask(oldTitle, newTitle) {
+  const index = customDailyTasks.indexOf(oldTitle);
+  if (index < 0 || !newTitle || oldTitle === newTitle) return;
+  customDailyTasks[index] = newTitle;
+  customDailyTasks = [...new Set(customDailyTasks)];
+  Object.entries(store).forEach(([dateKey, day]) => {
+    if (dateKey <= activeDate) return;
+    asArray(day.dailyTasks).forEach((task) => {
+      if (task.title === oldTitle) task.title = newTitle;
+    });
+  });
+  saveCustomDailyTasks();
+  saveStore();
+}
+
+function removeCustomDailyTask(title) {
+  if (!customDailyTasks.includes(title)) return;
+  customDailyTasks = customDailyTasks.filter((candidate) => candidate !== title);
+  Object.entries(store).forEach(([dateKey, day]) => {
+    if (dateKey <= activeDate) return;
+    day.dailyTasks = asArray(day.dailyTasks).filter((task) => task.title !== title);
+  });
+  saveCustomDailyTasks();
+}
+
 function saveMemoryStore() {
   memoryStore.projectMemory = ensureDefaultProjectMemory(asArray(memoryStore.projectMemory));
   localStorage.setItem(MEMORY_STORE_STORAGE_KEY, JSON.stringify(memoryStore));
@@ -1022,6 +1075,7 @@ function renderTaskList(listId) {
     const priority = row.querySelector(".priority-button");
     checkbox.checked = item.done;
     title.value = item.title;
+    let templateTitle = item.title;
     priority.classList.toggle("active", item.priority);
     checkbox.addEventListener("change", () => {
       item.done = checkbox.checked;
@@ -1033,7 +1087,13 @@ function renderTaskList(listId) {
       item.title = title.value;
       saveStore();
     });
-    title.addEventListener("change", renderBrainPrototype);
+    title.addEventListener("change", () => {
+      if (listId === "dailyTasks") {
+        updateCustomDailyTask(templateTitle, title.value.trim());
+        templateTitle = title.value.trim();
+      }
+      renderBrainPrototype();
+    });
     priority.addEventListener("click", () => {
       day[listId].forEach((candidate) => {
         if (candidate.id !== item.id) candidate.priority = false;
@@ -1044,6 +1104,7 @@ function renderTaskList(listId) {
       renderBrainPrototype();
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
+      if (listId === "dailyTasks") removeCustomDailyTask(item.title);
       day[listId] = day[listId].filter((candidate) => candidate.id !== item.id);
       saveStore();
       renderTaskList(listId);
@@ -8074,6 +8135,7 @@ function bindEvents() {
       const input = form.querySelector("input");
       const title = input.value.trim();
       if (!title) return;
+      if (form.dataset.addList === "dailyTasks") addCustomDailyTask(title);
       getDay()[form.dataset.addList].push(newItem(title));
       input.value = "";
       saveStore();
@@ -8385,6 +8447,7 @@ const BACKUP_DICTIONARY_VERSION = "v1";
 const BACKUP_KEYS = [
   STORAGE_KEY,
   OPERATION_EXPERIMENT_STORAGE_KEY,
+  CUSTOM_DAILY_TASKS_STORAGE_KEY,
   LATER_STORAGE_KEY,
   PERSISTENT_MEMO_STORAGE_KEY,
   LEARNING_LOG_STORAGE_KEY,
@@ -8492,6 +8555,7 @@ function createBackup() {
   const data = {};
   data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
   data[OPERATION_EXPERIMENT_STORAGE_KEY] = readStoredJson(OPERATION_EXPERIMENT_STORAGE_KEY, defaultOperationExperimentStore());
+  data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[LEARNING_LOG_STORAGE_KEY] = readStoredJson(LEARNING_LOG_STORAGE_KEY, []);

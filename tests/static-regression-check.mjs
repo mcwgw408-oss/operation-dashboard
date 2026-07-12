@@ -148,6 +148,7 @@ for (const key of [
   "SNAPSHOT_SETTINGS_KEY",
   "OPERATION_COCKPIT_STORAGE_KEY",
   "OPERATION_EXPERIMENT_STORAGE_KEY",
+  "CUSTOM_DAILY_TASKS_STORAGE_KEY",
 ]) {
   check(backupKeys.includes(key), `必須バックアップキーがありません: ${key}`);
 }
@@ -261,6 +262,11 @@ for (const label of [
   check(indexHtml.includes(label), `今日だけの予定・用事の説明がありません: ${label}`);
 }
 check(appJs.includes("function renderTodayOnlyDateLabels"), "今日だけの予定・用事に対象日を表示する処理がありません");
+check(indexHtml.includes("ここに追加した項目は、翌日以降にも引き継がれます"), "毎日タスクの引き継ぎ説明がありません");
+check(appJs.includes("function loadCustomDailyTasks"), "追加した毎日タスクを引き継ぐ読み込み処理がありません");
+check(appJs.includes('form.dataset.addList === "dailyTasks"'), "毎日タスク追加時の共通保存処理がありません");
+const ensureDefaultDailyTasksBody = extractDelimitedBlock(appJs, "function ensureDefaultDailyTasks", "{", "}");
+check(ensureDefaultDailyTasksBody.includes("customDailyTasks"), "独自の毎日タスクが日付データへ引き継がれません");
 const renderTaskListBody = extractDelimitedBlock(appJs, "function renderTaskList", "{", "}");
 check(renderTaskListBody.includes("renderBrainPrototype();"), "用事の変更後に判断メモが更新されません");
 check(/renderTaskList\(form\.dataset\.addList\);\s*renderBrainPrototype\(\);/s.test(appJs), "用事の追加後に判断メモが更新されません");
