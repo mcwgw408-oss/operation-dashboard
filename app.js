@@ -111,6 +111,7 @@ let store = loadStore();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
 let autoDedupeLater = loadAutoDedupeLater();
+let laterSortOrder = loadLaterSortOrder();
 let laterSearchQuery = "";
 let laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
 let persistentMemos = loadPersistentMemos();
@@ -385,6 +386,15 @@ function loadAutoDedupeLater() {
     return JSON.parse(localStorage.getItem(LATER_VIEW_STORAGE_KEY))?.autoDedupe ?? false;
   } catch {
     return false;
+  }
+}
+
+function loadLaterSortOrder() {
+  try {
+    const savedOrder = JSON.parse(localStorage.getItem(LATER_VIEW_STORAGE_KEY))?.sortOrder;
+    return savedOrder === "newest" ? "newest" : "oldest";
+  } catch {
+    return "oldest";
   }
 }
 
@@ -715,7 +725,7 @@ function saveLaterItems() {
 function saveLaterView() {
   localStorage.setItem(
     LATER_VIEW_STORAGE_KEY,
-    JSON.stringify({ showDone: showDoneLater, autoDedupe: autoDedupeLater }),
+    JSON.stringify({ showDone: showDoneLater, autoDedupe: autoDedupeLater, sortOrder: laterSortOrder }),
   );
 }
 
@@ -1882,15 +1892,18 @@ function laterCreatedTime(item) {
   return Number.isNaN(time) ? null : time;
 }
 
-function sortLaterItemsForDisplay(items) {
+function sortLaterItemsForDisplay(items, sortOrder = "oldest") {
+  const newestFirst = sortOrder === "newest";
   return items
     .map((item, index) => ({ item, index }))
     .sort((left, right) => {
       const leftTime = laterCreatedTime(left.item);
       const rightTime = laterCreatedTime(right.item);
-      if (leftTime !== null && rightTime !== null && leftTime !== rightTime) return leftTime - rightTime;
-      if (leftTime === null && rightTime !== null) return -1;
-      if (leftTime !== null && rightTime === null) return 1;
+      if (leftTime !== null && rightTime !== null && leftTime !== rightTime) {
+        return newestFirst ? rightTime - leftTime : leftTime - rightTime;
+      }
+      if (leftTime === null && rightTime !== null) return newestFirst ? 1 : -1;
+      if (leftTime !== null && rightTime === null) return newestFirst ? -1 : 1;
       return left.index - right.index;
     })
     .map(({ item }) => item);
@@ -1915,6 +1928,12 @@ function renderLaterItems() {
   if (showDoneField) showDoneField.checked = showDoneLater;
   const autoDedupeField = $("#autoDedupeLater");
   if (autoDedupeField) autoDedupeField.checked = autoDedupeLater;
+  const sortToggle = $("#laterSortToggle");
+  if (sortToggle) {
+    const isNewest = laterSortOrder === "newest";
+    sortToggle.textContent = `並び順：${isNewest ? "新しい順" : "古い順"}`;
+    sortToggle.setAttribute("aria-label", `現在は${isNewest ? "新しい順" : "古い順"}です。押すと${isNewest ? "古い順" : "新しい順"}に切り替えます`);
+  }
   renderLaterCounts();
   const template = $("#laterTemplate");
   target.replaceChildren();
@@ -1924,6 +1943,7 @@ function renderLaterItems() {
   const statusItems = showDoneLater ? laterItems : laterItems.filter((item) => !item.done);
   const visibleItems = sortLaterItemsForDisplay(
     statusItems.filter((item) => laterMatchesSearch(item, searchQuery)),
+    laterSortOrder,
   );
   const displayItems = searchQuery ? visibleItems : visibleItems.slice(0, laterVisibleLimit);
   const hiddenCount = Math.max(0, visibleItems.length - displayItems.length);
@@ -8002,6 +8022,12 @@ function bindEvents() {
   $("#laterSearch")?.addEventListener("input", (event) => {
     laterSearchQuery = event.target.value;
     if (!laterSearchQuery.trim()) laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
+    renderLaterItems();
+  });
+  $("#laterSortToggle")?.addEventListener("click", () => {
+    laterSortOrder = laterSortOrder === "oldest" ? "newest" : "oldest";
+    laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
+    saveLaterView();
     renderLaterItems();
   });
   $("#autoDedupeLater")?.addEventListener("change", (event) => {

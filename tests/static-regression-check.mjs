@@ -66,6 +66,7 @@ check(duplicateIds.length === 0, `index.htmlに重複IDがあります: ${duplic
 const requiredIds = [
   "activeDate",
   "backToTop",
+  "laterSortToggle",
   "dashboard-start",
   "dashboard-input",
   "dashboard-accumulation",

@@ -35,6 +35,10 @@ const { sortLaterItemsForDisplay } = factory();
     { id: "mid", createdAt: "2026-01-02T00:00:00.000Z" },
   ];
   assert.deepEqual(sortLaterItemsForDisplay(items).map((item) => item.id), ["old", "mid", "new"]);
+  assert.deepEqual(
+    sortLaterItemsForDisplay(items, "newest").map((item) => item.id),
+    ["new", "mid", "old"],
+  );
 }
 
 {
@@ -47,6 +51,10 @@ const { sortLaterItemsForDisplay } = factory();
   assert.deepEqual(
     sortLaterItemsForDisplay(items).map((item) => item.id),
     ["legacy-a", "legacy-b", "old", "new"],
+  );
+  assert.deepEqual(
+    sortLaterItemsForDisplay(items, "newest").map((item) => item.id),
+    ["new", "old", "legacy-a", "legacy-b"],
   );
 }
 
