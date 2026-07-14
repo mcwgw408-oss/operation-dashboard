@@ -30,6 +30,7 @@ const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
 const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
 const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
+const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -112,6 +113,7 @@ let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
 saveCustomDailyTasks();
+let dailyTaskOrder = loadDailyTaskOrder();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
 let autoDedupeLater = loadAutoDedupeLater();
@@ -303,7 +305,7 @@ function latestDailyTaskTitlesBefore(dateKey) {
 }
 
 function dailyTaskTitlesForDate(dateKey = activeDate) {
-  const previousOrder = latestDailyTaskTitlesBefore(dateKey);
+  const previousOrder = dailyTaskOrder.length ? dailyTaskOrder : latestDailyTaskTitlesBefore(dateKey);
   return mergeDailyTaskTitles(
     previousOrder.length ? previousOrder : defaultDailyTasks,
   );
@@ -316,7 +318,7 @@ function buildDailyTasksForDate(dateKey = activeDate) {
 function syncFutureDailyTaskOrder(sourceDay, baseDate = activeDate) {
   const sourceTitles = dailyTaskTitlesFromDay(sourceDay);
   if (!sourceTitles.length) return false;
-  const orderedTitles = mergeDailyTaskTitles(sourceTitles);
+  const orderedTitles = dailyTaskOrder.length ? dailyTaskOrder : mergeDailyTaskTitles(sourceTitles);
   let changed = false;
   Object.entries(store).forEach(([dateKey, day]) => {
     if (dateKey <= baseDate || !Array.isArray(day?.dailyTasks)) return;
@@ -332,6 +334,22 @@ function syncFutureDailyTaskOrder(sourceDay, baseDate = activeDate) {
     }
   });
   return changed;
+}
+
+function applySavedDailyTaskOrder(day) {
+  if (!Array.isArray(day?.dailyTasks)) return false;
+  const orderedTitles = dailyTaskTitlesForDate(activeDate);
+  const existingTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title));
+  const existingByTitle = new Map(existingTasks.map((item) => [item.title, item]));
+  const orderedTasks = orderedTitles.map((title) => existingByTitle.get(title) || newItem(title));
+  existingTasks.forEach((item) => {
+    if (item.title && !orderedTitles.includes(item.title)) orderedTasks.push(item);
+  });
+  if (JSON.stringify(day.dailyTasks.map((item) => item.title)) === JSON.stringify(orderedTasks.map((item) => item.title))) {
+    return false;
+  }
+  day.dailyTasks = orderedTasks;
+  return true;
 }
 
 function blankDay() {
@@ -483,6 +501,17 @@ function loadCustomDailyTasks() {
       .map((item) => String(item?.title || "").trim())
       .filter((title) => title && !builtInTitles.has(title))))];
   return migrated;
+}
+
+function loadDailyTaskOrder() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(DAILY_TASK_ORDER_STORAGE_KEY));
+    if (Array.isArray(saved)) return mergeDailyTaskTitles(saved.filter((title) => typeof title === "string" && title.trim()));
+  } catch {
+    // Fall through to migration from the latest existing daily task order.
+  }
+  const latestOrder = latestDailyTaskTitlesBefore("9999-12-31");
+  return mergeDailyTaskTitles(latestOrder.length ? latestOrder : defaultDailyTasks);
 }
 
 function loadLaterItems() {
@@ -1012,10 +1041,23 @@ function saveCustomDailyTasks() {
   localStorage.setItem(CUSTOM_DAILY_TASKS_STORAGE_KEY, JSON.stringify(customDailyTasks));
 }
 
+function saveDailyTaskOrder() {
+  dailyTaskOrder = mergeDailyTaskTitles(dailyTaskOrder);
+  localStorage.setItem(DAILY_TASK_ORDER_STORAGE_KEY, JSON.stringify(dailyTaskOrder));
+}
+
+function saveDailyTaskOrderFromDay(day) {
+  dailyTaskOrder = mergeDailyTaskTitles(dailyTaskTitlesFromDay(day));
+  saveDailyTaskOrder();
+  syncFutureDailyTaskOrder(day);
+}
+
 function addCustomDailyTask(title) {
   if (defaultDailyTasks.includes(title) || customDailyTasks.includes(title)) return;
   customDailyTasks.push(title);
-  syncFutureDailyTaskOrder(getDay());
+  dailyTaskOrder = mergeDailyTaskTitles(dailyTaskOrder);
+  if (!dailyTaskOrder.includes(title)) dailyTaskOrder.push(title);
+  saveDailyTaskOrder();
   saveCustomDailyTasks();
 }
 
@@ -1030,7 +1072,8 @@ function updateCustomDailyTask(oldTitle, newTitle) {
       if (task.title === oldTitle) task.title = newTitle;
     });
   });
-  syncFutureDailyTaskOrder(getDay());
+  dailyTaskOrder = dailyTaskOrder.map((title) => title === oldTitle ? newTitle : title);
+  saveDailyTaskOrderFromDay(getDay());
   saveCustomDailyTasks();
   saveStore();
 }
@@ -1042,6 +1085,8 @@ function removeCustomDailyTask(title) {
     if (dateKey <= activeDate) return;
     day.dailyTasks = asArray(day.dailyTasks).filter((task) => task.title !== title);
   });
+  dailyTaskOrder = dailyTaskOrder.filter((candidate) => candidate !== title);
+  saveDailyTaskOrder();
   saveCustomDailyTasks();
 }
 
@@ -1063,6 +1108,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureDefaultDailyTasks(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (applySavedDailyTaskOrder(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureMetricDefaults(store[activeDate])) {
@@ -1192,7 +1240,7 @@ function renderTaskList(listId) {
         if (nextIndex < 0 || nextIndex >= day[listId].length) return;
         const [moving] = day[listId].splice(index, 1);
         day[listId].splice(nextIndex, 0, moving);
-        if (listId === "dailyTasks") syncFutureDailyTaskOrder(day);
+        if (listId === "dailyTasks") saveDailyTaskOrderFromDay(day);
         saveStore();
         renderTaskList(listId);
         renderBrainPrototype();
@@ -8318,6 +8366,7 @@ function bindEvents() {
       if (!title) return;
       if (form.dataset.addList === "dailyTasks") addCustomDailyTask(title);
       getDay()[form.dataset.addList].push(newItem(title));
+      if (form.dataset.addList === "dailyTasks") saveDailyTaskOrderFromDay(getDay());
       input.value = "";
       saveStore();
       renderTaskList(form.dataset.addList);
@@ -8629,6 +8678,7 @@ const BACKUP_KEYS = [
   STORAGE_KEY,
   OPERATION_EXPERIMENT_STORAGE_KEY,
   CUSTOM_DAILY_TASKS_STORAGE_KEY,
+  DAILY_TASK_ORDER_STORAGE_KEY,
   LATER_STORAGE_KEY,
   PERSISTENT_MEMO_STORAGE_KEY,
   LEARNING_LOG_STORAGE_KEY,
@@ -8737,6 +8787,7 @@ function createBackup() {
   data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
   data[OPERATION_EXPERIMENT_STORAGE_KEY] = readStoredJson(OPERATION_EXPERIMENT_STORAGE_KEY, defaultOperationExperimentStore());
   data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
+  data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[LEARNING_LOG_STORAGE_KEY] = readStoredJson(LEARNING_LOG_STORAGE_KEY, []);

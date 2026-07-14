@@ -149,6 +149,7 @@ for (const key of [
   "OPERATION_COCKPIT_STORAGE_KEY",
   "OPERATION_EXPERIMENT_STORAGE_KEY",
   "CUSTOM_DAILY_TASKS_STORAGE_KEY",
+  "DAILY_TASK_ORDER_STORAGE_KEY",
 ]) {
   check(backupKeys.includes(key), `必須バックアップキーがありません: ${key}`);
 }
@@ -267,13 +268,14 @@ check(appJs.includes("function loadCustomDailyTasks"), "追加した毎日タス
 check(appJs.includes('form.dataset.addList === "dailyTasks"'), "毎日タスク追加時の共通保存処理がありません");
 const ensureDefaultDailyTasksBody = extractDelimitedBlock(appJs, "function ensureDefaultDailyTasks", "{", "}");
 check(appJs.includes("function dailyTaskTitlesForDate"), "毎日タスクの表示順を日付ごとに決める処理がありません");
-check(appJs.includes("function latestDailyTaskTitlesBefore"), "前日以前の毎日タスク順を読む処理がありません");
-check(appJs.includes("function syncFutureDailyTaskOrder"), "未来日の毎日タスク順を同期する処理がありません");
+check(appJs.includes("function loadDailyTaskOrder"), "最後に並べ替えた毎日タスク順を読み込む処理がありません");
+check(appJs.includes("function saveDailyTaskOrderFromDay"), "最後に並べ替えた毎日タスク順を保存する処理がありません");
+check(appJs.includes("function applySavedDailyTaskOrder"), "保存済みの毎日タスク順を日付データへ適用する処理がありません");
 check(ensureDefaultDailyTasksBody.includes("dailyTaskTitlesForDate(activeDate)"), "毎日タスク補完時に保存済み順序が参照されません");
 check(appJs.includes("return [...defaultDailyTasks, ...customDailyTasks];"), "独自の毎日タスクが日付データへ引き継がれません");
 const renderTaskListBody = extractDelimitedBlock(appJs, "function renderTaskList", "{", "}");
 check(renderTaskListBody.includes("renderBrainPrototype();"), "用事の変更後に判断メモが更新されません");
-check(renderTaskListBody.includes('if (listId === "dailyTasks") syncFutureDailyTaskOrder(day);'), "毎日タスクの並び替え後に未来日の順序が保存されません");
+check(renderTaskListBody.includes('if (listId === "dailyTasks") saveDailyTaskOrderFromDay(day);'), "毎日タスクの並び替え後に最後の順序が保存されません");
 check(/renderTaskList\(form\.dataset\.addList\);\s*renderBrainPrototype\(\);/s.test(appJs), "用事の追加後に判断メモが更新されません");
 const publishingOpsPanelIndex = indexHtml.indexOf('class="panel publishing-ops-panel span-2"');
 const publishingOpsHistoryIndex = indexHtml.indexOf('class="panel publishing-ops-history-panel span-2"');
