@@ -167,7 +167,7 @@ check(appJs.includes("const source = `learning:${learning.id}`;"), "学び由来
 check(appJs.includes('result.status === "updated"'), "学び由来記憶の更新状態表示がありません");
 check(appJs.includes("const MEMORY_LIBRARY_PAGE_SIZE = 10;"), "記憶一覧の初期表示件数が10件ではありません");
 check(appJs.includes("const SNAPSHOT_VERSION = 1;"), "snapshotVersion must remain 1 for the additive cockpit app section");
-check(appJs.includes('const SNAPSHOT_DICTIONARY_VERSION = "v1.3";'), "snapshot dictionaryVersion must describe the cockpit app section");
+check(appJs.includes('const SNAPSHOT_DICTIONARY_VERSION = "v1.4";'), "snapshot dictionaryVersion must describe the todayWeather summary and cockpit app section");
 check(appJs.includes('const OPERATION_COCKPIT_STORAGE_KEY = "operation-cockpit-v1";'), "operation-cockpit read key is missing");
 check(appJs.includes('"operation-cockpit": {'), "operation-cockpit Snapshot app payload is missing");
 const readOperationCockpitStoreBody = extractDelimitedBlock(appJs, "function readOperationCockpitStore", "{", "}");
@@ -295,6 +295,7 @@ const requiredOrders = new Map([
   [".dashboard .morning-guidance-panel", "10"],
   [".dashboard .summary-panel", "11"],
   [".dashboard .daily-focus-panel", "12"],
+  [".dashboard .welcome-home-panel", "13"],
   [".dashboard .brain-panel", "14"],
   [".dashboard .dashboard-input-heading", "30"],
   [".dashboard .publishing-ops-panel", "31"],

@@ -34,7 +34,7 @@ const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
 const SNAPSHOT_VERSION = 1;
-const SNAPSHOT_DICTIONARY_VERSION = "v1.3";
+const SNAPSHOT_DICTIONARY_VERSION = "v1.4";
 const SNAPSHOT_SETTINGS_KEY = "sakura-snapshot-settings-v1";
 const SNAPSHOT_DETAIL_DAYS = 7;
 const SNAPSHOT_LOG_DAYS = 30;
@@ -291,6 +291,8 @@ function blankDay() {
     publishingOpsUpdatedAt: "",
     dailyInput: "",
     dailyInputUpdatedAt: "",
+    todayWeather: "",
+    todayWeatherUpdatedAt: "",
     metrics: {
       mailUnread: "",
       mailProcessed: "",
@@ -387,6 +389,19 @@ function ensureDailyInput(day) {
   }
   if (!("dailyInputUpdatedAt" in day)) {
     day.dailyInputUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureTodayWeather(day) {
+  let changed = false;
+  if (!("todayWeather" in day)) {
+    day.todayWeather = "";
+    changed = true;
+  }
+  if (!("todayWeatherUpdatedAt" in day)) {
+    day.todayWeatherUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1006,6 +1021,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureDailyInput(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureTodayWeather(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
@@ -2303,6 +2321,99 @@ function renderDailyInputSaveState(day, confirmation = "") {
   } else {
     status.textContent = "本日の入力はまだ保存されていません。";
   }
+}
+
+const todayWeatherOptions = {
+  sunny: { label: "☀ はれ", greeting: "おかえりなさい。今日は軽やかに進めそうです。まずは小さく始めましょう。" },
+  cloudy: { label: "☁ くもり", greeting: "おかえりなさい。少し曇っていても大丈夫です。今日は輪郭を整えるところから始めましょう。" },
+  rainy: { label: "🌧 あめ", greeting: "おかえりなさい。今日は無理に晴らさなくて大丈夫です。静かに戻れる入口をここに置いておきます。" },
+};
+
+function normalizeTodayWeather(value) {
+  return Object.prototype.hasOwnProperty.call(todayWeatherOptions, value) ? value : "";
+}
+
+function todayWeatherLabel(value) {
+  const weather = normalizeTodayWeather(value);
+  return weather ? todayWeatherOptions[weather].label : "未選択";
+}
+
+function buildWelcomeGreeting(day) {
+  const weather = normalizeTodayWeather(day?.todayWeather);
+  if (weather) return todayWeatherOptions[weather].greeting;
+  return "おかえりなさい。今日の心の天気を選ぶと、ここから始められます。";
+}
+
+function buildReunionCards(limit = 3) {
+  return Object.entries(store)
+    .filter(([dateKey]) => dateKey < activeDate)
+    .sort(([left], [right]) => right.localeCompare(left))
+    .flatMap(([dateKey, day]) => {
+      const cards = [];
+      const didToday = String(day?.reflection?.didToday || "").trim();
+      if (didToday) {
+        cards.push({
+          date: dateKey,
+          label: "できたこと",
+          text: didToday,
+        });
+      }
+      asArray(day?.learnings).forEach((learning) => {
+        const text = [
+          learning?.title,
+          learning?.summaryLine,
+          learning?.learned,
+        ].map((value) => String(value || "").trim()).find(Boolean);
+        if (text) {
+          cards.push({
+            date: dateKey,
+            label: "気づき",
+            text,
+          });
+        }
+      });
+      return cards;
+    })
+    .slice(0, limit);
+}
+
+function renderWelcomeHomePanel() {
+  const day = getDay();
+  const weather = normalizeTodayWeather(day.todayWeather);
+  const greeting = $("#welcomeHomeGreeting");
+  const status = $("#welcomeWeatherStatus");
+  if (greeting) greeting.textContent = buildWelcomeGreeting(day);
+  if (status) {
+    status.textContent = weather
+      ? `${todayWeatherLabel(weather)}で保存済みです。`
+      : "まだ選ばれていません。";
+  }
+  document.querySelectorAll("[data-weather-choice]").forEach((button) => {
+    const selected = button.dataset.weatherChoice === weather;
+    button.setAttribute("aria-pressed", String(selected));
+  });
+
+  const reunionList = $("#welcomeReunionCards");
+  if (!reunionList) return;
+  reunionList.replaceChildren();
+  const cards = buildReunionCards();
+  if (!cards.length) {
+    const empty = document.createElement("p");
+    empty.className = "section-note";
+    empty.textContent = "過去の振り返りや学びが増えると、ここに再会カードが表示されます。";
+    reunionList.append(empty);
+    return;
+  }
+  cards.forEach((card) => {
+    const item = document.createElement("article");
+    item.className = "welcome-reunion-item";
+    const title = document.createElement("strong");
+    title.textContent = card.text;
+    const meta = document.createElement("span");
+    meta.textContent = `${formatDateLabel(card.date)}・${card.label}`;
+    item.append(title, meta);
+    reunionList.append(item);
+  });
 }
 
 function collectSearchText(day) {
@@ -7905,6 +8016,7 @@ function renderAll() {
   renderOperationExperiment();
   renderLaterItems();
   renderFields();
+  renderWelcomeHomePanel();
   renderSummary();
   renderHistory();
   renderBrainPrototype();
@@ -8059,6 +8171,17 @@ function bindEvents() {
       day,
       `本日の入力を${action}しました。最終更新 ${formatSavedAt(day.dailyInputUpdatedAt)}。さくらの判断材料に反映しました。`,
     );
+  });
+  document.querySelectorAll("[data-weather-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const weather = normalizeTodayWeather(button.dataset.weatherChoice);
+      if (!weather) return;
+      const day = getDay();
+      day.todayWeather = weather;
+      day.todayWeatherUpdatedAt = new Date().toISOString();
+      saveStore();
+      renderWelcomeHomePanel();
+    });
   });
   $("#executionFeedbackOutcome")?.addEventListener("change", (event) => {
     upsertExecutionFeedback({ outcome: event.target.value });
@@ -8747,6 +8870,9 @@ function buildSakuraSnapshot(mode) {
         return;
       }
       const day = deepCopy(fullStore[dateKey]);
+      if ("todayWeather" in day) {
+        day.todayWeather = normalizeTodayWeather(day.todayWeather);
+      }
       if (!settings.reflection) {
         day.reflection = null;
       }
@@ -8978,6 +9104,7 @@ function buildSakuraSnapshot(mode) {
 
   // --- summary（計算済みの要約） ---
   const todayRecord = fullStore[toKey];
+  const todayWeather = normalizeTodayWeather(todayRecord?.todayWeather);
   let todayProgress = "0/0";
   let todayEventCount = 0;
   if (todayRecord) {
@@ -9035,6 +9162,7 @@ function buildSakuraSnapshot(mode) {
     },
     summary: {
       todayProgress,
+      todayWeather,
       todayEventCount,
       seedsFermenting: fermenting.length,
       longestFermentingDays: fermentingDays.length ? Math.max(...fermentingDays) : null,

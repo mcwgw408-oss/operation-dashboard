@@ -12,6 +12,16 @@ const fixtures = [
   {
     name: "cockpit-valid",
     localStorage: {
+      "operation-dashboard-v1": {
+        "2026-07-04": {
+          todayWeather: "cloudy",
+          todayWeatherUpdatedAt: "2026-07-04T08:00:00.000Z",
+          dailyTasks: [],
+          todayTasks: [],
+          todayEvents: [],
+          reflection: {},
+        },
+      },
       "operation-cockpit-v1": {
         "2026-06-27": { topPriority: "outside range" },
         "2026-06-29": {
