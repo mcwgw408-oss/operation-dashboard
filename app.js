@@ -41,6 +41,7 @@ const SNAPSHOT_DETAIL_DAYS = 7;
 const SNAPSHOT_LOG_DAYS = 30;
 const LATER_INITIAL_DISPLAY_LIMIT = 10;
 const MEMORY_LIBRARY_PAGE_SIZE = 10;
+const DAILY_TASK_ORDER_BASE_DATE = "2026-07-15";
 
 const EXTERNAL_APP_KEYS = {
   discoveries: "discovery-labo-discoveries",
@@ -304,10 +305,33 @@ function latestDailyTaskTitlesBefore(dateKey) {
     .find((titles) => titles.length) || [];
 }
 
+function previousDateKey(dateKey) {
+  const date = dateKeyToLocalDate(dateKey);
+  if (!date) return "";
+  date.setDate(date.getDate() - 1);
+  return toDateInputValue(date);
+}
+
 function dailyTaskTitlesForDate(dateKey = activeDate) {
-  const previousOrder = dailyTaskOrder.length ? dailyTaskOrder : latestDailyTaskTitlesBefore(dateKey);
+  const ownOrder = dateKey === DAILY_TASK_ORDER_BASE_DATE
+    ? dailyTaskTitlesFromDay(store?.[dateKey])
+    : [];
+  if (ownOrder.length) return mergeDailyTaskTitles(ownOrder);
+
+  const previousDayOrder = dailyTaskTitlesFromDay(store?.[previousDateKey(dateKey)]);
+  if (previousDayOrder.length) return mergeDailyTaskTitles(previousDayOrder);
+
+  const baseOrder = dateKey > DAILY_TASK_ORDER_BASE_DATE
+    ? dailyTaskTitlesFromDay(store?.[DAILY_TASK_ORDER_BASE_DATE])
+    : [];
+  if (baseOrder.length) return mergeDailyTaskTitles(baseOrder);
+
+  const previousOrder = latestDailyTaskTitlesBefore(dateKey);
+  if (previousOrder.length) return mergeDailyTaskTitles(previousOrder);
+
+  const savedOrder = dailyTaskOrder.length ? dailyTaskOrder : defaultDailyTasks;
   return mergeDailyTaskTitles(
-    previousOrder.length ? previousOrder : defaultDailyTasks,
+    savedOrder,
   );
 }
 
@@ -318,7 +342,7 @@ function buildDailyTasksForDate(dateKey = activeDate) {
 function syncFutureDailyTaskOrder(sourceDay, baseDate = activeDate) {
   const sourceTitles = dailyTaskTitlesFromDay(sourceDay);
   if (!sourceTitles.length) return false;
-  const orderedTitles = dailyTaskOrder.length ? dailyTaskOrder : mergeDailyTaskTitles(sourceTitles);
+  const orderedTitles = mergeDailyTaskTitles(sourceTitles);
   let changed = false;
   Object.entries(store).forEach(([dateKey, day]) => {
     if (dateKey <= baseDate || !Array.isArray(day?.dailyTasks)) return;

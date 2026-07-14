@@ -268,6 +268,10 @@ check(appJs.includes("function loadCustomDailyTasks"), "追加した毎日タス
 check(appJs.includes('form.dataset.addList === "dailyTasks"'), "毎日タスク追加時の共通保存処理がありません");
 const ensureDefaultDailyTasksBody = extractDelimitedBlock(appJs, "function ensureDefaultDailyTasks", "{", "}");
 check(appJs.includes("function dailyTaskTitlesForDate"), "毎日タスクの表示順を日付ごとに決める処理がありません");
+check(appJs.includes('const DAILY_TASK_ORDER_BASE_DATE = "2026-07-15";'), "毎日タスク順の基準日が2026-07-15に固定されていません");
+check(appJs.includes("function previousDateKey"), "前日の日付キーを作る処理がありません");
+check(appJs.includes("previousDayOrder.length"), "毎日タスク補完時に前日の順序が優先されません");
+check(appJs.includes("DAILY_TASK_ORDER_BASE_DATE"), "毎日タスク補完時に2026-07-15の順序が参照されません");
 check(appJs.includes("function loadDailyTaskOrder"), "最後に並べ替えた毎日タスク順を読み込む処理がありません");
 check(appJs.includes("function saveDailyTaskOrderFromDay"), "最後に並べ替えた毎日タスク順を保存する処理がありません");
 check(appJs.includes("function applySavedDailyTaskOrder"), "保存済みの毎日タスク順を日付データへ適用する処理がありません");

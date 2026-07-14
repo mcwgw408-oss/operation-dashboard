@@ -92,6 +92,8 @@ save入口:
 
 `localStorage.setItem` は原則として上記save関数、バックアップ復元、Snapshot設定、既存初期化補完の中だけに置きます。
 
+毎日タスクの表示順は 2026-07-15 を基準にし、それ以降の日付では前日の並びを引き継ぎます。
+
 ## Backup / Snapshot入口
 
 Backup:
