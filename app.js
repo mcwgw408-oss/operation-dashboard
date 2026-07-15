@@ -5018,6 +5018,9 @@ const HEALTH_UI_VALUE_LABELS = {
   okay: "普通",
   good: "良い",
   deep: "とても良い",
+  normal: "普通",
+  slightly_sleepy: "少し眠い",
+  very_sleepy: "かなり眠い",
   depleted: "かなり消耗している",
   low: "低い",
   neutral: "普通",
@@ -5060,6 +5063,8 @@ const HEALTH_UI_TOKEN_LABELS = {
   recovery_low: "回復感が低い",
   stress_high: "ストレスが高い",
   stress_overwhelming: "ストレスが強い",
+  sleep_score_low: "睡眠スコアが低い",
+  wake_very_sleepy: "起床時にかなり眠い",
 };
 
 const HEALTH_TREND_UI_LABELS = {
@@ -5069,6 +5074,34 @@ const HEALTH_TREND_UI_LABELS = {
   mixed: "ばらつきあり",
   insufficient_data: "記録がまだ少ない",
 };
+
+function formatSleepDuration(minutes) {
+  const totalMinutes = Number.parseInt(minutes, 10);
+  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return "";
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+  if (hours && remainingMinutes) return `${hours}時間${remainingMinutes}分`;
+  if (hours) return `${hours}時間`;
+  return `${remainingMinutes}分`;
+}
+
+function splitSleepDuration(minutes) {
+  const totalMinutes = Number.parseInt(minutes, 10);
+  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) {
+    return { hours: "", minutes: "" };
+  }
+  return {
+    hours: String(Math.floor(totalMinutes / 60)),
+    minutes: String(totalMinutes % 60),
+  };
+}
+
+function sleepDurationFromInputs() {
+  const hours = Number.parseInt($("#healthLongestSleepHours")?.value || "0", 10);
+  const minutes = Number.parseInt($("#healthLongestSleepMinutes")?.value || "0", 10);
+  const totalMinutes = (Number.isFinite(hours) ? hours : 0) * 60 + (Number.isFinite(minutes) ? minutes : 0);
+  return totalMinutes > 0 ? String(totalMinutes) : "";
+}
 
 function healthUiValue(value) {
   return HEALTH_UI_VALUE_LABELS[value] || HEALTH_UI_TOKEN_LABELS[value] || value || "-";
@@ -5090,6 +5123,10 @@ function buildHealthSummaryUi(health) {
   if (!health) return "ヘルスチェックはまだ記録されていません。";
   return [
     health.sleepHours ? `睡眠 ${health.sleepHours}時間` : "",
+    health.sleepCount ? `睡眠回数 ${health.sleepCount}回` : "",
+    health.longestSleepMinutes ? `最長睡眠 ${formatSleepDuration(health.longestSleepMinutes)}` : "",
+    health.wakeFeeling && health.wakeFeeling !== "unknown" ? `起床時 ${healthUiValue(health.wakeFeeling)}` : "",
+    health.sleepScore ? `睡眠スコア ${health.sleepScore}` : "",
     health.sleepQuality && health.sleepQuality !== "unknown" ? `睡眠の質 ${healthUiValue(health.sleepQuality)}` : "",
     health.recoveryFeeling && health.recoveryFeeling !== "unknown" ? `回復感 ${healthUiValue(health.recoveryFeeling)}` : "",
     health.nutritionSatisfaction && health.nutritionSatisfaction !== "unknown" ? `食事 ${healthUiValue(health.nutritionSatisfaction)}` : "",
@@ -5131,6 +5168,10 @@ function localizeHealthUiText(value) {
   if (exact[text]) return exact[text];
   return text
     .replace(/sleep ([0-9.]+)h/g, "睡眠 $1時間")
+    .replace(/sleep_count ([0-9]+)x/g, "睡眠回数 $1回")
+    .replace(/longest_sleep ([0-9]+)m/g, (_, minutes) => `最長睡眠 ${formatSleepDuration(minutes)}`)
+    .replace(/wake ([a-z_]+)/g, (_, valueLabel) => `起床時 ${healthUiValue(valueLabel)}`)
+    .replace(/sleep_score ([0-9]+)/g, "睡眠スコア $1")
     .replace(/sleep ([a-z_]+)/g, (_, valueLabel) => `睡眠の質 ${healthUiValue(valueLabel)}`)
     .replace(/recovery ([a-z_]+)/g, (_, valueLabel) => `回復感 ${healthUiValue(valueLabel)}`)
     .replace(/nutrition ([a-z_]+)/g, (_, valueLabel) => `食事 ${healthUiValue(valueLabel)}`)
@@ -5181,6 +5222,10 @@ function buildHealthSummary(health = getLatestHealthState()) {
   }
   const healthContext = [
     health.sleepHours ? `sleep ${health.sleepHours}h` : "",
+    health.sleepCount ? `sleep_count ${health.sleepCount}x` : "",
+    health.longestSleepMinutes ? `longest_sleep ${health.longestSleepMinutes}m` : "",
+    health.wakeFeeling && health.wakeFeeling !== "unknown" ? `wake ${health.wakeFeeling}` : "",
+    health.sleepScore ? `sleep_score ${health.sleepScore}` : "",
     health.sleepQuality && health.sleepQuality !== "unknown" ? `sleep ${health.sleepQuality}` : "",
     health.recoveryFeeling && health.recoveryFeeling !== "unknown" ? `recovery ${health.recoveryFeeling}` : "",
     health.nutritionSatisfaction && health.nutritionSatisfaction !== "unknown" ? `nutrition ${health.nutritionSatisfaction}` : "",
@@ -5214,6 +5259,10 @@ function upsertHealthState(updates = {}) {
       id: crypto.randomUUID(),
       date: activeDate,
       sleepHours: "",
+      sleepCount: "",
+      longestSleepMinutes: "",
+      wakeFeeling: "unknown",
+      sleepScore: "",
       sleepQuality: "unknown",
       recoveryFeeling: "unknown",
       nutritionSatisfaction: "unknown",
@@ -5244,6 +5293,12 @@ function renderHealthState() {
     if (target.value !== (value || "")) target.value = value || "";
   };
   setValue("#healthSleepHours", health?.sleepHours);
+  setValue("#healthSleepCount", health?.sleepCount);
+  const longestSleep = splitSleepDuration(health?.longestSleepMinutes);
+  setValue("#healthLongestSleepHours", longestSleep.hours);
+  setValue("#healthLongestSleepMinutes", longestSleep.minutes);
+  setValue("#healthWakeFeeling", health?.wakeFeeling || "unknown");
+  setValue("#healthSleepScore", health?.sleepScore);
   setValue("#healthSleepQuality", health?.sleepQuality || "unknown");
   setValue("#healthRecoveryFeeling", health?.recoveryFeeling || "unknown");
   setValue("#healthNutritionSatisfaction", health?.nutritionSatisfaction || "unknown");
@@ -5303,7 +5358,14 @@ function buildHealthInsight(healthItems = getRecentHealthStates()) {
   const recentNutrition = mostCommonHealthValue(items, "nutritionSatisfaction");
   const recentStress = mostCommonHealthValue(items, "stressLevel");
   const recentMood = mostCommonHealthValue(items, "mood", "mixed");
-  const sleepItems = items.filter((item) => item.sleepHours || (item.sleepQuality && item.sleepQuality !== "unknown"));
+  const sleepItems = items.filter((item) =>
+    item.sleepHours ||
+    item.sleepCount ||
+    item.longestSleepMinutes ||
+    item.sleepScore ||
+    (item.wakeFeeling && item.wakeFeeling !== "unknown") ||
+    (item.sleepQuality && item.sleepQuality !== "unknown")
+  );
   const lowRecoveryWithSleep = sleepItems.filter((item) => ["depleted", "low"].includes(item.recoveryFeeling)).length;
   const sleepRecoveryNote = sleepItems.length
     ? `Recent records with sleep entries show recovery as ${recentRecovery}. This may be useful context, not a cause.`
@@ -5371,6 +5433,13 @@ const HEALTH_TREND_SCORE_MAPS = {
     good: 4,
     deep: 5,
   },
+  wakeFeeling: {
+    very_sleepy: 1,
+    slightly_sleepy: 2,
+    unknown: 3,
+    normal: 4,
+    refreshed: 5,
+  },
   energyLevel: {
     very_low: 1,
     low: 2,
@@ -5403,6 +5472,12 @@ function averageSleepScore(items) {
     }
     const qualityScore = HEALTH_TREND_SCORE_MAPS.sleepQuality[item?.sleepQuality];
     if (Number.isFinite(qualityScore)) values.push(qualityScore);
+    const wakeScore = HEALTH_TREND_SCORE_MAPS.wakeFeeling[item?.wakeFeeling];
+    if (Number.isFinite(wakeScore)) values.push(wakeScore);
+    const watchSleepScore = Number.parseFloat(item?.sleepScore);
+    if (Number.isFinite(watchSleepScore)) {
+      values.push(Math.max(1, Math.min(5, watchSleepScore / 20)));
+    }
     return values;
   });
   if (!scores.length) return null;
@@ -5534,14 +5609,17 @@ function buildHealthContext(
   const recovery = health?.recoveryFeeling || healthInsight?.recentRecovery || "unknown";
   const energy = health?.energyLevel || "medium";
   const stress = health?.stressLevel || "unknown";
-  const capacity = ["very_low", "low"].includes(energy) || ["depleted", "low"].includes(recovery)
+  const sleepScore = Number(health?.sleepScore);
+  const lowSleepScore = Number.isFinite(sleepScore) && sleepScore > 0 && sleepScore < 50;
+  const verySleepyWake = health?.wakeFeeling === "very_sleepy";
+  const capacity = ["very_low", "low"].includes(energy) || ["depleted", "low"].includes(recovery) || lowSleepScore || verySleepyWake
     ? "low"
     : energy === "unstable"
       ? "unstable"
       : energy === "high" && ["recovered", "refreshed"].includes(recovery)
         ? "high"
         : "medium";
-  const recoveryStatus = ["depleted", "low"].includes(recovery)
+  const recoveryStatus = ["depleted", "low"].includes(recovery) || lowSleepScore || verySleepyWake
     ? "needs_recovery"
     : ["recovered", "refreshed"].includes(recovery)
       ? "recovered"
@@ -5552,6 +5630,8 @@ function buildHealthContext(
     ["very_low", "low", "unstable"].includes(energy) ? `energy_${energy}` : "",
     ["depleted", "low"].includes(recovery) ? `recovery_${recovery}` : "",
     ["high", "overwhelming"].includes(stress) ? `stress_${stress}` : "",
+    lowSleepScore ? "sleep_score_low" : "",
+    verySleepyWake ? "wake_very_sleepy" : "",
   ].filter(Boolean);
   const currentRisk = riskParts.join(" / ") || "no_immediate_health_context_risk";
   const trendContext = healthTrend?.recoveryMomentum && healthTrend.recoveryMomentum !== "insufficient_data"
@@ -6373,11 +6453,23 @@ function inferEnergyContext(day, completedToday, openTodayCount, health = null, 
   const reflection = day.reflection || {};
   const reflectionText = [reflection.didToday, reflection.blockedToday, reflection.tomorrowPlan].join(" ");
   const sleepHours = Number(health?.sleepHours);
+  const sleepScore = Number(health?.sleepScore);
+  const highSleepScore = Number.isFinite(sleepScore) && sleepScore >= 75;
+  const lowSleepScore = Number.isFinite(sleepScore) && sleepScore > 0 && sleepScore < 50;
+  const wakeFeeling = health?.wakeFeeling || "unknown";
+  const sleepyWake = ["slightly_sleepy", "very_sleepy"].includes(wakeFeeling);
+  const shortSleepRisk = Number.isFinite(sleepHours) &&
+    sleepHours > 0 &&
+    sleepHours < 3 &&
+    !["refreshed", "normal"].includes(wakeFeeling) &&
+    !highSleepScore;
   const healthNeedsRecovery = Boolean(health) && (
     ["very_low", "low", "unstable"].includes(health.energyLevel) ||
     ["depleted", "low"].includes(health.recoveryFeeling) ||
     ["high", "overwhelming"].includes(health.stressLevel) ||
-    (Number.isFinite(sleepHours) && sleepHours > 0 && sleepHours < 3)
+    wakeFeeling === "very_sleepy" ||
+    lowSleepScore ||
+    (shortSleepRisk && sleepyWake)
   );
   if (healthNeedsRecovery) {
     return { state: "Recovery", modifier: -30, text: "選択日の体調・睡眠から、今日は回復と予定の余白を優先します。" };
@@ -8352,6 +8444,22 @@ function bindEvents() {
     });
   };
   bindHealthInput("#healthSleepHours", "sleepHours", "input");
+  bindHealthInput("#healthSleepCount", "sleepCount", "input");
+  ["#healthLongestSleepHours", "#healthLongestSleepMinutes"].forEach((selector) => {
+    $(selector)?.addEventListener("input", () => {
+      upsertHealthState({ longestSleepMinutes: sleepDurationFromInputs() });
+      renderHealthState();
+      renderHealthInsight();
+      renderHealthTrend();
+      renderHealthContext();
+      renderHealthAwareConversation();
+      renderHealthAwareRecommendation();
+      renderAdaptiveIntelligence();
+      renderExecutiveSummary();
+    });
+  });
+  bindHealthInput("#healthWakeFeeling", "wakeFeeling");
+  bindHealthInput("#healthSleepScore", "sleepScore", "input");
   bindHealthInput("#healthSleepQuality", "sleepQuality");
   bindHealthInput("#healthRecoveryFeeling", "recoveryFeeling");
   bindHealthInput("#healthNutritionSatisfaction", "nutritionSatisfaction");

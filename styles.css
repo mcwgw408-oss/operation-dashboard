@@ -2337,6 +2337,19 @@ textarea {
   padding: 6px 8px;
 }
 
+.health-check-grid .duration-inputs {
+  display: grid;
+  align-items: center;
+  gap: 5px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+}
+
+.health-check-grid .duration-inputs span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .health-check-note textarea {
   min-height: 70px;
   padding: 8px;

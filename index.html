@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260716-sleep-detail" />
   </head>
   <body>
     <div class="app">
@@ -582,6 +582,25 @@
                     <h4>ヘルスチェック</h4>
                     <div class="health-check-grid">
                       <label><span>睡眠時間</span><input id="healthSleepHours" type="number" min="0" max="24" step="0.5" inputmode="decimal" /></label>
+                      <label><span>睡眠回数</span><input id="healthSleepCount" type="number" min="0" max="20" step="1" inputmode="numeric" /></label>
+                      <label><span>最長睡眠時間</span>
+                        <span class="duration-inputs">
+                          <input id="healthLongestSleepHours" type="number" min="0" max="24" step="1" inputmode="numeric" aria-label="最長睡眠時間の時間" />
+                          <span>時間</span>
+                          <input id="healthLongestSleepMinutes" type="number" min="0" max="59" step="5" inputmode="numeric" aria-label="最長睡眠時間の分" />
+                          <span>分</span>
+                        </span>
+                      </label>
+                      <label><span>起床時の感覚</span>
+                        <select id="healthWakeFeeling">
+                          <option value="unknown">🤔 わからない</option>
+                          <option value="refreshed">😀 すっきり</option>
+                          <option value="normal">🙂 普通</option>
+                          <option value="slightly_sleepy">😐 少し眠い</option>
+                          <option value="very_sleepy">😵 かなり眠い</option>
+                        </select>
+                      </label>
+                      <label><span>睡眠スコア</span><input id="healthSleepScore" type="number" min="0" max="100" step="1" inputmode="numeric" /></label>
                       <label><span>睡眠の質</span>
                         <select id="healthSleepQuality">
                           <option value="unknown">わからない</option>
@@ -1100,6 +1119,13 @@
             </div>
           </div>
           <div id="healthCheckInputMount"></div>
+          <script>
+            (() => {
+              const target = document.querySelector("#healthCheckInputMount");
+              const panel = document.querySelector(".health-check-panel");
+              if (target && panel && panel.parentElement !== target) target.append(panel);
+            })();
+          </script>
         </section>
 
         <section class="panel dashboard-memory-input-panel span-2" aria-label="さくらの記憶に残す">
@@ -1437,6 +1463,6 @@
       </div>
     </template>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=20260716-sleep-detail"></script>
   </body>
 </html>
