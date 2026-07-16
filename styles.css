@@ -2745,6 +2745,79 @@ textarea {
   line-height: 1.55;
 }
 
+.capacity-check-panel {
+  display: grid;
+  gap: 10px;
+  grid-column: 1 / -1;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px;
+}
+
+.capacity-check-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.capacity-check-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.capacity-check-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.capacity-check-row {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 9px;
+}
+
+.capacity-check-label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.capacity-check-options {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.capacity-check-options button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.capacity-check-options button:hover,
+.capacity-check-options button.selected {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.capacity-check-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .brain-list {
   display: grid;
   gap: 7px;
@@ -4117,6 +4190,14 @@ textarea {
   .daily-input-panel textarea,
   .daily-input-actions {
     grid-column: 1;
+  }
+
+  .capacity-check-panel {
+    grid-column: 1;
+  }
+
+  .capacity-check-grid {
+    grid-template-columns: 1fr;
   }
 
   .event-form,

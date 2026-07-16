@@ -376,6 +376,24 @@ function applySavedDailyTaskOrder(day) {
   return true;
 }
 
+const CAPACITY_CHECK_ITEMS = [
+  { key: "expression", label: "表情" },
+  { key: "mood", label: "気分" },
+  { key: "reading", label: "読む" },
+  { key: "writing", label: "書く（新規記事）" },
+  { key: "ideas", label: "アイデア" },
+  { key: "comments", label: "コメント・交流" },
+  { key: "housework", label: "掃除・家事" },
+  { key: "development", label: "実装・開発" },
+];
+
+const CAPACITY_CHECK_OPTIONS = [
+  { value: "double_circle", label: "◎", title: "できそう" },
+  { value: "circle", label: "○", title: "少しできそう" },
+  { value: "triangle", label: "△", title: "軽くなら" },
+  { value: "cross", label: "×", title: "今日は難しい" },
+];
+
 function blankDay() {
   return {
     dailyTasks: buildDailyTasksForDate(activeDate),
@@ -388,6 +406,8 @@ function blankDay() {
     publishingOpsUpdatedAt: "",
     dailyInput: "",
     dailyInputUpdatedAt: "",
+    capacityCheck: {},
+    capacityCheckUpdatedAt: "",
     todayWeather: "",
     todayWeatherUpdatedAt: "",
     metrics: {
@@ -486,6 +506,19 @@ function ensureDailyInput(day) {
   }
   if (!("dailyInputUpdatedAt" in day)) {
     day.dailyInputUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureCapacityCheck(day) {
+  let changed = false;
+  if (!day.capacityCheck || typeof day.capacityCheck !== "object" || Array.isArray(day.capacityCheck)) {
+    day.capacityCheck = {};
+    changed = true;
+  }
+  if (!("capacityCheckUpdatedAt" in day)) {
+    day.capacityCheckUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1150,6 +1183,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureDailyInput(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureCapacityCheck(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureTodayWeather(store[activeDate])) {
@@ -2410,6 +2446,7 @@ function renderFields() {
     dailyInput.value = day.dailyInput || "";
   }
   renderDailyInputSaveState(day);
+  renderCapacityCheck(day);
   Object.entries(day.metrics).forEach(([key, value]) => {
     const field = $(`#${key}`);
     if (!field) return;
@@ -2450,6 +2487,63 @@ function renderDailyInputSaveState(day, confirmation = "") {
     status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
   } else {
     status.textContent = "本日の入力はまだ保存されていません。";
+  }
+}
+
+function hasSavedCapacityCheck(day) {
+  return Boolean(day?.capacityCheckUpdatedAt) ||
+    CAPACITY_CHECK_ITEMS.some((item) => Boolean(day?.capacityCheck?.[item.key]));
+}
+
+function renderCapacityCheck(day = getDay(), confirmation = "") {
+  const grid = $("#capacityCheckGrid");
+  if (grid && !grid.children.length) {
+    CAPACITY_CHECK_ITEMS.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "capacity-check-row";
+      row.dataset.capacityItem = item.key;
+      const label = document.createElement("span");
+      label.className = "capacity-check-label";
+      label.textContent = item.label;
+      const options = document.createElement("div");
+      options.className = "capacity-check-options";
+      options.setAttribute("role", "group");
+      options.setAttribute("aria-label", item.label);
+      CAPACITY_CHECK_OPTIONS.forEach((option) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.capacityKey = item.key;
+        button.dataset.capacityValue = option.value;
+        button.title = `${item.label}: ${option.title}`;
+        button.setAttribute("aria-label", `${item.label} ${option.label} ${option.title}`);
+        button.textContent = option.label;
+        options.append(button);
+      });
+      row.append(label, options);
+      grid.append(row);
+    });
+  }
+  CAPACITY_CHECK_ITEMS.forEach((item) => {
+    const selectedValue = day?.capacityCheck?.[item.key] || "";
+    document.querySelectorAll(`[data-capacity-key="${item.key}"]`).forEach((button) => {
+      const isSelected = button.dataset.capacityValue === selectedValue;
+      button.classList.toggle("selected", isSelected);
+      button.setAttribute("aria-pressed", String(isSelected));
+    });
+  });
+  const status = $("#capacityCheckStatus");
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+    return;
+  }
+  if (hasSavedCapacityCheck(day)) {
+    const savedAt = formatSavedAt(day.capacityCheckUpdatedAt);
+    status.textContent = savedAt
+      ? `保存済みです。最終更新 ${savedAt}。`
+      : "保存済みです。";
+  } else {
+    status.textContent = "今日できることはまだ記録されていません。";
   }
 }
 
@@ -8393,6 +8487,19 @@ function bindEvents() {
       day,
       `本日の入力を${action}しました。最終更新 ${formatSavedAt(day.dailyInputUpdatedAt)}。さくらの判断材料に反映しました。`,
     );
+  });
+  $("#capacityCheckGrid")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-capacity-key]");
+    if (!button) return;
+    const day = getDay();
+    const key = button.dataset.capacityKey;
+    const value = button.dataset.capacityValue;
+    if (!CAPACITY_CHECK_ITEMS.some((item) => item.key === key)) return;
+    day.capacityCheck ||= {};
+    day.capacityCheck[key] = day.capacityCheck[key] === value ? "" : value;
+    day.capacityCheckUpdatedAt = new Date().toISOString();
+    saveStore();
+    renderCapacityCheck(day, `「${CAPACITY_CHECK_ITEMS.find((item) => item.key === key)?.label || key}」を保存しました。`);
   });
   document.querySelectorAll("[data-weather-choice]").forEach((button) => {
     button.addEventListener("click", () => {
