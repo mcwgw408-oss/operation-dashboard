@@ -4122,6 +4122,10 @@ textarea {
   order: 31;
 }
 
+.dashboard .reading-notes-panel {
+  order: 32;
+}
+
 .dashboard .operation-experiment-panel {
   order: 32;
 }
