@@ -3709,6 +3709,173 @@ textarea {
   opacity: 0.62;
 }
 
+.reading-notes-panel {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.reading-notes-heading {
+  align-items: flex-start;
+}
+
+.reading-notes-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.reading-notes-search span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reading-note-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-item);
+  background: #fbfdfb;
+  padding: 16px;
+}
+
+.reading-note-form[hidden] {
+  display: none;
+}
+
+.reading-note-form-heading,
+.reading-note-primary-field,
+.reading-note-wide-field,
+.reading-note-actions {
+  grid-column: 1 / -1;
+}
+
+.reading-note-form-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reading-note-form-heading h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.reading-note-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reading-note-form textarea {
+  min-height: 220px;
+  overflow: hidden;
+  line-height: 1.85;
+}
+
+.reading-note-primary-field textarea {
+  min-height: 520px;
+}
+
+.reading-note-wide-field textarea {
+  min-height: 280px;
+}
+
+.reading-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.reading-note-status {
+  margin: 0 auto 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reading-note-list {
+  display: grid;
+  gap: 10px;
+}
+
+.reading-note-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.reading-note-card.editing {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.reading-note-card-meta,
+.reading-note-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reading-note-card-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.reading-note-card-meta a {
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reading-note-card-meta a.disabled {
+  color: var(--muted);
+  pointer-events: none;
+  text-decoration: none;
+}
+
+.reading-note-card h3,
+.reading-note-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.reading-note-card h3 {
+  font-size: 15px;
+}
+
+.reading-note-card-learning {
+  display: -webkit-box;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+
+.reading-note-card-use {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.reading-note-card-actions {
+  justify-content: flex-end;
+}
+
 .publishing-ops-recent-texts p,
 .publishing-ops-recent-empty {
   margin: 0;
@@ -4050,6 +4217,7 @@ textarea {
 .brain-panel,
 .publishing-ops-panel,
 .publishing-ops-history-panel,
+.reading-notes-panel,
 .daily-input-panel,
 .dashboard-task-panel,
 .dashboard-health-input-panel,
@@ -4221,6 +4389,8 @@ textarea {
 
   .persistent-memo-actions,
   .learning-item,
+  .reading-note-form,
+  .reading-notes-search,
   .publishing-ops-grid,
   .operation-experiment-overview,
   .operation-experiment-daily-fields,
@@ -4254,6 +4424,24 @@ textarea {
 
   .publishing-ops-recent-range {
     width: fit-content;
+  }
+
+  .reading-note-form-heading,
+  .reading-note-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reading-note-status {
+    margin-right: 0;
+  }
+
+  .reading-note-primary-field textarea {
+    min-height: 440px;
+  }
+
+  .reading-note-wide-field textarea {
+    min-height: 240px;
   }
 
   .persistent-memo-actions {

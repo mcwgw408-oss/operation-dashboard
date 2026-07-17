@@ -1119,6 +1119,43 @@
           </section>
         </section>
 
+        <section class="panel reading-notes-panel span-2" aria-label="読書・記事の学びメモ">
+          <div class="panel-heading reading-notes-heading">
+            <div>
+              <h2>読書・記事の学びメモ</h2>
+              <p class="section-note">記事を読みながら、使えそうな学びや導入の気づきを残します。</p>
+            </div>
+            <button class="ghost-button" id="newReadingNote" type="button">新規作成</button>
+          </div>
+
+          <div class="reading-notes-search">
+            <input id="readingNoteSearch" type="search" placeholder="タイトル・URL・学び・活かし方・メモを検索" aria-label="読書・記事の学びメモを検索" />
+            <span id="readingNoteCount">0件</span>
+          </div>
+
+          <form id="readingNoteForm" class="reading-note-form" hidden>
+            <div class="reading-note-form-heading">
+              <div>
+                <h3 id="readingNoteFormTitle">新しい学びメモ</h3>
+                <p class="section-note">必須は「学び・気づき」だけです。長く書いても入力欄が広がります。</p>
+              </div>
+              <button class="ghost-button" id="cancelReadingNoteEdit" type="button">一覧に戻る</button>
+            </div>
+            <label>記事タイトル（任意）<input id="readingNoteTitle" type="text" /></label>
+            <label>URL（任意）<input id="readingNoteUrl" type="url" /></label>
+            <label class="reading-note-primary-field">学び・気づき（必須）<textarea id="readingNoteLearning" rows="16" placeholder="これは使えそう、この導入がいい、見出しの切り方が参考になる、など"></textarea></label>
+            <label class="reading-note-wide-field">自分ならどう活かすか（任意）<textarea id="readingNoteUse" rows="9"></textarea></label>
+            <label class="reading-note-wide-field">メモ<textarea id="readingNoteMemo" rows="8"></textarea></label>
+            <div class="reading-note-actions">
+              <p id="readingNoteStatus" class="reading-note-status" role="status" aria-live="polite">学び・気づきを書くと保存できます。</p>
+              <button class="ghost-button" id="deleteReadingNote" type="button" hidden>削除</button>
+              <button class="ghost-button" id="saveReadingNote" type="submit">保存</button>
+            </div>
+          </form>
+
+          <div id="readingNoteList" class="reading-note-list" aria-label="保存済みの読書・記事の学びメモ"></div>
+        </section>
+
         <section class="panel dashboard-health-input-panel span-2" aria-label="体調チェック">
           <div class="panel-heading">
             <div>

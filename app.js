@@ -2,6 +2,7 @@ const STORAGE_KEY = "operation-dashboard-v1";
 const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
+const READING_NOTES_STORAGE_KEY = "operation-dashboard-reading-notes-v1";
 const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
 const MEMORY_STORE_STORAGE_KEY = "sakura-memory-store-v1";
 const CONVERSATION_FEEDBACK_STORAGE_KEY = "sakura-conversation-feedback-v1";
@@ -123,6 +124,9 @@ let laterSearchQuery = "";
 let laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
 let persistentMemos = loadPersistentMemos();
 let persistentMemoSearchQuery = "";
+let readingNotes = loadReadingNotes();
+let readingNoteSearchQuery = "";
+let editingReadingNoteId = "";
 let learningSearchQuery = "";
 let learningGlobalSearchQuery = "";
 let learningLog = loadLearningLog();
@@ -277,6 +281,20 @@ function newPersistentMemo() {
   return {
     id: crypto.randomUUID(),
     text: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function newReadingNote() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    title: "",
+    url: "",
+    learning: "",
+    use: "",
+    memo: "",
     createdAt: now,
     updatedAt: now,
   };
@@ -608,6 +626,15 @@ function loadLaterSortOrder() {
 function loadPersistentMemos() {
   try {
     const saved = JSON.parse(localStorage.getItem(PERSISTENT_MEMO_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadReadingNotes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(READING_NOTES_STORAGE_KEY));
     return Array.isArray(saved) ? saved : [];
   } catch {
     return [];
@@ -956,6 +983,10 @@ function saveLaterView() {
 
 function savePersistentMemos() {
   localStorage.setItem(PERSISTENT_MEMO_STORAGE_KEY, JSON.stringify(persistentMemos));
+}
+
+function saveReadingNotes() {
+  localStorage.setItem(READING_NOTES_STORAGE_KEY, JSON.stringify(readingNotes));
 }
 
 function saveLearningLog() {
@@ -1659,6 +1690,197 @@ function renderPersistentMemos({ focusId } = {}) {
     if (memo.id === focusId) {
       textarea.focus();
     }
+  });
+}
+
+function readingNoteSearchText(note) {
+  return [
+    note.title,
+    note.url,
+    note.learning,
+    note.use,
+    note.memo,
+  ]
+    .map((value) => normalizeLaterText(value || ""))
+    .join(" ");
+}
+
+function visibleReadingNotes() {
+  const searchQuery = normalizeLaterText(readingNoteSearchQuery);
+  return readingNotes
+    .filter((note) => !searchQuery || readingNoteSearchText(note).includes(searchQuery))
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+}
+
+function formatReadingNoteTime(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function autoResizeReadingTextarea(textarea) {
+  if (!textarea) return;
+  textarea.style.height = "auto";
+  textarea.style.height = `${textarea.scrollHeight + 2}px`;
+}
+
+function autoResizeReadingNoteTextareas() {
+  document.querySelectorAll(".reading-note-form textarea").forEach(autoResizeReadingTextarea);
+}
+
+function readReadingNoteForm() {
+  return {
+    title: $("#readingNoteTitle")?.value.trim() || "",
+    url: $("#readingNoteUrl")?.value.trim() || "",
+    learning: $("#readingNoteLearning")?.value.trim() || "",
+    use: $("#readingNoteUse")?.value.trim() || "",
+    memo: $("#readingNoteMemo")?.value.trim() || "",
+  };
+}
+
+function fillReadingNoteForm(note) {
+  $("#readingNoteTitle").value = note?.title || "";
+  $("#readingNoteUrl").value = note?.url || "";
+  $("#readingNoteLearning").value = note?.learning || "";
+  $("#readingNoteUse").value = note?.use || "";
+  $("#readingNoteMemo").value = note?.memo || "";
+  autoResizeReadingNoteTextareas();
+}
+
+function openReadingNoteForm(note = null) {
+  const form = $("#readingNoteForm");
+  if (!form) return;
+  editingReadingNoteId = note?.id || "";
+  form.hidden = false;
+  $("#readingNoteFormTitle").textContent = note ? "学びメモを編集" : "新しい学びメモ";
+  $("#deleteReadingNote").hidden = !note;
+  const status = $("#readingNoteStatus");
+  if (status) status.textContent = note ? "編集できます。" : "学び・気づきを書くと保存できます。";
+  fillReadingNoteForm(note || newReadingNote());
+  renderReadingNotes();
+  requestAnimationFrame(() => {
+    $("#readingNoteLearning")?.focus();
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+function closeReadingNoteForm() {
+  const form = $("#readingNoteForm");
+  if (!form) return;
+  editingReadingNoteId = "";
+  form.hidden = true;
+  fillReadingNoteForm(newReadingNote());
+  renderReadingNotes();
+}
+
+function saveReadingNoteFromForm(event) {
+  event?.preventDefault();
+  const values = readReadingNoteForm();
+  const status = $("#readingNoteStatus");
+  if (!values.learning) {
+    if (status) status.textContent = "学び・気づきは必須です。";
+    $("#readingNoteLearning")?.focus();
+    return;
+  }
+  const now = new Date().toISOString();
+  const existing = readingNotes.find((note) => note.id === editingReadingNoteId);
+  if (existing) {
+    Object.assign(existing, values, { updatedAt: now });
+  } else {
+    readingNotes.unshift({
+      ...newReadingNote(),
+      ...values,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+  saveReadingNotes();
+  closeReadingNoteForm();
+}
+
+function deleteEditingReadingNote() {
+  if (!editingReadingNoteId) return;
+  if (!confirm("この学びメモを削除しますか？")) return;
+  readingNotes = readingNotes.filter((note) => note.id !== editingReadingNoteId);
+  saveReadingNotes();
+  closeReadingNoteForm();
+}
+
+function renderReadingNotes() {
+  const target = $("#readingNoteList");
+  if (!target) return;
+  const searchField = $("#readingNoteSearch");
+  if (searchField && searchField.value !== readingNoteSearchQuery) {
+    searchField.value = readingNoteSearchQuery;
+  }
+  const notes = visibleReadingNotes();
+  const count = $("#readingNoteCount");
+  if (count) count.textContent = `${notes.length}件`;
+  target.replaceChildren();
+  if (!notes.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = normalizeLaterText(readingNoteSearchQuery)
+      ? "検索に一致する学びメモはありません。"
+      : "読書・記事の学びメモはまだありません。";
+    target.append(empty);
+    return;
+  }
+  notes.forEach((note) => {
+    const article = document.createElement("article");
+    article.className = "reading-note-card";
+    article.classList.toggle("editing", note.id === editingReadingNoteId);
+
+    const meta = document.createElement("div");
+    meta.className = "reading-note-card-meta";
+    const time = document.createElement("span");
+    time.textContent = note.updatedAt ? `更新 ${formatReadingNoteTime(note.updatedAt)}` : "";
+    const url = document.createElement("a");
+    url.href = note.url || "#";
+    url.target = "_blank";
+    url.rel = "noreferrer";
+    url.textContent = note.url ? "記事を開く" : "URLなし";
+    url.className = note.url ? "" : "disabled";
+    meta.append(time, url);
+
+    const title = document.createElement("h3");
+    title.textContent = note.title || "タイトル未入力の記事メモ";
+    const learning = document.createElement("p");
+    learning.className = "reading-note-card-learning";
+    learning.textContent = note.learning || "";
+    const use = document.createElement("p");
+    use.className = "reading-note-card-use";
+    use.textContent = note.use ? `活かし方: ${note.use}` : "";
+
+    const actions = document.createElement("div");
+    actions.className = "reading-note-card-actions";
+    const edit = document.createElement("button");
+    edit.className = "ghost-button";
+    edit.type = "button";
+    edit.textContent = "編集";
+    const remove = document.createElement("button");
+    remove.className = "delete-button";
+    remove.type = "button";
+    remove.textContent = "削除";
+    actions.append(edit, remove);
+
+    edit.addEventListener("click", () => openReadingNoteForm(note));
+    remove.addEventListener("click", () => {
+      if (!confirm("この学びメモを削除しますか？")) return;
+      readingNotes = readingNotes.filter((candidate) => candidate.id !== note.id);
+      saveReadingNotes();
+      if (editingReadingNoteId === note.id) closeReadingNoteForm();
+      renderReadingNotes();
+    });
+
+    article.append(meta, title, learning);
+    if (note.use) article.append(use);
+    article.append(actions);
+    target.append(article);
   });
 }
 
@@ -8326,6 +8548,7 @@ function renderAll() {
   renderRecurringSchedule();
   renderMailLastChecked();
   renderPersistentMemos();
+  renderReadingNotes();
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
@@ -8669,6 +8892,17 @@ function bindEvents() {
     persistentMemoSearchQuery = event.target.value;
     renderPersistentMemos();
   });
+  $("#newReadingNote")?.addEventListener("click", () => openReadingNoteForm());
+  $("#cancelReadingNoteEdit")?.addEventListener("click", closeReadingNoteForm);
+  $("#readingNoteForm")?.addEventListener("submit", saveReadingNoteFromForm);
+  $("#deleteReadingNote")?.addEventListener("click", deleteEditingReadingNote);
+  $("#readingNoteSearch")?.addEventListener("input", (event) => {
+    readingNoteSearchQuery = event.target.value;
+    renderReadingNotes();
+  });
+  document.querySelectorAll(".reading-note-form textarea").forEach((textarea) => {
+    textarea.addEventListener("input", () => autoResizeReadingTextarea(textarea));
+  });
   $("#learningSearch")?.addEventListener("input", (event) => {
     learningSearchQuery = event.target.value;
     renderLearnings();
@@ -8920,6 +9154,7 @@ const BACKUP_KEYS = [
   DAILY_TASK_ORDER_STORAGE_KEY,
   LATER_STORAGE_KEY,
   PERSISTENT_MEMO_STORAGE_KEY,
+  READING_NOTES_STORAGE_KEY,
   LEARNING_LOG_STORAGE_KEY,
   MEMORY_STORE_STORAGE_KEY,
   LATER_VIEW_STORAGE_KEY,
@@ -9029,6 +9264,7 @@ function createBackup() {
   data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
+  data[READING_NOTES_STORAGE_KEY] = readStoredJson(READING_NOTES_STORAGE_KEY, []);
   data[LEARNING_LOG_STORAGE_KEY] = readStoredJson(LEARNING_LOG_STORAGE_KEY, []);
   data[MEMORY_STORE_STORAGE_KEY] = readStoredJson(MEMORY_STORE_STORAGE_KEY, loadMemoryStore());
   data[LATER_VIEW_STORAGE_KEY] = readStoredJson(LATER_VIEW_STORAGE_KEY, {});
