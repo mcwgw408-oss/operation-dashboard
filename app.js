@@ -6726,38 +6726,56 @@ function prioritySourceMeta(source) {
     "operation-dashboard.todayTasks": {
       storageLabel: "今日やること",
       sectionSelector: "#todayTasks",
+      staleThirtyReason: "30日以上残っている未完了の項目です。",
+      staleSevenReason: "7日以上残っている未完了の項目です。",
     },
     "operation-dashboard.dailyTasks": {
       storageLabel: "毎日タスク",
       sectionSelector: "#dailyTasks",
+      staleThirtyReason: "30日以上残っている未完了の項目です。",
+      staleSevenReason: "7日以上残っている未完了の項目です。",
     },
     "operation-dashboard.projects": {
       storageLabel: "育てるプロジェクト",
       sectionSelector: "#projects",
+      staleThirtyReason: "30日以上動きが止まっているプロジェクトです。",
+      staleSevenReason: "7日以上動きが止まっているプロジェクトです。",
     },
     "operation-dashboard.laterItems": {
       storageLabel: "あとで見る・あとで読む",
       sectionSelector: "#laterList",
+      staleThirtyReason: "30日以上あとで見る・読むに残っています。",
+      staleSevenReason: "7日以上あとで見る・読むに残っています。",
     },
     "operation-dashboard.persistentMemos": {
       storageLabel: "残るメモ",
       sectionSelector: "#persistentMemoList",
+      staleThirtyReason: "30日以上前から残っているメモです。",
+      staleSevenReason: "7日以上前から残っているメモです。",
     },
     "discovery-labo.discoveries": {
       storageLabel: "発見ラボ / 発酵中アイデア",
       appUrl: "https://mcwgw408-oss.github.io/discovery-Labo/",
+      staleThirtyReason: "30日以上発酵中のアイデアです。",
+      staleSevenReason: "7日以上発酵中のアイデアです。",
     },
     "hasshin-kansatsu-labo.entries": {
       storageLabel: "発信観察ラボ",
       appUrl: "https://mcwgw408-oss.github.io/observation-Labo/",
+      staleThirtyReason: "30日以上前の発信観察に、次のアクションが残っています。",
+      staleSevenReason: "7日以上前の発信観察に、次のアクションが残っています。",
     },
     "substack-labo.writing": {
       storageLabel: "Substackラボ",
       appUrl: "https://mcwgw408-oss.github.io/substack-labo/",
+      staleThirtyReason: "30日以上更新されていない執筆中の記事です。",
+      staleSevenReason: "7日以上更新されていない執筆中の記事です。",
     },
     "koryu-log-labo.entries": {
       storageLabel: "交流ログ",
       appUrl: "https://mcwgw408-oss.github.io/action-Labo/",
+      staleThirtyReason: "30日以上前の「また見たい人」記録です。",
+      staleSevenReason: "7日以上前の「また見たい人」記録です。",
     },
     "operation-cockpit.intent": {
       storageLabel: "今日の意図",
@@ -6793,6 +6811,8 @@ function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePo
     sectionSelector: sourceMeta.sectionSelector || "",
     appUrl: sourceMeta.appUrl || "",
     url: item?.url || item?.link || "",
+    staleThirtyReason: sourceMeta.staleThirtyReason || "30日以上前から残っている項目です。",
+    staleSevenReason: sourceMeta.staleSevenReason || "7日以上前から残っている項目です。",
     baseReason,
     basePoints,
   };
@@ -6914,10 +6934,10 @@ function scorePriorityCandidate(candidate) {
   }
   if (candidate.stalenessDays >= 30) {
     score += PRIORITY_ENGINE_WEIGHTS.staleThirtyDays;
-    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleThirtyDays, text: "30日以上残っている未完了の項目です。" });
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleThirtyDays, text: candidate.staleThirtyReason });
   } else if (candidate.stalenessDays >= 7) {
     score += PRIORITY_ENGINE_WEIGHTS.staleSevenDays;
-    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleSevenDays, text: "7日以上残っている未完了の項目です。" });
+    reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleSevenDays, text: candidate.staleSevenReason });
   }
   if (candidate.done || candidate.status === "done" || candidate.status === "完了") {
     score += PRIORITY_ENGINE_WEIGHTS.completedPenalty;
