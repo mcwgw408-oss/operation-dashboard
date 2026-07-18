@@ -6762,8 +6762,7 @@ function prioritySourceMeta(source) {
     "hasshin-kansatsu-labo.entries": {
       storageLabel: "発信観察ラボ",
       appUrl: "https://mcwgw408-oss.github.io/observation-Labo/",
-      staleThirtyReason: "30日以上前の発信観察に、次のアクションが残っています。",
-      staleSevenReason: "7日以上前の発信観察に、次のアクションが残っています。",
+      staleTracking: false,
     },
     "substack-labo.writing": {
       storageLabel: "Substackラボ",
@@ -6811,6 +6810,7 @@ function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePo
     sectionSelector: sourceMeta.sectionSelector || "",
     appUrl: sourceMeta.appUrl || "",
     url: item?.url || item?.link || "",
+    staleTracking: sourceMeta.staleTracking !== false,
     staleThirtyReason: sourceMeta.staleThirtyReason || "30日以上前から残っている項目です。",
     staleSevenReason: sourceMeta.staleSevenReason || "7日以上前から残っている項目です。",
     baseReason,
@@ -6893,7 +6893,12 @@ function collectPriorityCandidates(context) {
     baseReason: "発酵中アイデアとして残っています。",
     basePoints: PRIORITY_ENGINE_WEIGHTS.fermentingIdea,
   })));
-  context.hasshinNextActions.forEach((item) => candidates.push(createPriorityCandidate({
+  context.hasshinNextActions
+    .filter((item) => {
+      const days = brainDaysSince(brainRecentDateOf(item));
+      return days === null || days < 30;
+    })
+    .forEach((item) => candidates.push(createPriorityCandidate({
     item: { ...item, title: item.nextAction || item.title || item.memo },
     source: "hasshin-kansatsu-labo.entries",
     sourceLabel: "発信観察",
@@ -6932,10 +6937,10 @@ function scorePriorityCandidate(candidate) {
     score += PRIORITY_ENGINE_WEIGHTS.updatedToday;
     reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.updatedToday, text: "今日更新されています。" });
   }
-  if (candidate.stalenessDays >= 30) {
+  if (candidate.staleTracking && candidate.stalenessDays >= 30) {
     score += PRIORITY_ENGINE_WEIGHTS.staleThirtyDays;
     reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleThirtyDays, text: candidate.staleThirtyReason });
-  } else if (candidate.stalenessDays >= 7) {
+  } else if (candidate.staleTracking && candidate.stalenessDays >= 7) {
     score += PRIORITY_ENGINE_WEIGHTS.staleSevenDays;
     reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleSevenDays, text: candidate.staleSevenReason });
   }
@@ -7085,13 +7090,13 @@ function explainPriorityCandidate(candidate) {
 function priorityCandidateReferenceItem(candidate) {
   if (!candidate) return null;
   const days = candidate.stalenessDays ?? candidate.ageDays;
-  const dayLabel = Number.isFinite(days) ? `${days}日前` : "日付不明";
+  const dayLabel = candidate.staleTracking && Number.isFinite(days) ? `${days}日前` : "";
   const createdLabel = brainFormatDate(candidate.createdAt) || "不明";
   return {
     type: "brain-reference",
     id: candidate.id || "",
     source: candidate.source || "",
-    title: `${candidate.title || "無題"}（${dayLabel}）`,
+    title: dayLabel ? `${candidate.title || "無題"}（${dayLabel}）` : (candidate.title || "無題"),
     storageLabel: candidate.storageLabel || candidate.sourceLabel || candidate.source || "不明",
     createdLabel,
     sectionSelector: candidate.sectionSelector || "",
