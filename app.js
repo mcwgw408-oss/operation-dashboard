@@ -32,6 +32,7 @@ const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
 const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
 const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
+const DELETED_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-deleted-daily-tasks-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -115,6 +116,8 @@ let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
 saveCustomDailyTasks();
+let deletedDailyTasks = loadDeletedDailyTasks();
+saveDeletedDailyTasks();
 let dailyTaskOrder = loadDailyTaskOrder();
 let laterItems = loadLaterItems();
 let showDoneLater = loadShowDoneLater();
@@ -301,18 +304,19 @@ function newReadingNote() {
 }
 
 function configuredDailyTaskTitles() {
-  return [...defaultDailyTasks, ...customDailyTasks];
+  const deletedTitles = new Set(deletedDailyTasks);
+  return [...defaultDailyTasks, ...customDailyTasks].filter((title) => !deletedTitles.has(title));
 }
 
 function dailyTaskTitlesFromDay(day) {
   return asArray(day?.dailyTasks)
     .map((item) => String(item?.title || "").trim())
-    .filter((title) => title && !obsoleteDailyTasks.includes(title));
+    .filter((title) => title && !obsoleteDailyTasks.includes(title) && !deletedDailyTasks.includes(title));
 }
 
 function mergeDailyTaskTitles(primaryTitles = [], requiredTitles = configuredDailyTaskTitles()) {
   return [...new Set([...primaryTitles, ...requiredTitles])]
-    .filter((title) => title && !obsoleteDailyTasks.includes(title));
+    .filter((title) => title && !obsoleteDailyTasks.includes(title) && !deletedDailyTasks.includes(title));
 }
 
 function latestDailyTaskTitlesBefore(dateKey) {
@@ -364,7 +368,7 @@ function syncFutureDailyTaskOrder(sourceDay, baseDate = activeDate) {
   let changed = false;
   Object.entries(store).forEach(([dateKey, day]) => {
     if (dateKey <= baseDate || !Array.isArray(day?.dailyTasks)) return;
-    const existingTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title));
+    const existingTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title) && !deletedDailyTasks.includes(item.title));
     const existingByTitle = new Map(existingTasks.map((item) => [item.title, item]));
     const reorderedTasks = orderedTitles.map((title) => existingByTitle.get(title) || newItem(title));
     existingTasks.forEach((item) => {
@@ -381,7 +385,7 @@ function syncFutureDailyTaskOrder(sourceDay, baseDate = activeDate) {
 function applySavedDailyTaskOrder(day) {
   if (!Array.isArray(day?.dailyTasks)) return false;
   const orderedTitles = dailyTaskTitlesForDate(activeDate);
-  const existingTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title));
+  const existingTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title) && !deletedDailyTasks.includes(item.title));
   const existingByTitle = new Map(existingTasks.map((item) => [item.title, item]));
   const orderedTasks = orderedTitles.map((title) => existingByTitle.get(title) || newItem(title));
   existingTasks.forEach((item) => {
@@ -453,7 +457,7 @@ function ensureDefaultDailyTasks(day) {
   let changed = false;
   day.dailyTasks ||= [];
   const beforeCount = day.dailyTasks.length;
-  day.dailyTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title));
+  day.dailyTasks = day.dailyTasks.filter((item) => !obsoleteDailyTasks.includes(item.title) && !deletedDailyTasks.includes(item.title));
   if (day.dailyTasks.length !== beforeCount) changed = true;
   dailyTaskTitlesForDate(activeDate).forEach((title) => {
     if (!day.dailyTasks.some((item) => item.title === title)) {
@@ -576,6 +580,16 @@ function loadCustomDailyTasks() {
       .map((item) => String(item?.title || "").trim())
       .filter((title) => title && !builtInTitles.has(title))))];
   return migrated;
+}
+
+function loadDeletedDailyTasks() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(DELETED_DAILY_TASKS_STORAGE_KEY));
+    if (Array.isArray(saved)) return [...new Set(saved.filter((title) => typeof title === "string" && title.trim()))];
+  } catch {
+    // Ignore malformed saved data.
+  }
+  return [];
 }
 
 function loadDailyTaskOrder() {
@@ -1129,6 +1143,11 @@ function saveCustomDailyTasks() {
   localStorage.setItem(CUSTOM_DAILY_TASKS_STORAGE_KEY, JSON.stringify(customDailyTasks));
 }
 
+function saveDeletedDailyTasks() {
+  deletedDailyTasks = [...new Set(deletedDailyTasks.filter((title) => typeof title === "string" && title.trim()))];
+  localStorage.setItem(DELETED_DAILY_TASKS_STORAGE_KEY, JSON.stringify(deletedDailyTasks));
+}
+
 function saveDailyTaskOrder() {
   dailyTaskOrder = mergeDailyTaskTitles(dailyTaskOrder);
   localStorage.setItem(DAILY_TASK_ORDER_STORAGE_KEY, JSON.stringify(dailyTaskOrder));
@@ -1141,10 +1160,18 @@ function saveDailyTaskOrderFromDay(day) {
 }
 
 function addCustomDailyTask(title) {
-  if (defaultDailyTasks.includes(title) || customDailyTasks.includes(title)) return;
-  customDailyTasks.push(title);
+  const normalizedTitle = String(title || "").trim();
+  if (!normalizedTitle) return;
+  deletedDailyTasks = deletedDailyTasks.filter((candidate) => candidate !== normalizedTitle);
+  if (defaultDailyTasks.includes(normalizedTitle) || customDailyTasks.includes(normalizedTitle)) {
+    saveDeletedDailyTasks();
+    saveDailyTaskOrder();
+    return;
+  }
+  customDailyTasks.push(normalizedTitle);
   dailyTaskOrder = mergeDailyTaskTitles(dailyTaskOrder);
-  if (!dailyTaskOrder.includes(title)) dailyTaskOrder.push(title);
+  if (!dailyTaskOrder.includes(normalizedTitle)) dailyTaskOrder.push(normalizedTitle);
+  saveDeletedDailyTasks();
   saveDailyTaskOrder();
   saveCustomDailyTasks();
 }
@@ -1167,13 +1194,18 @@ function updateCustomDailyTask(oldTitle, newTitle) {
 }
 
 function removeCustomDailyTask(title) {
-  if (!customDailyTasks.includes(title)) return;
-  customDailyTasks = customDailyTasks.filter((candidate) => candidate !== title);
+  const normalizedTitle = String(title || "").trim();
+  if (!normalizedTitle) return;
+  if (defaultDailyTasks.includes(normalizedTitle) && !deletedDailyTasks.includes(normalizedTitle)) {
+    deletedDailyTasks.push(normalizedTitle);
+  }
+  customDailyTasks = customDailyTasks.filter((candidate) => candidate !== normalizedTitle);
   Object.entries(store).forEach(([dateKey, day]) => {
     if (dateKey <= activeDate) return;
-    day.dailyTasks = asArray(day.dailyTasks).filter((task) => task.title !== title);
+    day.dailyTasks = asArray(day.dailyTasks).filter((task) => task.title !== normalizedTitle);
   });
-  dailyTaskOrder = dailyTaskOrder.filter((candidate) => candidate !== title);
+  dailyTaskOrder = dailyTaskOrder.filter((candidate) => candidate !== normalizedTitle);
+  saveDeletedDailyTasks();
   saveDailyTaskOrder();
   saveCustomDailyTasks();
 }
