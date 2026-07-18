@@ -8090,7 +8090,9 @@ function buildBrainExpression({
         brainMemoryContext,
         day.dailyInput,
       ),
-      task: focusTask?.title || "今日のタスクはまだありません。",
+      taskLabel: focusTask?.title ? "今日やること" : "今日の候補",
+      task: focusTask?.title || dailyFocusValue(priorityCandidate?.title) || "今日の候補はまだありません。",
+      taskIsTodayTask: Boolean(focusTask?.title),
     },
     focusTask,
   };
@@ -8107,6 +8109,8 @@ function renderDailyFocusLayer(dailyFocus = {}) {
   $("#dailyFocusPriority").textContent = dailyFocus.priority;
   $("#dailyFocusNextAction").textContent = dailyFocus.nextAction;
   $("#dailyFocusCondition").textContent = dailyFocus.condition;
+  const taskLabel = $("#dailyFocusTaskLabel");
+  if (taskLabel) taskLabel.textContent = dailyFocus.taskLabel || "今日の候補";
   $("#dailyFocusTask").textContent = dailyFocus.task;
 }
 

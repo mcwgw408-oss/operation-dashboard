@@ -50,7 +50,7 @@ function renderDashboard(operationStore) {
 const dailyOnlyDom = renderDashboard({
   [activeDate]: {
     dailyTasks: [
-      { id: "daily-1", title: "おはスタック回り", done: false, completed: false, priority: true },
+      { id: "daily-1", title: "daily-only-candidate", done: false, completed: false, priority: true },
     ],
     todayTasks: [],
     todayEvents: [],
@@ -62,16 +62,18 @@ const dailyOnlyDom = renderDashboard({
 
 assert.equal(dailyOnlyDom.window.document.querySelector("#completeCount").textContent, "0 / 0");
 assert.equal(dailyOnlyDom.window.document.querySelector("#progressLabel").textContent, "0%");
-assert.ok(!dailyOnlyDom.window.document.querySelector("#dailyFocusTask").textContent.includes("おはスタック回り"));
+assert.equal(dailyOnlyDom.window.document.querySelector("#dailyFocusTaskLabel").textContent, "今日の候補");
+assert.equal(dailyOnlyDom.window.document.querySelector("#dailyFocusTask").textContent, "daily-only-candidate");
+assert.equal(dailyOnlyDom.window.document.querySelectorAll("#todayTasks .task-title").length, 0);
 dailyOnlyDom.window.close();
 
 const todayDom = renderDashboard({
   [activeDate]: {
     dailyTasks: [
-      { id: "daily-1", title: "おはスタック回り", done: false, completed: false, priority: true },
+      { id: "daily-1", title: "daily-only-candidate", done: false, completed: false, priority: true },
     ],
     todayTasks: [
-      { id: "today-1", title: "今日だけの用事", done: false, completed: false, priority: false },
+      { id: "today-1", title: "today-task", done: false, completed: false, priority: false },
     ],
     todayEvents: [],
     projects: [],
@@ -81,7 +83,9 @@ const todayDom = renderDashboard({
 });
 
 assert.equal(todayDom.window.document.querySelector("#completeCount").textContent, "0 / 1");
-assert.equal(todayDom.window.document.querySelector("#dailyFocusTask").textContent, "今日だけの用事");
+assert.equal(todayDom.window.document.querySelector("#dailyFocusTaskLabel").textContent, "今日やること");
+assert.equal(todayDom.window.document.querySelector("#dailyFocusTask").textContent, "today-task");
+assert.equal(todayDom.window.document.querySelector("#todayTasks .task-title").value, "today-task");
 todayDom.window.close();
 
 console.log("daily focus today task source check passed");
