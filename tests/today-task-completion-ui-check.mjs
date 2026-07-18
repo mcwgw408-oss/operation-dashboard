@@ -71,7 +71,9 @@ function readOperationStore(window) {
 
 const initialStore = {
   [activeDate]: {
-    dailyTasks: [],
+    dailyTasks: [
+      { id: "daily-1", title: "already done daily task", done: true, completed: true },
+    ],
     todayTasks: [
       {
         id: "today-1",
@@ -93,8 +95,9 @@ const checkbox = window.document.querySelector("#todayTasks .task-check");
 
 assert.ok(checkbox, "today task checkbox should render");
 assert.equal(checkbox.checked, false);
-assert.equal(window.document.querySelector("#progressLabel").textContent, "0%");
-assert.equal(window.document.querySelector("#completeCount").textContent, "0 / 1");
+const trackedCount = window.document.querySelectorAll("#dailyTasks .task-check, #todayTasks .task-check").length;
+assert.equal(window.document.querySelector("#progressLabel").textContent, `${Math.round((1 / trackedCount) * 100)}%`);
+assert.equal(window.document.querySelector("#completeCount").textContent, `1 / ${trackedCount}`);
 
 checkbox.click();
 
@@ -103,8 +106,8 @@ const savedTask = savedAfterClick[activeDate].todayTasks[0];
 assert.equal(savedTask.completed, true);
 assert.equal(savedTask.done, true);
 assert.equal(window.document.querySelector("#todayTasks .task-check").checked, true);
-assert.equal(window.document.querySelector("#progressLabel").textContent, "100%");
-assert.equal(window.document.querySelector("#completeCount").textContent, "1 / 1");
+assert.equal(window.document.querySelector("#progressLabel").textContent, `${Math.round((2 / trackedCount) * 100)}%`);
+assert.equal(window.document.querySelector("#completeCount").textContent, `2 / ${trackedCount}`);
 
 const persistedStore = readOperationStore(window);
 dom.window.close();
@@ -112,8 +115,8 @@ dom.window.close();
 const reloadedDom = createDashboardDom(persistedStore);
 const reloadedWindow = reloadedDom.window;
 assert.equal(reloadedWindow.document.querySelector("#todayTasks .task-check").checked, true);
-assert.equal(reloadedWindow.document.querySelector("#progressLabel").textContent, "100%");
-assert.equal(reloadedWindow.document.querySelector("#completeCount").textContent, "1 / 1");
+assert.equal(reloadedWindow.document.querySelector("#progressLabel").textContent, `${Math.round((2 / trackedCount) * 100)}%`);
+assert.equal(reloadedWindow.document.querySelector("#completeCount").textContent, `2 / ${trackedCount}`);
 assert.equal(readOperationStore(reloadedWindow)[activeDate].todayTasks[0].completed, true);
 
 reloadedDom.window.close();

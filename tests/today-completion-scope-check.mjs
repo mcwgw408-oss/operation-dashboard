@@ -40,7 +40,7 @@ const decision = harness.runFixture({
   localStorage: {},
 });
 
-assert.equal(decision.recommendationInput.completedToday, 1);
+assert.equal(decision.recommendationInput.completedToday, 5);
 assert.equal(decision.priorityCandidate.source, "operation-dashboard.todayTasks");
 assert.equal(decision.priorityCandidate.title, "Today task open");
 
@@ -53,6 +53,66 @@ const snapshot = harness.runSnapshotFixture({
   },
 });
 
-assert.equal(snapshot.summary.todayProgress, "1/2");
+assert.equal(snapshot.summary.todayProgress, "5/6");
+
+const nineDailyTasks = Array.from({ length: 9 }, (_, index) => ({
+  id: `nine-daily-${index + 1}`,
+  title: `Nine daily task ${index + 1}`,
+  done: false,
+  completed: false,
+}));
+const nineDailySnapshot = harness.runSnapshotFixture({
+  mode: "morning",
+  localStorage: {
+    "operation-dashboard-v1": {
+      [activeDate]: {
+        dailyTasks: nineDailyTasks,
+        todayTasks: [],
+        todayEvents: [],
+        projects: [],
+        reflection: {},
+      },
+    },
+  },
+});
+assert.equal(nineDailySnapshot.summary.todayProgress, "0/9");
+
+nineDailyTasks[0].done = true;
+nineDailyTasks[0].completed = true;
+const oneDoneDailySnapshot = harness.runSnapshotFixture({
+  mode: "morning",
+  localStorage: {
+    "operation-dashboard-v1": {
+      [activeDate]: {
+        dailyTasks: nineDailyTasks,
+        todayTasks: [],
+        todayEvents: [],
+        projects: [],
+        reflection: {},
+      },
+    },
+  },
+});
+assert.equal(oneDoneDailySnapshot.summary.todayProgress, "1/9");
+
+nineDailyTasks.forEach((task) => {
+  task.done = true;
+  task.completed = true;
+});
+const allDoneDailySnapshot = harness.runSnapshotFixture({
+  mode: "morning",
+  localStorage: {
+    "operation-dashboard-v1": {
+      [activeDate]: {
+        dailyTasks: nineDailyTasks,
+        todayTasks: [],
+        todayEvents: [],
+        projects: [],
+        reflection: {},
+      },
+    },
+  },
+});
+assert.equal(allDoneDailySnapshot.summary.todayProgress, "9/9");
 
 console.log("today completion scope check passed");

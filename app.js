@@ -1322,7 +1322,10 @@ function renderClock() {
 }
 
 function todayAchievementItems(day) {
-  return asArray(day?.todayTasks);
+  return [
+    ...asArray(day?.dailyTasks),
+    ...asArray(day?.todayTasks),
+  ];
 }
 
 function todayCompletionStats(day) {

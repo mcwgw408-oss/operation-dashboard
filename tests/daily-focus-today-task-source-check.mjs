@@ -60,7 +60,8 @@ const dailyOnlyDom = renderDashboard({
   },
 });
 
-assert.equal(dailyOnlyDom.window.document.querySelector("#completeCount").textContent, "0 / 0");
+const dailyOnlyTrackedCount = dailyOnlyDom.window.document.querySelectorAll("#dailyTasks .task-check, #todayTasks .task-check").length;
+assert.equal(dailyOnlyDom.window.document.querySelector("#completeCount").textContent, `0 / ${dailyOnlyTrackedCount}`);
 assert.equal(dailyOnlyDom.window.document.querySelector("#progressLabel").textContent, "0%");
 assert.equal(dailyOnlyDom.window.document.querySelector("#dailyFocusTaskLabel").textContent, "今日の候補");
 assert.equal(dailyOnlyDom.window.document.querySelector("#dailyFocusTask").textContent, "daily-only-candidate");
@@ -82,7 +83,8 @@ const todayDom = renderDashboard({
   },
 });
 
-assert.equal(todayDom.window.document.querySelector("#completeCount").textContent, "0 / 1");
+const todayTrackedCount = todayDom.window.document.querySelectorAll("#dailyTasks .task-check, #todayTasks .task-check").length;
+assert.equal(todayDom.window.document.querySelector("#completeCount").textContent, `0 / ${todayTrackedCount}`);
 assert.equal(todayDom.window.document.querySelector("#dailyFocusTaskLabel").textContent, "今日やること");
 assert.equal(todayDom.window.document.querySelector("#dailyFocusTask").textContent, "today-task");
 assert.equal(todayDom.window.document.querySelector("#todayTasks .task-title").value, "today-task");
