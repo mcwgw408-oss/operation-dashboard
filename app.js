@@ -7855,14 +7855,11 @@ function dailyFocusValue(value) {
   return text && text !== "-" ? text : "";
 }
 
-function pickDailyFocusTask(todayTasks = [], dailyTasks = []) {
+function pickDailyFocusTask(todayTasks = []) {
   const openTodayTasks = asArray(todayTasks).filter(brainIsOpen);
-  const openDailyTasks = asArray(dailyTasks).filter(brainIsOpen);
   return (
     openTodayTasks.find((task) => task.priority) ||
     openTodayTasks[0] ||
-    openDailyTasks.find((task) => task.priority) ||
-    openDailyTasks[0] ||
     null
   );
 }
@@ -7879,7 +7876,7 @@ function buildContextSummary({
   selectedFocusTask,
 } = {}) {
   const focusTask = selectedFocusTask === undefined
-    ? pickDailyFocusTask(todayTasks, dailyTasks)
+    ? pickDailyFocusTask(todayTasks)
     : selectedFocusTask;
   const dailyInputNote = dailyFocusValue(dailyInput);
   const memoryTitle = dailyFocusValue(
@@ -7888,7 +7885,7 @@ function buildContextSummary({
   );
   const support = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.recommendationSupport));
   const caution = dailyFocusValue(localizeHealthUiText(healthAwareRecommendation?.cautionNote));
-  const taskCount = asArray(todayTasks).filter(brainIsOpen).length + asArray(dailyTasks).filter(brainIsOpen).length;
+  const taskCount = asArray(todayTasks).filter(brainIsOpen).length;
   const theme = dailyFocusValue(priorityCandidate?.title) ||
     dailyFocusValue(recommendation?.title) ||
     dailyFocusValue(focusTask?.title) ||
@@ -8048,7 +8045,7 @@ function buildBrainExpression({
     recommendation,
     intentDecision,
   );
-  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  const focusTask = pickDailyFocusTask(todayTasks);
   const expressionContext = {
     priorityCandidate,
     recommendation: recommendationExpression,
@@ -8124,7 +8121,7 @@ function buildExplainableGuidanceReasons({
   adaptiveGuidance = buildAdaptiveGuidanceScores(),
 } = {}) {
   const reasons = [];
-  const focusTask = pickDailyFocusTask(todayTasks, dailyTasks);
+  const focusTask = pickDailyFocusTask(todayTasks);
   const memoryTitle = dailyFocusValue(
     memoryDisplayTitle(memoryContext?.retrieved?.[0]) ||
     memoryDisplayTitle(memoryContext?.recent?.[0]),
