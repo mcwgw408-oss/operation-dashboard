@@ -355,6 +355,7 @@ const allowedSetItemFunctionNames = new Set([
   "loadPersonalityProfile",
   "loadRelationshipProfile",
   "getDay",
+  "persistStore",
   "renderHistory",
   "handleImportBackupFile",
 ]);

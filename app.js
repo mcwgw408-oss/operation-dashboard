@@ -1216,10 +1216,34 @@ function saveMemoryStore() {
 }
 
 function saveStore() {
-  store[activeDate].updatedAt = new Date().toISOString();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  persistStore();
   renderSummary();
   renderHistory();
+}
+
+function persistStore() {
+  store[activeDate].updatedAt = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+}
+
+function renderAfterTaskListChange(listId) {
+  try {
+    persistStore();
+  } catch (error) {
+    console.error("Failed to save task list change", error);
+  }
+  try {
+    renderSummary();
+  } catch (error) {
+    console.error("Failed to render summary after task list change", error);
+  }
+  try {
+    renderHistory();
+  } catch (error) {
+    console.error("Failed to render history after task list change", error);
+  }
+  renderTaskList(listId);
+  renderBrainPrototype();
 }
 
 function getDay() {
@@ -1325,9 +1349,7 @@ function renderTaskList(listId) {
     priority.classList.toggle("active", item.priority);
     checkbox.addEventListener("change", () => {
       item.done = checkbox.checked;
-      saveStore();
-      renderTaskList(listId);
-      renderBrainPrototype();
+      renderAfterTaskListChange(listId);
     });
     title.addEventListener("input", () => {
       item.title = title.value;
@@ -1345,28 +1367,29 @@ function renderTaskList(listId) {
         if (candidate.id !== item.id) candidate.priority = false;
       });
       item.priority = !item.priority;
-      saveStore();
-      renderTaskList(listId);
-      renderBrainPrototype();
+      renderAfterTaskListChange(listId);
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
-      if (listId === "dailyTasks") removeCustomDailyTask(item.title);
-      day[listId] = day[listId].filter((candidate) => candidate.id !== item.id);
-      saveStore();
-      renderTaskList(listId);
-      renderBrainPrototype();
+      const currentIndex = day[listId].findIndex((candidate) => candidate === item || (item.id && candidate.id === item.id));
+      if (currentIndex < 0) return;
+      const [removed] = day[listId].splice(currentIndex, 1);
+      if (listId === "dailyTasks") {
+        removeCustomDailyTask(removed.title);
+        saveDailyTaskOrderFromDay(day);
+      }
+      renderAfterTaskListChange(listId);
     });
     row.querySelectorAll(".move-button").forEach((button) => {
       button.addEventListener("click", () => {
         const direction = button.dataset.move === "up" ? -1 : 1;
-        const nextIndex = index + direction;
+        const currentIndex = day[listId].findIndex((candidate) => candidate === item || (item.id && candidate.id === item.id));
+        if (currentIndex < 0) return;
+        const nextIndex = currentIndex + direction;
         if (nextIndex < 0 || nextIndex >= day[listId].length) return;
-        const [moving] = day[listId].splice(index, 1);
+        const [moving] = day[listId].splice(currentIndex, 1);
         day[listId].splice(nextIndex, 0, moving);
         if (listId === "dailyTasks") saveDailyTaskOrderFromDay(day);
-        saveStore();
-        renderTaskList(listId);
-        renderBrainPrototype();
+        renderAfterTaskListChange(listId);
       });
     });
     target.append(row);
