@@ -48,12 +48,12 @@
             <strong id="timeLabel"></strong>
           </div>
           <div class="summary-cell progress-cell">
-            <span>今日の進捗率</span>
+            <span>今日の達成率</span>
             <strong id="progressLabel">0%</strong>
             <div class="progress-track"><div id="progressBar"></div></div>
           </div>
           <div class="summary-cell">
-            <span>完了した項目数</span>
+            <span>今日やること完了数</span>
             <strong id="completeCount">0 / 0</strong>
           </div>
         </section>
@@ -795,7 +795,7 @@
               <ul id="brainSuggestions" class="brain-list"></ul>
             </div>
             <div class="brain-card">
-              <span class="brain-label">発酵中アイデア</span>
+              <span class="brain-label">振り返り候補のアイデア</span>
               <ul id="brainFermentingIdeas" class="brain-list"></ul>
             </div>
             <div class="brain-card">
@@ -1291,8 +1291,8 @@
         <section class="panel persistent-memo-panel span-2">
           <div class="panel-heading">
             <div>
-              <h2>残るメモ</h2>
-              <p class="section-note">日付を変えても残る、いつでも書き足せる自分用のメモです。さくらの記憶には追加されません。</p>
+              <h2>研究ノート・残るメモ</h2>
+              <p class="section-note">日付を変えても残る、いつでも書き足せる研究ノートです。今日の達成率には含めません。</p>
             </div>
             <button class="ghost-button" id="addPersistentMemo" type="button">追加</button>
           </div>
@@ -1300,7 +1300,7 @@
             <span id="persistentMemoSearchCount" hidden>検索 <strong>0</strong></span>
           </div>
           <div class="later-search">
-            <input id="persistentMemoSearch" type="search" placeholder="メモを検索" aria-label="残るメモを検索" />
+            <input id="persistentMemoSearch" type="search" placeholder="研究ノートを検索" aria-label="研究ノート・残るメモを検索" />
           </div>
           <div id="persistentMemoList" class="persistent-memo-list"></div>
         </section>
@@ -1508,6 +1508,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260719-hasshin-no-stale-alert"></script>
+    <script src="./app.js?v=20260719-separate-daily-achievement"></script>
   </body>
 </html>

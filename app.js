@@ -1309,17 +1309,13 @@ function renderClock() {
   }).format(new Date());
 }
 
+function todayAchievementItems(day) {
+  return asArray(day?.todayTasks);
+}
+
 function renderSummary() {
   const day = getDay();
-  const tracked = [
-    ...day.dailyTasks,
-    ...day.todayTasks,
-    ...day.projects,
-    { done: day.metrics.mailMorningChecked, title: "メール朝チェック" },
-    { done: day.metrics.mailNoonChecked, title: "メール昼チェック" },
-    { done: day.metrics.mailNightChecked, title: "メール夜チェック" },
-    { done: day.metrics.dmPreviousDone, title: "DM前日分" },
-  ];
+  const tracked = todayAchievementItems(day);
   const total = tracked.length;
   const done = tracked.filter((item) => item.done).length;
   const progress = total ? Math.round((done / total) * 100) : 0;
@@ -3046,7 +3042,7 @@ function renderHistory() {
     .forEach(([date, day]) => {
       const row = document.createElement("div");
       row.className = "history-item";
-      const tracked = [...day.dailyTasks, ...day.todayTasks, ...day.projects];
+      const tracked = todayAchievementItems(day);
       const done = tracked.filter((item) => item.done).length;
       const total = tracked.length;
       row.innerHTML = `
@@ -6744,20 +6740,20 @@ function prioritySourceMeta(source) {
     "operation-dashboard.laterItems": {
       storageLabel: "あとで見る・あとで読む",
       sectionSelector: "#laterList",
-      staleThirtyReason: "30日以上あとで見る・読むに残っています。",
-      staleSevenReason: "7日以上あとで見る・読むに残っています。",
+      staleThirtyReason: "30日以上前に保存したあとで見る・読む候補です。",
+      staleSevenReason: "7日以上前に保存したあとで見る・読む候補です。",
     },
     "operation-dashboard.persistentMemos": {
-      storageLabel: "残るメモ",
+      storageLabel: "研究ノート / 残るメモ",
       sectionSelector: "#persistentMemoList",
-      staleThirtyReason: "30日以上前から残っているメモです。",
-      staleSevenReason: "7日以上前から残っているメモです。",
+      staleThirtyReason: "30日以上前に書いた研究ノートです。",
+      staleSevenReason: "7日以上前に書いた研究ノートです。",
     },
     "discovery-labo.discoveries": {
-      storageLabel: "発見ラボ / 発酵中アイデア",
+      storageLabel: "発見ラボ / 振り返り候補",
       appUrl: "https://mcwgw408-oss.github.io/discovery-Labo/",
-      staleThirtyReason: "30日以上発酵中のアイデアです。",
-      staleSevenReason: "7日以上発酵中のアイデアです。",
+      staleThirtyReason: "30日以上前からある振り返り候補のアイデアです。",
+      staleSevenReason: "7日以上前からある振り返り候補のアイデアです。",
     },
     "hasshin-kansatsu-labo.entries": {
       storageLabel: "発信観察ラボ",
@@ -6876,21 +6872,21 @@ function collectPriorityCandidates(context) {
     item,
     source: "operation-dashboard.laterItems",
     sourceLabel: "あとで見る/読む",
-    baseReason: "あとで見る/読むに未完了で残っています。",
+    baseReason: "あとで見る/読む候補として保存されています。",
     basePoints: PRIORITY_ENGINE_WEIGHTS.laterItem,
   })));
   context.persistentMemos.forEach((item) => candidates.push(createPriorityCandidate({
     item,
     source: "operation-dashboard.persistentMemos",
-    sourceLabel: "残るメモ",
-    baseReason: "最近更新された残るメモです。",
+    sourceLabel: "研究ノート",
+    baseReason: "最近更新された研究ノートです。",
     basePoints: PRIORITY_ENGINE_WEIGHTS.persistentMemo,
   })));
   context.fermentingIdeas.forEach((item) => candidates.push(createPriorityCandidate({
     item,
     source: "discovery-labo.discoveries",
-    sourceLabel: "発酵中アイデア",
-    baseReason: "発酵中アイデアとして残っています。",
+    sourceLabel: "振り返り候補",
+    baseReason: "振り返り候補のアイデアです。",
     basePoints: PRIORITY_ENGINE_WEIGHTS.fermentingIdea,
   })));
   context.hasshinNextActions
@@ -7069,7 +7065,7 @@ function rankPriorityCandidates(candidates, energyContext, momentumContext) {
 function explainPriorityCandidate(candidate) {
   if (!candidate) {
     return {
-      summary: "未完了の候補が少ないため、今日は整える日として表示しています。",
+      summary: "今日の実行候補が少ないため、今日は整える日として表示しています。",
       reasons: ["今日の優先候補として強く出る項目はありません。"],
     };
   }
@@ -7231,8 +7227,8 @@ function recommendationReasonForSource(source, candidate = null) {
     "operation-dashboard.dailyTasks": "毎日タスクとして残っています。",
     "operation-dashboard.projects": "育てているプロジェクトに入っています。",
     "operation-dashboard.laterItems": "あとで見る項目として残っています。",
-    "operation-dashboard.persistentMemos": "最近更新されたメモがあります。",
-    "discovery-labo.discoveries": "発酵中アイデアがあります。",
+    "operation-dashboard.persistentMemos": "最近更新された研究ノートがあります。",
+    "discovery-labo.discoveries": "振り返り候補のアイデアがあります。",
     "hasshin-kansatsu-labo.entries": candidate?.title ? `次のアクション: ${candidate.title}` : "発信観察に具体的な次の行動があります。",
     "substack-labo.writing": "執筆中の記事があります。",
     "koryu-log-labo.entries": "また見たい人の記録があります。",
@@ -7255,8 +7251,8 @@ function buildRecommendationReasons(input) {
 
   const reasons = [recommendationReasonForSource(input.topCandidate.source, input.topCandidate)];
   reasons.push(...scheduleReasons);
-  if (input.hasFermentingIdeas && !reasons.includes("発酵中アイデアがあります。")) {
-    reasons.push("発酵中アイデアがあります。");
+  if (input.hasFermentingIdeas && !reasons.includes("振り返り候補のアイデアがあります。")) {
+    reasons.push("振り返り候補のアイデアがあります。");
   }
   if (input.hasWritingInProgress && !reasons.includes("執筆中の記事があります。")) {
     reasons.push("執筆中の記事があります。");
@@ -7726,7 +7722,7 @@ function buildExplainLayerDetails(
     input.topCandidate ? `${input.topCandidate.sourceLabel}の候補を見ています。` : "今日の候補全体を軽く見ています。",
     input.openTodayCount ? `今日やることに未完了が${input.openTodayCount}件あります。` : "今日やることの未完了は少なめです。",
     input.hasTodayEvents ? `今日の予定が${input.eventContext.count}件あります。` : "",
-    input.hasFermentingIdeas ? "発酵中アイデアがあります。" : "",
+    input.hasFermentingIdeas ? "振り返り候補のアイデアがあります。" : "",
     input.hasWritingInProgress ? "執筆中の記事があります。" : "",
     input.hasNextActions ? "発信観察の次アクションがあります。" : "",
   ].filter(Boolean);
@@ -8738,7 +8734,7 @@ function renderBrainPrototype() {
   appendBrainItems(
     $("#brainFermentingIdeas"),
     fermentingIdeas.map((seed) => brainTitleOf(seed, "無題のアイデア")),
-    "発酵中アイデアはまだありません。",
+    "振り返り候補のアイデアはまだありません。",
   );
 
   appendBrainItems(
@@ -8747,7 +8743,11 @@ function renderBrainPrototype() {
     "執筆中の記事はまだありません。",
   );
 
-  const newestHasshin = hasshinNextActions
+  const recentHasshinNextActions = hasshinNextActions.filter((entry) => {
+    const days = brainDaysSince(brainRecentDateOf(entry));
+    return days === null || days < 30;
+  });
+  const newestHasshin = recentHasshinNextActions
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
   const newestRevisit = revisitPeople
     .sort((a, b) => String(brainRecentDateOf(b)).localeCompare(String(brainRecentDateOf(a))))[0];
@@ -8756,7 +8756,7 @@ function renderBrainPrototype() {
     day.dailyInput ? "今日の入力: 自由入力メモを参照" : "",
     newestHasshin?.nextAction ? `発信観察の次アクション: ${newestHasshin.nextAction}` : "",
     newestRevisit?.name ? `また見たい人: ${newestRevisit.name}` : "",
-    newestMemo ? `残るメモ更新: ${brainFormatDateTime(newestMemo.updatedAt || newestMemo.createdAt)}` : "",
+    newestMemo ? `研究ノート更新: ${brainFormatDateTime(newestMemo.updatedAt || newestMemo.createdAt)}` : "",
     day.updatedAt ? `今日の記録更新: ${brainFormatDateTime(day.updatedAt)}` : "",
   ];
   appendBrainItems($("#brainRecentChanges"), recentChanges, "最近の変化はまだありません。");
@@ -9330,14 +9330,7 @@ function downloadCsv() {
     .forEach(([date, day]) => {
       ensureMetricDefaults(day);
       ensurePublishingOps(day);
-      const tracked = [
-        ...day.dailyTasks,
-        ...day.todayTasks,
-        ...day.projects,
-        { done: day.metrics.mailMorningChecked },
-        { done: day.metrics.mailNoonChecked },
-        { done: day.metrics.mailNightChecked },
-      ];
+      const tracked = todayAchievementItems(day);
       rows.push([
         date,
         tracked.filter((item) => item.done).length,
@@ -9944,18 +9937,8 @@ function buildSakuraSnapshot(mode) {
   let todayProgress = "0/0";
   let todayEventCount = 0;
   if (todayRecord) {
-    const tracked = [
-      ...(todayRecord.dailyTasks || []),
-      ...(todayRecord.todayTasks || []),
-    ].map((task) => Boolean(task.done));
+    const tracked = todayAchievementItems(todayRecord).map((task) => Boolean(task.done));
     todayEventCount = asArray(todayRecord.todayEvents).length;
-    const metrics = todayRecord.metrics || {};
-    tracked.push(
-      Boolean(metrics.mailMorningChecked),
-      Boolean(metrics.mailNoonChecked),
-      Boolean(metrics.mailNightChecked),
-      Boolean(metrics.dmPreviousDone),
-    );
     todayProgress = `${tracked.filter(Boolean).length}/${tracked.length}`;
   }
 
