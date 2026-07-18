@@ -2842,6 +2842,49 @@ textarea {
   color: var(--muted);
 }
 
+.brain-list .brain-reference-item {
+  list-style: none;
+  margin-left: -18px;
+}
+
+.brain-reference-button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid var(--green-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  padding: 9px 10px;
+  text-align: left;
+}
+
+.brain-reference-button:hover,
+.brain-reference-button:focus-visible {
+  border-color: var(--green);
+  background: #fff;
+}
+
+.brain-reference-button strong {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.brain-reference-button span,
+.brain-reference-button small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.source-highlight {
+  border-color: var(--yellow-line) !important;
+  background: var(--yellow-soft) !important;
+  box-shadow: 0 0 0 3px rgba(229, 183, 90, 0.28);
+}
+
 .panel {
   min-height: 180px;
   padding: 20px;

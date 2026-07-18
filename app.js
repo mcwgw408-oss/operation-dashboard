@@ -1333,9 +1333,16 @@ function renderTaskList(listId) {
   const day = getDay();
   const target = $(`#${listId}`);
   const template = $("#taskTemplate");
+  const sourceByListId = {
+    todayTasks: "operation-dashboard.todayTasks",
+    dailyTasks: "operation-dashboard.dailyTasks",
+    projects: "operation-dashboard.projects",
+  };
   target.replaceChildren();
   day[listId].forEach((item, index) => {
     const row = template.content.firstElementChild.cloneNode(true);
+    row.dataset.brainSource = sourceByListId[listId] || listId;
+    row.dataset.brainId = item.id || `${sourceByListId[listId] || listId}:${item.title || ""}`;
     row.classList.toggle("done", item.done);
     row.classList.toggle("priority", item.priority && !item.done);
     const checkbox = row.querySelector(".task-check");
@@ -1707,6 +1714,8 @@ function renderPersistentMemos({ focusId } = {}) {
   }
   visibleMemos.forEach((memo) => {
     const row = template.content.firstElementChild.cloneNode(true);
+    row.dataset.brainSource = "operation-dashboard.persistentMemos";
+    row.dataset.brainId = memo.id || `operation-dashboard.persistentMemos:${memo.text || ""}`;
     const textarea = row.querySelector("textarea");
     const meta = row.querySelector(".persistent-memo-meta");
     textarea.value = memo.text || "";
@@ -2649,6 +2658,8 @@ function renderLaterItems() {
   }
   displayItems.forEach((item) => {
     const row = template.content.firstElementChild.cloneNode(true);
+    row.dataset.brainSource = "operation-dashboard.laterItems";
+    row.dataset.brainId = item.id || `operation-dashboard.laterItems:${item.title || ""}`;
     row.classList.toggle("done", item.done);
     const check = row.querySelector(".later-check");
     const type = row.querySelector(".later-type");
@@ -3062,6 +3073,68 @@ function renderHistory() {
     });
 }
 
+function openAncestorDetails(element) {
+  let current = element?.parentElement;
+  while (current) {
+    if (current.tagName === "DETAILS") current.open = true;
+    current = current.parentElement;
+  }
+}
+
+function flashReferencedSource(element) {
+  if (!element) return;
+  element.classList.remove("source-highlight");
+  void element.offsetWidth;
+  element.classList.add("source-highlight");
+  setTimeout(() => element.classList.remove("source-highlight"), 2200);
+}
+
+function brainCssEscape(value) {
+  if (window.CSS?.escape) return CSS.escape(String(value || ""));
+  return String(value || "").replace(/["\\]/g, "\\$&");
+}
+
+function openBrainReference(reference) {
+  if (!reference || typeof reference !== "object") return;
+  const candidateSelectors = [
+    reference.source && reference.id
+      ? `[data-brain-source="${brainCssEscape(reference.source)}"][data-brain-id="${brainCssEscape(reference.id)}"]`
+      : "",
+    reference.sectionSelector || "",
+  ].filter(Boolean);
+  const target = candidateSelectors.map((selector) => document.querySelector(selector)).find(Boolean);
+  if (!target) {
+    if (reference.url || reference.appUrl) window.open(reference.url || reference.appUrl, "_blank", "noreferrer");
+    return;
+  }
+  openAncestorDetails(target);
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  flashReferencedSource(target);
+}
+
+function appendBrainReferenceItem(listItem, reference) {
+  listItem.className = "brain-reference-item";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "brain-reference-button";
+  button.addEventListener("click", () => openBrainReference(reference));
+
+  const title = document.createElement("strong");
+  title.textContent = reference.title || "参照した項目";
+
+  const meta = document.createElement("span");
+  meta.textContent = [
+    reference.storageLabel ? `保存先: ${reference.storageLabel}` : "",
+    reference.createdLabel ? `作成日: ${reference.createdLabel}` : "",
+  ].filter(Boolean).join(" / ");
+
+  const action = document.createElement("small");
+  action.textContent = "元データを開く";
+
+  button.append(title, meta, action);
+  listItem.append(button);
+}
+
 function appendBrainItems(target, items, emptyText) {
   if (!target) return;
   target.replaceChildren();
@@ -3073,9 +3146,13 @@ function appendBrainItems(target, items, emptyText) {
     target.append(item);
     return;
   }
-  visibleItems.forEach((text) => {
+  visibleItems.forEach((entry) => {
     const item = document.createElement("li");
-    item.textContent = text;
+    if (entry && typeof entry === "object" && entry.type === "brain-reference") {
+      appendBrainReferenceItem(item, entry);
+    } else {
+      item.textContent = entry;
+    }
     target.append(item);
   });
 }
@@ -6602,6 +6679,17 @@ function brainFormatDateTime(value) {
   }).format(date);
 }
 
+function brainFormatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).format(date);
+}
+
 function brainRecentDateOf(item) {
   return item?.updatedAt || item?.createdAt || item?.date || "";
 }
@@ -6633,9 +6721,61 @@ function collectBrainWritingItems(workspace) {
   return [];
 }
 
+function prioritySourceMeta(source) {
+  const sources = {
+    "operation-dashboard.todayTasks": {
+      storageLabel: "今日やること",
+      sectionSelector: "#todayTasks",
+    },
+    "operation-dashboard.dailyTasks": {
+      storageLabel: "毎日タスク",
+      sectionSelector: "#dailyTasks",
+    },
+    "operation-dashboard.projects": {
+      storageLabel: "育てるプロジェクト",
+      sectionSelector: "#projects",
+    },
+    "operation-dashboard.laterItems": {
+      storageLabel: "あとで見る・あとで読む",
+      sectionSelector: "#laterList",
+    },
+    "operation-dashboard.persistentMemos": {
+      storageLabel: "残るメモ",
+      sectionSelector: "#persistentMemoList",
+    },
+    "discovery-labo.discoveries": {
+      storageLabel: "発見ラボ / 発酵中アイデア",
+      appUrl: "https://mcwgw408-oss.github.io/discovery-Labo/",
+    },
+    "hasshin-kansatsu-labo.entries": {
+      storageLabel: "発信観察ラボ",
+      appUrl: "https://mcwgw408-oss.github.io/observation-Labo/",
+    },
+    "substack-labo.writing": {
+      storageLabel: "Substackラボ",
+      appUrl: "https://mcwgw408-oss.github.io/substack-labo/",
+    },
+    "koryu-log-labo.entries": {
+      storageLabel: "交流ログ",
+      appUrl: "https://mcwgw408-oss.github.io/action-Labo/",
+    },
+    "operation-cockpit.intent": {
+      storageLabel: "今日の意図",
+      sectionSelector: "#dashboard-start",
+    },
+    "operation-dashboard.dailyInput": {
+      storageLabel: "本日の入力",
+      sectionSelector: "#dailyInput",
+    },
+  };
+  return sources[source] || { storageLabel: source || "不明" };
+}
+
 function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePoints }) {
   const title = brainTitleOf(item, "");
   const updatedAt = brainRecentDateOf(item);
+  const createdAt = item?.createdAt || item?.date || "";
+  const sourceMeta = prioritySourceMeta(source);
   return {
     id: item?.id || `${source}:${title}`,
     item,
@@ -6645,10 +6785,14 @@ function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePo
     done: Boolean(item?.done),
     status: item?.status || "open",
     priorityFlag: Boolean(item?.priority),
-    createdAt: item?.createdAt || item?.date || "",
+    createdAt,
     updatedAt,
-    ageDays: brainDaysSince(item?.createdAt || item?.date),
+    ageDays: brainDaysSince(createdAt),
     stalenessDays: brainDaysSince(updatedAt || item?.createdAt || item?.date),
+    storageLabel: sourceMeta.storageLabel || sourceLabel || source,
+    sectionSelector: sourceMeta.sectionSelector || "",
+    appUrl: sourceMeta.appUrl || "",
+    url: item?.url || item?.link || "",
     baseReason,
     basePoints,
   };
@@ -6918,12 +7062,34 @@ function explainPriorityCandidate(candidate) {
   };
 }
 
+function priorityCandidateReferenceItem(candidate) {
+  if (!candidate) return null;
+  const days = candidate.stalenessDays ?? candidate.ageDays;
+  const dayLabel = Number.isFinite(days) ? `${days}日前` : "日付不明";
+  const createdLabel = brainFormatDate(candidate.createdAt) || "不明";
+  return {
+    type: "brain-reference",
+    id: candidate.id || "",
+    source: candidate.source || "",
+    title: `${candidate.title || "無題"}（${dayLabel}）`,
+    storageLabel: candidate.storageLabel || candidate.sourceLabel || candidate.source || "不明",
+    createdLabel,
+    sectionSelector: candidate.sectionSelector || "",
+    url: candidate.url || "",
+    appUrl: candidate.appUrl || "",
+  };
+}
+
 function priorityCandidateMaterialLabels(candidate) {
   if (!candidate) {
     return ["今日の予定・タスク・記憶を確認しました。"];
   }
+  const reference = priorityCandidateReferenceItem(candidate);
   const scoreParts = [
+    reference,
     `参照元: ${candidate.sourceLabel || candidate.source || "不明"}`,
+    `保存先: ${candidate.storageLabel || candidate.sourceLabel || candidate.source || "不明"}`,
+    `作成日: ${brainFormatDate(candidate.createdAt) || "不明"}`,
     `基本スコア: ${candidate.score ?? 0}`,
     `調整後スコア: ${candidate.adjustedScore ?? candidate.score ?? 0}`,
   ];
@@ -7601,9 +7767,13 @@ function setExplainLayerExpanded(isExpanded) {
   body.hidden = !isExpanded;
 }
 
-function renderExplainLayerDetails(details) {
+function renderExplainLayerDetails(details, referenceItem = null) {
   appendBrainItems($("#explainSeenInfo"), details.seenInfo, "見ている情報はまだ少なめです。");
-  appendBrainItems($("#explainMainReasons"), details.mainReasons, "主な理由はまだありません。");
+  appendBrainItems(
+    $("#explainMainReasons"),
+    [referenceItem, ...asArray(details.mainReasons)].filter(Boolean),
+    "主な理由はまだありません。",
+  );
   appendBrainItems($("#explainUncertainty"), details.uncertainty, "不確かな点は少なめです。");
   const energyTarget = $("#explainEnergyImpact");
   const momentumTarget = $("#explainMomentumImpact");
@@ -8444,7 +8614,11 @@ function renderBrainPrototype() {
     priorityCandidateMaterialLabels(priorityCandidate),
     "判断材料はまだありません。",
   );
-  appendBrainItems($("#brainPriorityReasons"), explanation.reasons, "理由はまだありません。");
+  appendBrainItems(
+    $("#brainPriorityReasons"),
+    [priorityCandidateReferenceItem(priorityCandidate), ...explanation.reasons].filter(Boolean),
+    "理由はまだありません。",
+  );
 
   $("#brainRecommendationTitle").textContent = recommendationExpression.title;
   $("#brainRecommendationMessage").textContent = recommendationExpression.message;
@@ -8456,7 +8630,7 @@ function renderBrainPrototype() {
   }
   appendBrainItems($("#brainRecommendationReasons"), recommendationExpression.reasons, "今日は理由を少なくして、軽く整える提案です。");
   renderHealthAwareRecommendation(healthAwareRecommendation);
-  renderExplainLayerDetails(explainLayerDetails);
+  renderExplainLayerDetails(explainLayerDetails, priorityCandidateReferenceItem(priorityCandidate));
   renderLearningFeedback(learningEntry);
   renderLearningSummary(latestLearningSummary);
   renderLearningHint(latestLearningHint);
