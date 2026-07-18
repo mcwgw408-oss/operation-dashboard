@@ -335,9 +335,7 @@ function previousDateKey(dateKey) {
 }
 
 function dailyTaskTitlesForDate(dateKey = activeDate) {
-  const ownOrder = dateKey === DAILY_TASK_ORDER_BASE_DATE
-    ? dailyTaskTitlesFromDay(store?.[dateKey])
-    : [];
+  const ownOrder = dailyTaskTitlesFromDay(store?.[dateKey]);
   if (ownOrder.length) return mergeDailyTaskTitles(ownOrder);
 
   const previousDayOrder = dailyTaskTitlesFromDay(store?.[previousDateKey(dateKey)]);

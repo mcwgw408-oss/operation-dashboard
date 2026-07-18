@@ -38,8 +38,33 @@ if (!window.crypto?.randomUUID) {
   };
 }
 
+const today = "2026-07-18";
+const yesterday = "2026-07-17";
+const yesterdayTitles = ["メール確認", "DM確認（前日分まで）", "記事執筆（翌日公開分）"];
+const todayTitles = ["記事執筆（翌日公開分）", "メール確認", "DM確認（前日分まで）"];
+window.localStorage.setItem("operation-dashboard-v1", JSON.stringify({
+  [yesterday]: {
+    dailyTasks: yesterdayTitles.map((title, index) => ({ id: `y-${index}`, title, done: false, priority: false })),
+    todayTasks: [],
+    todayEvents: [],
+    projects: [],
+    metrics: {},
+    reflection: {},
+  },
+  [today]: {
+    dailyTasks: todayTitles.map((title, index) => ({ id: `t-${index}`, title, done: false, priority: false })),
+    todayTasks: [],
+    todayEvents: [],
+    projects: [],
+    metrics: {},
+    reflection: {},
+  },
+}));
+
 window.eval(`${appJs}\n//# sourceURL=app.js`);
 window.document.dispatchEvent(new window.Event("DOMContentLoaded", { bubbles: true }));
+window.document.querySelector("#activeDate").value = today;
+window.document.querySelector("#activeDate").dispatchEvent(new window.Event("change", { bubbles: true }));
 
 const dailyTaskTitles = () => [...window.document.querySelectorAll("#dailyTasks .task-title")].map((input) => input.value);
 const fail = (message) => {
