@@ -180,8 +180,20 @@ function newItem(title = "") {
     id: crypto.randomUUID(),
     title,
     done: false,
+    completed: false,
     priority: false,
   };
+}
+
+function isItemCompleted(item) {
+  return Boolean(item?.done || item?.completed);
+}
+
+function setItemCompleted(item, completed) {
+  if (!item || typeof item !== "object") return;
+  const value = Boolean(completed);
+  item.done = value;
+  item.completed = value;
 }
 
 function newEvent({ title = "", time = "", type = "other", note = "" } = {}) {
@@ -1313,12 +1325,17 @@ function todayAchievementItems(day) {
   return asArray(day?.todayTasks);
 }
 
-function renderSummary() {
-  const day = getDay();
+function todayCompletionStats(day) {
   const tracked = todayAchievementItems(day);
   const total = tracked.length;
-  const done = tracked.filter((item) => item.done).length;
+  const done = tracked.filter(isItemCompleted).length;
   const progress = total ? Math.round((done / total) * 100) : 0;
+  return { tracked, total, done, progress };
+}
+
+function renderSummary() {
+  const day = getDay();
+  const { total, done, progress } = todayCompletionStats(day);
   $("#dateLabel").textContent = formatDateLabel(activeDate);
   $("#progressLabel").textContent = `${progress}%`;
   $("#progressBar").style.width = `${progress}%`;
@@ -1339,17 +1356,18 @@ function renderTaskList(listId) {
     const row = template.content.firstElementChild.cloneNode(true);
     row.dataset.brainSource = sourceByListId[listId] || listId;
     row.dataset.brainId = item.id || `${sourceByListId[listId] || listId}:${item.title || ""}`;
-    row.classList.toggle("done", item.done);
-    row.classList.toggle("priority", item.priority && !item.done);
+    const completed = isItemCompleted(item);
+    row.classList.toggle("done", completed);
+    row.classList.toggle("priority", item.priority && !completed);
     const checkbox = row.querySelector(".task-check");
     const title = row.querySelector(".task-title");
     const priority = row.querySelector(".priority-button");
-    checkbox.checked = item.done;
+    checkbox.checked = completed;
     title.value = item.title;
     let templateTitle = item.title;
     priority.classList.toggle("active", item.priority);
     checkbox.addEventListener("change", () => {
-      item.done = checkbox.checked;
+      setItemCompleted(item, checkbox.checked);
       renderAfterTaskListChange(listId);
     });
     title.addEventListener("input", () => {
@@ -3042,9 +3060,7 @@ function renderHistory() {
     .forEach(([date, day]) => {
       const row = document.createElement("div");
       row.className = "history-item";
-      const tracked = todayAchievementItems(day);
-      const done = tracked.filter((item) => item.done).length;
-      const total = tracked.length;
+      const { done, total } = todayCompletionStats(day);
       row.innerHTML = `
         <strong>${date}</strong>
         <span>${done}/${total} 完了</span>
@@ -3633,7 +3649,7 @@ function buildConversationContext({
     dailyInputContext,
     todayTasks: asArray(todayTasks).map((task) => ({
       title: task.title || "",
-      done: Boolean(task.done),
+      done: isItemCompleted(task),
     })),
     todayEvents: asArray(todayEvents).map((event) => ({
       title: event.title || "",
@@ -3656,7 +3672,7 @@ function renderConversationContext(context) {
 
 function buildReplyPlan(conversationContext = {}) {
   const scheduledEvents = asArray(conversationContext.todayEvents).filter((event) => event.title);
-  const firstTask = asArray(conversationContext.todayTasks).find((task) => task.title && !task.done);
+  const firstTask = asArray(conversationContext.todayTasks).find((task) => task.title && !isItemCompleted(task));
   const memoryTitle = memoryDisplayTitle(conversationContext.memoryContext?.retrieved?.[0]) ||
     memoryDisplayTitle(conversationContext.memoryContext?.recent?.[0]);
   const confidence = conversationContext.learningConfidence?.score ?? 0;
@@ -6656,7 +6672,7 @@ function brainTitleOf(item, fallback = "無題") {
 }
 
 function brainIsOpen(item) {
-  return item && !item.done && item.status !== "done" && item.status !== "完了";
+  return item && !isItemCompleted(item) && item.status !== "done" && item.status !== "完了";
 }
 
 function brainStatusMatches(value, labels) {
@@ -6795,7 +6811,7 @@ function createPriorityCandidate({ item, source, sourceLabel, baseReason, basePo
     source,
     sourceLabel,
     title,
-    done: Boolean(item?.done),
+    done: isItemCompleted(item),
     status: item?.status || "open",
     priorityFlag: Boolean(item?.priority),
     createdAt,
@@ -6940,7 +6956,7 @@ function scorePriorityCandidate(candidate) {
     score += PRIORITY_ENGINE_WEIGHTS.staleSevenDays;
     reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.staleSevenDays, text: candidate.staleSevenReason });
   }
-  if (candidate.done || candidate.status === "done" || candidate.status === "完了") {
+  if (isItemCompleted(candidate) || candidate.status === "done" || candidate.status === "完了") {
     score += PRIORITY_ENGINE_WEIGHTS.completedPenalty;
     reasons.push({ points: PRIORITY_ENGINE_WEIGHTS.completedPenalty, text: "完了済みのため優先度を下げています。" });
   }
@@ -7053,7 +7069,7 @@ function applyPriorityModifiers(candidate, energyContext, momentumContext) {
 function rankPriorityCandidates(candidates, energyContext, momentumContext) {
   return candidates
     .map(scorePriorityCandidate)
-    .filter((candidate) => candidate.title && !candidate.done && candidate.status !== "done" && candidate.status !== "完了")
+    .filter((candidate) => candidate.title && !isItemCompleted(candidate) && candidate.status !== "done" && candidate.status !== "完了")
     .map((candidate) => applyPriorityModifiers(candidate, energyContext, momentumContext))
     .sort((a, b) => {
       if (b.adjustedScore !== a.adjustedScore) return b.adjustedScore - a.adjustedScore;
@@ -8319,7 +8335,9 @@ function collectBrainContext() {
   const todayTasks = asArray(day.todayTasks);
   const todayEvents = asArray(day.todayEvents);
   const projects = asArray(day.projects);
-  const completedToday = [...todayTasks, ...dailyTasks].filter((item) => item.done).length;
+  const todayCompletion = todayCompletionStats(day);
+  const completedToday = todayCompletion.done;
+  const completedDailyTasks = dailyTasks.filter(isItemCompleted).length;
   const openToday = todayTasks.filter(brainIsOpen);
   const laterOpen = laterItems.filter((item) => !item.done);
   const reflection = day.reflection || {};
@@ -8348,7 +8366,9 @@ function collectBrainContext() {
     todayEvents,
     projects,
     reflection,
+    todayCompletion,
     completedToday,
+    completedDailyTasks,
     openToday,
     laterOpen,
     persistentMemos,
@@ -9330,15 +9350,15 @@ function downloadCsv() {
     .forEach(([date, day]) => {
       ensureMetricDefaults(day);
       ensurePublishingOps(day);
-      const tracked = todayAchievementItems(day);
+      const { done, total } = todayCompletionStats(day);
       rows.push([
         date,
-        tracked.filter((item) => item.done).length,
-        tracked.length,
-        day.dailyTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
-        day.todayTasks.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        done,
+        total,
+        day.dailyTasks.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        day.todayTasks.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         asArray(day.todayEvents).map(formatEventLabel).join(" / "),
-        day.projects.map((item) => `${item.done ? "完了" : "未完了"}:${item.title}`).join(" / "),
+        day.projects.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         (day.memos || []).map((memo) => memo.text).join(" / "),
         (day.learnings || [])
           .map((learning) => [
@@ -9937,9 +9957,9 @@ function buildSakuraSnapshot(mode) {
   let todayProgress = "0/0";
   let todayEventCount = 0;
   if (todayRecord) {
-    const tracked = todayAchievementItems(todayRecord).map((task) => Boolean(task.done));
+    const { done, total } = todayCompletionStats(todayRecord);
     todayEventCount = asArray(todayRecord.todayEvents).length;
-    todayProgress = `${tracked.filter(Boolean).length}/${tracked.length}`;
+    todayProgress = `${done}/${total}`;
   }
 
   const fermenting = discoveries.filter((seed) => seed.status === "発酵中");
