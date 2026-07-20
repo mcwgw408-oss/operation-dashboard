@@ -3633,6 +3633,253 @@ textarea {
   gap: 6px;
 }
 
+.x-experiment-panel {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.x-experiment-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.x-experiment-metric {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 10px;
+}
+
+.x-experiment-metric strong {
+  font-size: 18px;
+}
+
+.x-experiment-metric span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.x-experiment-type-summary {
+  display: grid;
+  gap: 8px;
+}
+
+.x-experiment-type-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 9px 10px;
+  font-size: 13px;
+}
+
+.x-experiment-type-row span {
+  color: var(--muted);
+}
+
+.x-experiment-form {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.x-experiment-form-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.x-experiment-form-heading h3,
+.x-experiment-form-block h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.x-experiment-edit-marker {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-experiment-form-block {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.x-experiment-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.x-experiment-fields label,
+.x-experiment-search label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-experiment-wide-field {
+  grid-column: 1 / -1;
+}
+
+.x-experiment-number-fields {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.x-experiment-rate-preview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.x-experiment-rate-preview span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: var(--radius-item);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+.x-experiment-rate-preview strong {
+  color: var(--text);
+}
+
+.x-experiment-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.x-experiment-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  margin-right: auto;
+}
+
+.x-experiment-search {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.x-experiment-search > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.x-experiment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.x-experiment-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.x-experiment-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.x-experiment-card-header > div:first-child {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.x-experiment-card-header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.x-experiment-card-header strong {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.x-experiment-type {
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.x-experiment-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.x-experiment-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.x-experiment-details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.x-experiment-details dl {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.x-experiment-details div {
+  display: grid;
+  gap: 3px;
+  border-radius: var(--radius-item);
+  background: var(--panel);
+  padding: 8px;
+}
+
+.x-experiment-details dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.x-experiment-details dd {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
 .operation-experiment-panel {
   display: grid;
   gap: 14px;
@@ -4165,6 +4412,10 @@ textarea {
   order: 31;
 }
 
+.dashboard .x-experiment-panel {
+  order: 32;
+}
+
 .dashboard .reading-notes-panel {
   order: 32;
 }
@@ -4439,6 +4690,13 @@ textarea {
   .reading-note-form,
   .reading-notes-search,
   .publishing-ops-grid,
+  .x-experiment-summary,
+  .x-experiment-type-row,
+  .x-experiment-fields,
+  .x-experiment-number-fields,
+  .x-experiment-rate-preview,
+  .x-experiment-search,
+  .x-experiment-card-metrics,
   .operation-experiment-overview,
   .operation-experiment-daily-fields,
   .operation-experiment-metrics > div,
@@ -4461,6 +4719,16 @@ textarea {
 
   .operation-experiment-recent-row strong:last-child {
     grid-column: 1 / -1;
+  }
+
+  .x-experiment-card-header,
+  .x-experiment-save-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .x-experiment-status {
+    margin-right: 0;
   }
 
   .publishing-ops-recent-heading,

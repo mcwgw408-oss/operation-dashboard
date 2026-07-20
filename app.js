@@ -30,6 +30,7 @@ const HEALTH_STATE_STORAGE_KEY = "sakura-health-state-v1";
 const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
 const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
+const X_EXPERIMENT_LOG_STORAGE_KEY = "operation-dashboard-x-experiment-logs-v1";
 const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
 const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
 const DELETED_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-deleted-daily-tasks-v1";
@@ -112,6 +113,34 @@ const defaultProjectMemory = [
     tags: ["life", "recovery"],
   },
 ];
+const X_EXPERIMENT_POST_TYPES = [
+  "共感",
+  "気づき",
+  "問いかけ",
+  "学び",
+  "体験談",
+  "記事からの派生",
+  "告知",
+  "その他",
+];
+
+const xExperimentFormFields = {
+  postDate: "#xExperimentPostDate",
+  postTime: "#xExperimentPostTime",
+  postContent: "#xExperimentPostContent",
+  postUrl: "#xExperimentPostUrl",
+  postType: "#xExperimentPostType",
+  hypothesis: "#xExperimentHypothesis",
+  experiment: "#xExperimentExperiment",
+  resultMemo: "#xExperimentResultMemo",
+  insight: "#xExperimentInsight",
+  nextHypothesis: "#xExperimentNextHypothesis",
+  impressions: "#xExperimentImpressions",
+  engagements: "#xExperimentEngagements",
+  detailClicks: "#xExperimentDetailClicks",
+  profileAccesses: "#xExperimentProfileAccesses",
+  linkClicks: "#xExperimentLinkClicks",
+};
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
@@ -162,6 +191,15 @@ let healthState = loadHealthState();
 let recurringSchedule = loadRecurringSchedule();
 let recurringAutoAddLog = loadRecurringAutoAddLog();
 let operationExperimentStore = loadOperationExperimentStore();
+let xExperimentLogs = loadXExperimentLogs();
+let editingXExperimentId = "";
+let savingXExperiment = false;
+let xExperimentFilters = {
+  date: "",
+  type: "all",
+  postKeyword: "",
+  insightKeyword: "",
+};
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -289,6 +327,48 @@ function blankOperationExperimentLog() {
     otherReactions: "",
     updatedAt: "",
   };
+}
+
+function blankXExperimentLog() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    postDate: activeDate,
+    postTime: "",
+    postContent: "",
+    postUrl: "",
+    postType: "その他",
+    hypothesis: "",
+    experiment: "",
+    resultMemo: "",
+    insight: "",
+    nextHypothesis: "",
+    impressions: "",
+    engagements: "",
+    detailClicks: "",
+    profileAccesses: "",
+    linkClicks: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function normalizeXExperimentLog(raw) {
+  const base = blankXExperimentLog();
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const log = { ...base, ...source };
+  log.id = typeof source.id === "string" && source.id ? source.id : base.id;
+  log.postType = X_EXPERIMENT_POST_TYPES.includes(source.postType) ? source.postType : "その他";
+  ["postDate", "postTime", "postContent", "postUrl", "hypothesis", "experiment", "resultMemo", "insight", "nextHypothesis", "createdAt", "updatedAt"].forEach((key) => {
+    log[key] = String(log[key] ?? "");
+  });
+  ["impressions", "engagements", "detailClicks", "profileAccesses", "linkClicks"].forEach((key) => {
+    log[key] = log[key] === null || log[key] === undefined ? "" : String(log[key]);
+  });
+  if (!log.postDate) log.postDate = activeDate;
+  if (!log.createdAt) log.createdAt = log.updatedAt || base.createdAt;
+  if (!log.updatedAt) log.updatedAt = log.createdAt;
+  return log;
 }
 
 function newPersistentMemo() {
@@ -955,6 +1035,15 @@ function loadOperationExperimentStore() {
   }
 }
 
+function loadXExperimentLogs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(X_EXPERIMENT_LOG_STORAGE_KEY));
+    return Array.isArray(saved) ? saved.map(normalizeXExperimentLog) : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -1147,6 +1236,10 @@ function saveRecurringAutoAddLog() {
 
 function saveOperationExperimentStore() {
   localStorage.setItem(OPERATION_EXPERIMENT_STORAGE_KEY, JSON.stringify(operationExperimentStore));
+}
+
+function saveXExperimentLogs() {
+  localStorage.setItem(X_EXPERIMENT_LOG_STORAGE_KEY, JSON.stringify(xExperimentLogs));
 }
 
 function saveCustomDailyTasks() {
@@ -2545,6 +2638,345 @@ function saveOperationExperimentFromForm() {
   saveOperationExperimentStore();
   $("#operationExperimentStatusMessage").textContent = "保存済みです。";
   renderOperationExperimentRecent(experiment);
+}
+
+function xExperimentNumber(value) {
+  if (value === "" || value === null || value === undefined) return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function xExperimentRate(numerator, impressions) {
+  const base = xExperimentNumber(impressions);
+  const value = xExperimentNumber(numerator);
+  if (!base || value === null) return null;
+  return (value / base) * 100;
+}
+
+function formatXExperimentRate(value) {
+  return value === null || value === undefined || !Number.isFinite(value) ? "—" : `${value.toFixed(2)}%`;
+}
+
+function formatXExperimentNumber(value) {
+  const number = xExperimentNumber(value);
+  return number === null ? "—" : number.toLocaleString("ja-JP");
+}
+
+function xExperimentExcerpt(value, maxLength = 72) {
+  const text = String(value || "").trim().replace(/\s+/g, " ");
+  if (!text) return "投稿内容は未入力";
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength)}…`;
+}
+
+function xExperimentDateTimeValue(log) {
+  return `${log.postDate || ""}T${log.postTime || "00:00"}:${log.updatedAt || log.createdAt || ""}`;
+}
+
+function readXExperimentForm() {
+  return Object.fromEntries(Object.entries(xExperimentFormFields).map(([key, selector]) => {
+    const field = $(selector);
+    return [key, field ? field.value.trim() : ""];
+  }));
+}
+
+function setXExperimentForm(log = blankXExperimentLog()) {
+  Object.entries(xExperimentFormFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (field) field.value = log[key] ?? "";
+  });
+  const marker = $("#xExperimentEditMarker");
+  if (marker) {
+    marker.hidden = !editingXExperimentId;
+    marker.textContent = editingXExperimentId ? "編集中です。保存するとこの記録を上書きします。" : "";
+  }
+  const title = $("#xExperimentFormTitle");
+  if (title) title.textContent = editingXExperimentId ? "X実験ログを編集" : "X実験ログを記録";
+  updateXExperimentPreviewRates();
+}
+
+function resetXExperimentForm() {
+  editingXExperimentId = "";
+  setXExperimentForm(blankXExperimentLog());
+  const status = $("#xExperimentStatus");
+  if (status) status.textContent = "投稿内容と仮説だけでも保存できます。";
+}
+
+function markXExperimentDirty() {
+  const status = $("#xExperimentStatus");
+  if (status) status.textContent = "未保存の変更があります。";
+  updateXExperimentPreviewRates();
+}
+
+function updateXExperimentPreviewRates() {
+  const values = readXExperimentForm();
+  const engagement = $("#xExperimentEngagementRatePreview");
+  const profile = $("#xExperimentProfileRatePreview");
+  const link = $("#xExperimentLinkRatePreview");
+  if (engagement) engagement.textContent = formatXExperimentRate(xExperimentRate(values.engagements, values.impressions));
+  if (profile) profile.textContent = formatXExperimentRate(xExperimentRate(values.profileAccesses, values.impressions));
+  if (link) link.textContent = formatXExperimentRate(xExperimentRate(values.linkClicks, values.impressions));
+}
+
+function buildXExperimentSummary(logs = xExperimentLogs) {
+  const summary = logs.reduce(
+    (result, log) => {
+      result.count += 1;
+      result.impressions += xExperimentNumber(log.impressions) ?? 0;
+      result.profileAccesses += xExperimentNumber(log.profileAccesses) ?? 0;
+      result.linkClicks += xExperimentNumber(log.linkClicks) ?? 0;
+      const engagementRate = xExperimentRate(log.engagements, log.impressions);
+      if (engagementRate !== null) result.engagementRates.push(engagementRate);
+      return result;
+    },
+    { count: 0, impressions: 0, profileAccesses: 0, linkClicks: 0, engagementRates: [] },
+  );
+  summary.averageEngagementRate = summary.engagementRates.length
+    ? summary.engagementRates.reduce((total, rate) => total + rate, 0) / summary.engagementRates.length
+    : null;
+  return summary;
+}
+
+function buildXExperimentTypeSummary(logs = xExperimentLogs) {
+  return X_EXPERIMENT_POST_TYPES.map((type) => {
+    const typeLogs = logs.filter((log) => log.postType === type);
+    const impressions = typeLogs
+      .map((log) => xExperimentNumber(log.impressions))
+      .filter((value) => value !== null);
+    const engagementRates = typeLogs
+      .map((log) => xExperimentRate(log.engagements, log.impressions))
+      .filter((value) => value !== null);
+    return {
+      type,
+      count: typeLogs.length,
+      averageImpressions: impressions.length
+        ? impressions.reduce((total, value) => total + value, 0) / impressions.length
+        : null,
+      averageEngagementRate: engagementRates.length
+        ? engagementRates.reduce((total, value) => total + value, 0) / engagementRates.length
+        : null,
+    };
+  }).filter((row) => row.count > 0);
+}
+
+function filteredXExperimentLogs() {
+  const postKeyword = xExperimentFilters.postKeyword.trim().toLowerCase();
+  const insightKeyword = xExperimentFilters.insightKeyword.trim().toLowerCase();
+  return [...xExperimentLogs]
+    .filter((log) => !xExperimentFilters.date || log.postDate === xExperimentFilters.date)
+    .filter((log) => xExperimentFilters.type === "all" || log.postType === xExperimentFilters.type)
+    .filter((log) => !postKeyword || String(log.postContent || "").toLowerCase().includes(postKeyword))
+    .filter((log) => {
+      if (!insightKeyword) return true;
+      return [log.hypothesis, log.insight]
+        .some((value) => String(value || "").toLowerCase().includes(insightKeyword));
+    })
+    .sort((left, right) => xExperimentDateTimeValue(right).localeCompare(xExperimentDateTimeValue(left)));
+}
+
+function createXExperimentMetric(label, value) {
+  const item = document.createElement("div");
+  item.className = "x-experiment-metric";
+  const number = document.createElement("strong");
+  number.textContent = value;
+  const caption = document.createElement("span");
+  caption.textContent = label;
+  item.append(number, caption);
+  return item;
+}
+
+function renderXExperimentSummary() {
+  const target = $("#xExperimentSummary");
+  const typeTarget = $("#xExperimentTypeSummary");
+  if (!target || !typeTarget) return;
+  const summary = buildXExperimentSummary();
+  target.replaceChildren(
+    createXExperimentMetric("記録した投稿数", `${summary.count}件`),
+    createXExperimentMetric("合計インプレッション数", summary.impressions.toLocaleString("ja-JP")),
+    createXExperimentMetric("平均エンゲージメント率", formatXExperimentRate(summary.averageEngagementRate)),
+    createXExperimentMetric("合計プロフィールアクセス数", summary.profileAccesses.toLocaleString("ja-JP")),
+    createXExperimentMetric("合計リンククリック数", summary.linkClicks.toLocaleString("ja-JP")),
+  );
+
+  const typeRows = buildXExperimentTypeSummary();
+  if (!typeRows.length) {
+    const empty = document.createElement("p");
+    empty.className = "section-note";
+    empty.textContent = "投稿の種類ごとの集計は、記録が増えると表示されます。";
+    typeTarget.replaceChildren(empty);
+    return;
+  }
+  typeTarget.replaceChildren(...typeRows.map((row) => {
+    const item = document.createElement("div");
+    item.className = "x-experiment-type-row";
+    const type = document.createElement("strong");
+    type.textContent = row.type;
+    const count = document.createElement("span");
+    count.textContent = `${row.count}件`;
+    const impressions = document.createElement("span");
+    impressions.textContent = `平均IMP ${row.averageImpressions === null ? "—" : Math.round(row.averageImpressions).toLocaleString("ja-JP")}`;
+    const rate = document.createElement("span");
+    rate.textContent = `平均ER ${formatXExperimentRate(row.averageEngagementRate)}`;
+    item.append(type, count, impressions, rate);
+    return item;
+  }));
+}
+
+function appendXExperimentDetail(container, label, value) {
+  const wrapper = document.createElement("div");
+  const term = document.createElement("dt");
+  term.textContent = label;
+  const description = document.createElement("dd");
+  description.textContent = value || "—";
+  wrapper.append(term, description);
+  container.append(wrapper);
+}
+
+function renderXExperimentList() {
+  const target = $("#xExperimentList");
+  const count = $("#xExperimentSearchCount");
+  if (!target) return;
+  const logs = filteredXExperimentLogs();
+  if (count) count.textContent = `${logs.length}件表示`;
+  if (!logs.length) {
+    const empty = document.createElement("p");
+    empty.className = "section-note";
+    empty.textContent = xExperimentLogs.length ? "条件に合うX実験ログはありません。" : "X実験ログはまだありません。";
+    target.replaceChildren(empty);
+    return;
+  }
+
+  target.replaceChildren(...logs.map((log) => {
+    const card = document.createElement("article");
+    card.className = "x-experiment-card";
+
+    const header = document.createElement("div");
+    header.className = "x-experiment-card-header";
+    const main = document.createElement("div");
+    const meta = document.createElement("span");
+    meta.textContent = `${log.postDate || "日付未入力"} ${log.postTime || ""}`.trim();
+    const title = document.createElement("strong");
+    title.textContent = xExperimentExcerpt(log.postContent);
+    const type = document.createElement("span");
+    type.className = "x-experiment-type";
+    type.textContent = log.postType || "その他";
+    main.append(meta, title, type);
+
+    const actions = document.createElement("div");
+    actions.className = "x-experiment-actions";
+    const editButton = document.createElement("button");
+    editButton.className = "ghost-button";
+    editButton.type = "button";
+    editButton.textContent = "編集";
+    editButton.addEventListener("click", () => editXExperimentLog(log.id));
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-button";
+    deleteButton.type = "button";
+    deleteButton.textContent = "削除";
+    deleteButton.addEventListener("click", () => deleteXExperimentLog(log.id));
+    actions.append(editButton, deleteButton);
+    header.append(main, actions);
+
+    const metrics = document.createElement("div");
+    metrics.className = "x-experiment-card-metrics";
+    [
+      ["インプレッション", formatXExperimentNumber(log.impressions)],
+      ["エンゲージメント", formatXExperimentNumber(log.engagements)],
+      ["プロフィール", formatXExperimentNumber(log.profileAccesses)],
+      ["リンククリック", formatXExperimentNumber(log.linkClicks)],
+      ["ER", formatXExperimentRate(xExperimentRate(log.engagements, log.impressions))],
+      ["プロフィール率", formatXExperimentRate(xExperimentRate(log.profileAccesses, log.impressions))],
+      ["リンク率", formatXExperimentRate(xExperimentRate(log.linkClicks, log.impressions))],
+    ].forEach(([label, value]) => {
+      metrics.append(createXExperimentMetric(label, value));
+    });
+
+    const details = document.createElement("details");
+    details.className = "x-experiment-details";
+    const summary = document.createElement("summary");
+    summary.textContent = "全項目を確認";
+    const detailList = document.createElement("dl");
+    appendXExperimentDetail(detailList, "投稿URL", log.postUrl);
+    appendXExperimentDetail(detailList, "仮説", log.hypothesis);
+    appendXExperimentDetail(detailList, "実験内容", log.experiment);
+    appendXExperimentDetail(detailList, "結果についてのメモ", log.resultMemo);
+    appendXExperimentDetail(detailList, "気づき", log.insight);
+    appendXExperimentDetail(detailList, "次に試すこと・次の仮説", log.nextHypothesis);
+    appendXExperimentDetail(detailList, "詳細のクリック数", formatXExperimentNumber(log.detailClicks));
+    appendXExperimentDetail(detailList, "最終更新", formatSavedAt(log.updatedAt) || log.updatedAt);
+    details.append(summary, detailList);
+
+    card.append(header, metrics, details);
+    return card;
+  }));
+}
+
+function renderXExperimentLogs() {
+  renderXExperimentSummary();
+  renderXExperimentList();
+  updateXExperimentPreviewRates();
+}
+
+function saveXExperimentFromForm(event) {
+  event?.preventDefault();
+  if (savingXExperiment) return;
+  savingXExperiment = true;
+  const button = $("#saveXExperiment");
+  if (button) button.disabled = true;
+  const status = $("#xExperimentStatus");
+  try {
+    const values = readXExperimentForm();
+    const now = new Date().toISOString();
+    const existingIndex = editingXExperimentId
+      ? xExperimentLogs.findIndex((log) => log.id === editingXExperimentId)
+      : -1;
+    const existing = existingIndex >= 0 ? xExperimentLogs[existingIndex] : blankXExperimentLog();
+    const nextLog = normalizeXExperimentLog({
+      ...existing,
+      ...values,
+      id: existing.id,
+      createdAt: existing.createdAt || now,
+      updatedAt: now,
+    });
+    if (existingIndex >= 0) {
+      xExperimentLogs[existingIndex] = nextLog;
+    } else {
+      xExperimentLogs.unshift(nextLog);
+    }
+    saveXExperimentLogs();
+    editingXExperimentId = "";
+    setXExperimentForm(blankXExperimentLog());
+    renderXExperimentLogs();
+    if (status) status.textContent = `保存しました。最終更新 ${formatSavedAt(now)}`;
+  } catch (error) {
+    console.error("Failed to save X experiment log", error);
+    if (status) status.textContent = "保存できませんでした。入力内容は残っています。もう一度試してください。";
+  } finally {
+    savingXExperiment = false;
+    if (button) button.disabled = false;
+  }
+}
+
+function editXExperimentLog(id) {
+  const log = xExperimentLogs.find((item) => item.id === id);
+  if (!log) return;
+  editingXExperimentId = id;
+  setXExperimentForm(log);
+  $("#xExperimentForm")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  const status = $("#xExperimentStatus");
+  if (status) status.textContent = "編集中です。保存すると既存データを上書きします。";
+}
+
+function deleteXExperimentLog(id) {
+  const log = xExperimentLogs.find((item) => item.id === id);
+  if (!log) return;
+  const accepted = confirm("このX実験ログを削除します。元に戻せません。よろしいですか？");
+  if (!accepted) return;
+  xExperimentLogs = xExperimentLogs.filter((item) => item.id !== id);
+  if (editingXExperimentId === id) resetXExperimentForm();
+  saveXExperimentLogs();
+  renderXExperimentLogs();
+  const status = $("#xExperimentStatus");
+  if (status) status.textContent = "削除しました。";
 }
 
 function renderLaterCounts() {
@@ -8828,6 +9260,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  renderXExperimentLogs();
   renderOperationExperiment();
   renderLaterItems();
   renderFields();
@@ -9290,6 +9723,30 @@ function bindEvents() {
     field.addEventListener("input", markDirty);
     field.addEventListener("change", markDirty);
   });
+  $("#xExperimentForm")?.addEventListener("submit", saveXExperimentFromForm);
+  $("#newXExperiment")?.addEventListener("click", resetXExperimentForm);
+  Object.values(xExperimentFormFields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    field.addEventListener("input", markXExperimentDirty);
+    field.addEventListener("change", markXExperimentDirty);
+  });
+  $("#xExperimentFilterDate")?.addEventListener("input", (event) => {
+    xExperimentFilters.date = event.target.value;
+    renderXExperimentList();
+  });
+  $("#xExperimentFilterType")?.addEventListener("change", (event) => {
+    xExperimentFilters.type = event.target.value;
+    renderXExperimentList();
+  });
+  $("#xExperimentPostKeyword")?.addEventListener("input", (event) => {
+    xExperimentFilters.postKeyword = event.target.value;
+    renderXExperimentList();
+  });
+  $("#xExperimentInsightKeyword")?.addEventListener("input", (event) => {
+    xExperimentFilters.insightKeyword = event.target.value;
+    renderXExperimentList();
+  });
   $("#historySearch").addEventListener("input", renderHistory);
   $("#downloadCsv").addEventListener("click", downloadCsv);
   $("#exportBackup")?.addEventListener("click", handleExportBackup);
@@ -9406,6 +9863,7 @@ function downloadCsv() {
 
 arrangeDashboardUxSections();
 bindEvents();
+resetXExperimentForm();
 renderAll();
 renderClock();
 setInterval(renderClock, 1000);
@@ -9419,6 +9877,7 @@ const BACKUP_DICTIONARY_VERSION = "v1";
 const BACKUP_KEYS = [
   STORAGE_KEY,
   OPERATION_EXPERIMENT_STORAGE_KEY,
+  X_EXPERIMENT_LOG_STORAGE_KEY,
   CUSTOM_DAILY_TASKS_STORAGE_KEY,
   DAILY_TASK_ORDER_STORAGE_KEY,
   LATER_STORAGE_KEY,
@@ -9529,6 +9988,7 @@ function createBackup() {
   const data = {};
   data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
   data[OPERATION_EXPERIMENT_STORAGE_KEY] = readStoredJson(OPERATION_EXPERIMENT_STORAGE_KEY, defaultOperationExperimentStore());
+  data[X_EXPERIMENT_LOG_STORAGE_KEY] = readStoredJson(X_EXPERIMENT_LOG_STORAGE_KEY, []);
   data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
   data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
@@ -9740,6 +10200,9 @@ function buildSakuraSnapshot(mode) {
   const laterItems = asArray(readStoredJson(LATER_STORAGE_KEY, [])).filter((item) => !item.done);
   const persistentMemos = asArray(readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []));
   const learningLogItems = asArray(readStoredJson(LEARNING_LOG_STORAGE_KEY, []));
+  const xExperimentLogItems = asArray(readStoredJson(X_EXPERIMENT_LOG_STORAGE_KEY, []))
+    .map(normalizeXExperimentLog)
+    .filter((log) => log.postDate >= logFromKey || String(log.nextHypothesis || "").trim() !== "");
   const conversationFeedbackItems = asArray(readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []));
   const conversationImprovementItems = asArray(readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []));
   const conversationReflectionItems = asArray(readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []));
@@ -10054,7 +10517,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, learningSummary, learningHint, learningConfidence, memory },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, xExperimentLogs: xExperimentLogItems, learningSummary, learningHint, learningConfidence, memory },
       },
       "discovery-labo": {
         schemaVersion: 1,

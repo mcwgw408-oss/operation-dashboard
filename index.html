@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260719-priority-reference-card" />
+    <link rel="stylesheet" href="./styles.css?v=20260721-x-experiment-log" />
   </head>
   <body>
     <div class="app">
@@ -34,6 +34,7 @@
         <nav class="dashboard-page-nav" aria-label="ページ内移動">
           <a href="#dashboard-start">今日のはじまり</a>
           <a href="#dashboard-input">今日を書く</a>
+          <a href="#x-experiment-log">X実験ログ</a>
           <a href="#dashboard-accumulation">ためる</a>
           <a href="#dashboard-closed">閉じているもの</a>
         </nav>
@@ -1051,6 +1052,104 @@
           <p id="publishingOpsStatus" class="publishing-ops-status">本日の発信運営はまだ保存されていません。</p>
         </section>
 
+        <section id="x-experiment-log" class="panel x-experiment-panel span-2" aria-label="X実験ログ">
+          <div class="panel-heading">
+            <div>
+              <h2>X実験ログ</h2>
+              <p class="section-note">Xで試した投稿の仮説、反応、気づき、次に試すことを残します。数値は後から追記できます。</p>
+            </div>
+            <button class="ghost-button" id="newXExperiment" type="button">新規登録</button>
+          </div>
+
+          <div id="xExperimentSummary" class="x-experiment-summary" aria-label="X実験ログ集計"></div>
+          <div id="xExperimentTypeSummary" class="x-experiment-type-summary" aria-label="投稿の種類ごとの集計"></div>
+
+          <form id="xExperimentForm" class="x-experiment-form">
+            <div class="x-experiment-form-heading">
+              <div>
+                <h3 id="xExperimentFormTitle">X実験ログを記録</h3>
+                <p id="xExperimentEditMarker" class="x-experiment-edit-marker" hidden></p>
+              </div>
+            </div>
+
+            <section class="x-experiment-form-block">
+              <h3>投稿情報</h3>
+              <div class="x-experiment-fields">
+                <label>投稿日<input id="xExperimentPostDate" type="date" /></label>
+                <label>投稿時間<input id="xExperimentPostTime" type="time" /></label>
+                <label>投稿の種類
+                  <select id="xExperimentPostType">
+                    <option>共感</option>
+                    <option>気づき</option>
+                    <option>問いかけ</option>
+                    <option>学び</option>
+                    <option>体験談</option>
+                    <option>記事からの派生</option>
+                    <option>告知</option>
+                    <option>その他</option>
+                  </select>
+                </label>
+                <label>投稿URL<input id="xExperimentPostUrl" type="url" /></label>
+                <label class="x-experiment-wide-field">投稿内容<textarea id="xExperimentPostContent" rows="5"></textarea></label>
+                <label class="x-experiment-wide-field">仮説<textarea id="xExperimentHypothesis" rows="4"></textarea></label>
+              </div>
+            </section>
+
+            <section class="x-experiment-form-block">
+              <h3>数値結果</h3>
+              <div class="x-experiment-fields x-experiment-number-fields">
+                <label>インプレッション数<input id="xExperimentImpressions" type="number" min="0" inputmode="numeric" /></label>
+                <label>エンゲージメント数<input id="xExperimentEngagements" type="number" min="0" inputmode="numeric" /></label>
+                <label>詳細のクリック数<input id="xExperimentDetailClicks" type="number" min="0" inputmode="numeric" /></label>
+                <label>プロフィールへのアクセス数<input id="xExperimentProfileAccesses" type="number" min="0" inputmode="numeric" /></label>
+                <label>リンククリック数<input id="xExperimentLinkClicks" type="number" min="0" inputmode="numeric" /></label>
+              </div>
+              <div class="x-experiment-rate-preview" aria-label="自動計算">
+                <span>エンゲージメント率 <strong id="xExperimentEngagementRatePreview">—</strong></span>
+                <span>プロフィールアクセス率 <strong id="xExperimentProfileRatePreview">—</strong></span>
+                <span>リンククリック率 <strong id="xExperimentLinkRatePreview">—</strong></span>
+              </div>
+            </section>
+
+            <section class="x-experiment-form-block">
+              <h3>振り返り</h3>
+              <div class="x-experiment-fields">
+                <label class="x-experiment-wide-field">実験内容<textarea id="xExperimentExperiment" rows="4"></textarea></label>
+                <label class="x-experiment-wide-field">結果についてのメモ<textarea id="xExperimentResultMemo" rows="4"></textarea></label>
+                <label class="x-experiment-wide-field">気づき<textarea id="xExperimentInsight" rows="4"></textarea></label>
+                <label class="x-experiment-wide-field">次に試すこと・次の仮説<textarea id="xExperimentNextHypothesis" rows="4"></textarea></label>
+              </div>
+            </section>
+
+            <div class="x-experiment-save-row">
+              <p id="xExperimentStatus" class="x-experiment-status" role="status" aria-live="polite">投稿内容と仮説だけでも保存できます。</p>
+              <button class="ghost-button" id="saveXExperiment" type="submit">保存</button>
+            </div>
+          </form>
+
+          <div class="x-experiment-search">
+            <label>日付<input id="xExperimentFilterDate" type="date" /></label>
+            <label>投稿の種類
+              <select id="xExperimentFilterType">
+                <option value="all">すべて</option>
+                <option>共感</option>
+                <option>気づき</option>
+                <option>問いかけ</option>
+                <option>学び</option>
+                <option>体験談</option>
+                <option>記事からの派生</option>
+                <option>告知</option>
+                <option>その他</option>
+              </select>
+            </label>
+            <label>投稿内容<input id="xExperimentPostKeyword" type="search" placeholder="キーワード" /></label>
+            <label>仮説・気づき<input id="xExperimentInsightKeyword" type="search" placeholder="キーワード" /></label>
+            <span id="xExperimentSearchCount">0件表示</span>
+          </div>
+
+          <div id="xExperimentList" class="x-experiment-list" aria-label="保存済みX実験ログ"></div>
+        </section>
+
         <section class="panel reading-notes-panel span-2" aria-label="読書・記事の学びメモ">
           <div class="panel-heading reading-notes-heading">
             <div>
@@ -1508,6 +1607,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260719-daily-tasks-completion-rate"></script>
+    <script src="./app.js?v=20260721-x-experiment-log"></script>
   </body>
 </html>
