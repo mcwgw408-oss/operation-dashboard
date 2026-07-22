@@ -3726,7 +3726,7 @@ textarea {
 }
 
 .x-experiment-fields label,
-.x-experiment-search label {
+.x-experiment-controls label {
   display: grid;
   gap: 6px;
   color: var(--muted);
@@ -3776,16 +3776,42 @@ textarea {
   margin-right: auto;
 }
 
-.x-experiment-search {
+.x-experiment-create-form {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 12px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-item);
+  background: var(--green-soft);
+  padding: 12px;
+}
+
+.x-experiment-create-form[hidden] {
+  display: none;
+}
+
+.x-experiment-create-fields {
+  display: grid;
+  grid-template-columns: 1.2fr minmax(150px, 0.75fr) minmax(170px, 0.85fr) minmax(150px, 0.75fr);
+  gap: 10px;
+}
+
+.x-experiment-create-fields label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-experiment-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
   align-items: end;
   gap: 10px;
   border-top: 1px solid var(--line);
   padding-top: 14px;
 }
 
-.x-experiment-search > span {
+.x-experiment-controls > span {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
@@ -3797,7 +3823,34 @@ textarea {
   gap: 10px;
 }
 
-.x-experiment-card {
+.x-experiment-empty {
+  display: grid;
+  gap: 6px;
+  border: 1px dashed var(--green-line);
+  border-radius: var(--radius-item);
+  background: var(--green-soft);
+  padding: 14px;
+}
+
+.x-experiment-empty strong {
+  font-size: 15px;
+}
+
+.x-experiment-empty p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-experiment-workspace {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.35fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.x-experiment-list-panel,
+.x-experiment-detail-panel {
   display: grid;
   gap: 10px;
   border: 1px solid var(--line);
@@ -3806,27 +3859,69 @@ textarea {
   padding: 12px;
 }
 
-.x-experiment-card-header {
+.x-experiment-subheading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.x-experiment-subheading h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.x-experiment-subheading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.x-experiment-list-item {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: var(--panel);
+  color: var(--text);
+  text-align: left;
+  padding: 12px;
+}
+
+.x-experiment-list-item:hover,
+.x-experiment-list-item.is-active {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.x-experiment-list-item-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
-.x-experiment-card-header > div:first-child {
+.x-experiment-list-item-header > div:first-child {
   display: grid;
   gap: 5px;
   min-width: 0;
 }
 
-.x-experiment-card-header span {
+.x-experiment-list-item-header span {
   color: var(--muted);
   font-size: 12px;
 }
 
-.x-experiment-card-header strong {
+.x-experiment-list-item-header strong {
   font-size: 14px;
   line-height: 1.55;
+}
+
+.x-experiment-list-result {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #fff;
+  padding: 2px 8px;
 }
 
 .x-experiment-type {
@@ -3842,23 +3937,102 @@ textarea {
   gap: 8px;
 }
 
-.x-experiment-card-metrics {
+.x-experiment-list-metrics {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
-.x-experiment-details summary {
-  cursor: pointer;
+.x-experiment-detail {
+  display: grid;
+  gap: 12px;
+}
+
+.x-experiment-management {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  border-radius: var(--radius-item);
+  background: var(--panel);
+  padding: 10px;
+}
+
+.x-experiment-manage-field {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-experiment-media-panel,
+.x-experiment-note-grid {
+  display: grid;
+  gap: 10px;
+  border-radius: var(--radius-item);
+  background: var(--panel);
+  padding: 10px;
+}
+
+.x-experiment-media-panel > span {
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
 }
 
-.x-experiment-details dl {
+.x-experiment-media-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.x-experiment-note-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.x-experiment-note-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.x-experiment-note-field {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-experiment-detail-title {
+  display: grid;
+  gap: 5px;
+  border-radius: var(--radius-item);
+  background: var(--green-soft);
+  padding: 12px;
+}
+
+.x-experiment-detail-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.x-experiment-detail-title strong {
+  font-size: 16px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.x-experiment-detail-numbers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.x-experiment-details {
   display: grid;
   gap: 8px;
-  margin: 10px 0 0;
+  margin: 0;
 }
 
 .x-experiment-details div {
@@ -4693,10 +4867,16 @@ textarea {
   .x-experiment-summary,
   .x-experiment-type-row,
   .x-experiment-fields,
+  .x-experiment-create-fields,
   .x-experiment-number-fields,
   .x-experiment-rate-preview,
-  .x-experiment-search,
-  .x-experiment-card-metrics,
+  .x-experiment-controls,
+  .x-experiment-workspace,
+  .x-experiment-list-metrics,
+  .x-experiment-management,
+  .x-experiment-media-list,
+  .x-experiment-note-grid,
+  .x-experiment-detail-numbers,
   .operation-experiment-overview,
   .operation-experiment-daily-fields,
   .operation-experiment-metrics > div,
@@ -4721,7 +4901,8 @@ textarea {
     grid-column: 1 / -1;
   }
 
-  .x-experiment-card-header,
+  .x-experiment-list-item-header,
+  .x-experiment-note-actions,
   .x-experiment-save-row {
     align-items: stretch;
     flex-direction: column;
