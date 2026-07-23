@@ -211,9 +211,22 @@ for (const token of [
   check(indexHtml.includes(token), `recent publishing ops UI is missing: ${token}`);
 }
 for (const token of [
-  'id="publishingOpsXPostIdea1"',
-  'id="publishingOpsXPostIdea2"',
-  'id="publishingOpsXPostIdea3"',
+  'id="x-analysis-room"',
+  'id="xAnalysisPost1"',
+  'id="xAnalysisPost2"',
+  'id="xAnalysisPost3"',
+  'id="xAnalysisImpressions"',
+  'id="xAnalysisEngagements"',
+  'id="xAnalysisDetailClicks"',
+  'id="xAnalysisProfileAccesses"',
+  'id="xAnalysisFollowDelta"',
+  'id="xAnalysisReposts"',
+  'id="xAnalysisLikes"',
+  'id="xAnalysisBookmarks"',
+  'id="xAnalysisHypothesis"',
+  'id="xAnalysisResult"',
+  'id="xAnalysisNextTry"',
+  "X分析室",
   "X投稿①",
   "X投稿②",
   "X投稿③",
@@ -222,7 +235,7 @@ for (const token of [
 ]) {
   check(indexHtml.includes(token), `SNS投稿アイデア欄がありません: ${token}`);
 }
-for (const key of ["xPostIdea1", "xPostIdea2", "xPostIdea3", "notesIdeas", "chatIdeas", "articleIdeas"]) {
+for (const key of ["xPost1", "xPost2", "xPost3", "impressions", "engagements", "hypothesis", "result", "nextTry", "notesIdeas", "chatIdeas", "articleIdeas"]) {
   check(appJs.includes(key), `SNS投稿アイデアの保存キーがありません: ${key}`);
 }
 check(appJs.includes("const PUBLISHING_OPS_RECENT_DAYS = 7;"), "recent publishing ops period is not fixed to 7 days");
@@ -311,6 +324,7 @@ const dashboardZoneTargets = [
   "#dashboard-start",
   "#dashboard-input",
   "#sns-posting",
+  "#x-analysis-room",
   "#reading-notes",
   "#dashboard-accumulation",
   "#dashboard-closed",

@@ -310,9 +310,6 @@ function defaultPublishingOps(date = activeDate) {
     articleCount: "",
     audioArticleCount: "",
     morningStackStatus: "できなかった",
-    xPostIdea1: "",
-    xPostIdea2: "",
-    xPostIdea3: "",
     notesIdeas: "",
     articleIdeas: "",
     chatIdeas: "",
@@ -320,6 +317,26 @@ function defaultPublishingOps(date = activeDate) {
     morningStackFlow: "",
     yoshidaBalance: "",
     operationFindings: "",
+  };
+}
+
+function defaultXAnalysis(date = activeDate) {
+  return {
+    date,
+    xPost1: "",
+    xPost2: "",
+    xPost3: "",
+    impressions: "",
+    engagements: "",
+    detailClicks: "",
+    profileAccesses: "",
+    followDelta: "",
+    reposts: "",
+    likes: "",
+    bookmarks: "",
+    hypothesis: "",
+    result: "",
+    nextTry: "",
   };
 }
 
@@ -651,6 +668,8 @@ function blankDay() {
     learnings: [],
     publishingOps: defaultPublishingOps(),
     publishingOpsUpdatedAt: "",
+    xAnalysis: defaultXAnalysis(),
+    xAnalysisUpdatedAt: "",
     dailyInput: "",
     dailyInputUpdatedAt: "",
     capacityCheck: {},
@@ -732,6 +751,37 @@ function ensurePublishingOps(day) {
   });
   if (!("publishingOpsUpdatedAt" in day)) {
     day.publishingOpsUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureXAnalysis(day) {
+  let changed = false;
+  if (!day.xAnalysis || typeof day.xAnalysis !== "object") {
+    day.xAnalysis = defaultXAnalysis();
+    changed = true;
+  }
+  const defaults = defaultXAnalysis();
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.xAnalysis)) {
+      day.xAnalysis[key] = value;
+      changed = true;
+    }
+  });
+  const legacyOps = day.publishingOps && typeof day.publishingOps === "object" ? day.publishingOps : {};
+  [
+    ["xPostIdea1", "xPost1"],
+    ["xPostIdea2", "xPost2"],
+    ["xPostIdea3", "xPost3"],
+  ].forEach(([legacyKey, nextKey]) => {
+    if (!day.xAnalysis[nextKey] && legacyOps[legacyKey]) {
+      day.xAnalysis[nextKey] = legacyOps[legacyKey];
+      changed = true;
+    }
+  });
+  if (!("xAnalysisUpdatedAt" in day)) {
+    day.xAnalysisUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1528,6 +1578,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensurePublishingOps(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureXAnalysis(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureTodayEvents(store[activeDate])) {
@@ -2427,9 +2480,6 @@ const publishingOpsFields = {
   articleCount: "#publishingOpsArticleCount",
   audioArticleCount: "#publishingOpsAudioArticleCount",
   morningStackStatus: "#publishingOpsMorningStack",
-  xPostIdea1: "#publishingOpsXPostIdea1",
-  xPostIdea2: "#publishingOpsXPostIdea2",
-  xPostIdea3: "#publishingOpsXPostIdea3",
   notesIdeas: "#publishingOpsNotesIdeas",
   articleIdeas: "#publishingOpsArticleIdeas",
   chatIdeas: "#publishingOpsChatIdeas",
@@ -2446,10 +2496,28 @@ const publishingOpsCountFields = [
   ["articleCount", "記事投稿数"],
   ["audioArticleCount", "音声記事投稿数"],
 ];
+
+const xAnalysisFields = {
+  date: "#xAnalysisDate",
+  xPost1: "#xAnalysisPost1",
+  xPost2: "#xAnalysisPost2",
+  xPost3: "#xAnalysisPost3",
+  impressions: "#xAnalysisImpressions",
+  engagements: "#xAnalysisEngagements",
+  detailClicks: "#xAnalysisDetailClicks",
+  profileAccesses: "#xAnalysisProfileAccesses",
+  followDelta: "#xAnalysisFollowDelta",
+  reposts: "#xAnalysisReposts",
+  likes: "#xAnalysisLikes",
+  bookmarks: "#xAnalysisBookmarks",
+  hypothesis: "#xAnalysisHypothesis",
+  result: "#xAnalysisResult",
+  nextTry: "#xAnalysisNextTry",
+};
+
 const publishingOpsTextSections = [
   ["今日の一番の学び", ["yoshidaLearning"]],
   ["明日に活かすこと", ["yoshidaTomorrow"]],
-  ["X投稿アイデア", ["xPostIdea1", "xPostIdea2", "xPostIdea3"]],
   ["Notes投稿アイデア", ["notesIdeas"]],
   ["Chat投稿アイデア", ["chatIdeas"]],
   ["記事アイデア", ["articleIdeas"]],
@@ -2699,6 +2767,58 @@ function savePublishingOpsFromForm() {
   renderOperationExperiment();
 }
 
+function hasXAnalysisRecord(rawAnalysis, analysis) {
+  if (!rawAnalysis || typeof rawAnalysis !== "object") return false;
+  return Object.keys(defaultXAnalysis()).some((key) => key !== "date" && cleanPublishingOpsText(analysis[key]));
+}
+
+function hasSavedXAnalysis(day) {
+  const analysis = { ...defaultXAnalysis(), ...(day?.xAnalysis || {}) };
+  return Boolean(day?.xAnalysisUpdatedAt) || hasXAnalysisRecord(day?.xAnalysis, analysis);
+}
+
+function renderXAnalysisSaveState(day, confirmation = "") {
+  const saved = hasSavedXAnalysis(day);
+  const button = $("#saveXAnalysis");
+  const status = $("#xAnalysisStatus");
+  const savedAt = formatSavedAt(day?.xAnalysisUpdatedAt);
+  if (button) {
+    button.textContent = saved ? "本日のX分析を更新する" : "本日のX分析を保存する";
+  }
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻を表示します。";
+  } else {
+    status.textContent = "本日のX分析はまだ保存されていません。";
+  }
+}
+
+function renderXAnalysis() {
+  const day = getDay();
+  const analysis = { ...defaultXAnalysis(), ...(day.xAnalysis || {}) };
+  Object.entries(xAnalysisFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (field && field.value !== (analysis[key] || "")) {
+      field.value = analysis[key] || "";
+    }
+  });
+  renderXAnalysisSaveState(day);
+}
+
+function saveXAnalysisFromForm() {
+  const day = getDay();
+  const wasSaved = hasSavedXAnalysis(day);
+  day.xAnalysis = { ...defaultXAnalysis(), ...readXAnalysisForm() };
+  day.xAnalysisUpdatedAt = new Date().toISOString();
+  saveStore();
+  const action = wasSaved ? "更新" : "保存";
+  renderXAnalysisSaveState(day, `本日のX分析を${action}しました。最終更新 ${formatSavedAt(day.xAnalysisUpdatedAt)}`);
+}
+
 const operationExperimentDefinitionFields = {
   name: "#operationExperimentName",
   status: "#operationExperimentStatus",
@@ -2805,6 +2925,13 @@ function saveOperationExperimentFromForm() {
   saveOperationExperimentStore();
   $("#operationExperimentStatusMessage").textContent = "保存済みです。";
   renderOperationExperimentRecent(experiment);
+}
+
+function readXAnalysisForm() {
+  return Object.fromEntries(Object.entries(xAnalysisFields).map(([key, selector]) => {
+    const field = $(selector);
+    return [key, field ? field.value : ""];
+  }));
 }
 
 function readPublishingSeedCandidateForm() {
@@ -10532,6 +10659,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  renderXAnalysis();
   setPublishingSeedActiveView(publishingSeedActiveView);
   renderPublishingSeedCandidates();
   renderPublishingSeeds();
@@ -10986,6 +11114,17 @@ function bindEvents() {
       const status = $("#publishingOpsStatus");
       if (status) status.textContent = "未保存の変更があります。";
     });
+  });
+  $("#saveXAnalysis")?.addEventListener("click", saveXAnalysisFromForm);
+  Object.values(xAnalysisFields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    const markDirty = () => {
+      const status = $("#xAnalysisStatus");
+      if (status) status.textContent = "未保存の変更があります。";
+    };
+    field.addEventListener("input", markDirty);
+    field.addEventListener("change", markDirty);
   });
   $("#saveOperationExperiment")?.addEventListener("click", saveOperationExperimentFromForm);
   [...Object.values(operationExperimentDefinitionFields), ...Object.values(operationExperimentLogFields)].forEach((selector) => {

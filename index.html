@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260724-sns-post-ideas" />
+    <link rel="stylesheet" href="./styles.css?v=20260724-x-analysis-room" />
   </head>
   <body>
     <div class="app">
@@ -36,6 +36,7 @@
           <a href="#dashboard-start">今日のはじまり</a>
           <a href="#dashboard-input">今日を書く</a>
           <a href="#sns-posting">SNS投稿</a>
+          <a href="#x-analysis-room">X分析室</a>
           <a href="#publishing-seed-candidates">Seed候補</a>
           <a href="#publishing-seeds">Seeds</a>
           <a href="#publishing-experiment-lab">発信実験室</a>
@@ -1024,9 +1025,6 @@
 
             <section class="publishing-ops-block">
               <h3>発信アイデア</h3>
-              <label>X投稿①<textarea id="publishingOpsXPostIdea1" rows="2"></textarea></label>
-              <label>X投稿②<textarea id="publishingOpsXPostIdea2" rows="2"></textarea></label>
-              <label>X投稿③<textarea id="publishingOpsXPostIdea3" rows="2"></textarea></label>
               <label>Notesで投稿したいこと<textarea id="publishingOpsNotesIdeas" rows="3"></textarea></label>
               <label>Chatで投稿したいこと<textarea id="publishingOpsChatIdeas" rows="3"></textarea></label>
               <label>記事にできそうなこと<textarea id="publishingOpsArticleIdeas" rows="3"></textarea></label>
@@ -1058,6 +1056,48 @@
             </section>
           </div>
           <p id="publishingOpsStatus" class="publishing-ops-status">本日の発信運営はまだ保存されていません。</p>
+        </section>
+
+        <section id="x-analysis-room" class="panel x-analysis-panel span-2" aria-label="X分析室">
+          <div class="panel-heading">
+            <div>
+              <h2>X分析室</h2>
+              <p class="section-note">Xを投稿管理ではなく、仮説・数値・次の検証を記録する実験場所として扱います。</p>
+            </div>
+            <button class="ghost-button" id="saveXAnalysis" type="button">本日のX分析を保存する</button>
+          </div>
+
+          <div class="x-analysis-grid">
+            <section class="x-analysis-block">
+              <h3>今日のX投稿</h3>
+              <label>日付<input id="xAnalysisDate" type="date" /></label>
+              <label>X投稿①<textarea id="xAnalysisPost1" rows="3"></textarea></label>
+              <label>X投稿②<textarea id="xAnalysisPost2" rows="3"></textarea></label>
+              <label>X投稿③<textarea id="xAnalysisPost3" rows="3"></textarea></label>
+            </section>
+
+            <section class="x-analysis-block">
+              <h3>数値</h3>
+              <div class="x-analysis-number-grid">
+                <label>インプレッション<input id="xAnalysisImpressions" type="number" min="0" inputmode="numeric" /></label>
+                <label>エンゲージメント<input id="xAnalysisEngagements" type="number" min="0" inputmode="numeric" /></label>
+                <label>詳細クリック<input id="xAnalysisDetailClicks" type="number" min="0" inputmode="numeric" /></label>
+                <label>プロフィールアクセス<input id="xAnalysisProfileAccesses" type="number" min="0" inputmode="numeric" /></label>
+                <label>フォロー増減<input id="xAnalysisFollowDelta" type="number" inputmode="numeric" /></label>
+                <label>リポスト<input id="xAnalysisReposts" type="number" min="0" inputmode="numeric" /></label>
+                <label>いいね<input id="xAnalysisLikes" type="number" min="0" inputmode="numeric" /></label>
+                <label>ブックマーク<input id="xAnalysisBookmarks" type="number" min="0" inputmode="numeric" /></label>
+              </div>
+            </section>
+
+            <section class="x-analysis-block x-analysis-wide-block">
+              <h3>仮説・検証</h3>
+              <label>投稿前の仮説<textarea id="xAnalysisHypothesis" rows="3"></textarea></label>
+              <label>結果<textarea id="xAnalysisResult" rows="3"></textarea></label>
+              <label>次回試すこと<textarea id="xAnalysisNextTry" rows="3"></textarea></label>
+            </section>
+          </div>
+          <p id="xAnalysisStatus" class="publishing-ops-status">本日のX分析はまだ保存されていません。</p>
         </section>
 
         <div class="publishing-seed-workbench-tabs span-2" aria-label="Seedワークベンチ切り替え">
@@ -1729,6 +1769,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260724-sns-post-ideas"></script>
+    <script src="./app.js?v=20260724-x-analysis-room"></script>
   </body>
 </html>

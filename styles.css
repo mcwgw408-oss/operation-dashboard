@@ -257,6 +257,7 @@ textarea {
 }
 
 #sns-posting,
+#x-analysis-room,
 #publishing-seed-candidates,
 #publishing-seeds,
 #publishing-experiment-lab,
@@ -3652,6 +3653,58 @@ textarea {
   gap: 6px;
 }
 
+.x-analysis-panel {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+  border-color: var(--blue-line);
+  background:
+    linear-gradient(135deg, rgba(237, 244, 249, 0.88), rgba(255, 255, 255, 0.96) 55%),
+    var(--panel);
+}
+
+.x-analysis-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.x-analysis-block {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--blue-line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 12px;
+}
+
+.x-analysis-wide-block {
+  grid-column: 1 / -1;
+}
+
+.x-analysis-block h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.x-analysis-block label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.x-analysis-number-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.x-analysis-block textarea {
+  min-height: 86px;
+}
+
 .publishing-seed-workbench-tabs {
   display: flex;
   gap: 8px;
@@ -5117,6 +5170,10 @@ textarea {
   order: 31;
 }
 
+.dashboard .x-analysis-panel {
+  order: 31;
+}
+
 .dashboard .publishing-seed-candidates-panel {
   order: 32;
 }
@@ -5409,6 +5466,8 @@ textarea {
   .publishing-seed-form,
   .publishing-seed-controls,
   .publishing-ops-grid,
+  .x-analysis-grid,
+  .x-analysis-number-grid,
   .x-experiment-summary,
   .x-experiment-type-row,
   .x-experiment-fields,
