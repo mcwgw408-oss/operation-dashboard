@@ -2853,7 +2853,7 @@ function createSeedFromCandidate(candidate, personalTake) {
     originalTheme: [
       candidate.originalTopic,
       candidate.summary ? `要点: ${candidate.summary}` : "",
-      candidate.reason ? `なぜ、さくら向け？: ${candidate.reason}` : "",
+      candidate.reason ? `選定理由: ${candidate.reason}` : "",
     ].filter(Boolean).join("\n"),
     personalTake: take,
     tags: [candidate.sourceName, "Seed候補"].filter(Boolean).join(", "),
@@ -2896,7 +2896,7 @@ function createPublishingSeedCandidateCard(candidate) {
 
   const reason = document.createElement("p");
   reason.className = "publishing-seed-candidate-reason";
-  reason.textContent = candidate.reason ? `なぜ、さくら向け？: ${candidate.reason}` : "なぜ、さくら向け？はまだありません。";
+  reason.textContent = candidate.reason ? `選定理由: ${candidate.reason}` : "選定理由はまだありません。";
 
   const source = document.createElement("div");
   source.className = "publishing-seed-candidate-source";
