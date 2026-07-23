@@ -310,6 +310,9 @@ function defaultPublishingOps(date = activeDate) {
     articleCount: "",
     audioArticleCount: "",
     morningStackStatus: "できなかった",
+    xPostIdea1: "",
+    xPostIdea2: "",
+    xPostIdea3: "",
     notesIdeas: "",
     articleIdeas: "",
     chatIdeas: "",
@@ -2424,6 +2427,9 @@ const publishingOpsFields = {
   articleCount: "#publishingOpsArticleCount",
   audioArticleCount: "#publishingOpsAudioArticleCount",
   morningStackStatus: "#publishingOpsMorningStack",
+  xPostIdea1: "#publishingOpsXPostIdea1",
+  xPostIdea2: "#publishingOpsXPostIdea2",
+  xPostIdea3: "#publishingOpsXPostIdea3",
   notesIdeas: "#publishingOpsNotesIdeas",
   articleIdeas: "#publishingOpsArticleIdeas",
   chatIdeas: "#publishingOpsChatIdeas",
@@ -2443,7 +2449,10 @@ const publishingOpsCountFields = [
 const publishingOpsTextSections = [
   ["今日の一番の学び", ["yoshidaLearning"]],
   ["明日に活かすこと", ["yoshidaTomorrow"]],
-  ["発信アイデア", ["notesIdeas", "articleIdeas", "chatIdeas"]],
+  ["X投稿アイデア", ["xPostIdea1", "xPostIdea2", "xPostIdea3"]],
+  ["Notes投稿アイデア", ["notesIdeas"]],
+  ["Chat投稿アイデア", ["chatIdeas"]],
+  ["記事アイデア", ["articleIdeas"]],
   ["運用上の気づき", ["operationFindings"]],
 ];
 

@@ -210,6 +210,21 @@ for (const token of [
 ]) {
   check(indexHtml.includes(token), `recent publishing ops UI is missing: ${token}`);
 }
+for (const token of [
+  'id="publishingOpsXPostIdea1"',
+  'id="publishingOpsXPostIdea2"',
+  'id="publishingOpsXPostIdea3"',
+  "X投稿①",
+  "X投稿②",
+  "X投稿③",
+  "Notesで投稿したいこと",
+  "Chatで投稿したいこと",
+]) {
+  check(indexHtml.includes(token), `SNS投稿アイデア欄がありません: ${token}`);
+}
+for (const key of ["xPostIdea1", "xPostIdea2", "xPostIdea3", "notesIdeas", "chatIdeas", "articleIdeas"]) {
+  check(appJs.includes(key), `SNS投稿アイデアの保存キーがありません: ${key}`);
+}
 check(appJs.includes("const PUBLISHING_OPS_RECENT_DAYS = 7;"), "recent publishing ops period is not fixed to 7 days");
 check(appJs.includes("function buildPublishingOpsRecentFlow"), "recent publishing ops aggregation function is missing");
 check(appJs.includes("function renderPublishingOpsRecentFlow"), "recent publishing ops render function is missing");
