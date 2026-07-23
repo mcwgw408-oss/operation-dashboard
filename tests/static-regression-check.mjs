@@ -295,6 +295,8 @@ check(indexHtml.includes('class="dashboard-page-nav"'), "ページ内ナビが�
 const dashboardZoneTargets = [
   "#dashboard-start",
   "#dashboard-input",
+  "#sns-posting",
+  "#reading-notes",
   "#dashboard-accumulation",
   "#dashboard-closed",
 ];

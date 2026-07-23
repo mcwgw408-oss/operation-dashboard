@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260724-seed-candidate-edit" />
+    <link rel="stylesheet" href="./styles.css?v=20260724-dashboard-toc-sns" />
   </head>
   <body>
     <div class="app">
@@ -31,12 +31,15 @@
       </header>
 
       <main class="dashboard">
-        <nav class="dashboard-page-nav" aria-label="ページ内移動">
+        <nav class="dashboard-page-nav" aria-label="目次">
+          <span class="dashboard-page-nav-title">目次</span>
           <a href="#dashboard-start">今日のはじまり</a>
           <a href="#dashboard-input">今日を書く</a>
+          <a href="#sns-posting">SNS投稿</a>
           <a href="#publishing-seed-candidates">Seed候補</a>
           <a href="#publishing-seeds">Seeds</a>
           <a href="#publishing-experiment-lab">発信実験室</a>
+          <a href="#reading-notes">学びメモ</a>
           <a href="#dashboard-accumulation">ためる</a>
           <a href="#dashboard-closed">閉じているもの</a>
         </nav>
@@ -979,11 +982,11 @@
           <div id="dailyTasks" class="task-list"></div>
         </section>
 
-        <section class="panel publishing-ops-panel span-2" aria-label="発信運営">
+        <section id="sns-posting" class="panel publishing-ops-panel span-2" aria-label="SNS投稿">
           <div class="panel-heading">
             <div>
-              <h2>発信運営</h2>
-              <p class="section-note">記事、ノート、チャット、ライブ配信、おはスタック回りの今日の運用を記録します。</p>
+              <h2>SNS投稿</h2>
+              <p class="section-note">X・Notes・Chatを中心に、記事、ライブ配信、おはスタック回りの今日の投稿運用を記録します。</p>
             </div>
             <button class="ghost-button" id="savePublishingOps" type="button">本日の記録を保存する</button>
           </div>
@@ -1266,7 +1269,7 @@
           </div>
         </section>
 
-        <section class="panel reading-notes-panel span-2" aria-label="読書・記事の学びメモ">
+        <section id="reading-notes" class="panel reading-notes-panel span-2" aria-label="読書・記事の学びメモ">
           <div class="panel-heading reading-notes-heading">
             <div>
               <h2>読書・記事の学びメモ</h2>
@@ -1723,6 +1726,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260724-seed-candidate-edit"></script>
+    <script src="./app.js?v=20260724-dashboard-toc-sns"></script>
   </body>
 </html>
