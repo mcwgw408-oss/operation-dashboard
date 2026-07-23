@@ -31,6 +31,7 @@ const RECURRING_SCHEDULE_STORAGE_KEY = "sakura-recurring-schedule-v1";
 const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
 const X_EXPERIMENT_LOG_STORAGE_KEY = "operation-dashboard-x-experiment-logs-v1";
+const PUBLISHING_SEEDS_STORAGE_KEY = "operation-dashboard-publishing-seeds-v1";
 const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
 const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
 const DELETED_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-deleted-daily-tasks-v1";
@@ -126,6 +127,7 @@ const X_EXPERIMENT_POST_TYPES = [
 const X_EXPERIMENT_BRANDS = ["ブランドA", "ブランドB", "その他"];
 const X_EXPERIMENT_STATUSES = ["💡 アイデア", "🛠 準備中", "🧪 実験中", "📊 検証中", "✅ 検証完了"];
 const X_EXPERIMENT_TYPES = ["投稿仮説", "導線検証", "ブランド検証", "反応観察", "継続運用", "その他"];
+const PUBLISHING_SEED_STATUSES = ["種", "記事化", "保留"];
 const X_EXPERIMENT_MEDIA = {
   "ブランドA": ["Substack", "Substack Notes", "note（回復・AI・暮らし）", "X", "WordPress", "Live"],
   "ブランドB": ["note（Substack初心者向け）"],
@@ -200,6 +202,8 @@ let recurringSchedule = loadRecurringSchedule();
 let recurringAutoAddLog = loadRecurringAutoAddLog();
 let operationExperimentStore = loadOperationExperimentStore();
 let xExperimentLogs = loadXExperimentLogs();
+let publishingSeeds = loadPublishingSeeds();
+let publishingSeedStatusFilter = "all";
 let editingXExperimentId = "";
 let activeXExperimentDetailId = "";
 let savingXExperiment = false;
@@ -366,6 +370,38 @@ function blankXExperimentLog() {
     createdAt: now,
     updatedAt: now,
   };
+}
+
+function blankPublishingSeed() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    title: "",
+    originalTheme: "",
+    personalTake: "",
+    tags: "",
+    savedDate: activeDate,
+    status: "種",
+    source: "",
+    articleExperimentId: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function normalizePublishingSeed(raw) {
+  const base = blankPublishingSeed();
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const seed = { ...base, ...source };
+  seed.id = typeof source.id === "string" && source.id ? source.id : base.id;
+  ["title", "originalTheme", "personalTake", "tags", "savedDate", "source", "articleExperimentId", "createdAt", "updatedAt"].forEach((key) => {
+    seed[key] = String(seed[key] ?? "");
+  });
+  seed.status = PUBLISHING_SEED_STATUSES.includes(source.status) ? source.status : "種";
+  if (!seed.savedDate) seed.savedDate = activeDate;
+  if (!seed.createdAt) seed.createdAt = seed.updatedAt || base.createdAt;
+  if (!seed.updatedAt) seed.updatedAt = seed.createdAt;
+  return seed;
 }
 
 function normalizeXExperimentLog(raw) {
@@ -1074,6 +1110,15 @@ function loadXExperimentLogs() {
   }
 }
 
+function loadPublishingSeeds() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved.map(normalizePublishingSeed) : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -1270,6 +1315,10 @@ function saveOperationExperimentStore() {
 
 function saveXExperimentLogs() {
   localStorage.setItem(X_EXPERIMENT_LOG_STORAGE_KEY, JSON.stringify(xExperimentLogs));
+}
+
+function savePublishingSeeds() {
+  localStorage.setItem(PUBLISHING_SEEDS_STORAGE_KEY, JSON.stringify(publishingSeeds));
 }
 
 function saveCustomDailyTasks() {
@@ -2668,6 +2717,215 @@ function saveOperationExperimentFromForm() {
   saveOperationExperimentStore();
   $("#operationExperimentStatusMessage").textContent = "保存済みです。";
   renderOperationExperimentRecent(experiment);
+}
+
+function publishingSeedExcerpt(value, maxLength = 82) {
+  const text = String(value || "").trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength)}...`;
+}
+
+function publishingSeedTags(value) {
+  return String(value || "")
+    .split(/[,\s、，]+/)
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function readPublishingSeedForm() {
+  return {
+    title: $("#publishingSeedTitle")?.value.trim() || "",
+    originalTheme: $("#publishingSeedOriginalTheme")?.value.trim() || "",
+    personalTake: $("#publishingSeedPersonalTake")?.value.trim() || "",
+    tags: $("#publishingSeedTags")?.value.trim() || "",
+    status: $("#publishingSeedStatus")?.value || "種",
+  };
+}
+
+function clearPublishingSeedForm() {
+  ["#publishingSeedTitle", "#publishingSeedOriginalTheme", "#publishingSeedPersonalTake", "#publishingSeedTags"].forEach((selector) => {
+    const field = $(selector);
+    if (field) field.value = "";
+  });
+  const status = $("#publishingSeedStatus");
+  if (status) status.value = "種";
+}
+
+function filteredPublishingSeeds() {
+  return [...publishingSeeds]
+    .filter((seed) => publishingSeedStatusFilter === "all" || seed.status === publishingSeedStatusFilter)
+    .sort((left, right) => String(right.savedDate || right.createdAt).localeCompare(String(left.savedDate || left.createdAt)));
+}
+
+function updatePublishingSeedSummary() {
+  const total = $("#publishingSeedTotalCount");
+  const open = $("#publishingSeedOpenCount");
+  const article = $("#publishingSeedArticleCount");
+  const hold = $("#publishingSeedHoldCount");
+  if (total) total.textContent = publishingSeeds.length;
+  if (open) open.textContent = publishingSeeds.filter((seed) => seed.status === "種").length;
+  if (article) article.textContent = publishingSeeds.filter((seed) => seed.status === "記事化").length;
+  if (hold) hold.textContent = publishingSeeds.filter((seed) => seed.status === "保留").length;
+}
+
+function setPublishingSeedStatus(seed, status) {
+  if (!PUBLISHING_SEED_STATUSES.includes(status)) return;
+  seed.status = status;
+  seed.updatedAt = new Date().toISOString();
+  savePublishingSeeds();
+  renderPublishingSeeds();
+}
+
+function convertPublishingSeedToExperiment(seed) {
+  const now = new Date().toISOString();
+  const title = seed.title || publishingSeedExcerpt(seed.personalTake || seed.originalTheme, 42) || "Seedsからの記事化";
+  const log = normalizeXExperimentLog({
+    ...blankXExperimentLog(),
+    title,
+    postDate: activeDate,
+    status: X_EXPERIMENT_STATUSES[1],
+    experimentType: X_EXPERIMENT_TYPES[0],
+    hypothesis: seed.personalTake || title,
+    startReason: ["Seedsから記事化", seed.originalTheme].filter(Boolean).join("\n"),
+    experiment: "この種を記事にして、反応と次の仮説を発信実験室で検証する。",
+    postContent: seed.personalTake,
+    createdAt: now,
+    updatedAt: now,
+  });
+  xExperimentLogs.unshift(log);
+  activeXExperimentDetailId = log.id;
+  seed.status = "記事化";
+  seed.articleExperimentId = log.id;
+  seed.updatedAt = now;
+  savePublishingSeeds();
+  saveXExperimentLogs();
+  renderPublishingSeeds();
+  renderXExperimentLogs();
+  $("#publishing-experiment-lab")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+}
+
+function createPublishingSeedCard(seed) {
+  const card = document.createElement("article");
+  card.className = `publishing-seed-card status-${seed.status}`;
+
+  const header = document.createElement("div");
+  header.className = "publishing-seed-card-header";
+  const titleBlock = document.createElement("div");
+  const title = document.createElement("h3");
+  title.textContent = seed.title || publishingSeedExcerpt(seed.personalTake || seed.originalTheme, 48) || "無題の種";
+  const meta = document.createElement("span");
+  meta.textContent = `${seed.savedDate || "-"} / ${seed.status}`;
+  titleBlock.append(title, meta);
+  const status = document.createElement("select");
+  status.setAttribute("aria-label", "Seedsの状態");
+  PUBLISHING_SEED_STATUSES.forEach((option) => {
+    const item = document.createElement("option");
+    item.value = option;
+    item.textContent = option;
+    status.append(item);
+  });
+  status.value = seed.status;
+  status.addEventListener("change", (event) => setPublishingSeedStatus(seed, event.target.value));
+  header.append(titleBlock, status);
+
+  const original = document.createElement("p");
+  original.className = "publishing-seed-original";
+  original.textContent = seed.originalTheme ? `元テーマ: ${seed.originalTheme}` : "元テーマはまだありません。";
+
+  const take = document.createElement("p");
+  take.className = "publishing-seed-take";
+  take.textContent = seed.personalTake || "自分の一言はまだありません。";
+
+  const tags = document.createElement("div");
+  tags.className = "publishing-seed-tags";
+  publishingSeedTags(seed.tags).forEach((tag) => {
+    const item = document.createElement("span");
+    item.textContent = tag;
+    tags.append(item);
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "publishing-seed-actions";
+  const articleButton = document.createElement("button");
+  articleButton.className = "ghost-button";
+  articleButton.type = "button";
+  articleButton.textContent = seed.articleExperimentId ? "実験を見る" : "記事化する";
+  articleButton.addEventListener("click", () => {
+    if (seed.articleExperimentId && xExperimentLogs.some((log) => log.id === seed.articleExperimentId)) {
+      activeXExperimentDetailId = seed.articleExperimentId;
+      renderXExperimentLogs();
+      $("#publishing-experiment-lab")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      return;
+    }
+    convertPublishingSeedToExperiment(seed);
+  });
+  const holdButton = document.createElement("button");
+  holdButton.className = "ghost-button";
+  holdButton.type = "button";
+  holdButton.textContent = seed.status === "保留" ? "種に戻す" : "保留";
+  holdButton.addEventListener("click", () => setPublishingSeedStatus(seed, seed.status === "保留" ? "種" : "保留"));
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "delete-button";
+  deleteButton.type = "button";
+  deleteButton.textContent = "削除";
+  deleteButton.addEventListener("click", () => {
+    if (!confirm("このSeedを削除します。よろしいですか？")) return;
+    publishingSeeds = publishingSeeds.filter((item) => item.id !== seed.id);
+    savePublishingSeeds();
+    renderPublishingSeeds();
+  });
+  actions.append(articleButton, holdButton, deleteButton);
+
+  card.append(header, original, take);
+  if (tags.childElementCount) card.append(tags);
+  card.append(actions);
+  return card;
+}
+
+function renderPublishingSeeds() {
+  const target = $("#publishingSeedList");
+  if (!target) return;
+  updatePublishingSeedSummary();
+  const seeds = filteredPublishingSeeds();
+  const count = $("#publishingSeedSearchCount");
+  if (count) count.textContent = `${seeds.length}件表示`;
+  if (!seeds.length) {
+    const empty = document.createElement("div");
+    empty.className = "publishing-seed-empty";
+    const title = document.createElement("strong");
+    title.textContent = publishingSeeds.length ? "この状態のSeedはありません。" : "まだSeedはありません。";
+    const message = document.createElement("p");
+    message.textContent = publishingSeeds.length
+      ? "状態フィルターを変えると、別のSeedを確認できます。"
+      : "気になったテーマに対して「自分ならこう考える」を一言だけ残すと、未来の記事の入口になります。";
+    empty.append(title, message);
+    target.replaceChildren(empty);
+    return;
+  }
+  target.replaceChildren(...seeds.map(createPublishingSeedCard));
+}
+
+function savePublishingSeedFromForm(event) {
+  event?.preventDefault();
+  const values = readPublishingSeedForm();
+  const status = $("#publishingSeedSaveStatus");
+  if (!values.personalTake && !values.title && !values.originalTheme) {
+    if (status) status.textContent = "タイトル、元テーマ、自分の一言のどれかを入れると保存できます。";
+    return;
+  }
+  const now = new Date().toISOString();
+  const seed = normalizePublishingSeed({
+    ...blankPublishingSeed(),
+    ...values,
+    savedDate: activeDate,
+    createdAt: now,
+    updatedAt: now,
+  });
+  publishingSeeds.unshift(seed);
+  savePublishingSeeds();
+  clearPublishingSeedForm();
+  renderPublishingSeeds();
+  if (status) status.textContent = `Seedを保存しました。保存日 ${seed.savedDate}`;
 }
 
 function xExperimentNumber(value) {
@@ -9485,6 +9743,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  renderPublishingSeeds();
   renderXExperimentLogs();
   renderOperationExperiment();
   renderLaterItems();
@@ -9948,6 +10207,16 @@ function bindEvents() {
     field.addEventListener("input", markDirty);
     field.addEventListener("change", markDirty);
   });
+  $("#publishingSeedForm")?.addEventListener("submit", savePublishingSeedFromForm);
+  $("#clearPublishingSeedForm")?.addEventListener("click", () => {
+    clearPublishingSeedForm();
+    const status = $("#publishingSeedSaveStatus");
+    if (status) status.textContent = "入力を空にしました。";
+  });
+  $("#publishingSeedFilterStatus")?.addEventListener("change", (event) => {
+    publishingSeedStatusFilter = event.target.value;
+    renderPublishingSeeds();
+  });
   $("#xExperimentForm")?.addEventListener("submit", saveXExperimentFromForm);
   $("#newXExperiment")?.addEventListener("click", () => toggleXExperimentCreateForm());
   $("#xExperimentCreateForm")?.addEventListener("submit", createNewXExperiment);
@@ -10104,6 +10373,7 @@ const BACKUP_KEYS = [
   STORAGE_KEY,
   OPERATION_EXPERIMENT_STORAGE_KEY,
   X_EXPERIMENT_LOG_STORAGE_KEY,
+  PUBLISHING_SEEDS_STORAGE_KEY,
   CUSTOM_DAILY_TASKS_STORAGE_KEY,
   DAILY_TASK_ORDER_STORAGE_KEY,
   LATER_STORAGE_KEY,
@@ -10215,6 +10485,7 @@ function createBackup() {
   data[STORAGE_KEY] = readStoredJson(STORAGE_KEY, {});
   data[OPERATION_EXPERIMENT_STORAGE_KEY] = readStoredJson(OPERATION_EXPERIMENT_STORAGE_KEY, defaultOperationExperimentStore());
   data[X_EXPERIMENT_LOG_STORAGE_KEY] = readStoredJson(X_EXPERIMENT_LOG_STORAGE_KEY, []);
+  data[PUBLISHING_SEEDS_STORAGE_KEY] = readStoredJson(PUBLISHING_SEEDS_STORAGE_KEY, []);
   data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
   data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
@@ -10429,6 +10700,9 @@ function buildSakuraSnapshot(mode) {
   const xExperimentLogItems = asArray(readStoredJson(X_EXPERIMENT_LOG_STORAGE_KEY, []))
     .map(normalizeXExperimentLog)
     .filter((log) => log.postDate >= logFromKey || String(log.nextHypothesis || "").trim() !== "");
+  const publishingSeedItems = asArray(readStoredJson(PUBLISHING_SEEDS_STORAGE_KEY, []))
+    .map(normalizePublishingSeed)
+    .filter((seed) => seed.savedDate >= logFromKey || seed.status === "種");
   const conversationFeedbackItems = asArray(readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []));
   const conversationImprovementItems = asArray(readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []));
   const conversationReflectionItems = asArray(readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []));
@@ -10743,7 +11017,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, xExperimentLogs: xExperimentLogItems, learningSummary, learningHint, learningConfidence, memory },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, publishingSeeds: publishingSeedItems, xExperimentLogs: xExperimentLogItems, learningSummary, learningHint, learningConfidence, memory },
       },
       "discovery-labo": {
         schemaVersion: 1,

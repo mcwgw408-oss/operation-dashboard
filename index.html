@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260722-publishing-lab-s1" />
+    <link rel="stylesheet" href="./styles.css?v=20260723-seeds-mvp" />
   </head>
   <body>
     <div class="app">
@@ -34,6 +34,7 @@
         <nav class="dashboard-page-nav" aria-label="ページ内移動">
           <a href="#dashboard-start">今日のはじまり</a>
           <a href="#dashboard-input">今日を書く</a>
+          <a href="#publishing-seeds">Seeds</a>
           <a href="#publishing-experiment-lab">発信実験室</a>
           <a href="#dashboard-accumulation">ためる</a>
           <a href="#dashboard-closed">閉じているもの</a>
@@ -1052,6 +1053,55 @@
           <p id="publishingOpsStatus" class="publishing-ops-status">本日の発信運営はまだ保存されていません。</p>
         </section>
 
+        <section id="publishing-seeds" class="panel publishing-seeds-panel span-2" aria-label="Seeds">
+          <div class="panel-heading">
+            <div>
+              <h2>Seeds</h2>
+              <p class="section-note"><strong>記事になる前の「自分の反応」を保存します。</strong><br />元ネタの保管ではなく、「自分ならこう考える」を未来の記事の入口として残す場所です。</p>
+            </div>
+          </div>
+
+          <form id="publishingSeedForm" class="publishing-seed-form">
+            <label>タイトル（仮）<input id="publishingSeedTitle" type="text" placeholder="あとで見つけやすい仮タイトル" /></label>
+            <label>タグ<input id="publishingSeedTags" type="text" placeholder="AI, 発信, 日々の違和感 など" /></label>
+            <label>状態
+              <select id="publishingSeedStatus">
+                <option>種</option>
+                <option>記事化</option>
+                <option>保留</option>
+              </select>
+            </label>
+            <label class="publishing-seed-wide-field">元テーマ<textarea id="publishingSeedOriginalTheme" rows="3" placeholder="AI巡回やX/Substackなどで気になったテーマ"></textarea></label>
+            <label class="publishing-seed-wide-field publishing-seed-take-field">自分の一言<textarea id="publishingSeedPersonalTake" rows="5" placeholder="これは自分ならこう考える、という反応"></textarea></label>
+            <div class="publishing-seed-save-row">
+              <p id="publishingSeedSaveStatus" class="publishing-seed-status" role="status" aria-live="polite">一言だけでも保存できます。</p>
+              <button class="ghost-button" id="clearPublishingSeedForm" type="button">クリア</button>
+              <button type="submit">Seed保存</button>
+            </div>
+          </form>
+
+          <div class="later-counts publishing-seed-counts" aria-label="Seeds件数">
+            <span>合計 <strong id="publishingSeedTotalCount">0</strong></span>
+            <span>種 <strong id="publishingSeedOpenCount">0</strong></span>
+            <span>記事化 <strong id="publishingSeedArticleCount">0</strong></span>
+            <span>保留 <strong id="publishingSeedHoldCount">0</strong></span>
+            <span id="publishingSeedSearchCount">0件表示</span>
+          </div>
+
+          <div class="publishing-seed-controls">
+            <label>状態で絞り込み
+              <select id="publishingSeedFilterStatus">
+                <option value="all">すべて</option>
+                <option>種</option>
+                <option>記事化</option>
+                <option>保留</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="publishingSeedList" class="publishing-seed-list" aria-label="保存済みSeeds"></div>
+        </section>
+
         <section id="publishing-experiment-lab" class="panel x-experiment-panel span-2" aria-label="発信実験室">
           <div class="panel-heading">
             <div>
@@ -1612,6 +1662,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260722-publishing-lab-s1"></script>
+    <script src="./app.js?v=20260723-seeds-mvp"></script>
   </body>
 </html>
