@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260723-seeds-mvp" />
+    <link rel="stylesheet" href="./styles.css?v=20260723-seed-candidates-mvp" />
   </head>
   <body>
     <div class="app">
@@ -34,6 +34,7 @@
         <nav class="dashboard-page-nav" aria-label="ページ内移動">
           <a href="#dashboard-start">今日のはじまり</a>
           <a href="#dashboard-input">今日を書く</a>
+          <a href="#publishing-seed-candidates">Seed候補</a>
           <a href="#publishing-seeds">Seeds</a>
           <a href="#publishing-experiment-lab">発信実験室</a>
           <a href="#dashboard-accumulation">ためる</a>
@@ -1053,6 +1054,59 @@
           <p id="publishingOpsStatus" class="publishing-ops-status">本日の発信運営はまだ保存されていません。</p>
         </section>
 
+        <section id="publishing-seed-candidates" class="panel publishing-seed-candidates-panel span-2" aria-label="Seed候補">
+          <div class="panel-heading">
+            <div>
+              <h2>Seed候補</h2>
+              <p class="section-note"><strong>外部から見つけた話題を、いったん候補として並べます。</strong><br />まだSeedsには入れず、自分が反応したものだけを一言つきで保存します。</p>
+            </div>
+          </div>
+
+          <form id="publishingSeedCandidateForm" class="publishing-seed-candidate-form">
+            <label>元の話題<input id="publishingSeedCandidateTopic" type="text" placeholder="気になった話題や見出し" /></label>
+            <label>出典名<input id="publishingSeedCandidateSourceName" type="text" placeholder="X, Substack, note など" /></label>
+            <label>取得日<input id="publishingSeedCandidateFetchedDate" type="date" /></label>
+            <label class="publishing-seed-candidate-wide-field">要点<textarea id="publishingSeedCandidateSummary" rows="3" placeholder="何が話題なのか、どこが気になったのか"></textarea></label>
+            <label class="publishing-seed-candidate-wide-field">自分に向けた問い<textarea id="publishingSeedCandidateQuestion" rows="3" placeholder="自分なら何を考える？どこに違和感がある？"></textarea></label>
+            <label class="publishing-seed-candidate-wide-field">出典URL<input id="publishingSeedCandidateSourceUrl" type="url" placeholder="https://..." /></label>
+            <div class="publishing-seed-candidate-save-row">
+              <p id="publishingSeedCandidateStatus" class="publishing-seed-candidate-status" role="status" aria-live="polite">手動で1件ずつ候補を追加できます。</p>
+              <button class="ghost-button" id="clearPublishingSeedCandidateForm" type="button">クリア</button>
+              <button type="submit">候補追加</button>
+            </div>
+          </form>
+
+          <details class="publishing-seed-candidate-import">
+            <summary>JSONで候補を取り込む</summary>
+            <textarea id="publishingSeedCandidateJson" rows="8" placeholder='[{"originalTopic":"話題","summary":"要点","questionForSelf":"自分への問い","sourceName":"X","sourceUrl":"https://...","fetchedDate":"2026-07-23"}]'></textarea>
+            <div class="publishing-seed-candidate-save-row">
+              <p id="publishingSeedCandidateImportStatus" class="publishing-seed-candidate-status" role="status" aria-live="polite">配列、または candidates / items / results を含むJSONを取り込めます。</p>
+              <button class="ghost-button" id="importPublishingSeedCandidates" type="button">取り込む</button>
+            </div>
+          </details>
+
+          <div class="later-counts publishing-seed-candidate-counts" aria-label="Seed候補件数">
+            <span>合計 <strong id="publishingSeedCandidateTotalCount">0</strong></span>
+            <span>未確認 <strong id="publishingSeedCandidateUncheckedCount">0</strong></span>
+            <span>Seed化 <strong id="publishingSeedCandidateSeededCount">0</strong></span>
+            <span>見送り <strong id="publishingSeedCandidateSkippedCount">0</strong></span>
+            <span id="publishingSeedCandidateSearchCount">0件表示</span>
+          </div>
+
+          <div class="publishing-seed-candidate-controls">
+            <label>状態で絞り込み
+              <select id="publishingSeedCandidateFilterStatus">
+                <option value="all">すべて</option>
+                <option>未確認</option>
+                <option>Seed化</option>
+                <option>見送り</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="publishingSeedCandidateList" class="publishing-seed-candidate-list" aria-label="保存済みSeed候補"></div>
+        </section>
+
         <section id="publishing-seeds" class="panel publishing-seeds-panel span-2" aria-label="Seeds">
           <div class="panel-heading">
             <div>
@@ -1662,6 +1716,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260723-seeds-mvp"></script>
+    <script src="./app.js?v=20260723-seed-candidates-mvp"></script>
   </body>
 </html>

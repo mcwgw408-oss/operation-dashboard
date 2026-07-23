@@ -3633,6 +3633,184 @@ textarea {
   gap: 6px;
 }
 
+.publishing-seed-candidates-panel {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+  border-color: var(--blue-line);
+  background:
+    linear-gradient(135deg, rgba(237, 244, 249, 0.86), rgba(255, 255, 255, 0.96) 54%),
+    var(--panel);
+}
+
+.publishing-seed-candidate-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.7fr) minmax(130px, 0.45fr);
+  gap: 10px;
+  border: 1px solid var(--blue-line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 14px;
+}
+
+.publishing-seed-candidate-form label,
+.publishing-seed-candidate-controls label,
+.publishing-seed-candidate-convert label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.publishing-seed-candidate-wide-field,
+.publishing-seed-candidate-save-row {
+  grid-column: 1 / -1;
+}
+
+.publishing-seed-candidate-save-row,
+.publishing-seed-candidate-actions,
+.publishing-seed-candidate-card-header,
+.publishing-seed-candidate-convert-actions,
+.publishing-seed-candidate-source {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.publishing-seed-candidate-save-row {
+  justify-content: flex-end;
+}
+
+.publishing-seed-candidate-save-row button[type="submit"],
+.publishing-seed-candidate-convert-actions button:not(.ghost-button) {
+  min-height: 38px;
+  border-radius: 999px;
+  background: var(--button);
+  color: var(--button-text);
+  padding: 0 16px;
+  font-weight: 700;
+}
+
+.publishing-seed-candidate-status {
+  margin: 0 auto 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.publishing-seed-candidate-import {
+  display: grid;
+  gap: 10px;
+  border: 1px dashed var(--blue-line);
+  border-radius: var(--radius-item);
+  background: rgba(250, 253, 255, 0.88);
+  padding: 12px;
+}
+
+.publishing-seed-candidate-import summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.publishing-seed-candidate-import textarea {
+  margin-top: 10px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+}
+
+.publishing-seed-candidate-counts {
+  margin-bottom: 0;
+}
+
+.publishing-seed-candidate-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px);
+}
+
+.publishing-seed-candidate-list {
+  display: grid;
+  gap: 10px;
+}
+
+.publishing-seed-candidate-card,
+.publishing-seed-candidate-empty {
+  display: grid;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.publishing-seed-candidate-card.status-Seed化 {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.publishing-seed-candidate-card.status-見送り {
+  border-color: var(--yellow-line);
+  background: var(--yellow-soft);
+}
+
+.publishing-seed-candidate-card-header {
+  justify-content: space-between;
+}
+
+.publishing-seed-candidate-card-header h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.publishing-seed-candidate-card-header span,
+.publishing-seed-candidate-source,
+.publishing-seed-candidate-empty p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.publishing-seed-candidate-summary,
+.publishing-seed-candidate-question {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.publishing-seed-candidate-question {
+  border-left: 3px solid var(--blue-line);
+  background: rgba(246, 250, 253, 0.92);
+  padding: 8px 10px;
+}
+
+.publishing-seed-candidate-source {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.publishing-seed-candidate-source a {
+  color: var(--blue);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.publishing-seed-candidate-actions,
+.publishing-seed-candidate-convert-actions {
+  justify-content: flex-end;
+}
+
+.publishing-seed-candidate-convert {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-item);
+  background: rgba(251, 253, 251, 0.92);
+  padding: 12px;
+}
+
 .publishing-seeds-panel {
   display: grid;
   gap: 14px;
@@ -4744,6 +4922,10 @@ textarea {
   order: 31;
 }
 
+.dashboard .publishing-seed-candidates-panel {
+  order: 32;
+}
+
 .dashboard .publishing-seeds-panel {
   order: 32;
 }
@@ -4851,6 +5033,7 @@ textarea {
 .brain-panel,
 .publishing-ops-panel,
 .publishing-ops-history-panel,
+.publishing-seed-candidates-panel,
 .publishing-seeds-panel,
 .reading-notes-panel,
 .daily-input-panel,
@@ -5026,6 +5209,8 @@ textarea {
   .learning-item,
   .reading-note-form,
   .reading-notes-search,
+  .publishing-seed-candidate-form,
+  .publishing-seed-candidate-controls,
   .publishing-seed-form,
   .publishing-seed-controls,
   .publishing-ops-grid,
@@ -5089,6 +5274,11 @@ textarea {
 
   .reading-note-form-heading,
   .reading-note-actions,
+  .publishing-seed-candidate-save-row,
+  .publishing-seed-candidate-card-header,
+  .publishing-seed-candidate-actions,
+  .publishing-seed-candidate-convert-actions,
+  .publishing-seed-candidate-source,
   .publishing-seed-save-row,
   .publishing-seed-card-header,
   .publishing-seed-actions {
@@ -5097,6 +5287,7 @@ textarea {
   }
 
   .reading-note-status,
+  .publishing-seed-candidate-status,
   .publishing-seed-status {
     margin-right: 0;
   }

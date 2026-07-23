@@ -32,6 +32,7 @@ const RECURRING_AUTO_ADD_LOG_STORAGE_KEY = "sakura-recurring-auto-add-log-v1";
 const OPERATION_EXPERIMENT_STORAGE_KEY = "operation-dashboard-experiments-v1";
 const X_EXPERIMENT_LOG_STORAGE_KEY = "operation-dashboard-x-experiment-logs-v1";
 const PUBLISHING_SEEDS_STORAGE_KEY = "operation-dashboard-publishing-seeds-v1";
+const PUBLISHING_SEED_CANDIDATES_STORAGE_KEY = "operation-dashboard-publishing-seed-candidates-v1";
 const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
 const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
 const DELETED_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-deleted-daily-tasks-v1";
@@ -128,6 +129,7 @@ const X_EXPERIMENT_BRANDS = ["ブランドA", "ブランドB", "その他"];
 const X_EXPERIMENT_STATUSES = ["💡 アイデア", "🛠 準備中", "🧪 実験中", "📊 検証中", "✅ 検証完了"];
 const X_EXPERIMENT_TYPES = ["投稿仮説", "導線検証", "ブランド検証", "反応観察", "継続運用", "その他"];
 const PUBLISHING_SEED_STATUSES = ["種", "記事化", "保留"];
+const PUBLISHING_SEED_CANDIDATE_STATUSES = ["未確認", "Seed化", "見送り"];
 const X_EXPERIMENT_MEDIA = {
   "ブランドA": ["Substack", "Substack Notes", "note（回復・AI・暮らし）", "X", "WordPress", "Live"],
   "ブランドB": ["note（Substack初心者向け）"],
@@ -204,6 +206,9 @@ let operationExperimentStore = loadOperationExperimentStore();
 let xExperimentLogs = loadXExperimentLogs();
 let publishingSeeds = loadPublishingSeeds();
 let publishingSeedStatusFilter = "all";
+let publishingSeedCandidates = loadPublishingSeedCandidates();
+let publishingSeedCandidateStatusFilter = "all";
+let activePublishingSeedCandidateId = "";
 let editingXExperimentId = "";
 let activeXExperimentDetailId = "";
 let savingXExperiment = false;
@@ -383,7 +388,25 @@ function blankPublishingSeed() {
     savedDate: activeDate,
     status: "種",
     source: "",
+    sourceUrl: "",
+    seedCandidateId: "",
     articleExperimentId: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function blankPublishingSeedCandidate() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    originalTopic: "",
+    summary: "",
+    questionForSelf: "",
+    sourceName: "",
+    sourceUrl: "",
+    fetchedDate: activeDate,
+    status: "未確認",
     createdAt: now,
     updatedAt: now,
   };
@@ -394,7 +417,7 @@ function normalizePublishingSeed(raw) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const seed = { ...base, ...source };
   seed.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["title", "originalTheme", "personalTake", "tags", "savedDate", "source", "articleExperimentId", "createdAt", "updatedAt"].forEach((key) => {
+  ["title", "originalTheme", "personalTake", "tags", "savedDate", "source", "sourceUrl", "seedCandidateId", "articleExperimentId", "createdAt", "updatedAt"].forEach((key) => {
     seed[key] = String(seed[key] ?? "");
   });
   seed.status = PUBLISHING_SEED_STATUSES.includes(source.status) ? source.status : "種";
@@ -402,6 +425,29 @@ function normalizePublishingSeed(raw) {
   if (!seed.createdAt) seed.createdAt = seed.updatedAt || base.createdAt;
   if (!seed.updatedAt) seed.updatedAt = seed.createdAt;
   return seed;
+}
+
+function normalizePublishingSeedCandidate(raw) {
+  const base = blankPublishingSeedCandidate();
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const aliases = {
+    originalTopic: source.originalTopic ?? source.topic ?? source.title ?? source.originalTheme ?? source["元の話題"] ?? "",
+    summary: source.summary ?? source.point ?? source.description ?? source["要点"] ?? "",
+    questionForSelf: source.questionForSelf ?? source.question ?? source.prompt ?? source["自分に向けた問い"] ?? "",
+    sourceName: source.sourceName ?? source.source ?? source.media ?? source["出典名"] ?? "",
+    sourceUrl: source.sourceUrl ?? source.url ?? source.link ?? source["出典URL"] ?? "",
+    fetchedDate: source.fetchedDate ?? source.date ?? source.createdDate ?? source["取得日"] ?? "",
+  };
+  const candidate = { ...base, ...source, ...aliases };
+  candidate.id = typeof source.id === "string" && source.id ? source.id : base.id;
+  ["originalTopic", "summary", "questionForSelf", "sourceName", "sourceUrl", "fetchedDate", "createdAt", "updatedAt"].forEach((key) => {
+    candidate[key] = String(candidate[key] ?? "");
+  });
+  candidate.status = PUBLISHING_SEED_CANDIDATE_STATUSES.includes(source.status) ? source.status : "未確認";
+  if (!candidate.fetchedDate) candidate.fetchedDate = activeDate;
+  if (!candidate.createdAt) candidate.createdAt = candidate.updatedAt || base.createdAt;
+  if (!candidate.updatedAt) candidate.updatedAt = candidate.createdAt;
+  return candidate;
 }
 
 function normalizeXExperimentLog(raw) {
@@ -1119,6 +1165,15 @@ function loadPublishingSeeds() {
   }
 }
 
+function loadPublishingSeedCandidates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY));
+    return Array.isArray(saved) ? saved.map(normalizePublishingSeedCandidate) : [];
+  } catch {
+    return [];
+  }
+}
+
 function ensureDefaultProjectMemory(projectMemory) {
   const now = new Date().toISOString();
   const memories = [...projectMemory];
@@ -1319,6 +1374,10 @@ function saveXExperimentLogs() {
 
 function savePublishingSeeds() {
   localStorage.setItem(PUBLISHING_SEEDS_STORAGE_KEY, JSON.stringify(publishingSeeds));
+}
+
+function savePublishingSeedCandidates() {
+  localStorage.setItem(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY, JSON.stringify(publishingSeedCandidates));
 }
 
 function saveCustomDailyTasks() {
@@ -2717,6 +2776,275 @@ function saveOperationExperimentFromForm() {
   saveOperationExperimentStore();
   $("#operationExperimentStatusMessage").textContent = "保存済みです。";
   renderOperationExperimentRecent(experiment);
+}
+
+function readPublishingSeedCandidateForm() {
+  return {
+    originalTopic: $("#publishingSeedCandidateTopic")?.value.trim() || "",
+    summary: $("#publishingSeedCandidateSummary")?.value.trim() || "",
+    questionForSelf: $("#publishingSeedCandidateQuestion")?.value.trim() || "",
+    sourceName: $("#publishingSeedCandidateSourceName")?.value.trim() || "",
+    sourceUrl: $("#publishingSeedCandidateSourceUrl")?.value.trim() || "",
+    fetchedDate: $("#publishingSeedCandidateFetchedDate")?.value || activeDate,
+  };
+}
+
+function clearPublishingSeedCandidateForm() {
+  [
+    "#publishingSeedCandidateTopic",
+    "#publishingSeedCandidateSummary",
+    "#publishingSeedCandidateQuestion",
+    "#publishingSeedCandidateSourceName",
+    "#publishingSeedCandidateSourceUrl",
+  ].forEach((selector) => {
+    const field = $(selector);
+    if (field) field.value = "";
+  });
+  const fetchedDate = $("#publishingSeedCandidateFetchedDate");
+  if (fetchedDate) fetchedDate.value = activeDate;
+}
+
+function publishingSeedCandidateSummaryText(candidate) {
+  return [candidate.originalTopic, candidate.summary, candidate.questionForSelf, candidate.sourceName]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function filteredPublishingSeedCandidates() {
+  return [...publishingSeedCandidates]
+    .filter((candidate) => publishingSeedCandidateStatusFilter === "all" || candidate.status === publishingSeedCandidateStatusFilter)
+    .sort((left, right) => String(right.fetchedDate || right.createdAt).localeCompare(String(left.fetchedDate || left.createdAt)));
+}
+
+function updatePublishingSeedCandidateSummary() {
+  const total = $("#publishingSeedCandidateTotalCount");
+  const unchecked = $("#publishingSeedCandidateUncheckedCount");
+  const seeded = $("#publishingSeedCandidateSeededCount");
+  const skipped = $("#publishingSeedCandidateSkippedCount");
+  if (total) total.textContent = publishingSeedCandidates.length;
+  if (unchecked) unchecked.textContent = publishingSeedCandidates.filter((candidate) => candidate.status === "未確認").length;
+  if (seeded) seeded.textContent = publishingSeedCandidates.filter((candidate) => candidate.status === "Seed化").length;
+  if (skipped) skipped.textContent = publishingSeedCandidates.filter((candidate) => candidate.status === "見送り").length;
+}
+
+function setPublishingSeedCandidateStatus(candidate, status) {
+  if (!PUBLISHING_SEED_CANDIDATE_STATUSES.includes(status)) return;
+  candidate.status = status;
+  candidate.updatedAt = new Date().toISOString();
+  if (activePublishingSeedCandidateId === candidate.id && status !== "未確認") {
+    activePublishingSeedCandidateId = "";
+  }
+  savePublishingSeedCandidates();
+  renderPublishingSeedCandidates();
+}
+
+function createSeedFromCandidate(candidate, personalTake) {
+  const take = String(personalTake || "").trim();
+  const status = $("#publishingSeedCandidateStatus");
+  if (!take) {
+    if (status) status.textContent = "自分の一言を入れるとSeedsへ保存できます。";
+    return;
+  }
+  const now = new Date().toISOString();
+  const seed = normalizePublishingSeed({
+    ...blankPublishingSeed(),
+    title: candidate.originalTopic || publishingSeedExcerpt(candidate.summary, 42) || "Seed候補から保存",
+    originalTheme: [
+      candidate.originalTopic,
+      candidate.summary ? `要点: ${candidate.summary}` : "",
+      candidate.questionForSelf ? `問い: ${candidate.questionForSelf}` : "",
+    ].filter(Boolean).join("\n"),
+    personalTake: take,
+    tags: [candidate.sourceName, "Seed候補"].filter(Boolean).join(", "),
+    savedDate: activeDate,
+    status: "種",
+    source: candidate.sourceName,
+    sourceUrl: candidate.sourceUrl,
+    seedCandidateId: candidate.id,
+    createdAt: now,
+    updatedAt: now,
+  });
+  publishingSeeds.unshift(seed);
+  candidate.status = "Seed化";
+  candidate.updatedAt = now;
+  activePublishingSeedCandidateId = "";
+  savePublishingSeeds();
+  savePublishingSeedCandidates();
+  renderPublishingSeedCandidates();
+  renderPublishingSeeds();
+  if (status) status.textContent = "候補をSeedsへ保存しました。";
+}
+
+function createPublishingSeedCandidateCard(candidate) {
+  const card = document.createElement("article");
+  card.className = `publishing-seed-candidate-card status-${candidate.status}`;
+
+  const header = document.createElement("div");
+  header.className = "publishing-seed-candidate-card-header";
+  const titleBlock = document.createElement("div");
+  const title = document.createElement("h3");
+  title.textContent = candidate.originalTopic || publishingSeedExcerpt(candidate.summary, 54) || "無題の候補";
+  const meta = document.createElement("span");
+  meta.textContent = `${candidate.fetchedDate || "-"} / ${candidate.status}`;
+  titleBlock.append(title, meta);
+  header.append(titleBlock);
+
+  const summary = document.createElement("p");
+  summary.className = "publishing-seed-candidate-summary";
+  summary.textContent = candidate.summary || "要点はまだありません。";
+
+  const question = document.createElement("p");
+  question.className = "publishing-seed-candidate-question";
+  question.textContent = candidate.questionForSelf ? `問い: ${candidate.questionForSelf}` : "問いはまだありません。";
+
+  const source = document.createElement("div");
+  source.className = "publishing-seed-candidate-source";
+  const sourceName = document.createElement("span");
+  sourceName.textContent = candidate.sourceName || "出典未設定";
+  source.append(sourceName);
+  if (candidate.sourceUrl) {
+    const link = document.createElement("a");
+    link.href = candidate.sourceUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "出典を開く";
+    source.append(link);
+  }
+
+  const actions = document.createElement("div");
+  actions.className = "publishing-seed-candidate-actions";
+  const seedButton = document.createElement("button");
+  seedButton.className = "ghost-button";
+  seedButton.type = "button";
+  seedButton.textContent = candidate.status === "Seed化" ? "Seed化済み" : "Seedにする";
+  seedButton.disabled = candidate.status === "Seed化";
+  seedButton.addEventListener("click", () => {
+    activePublishingSeedCandidateId = activePublishingSeedCandidateId === candidate.id ? "" : candidate.id;
+    renderPublishingSeedCandidates();
+  });
+  const skipButton = document.createElement("button");
+  skipButton.className = "ghost-button";
+  skipButton.type = "button";
+  skipButton.textContent = candidate.status === "見送り" ? "未確認に戻す" : "見送る";
+  skipButton.addEventListener("click", () => setPublishingSeedCandidateStatus(candidate, candidate.status === "見送り" ? "未確認" : "見送り"));
+  actions.append(seedButton, skipButton);
+
+  card.append(header, summary, question, source, actions);
+
+  if (activePublishingSeedCandidateId === candidate.id && candidate.status !== "Seed化") {
+    const convert = document.createElement("div");
+    convert.className = "publishing-seed-candidate-convert";
+    const label = document.createElement("label");
+    label.textContent = "自分の一言";
+    const textarea = document.createElement("textarea");
+    textarea.rows = 4;
+    textarea.placeholder = "これは自分ならこう考える、という反応";
+    label.append(textarea);
+    const saveRow = document.createElement("div");
+    saveRow.className = "publishing-seed-candidate-convert-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "ghost-button";
+    cancelButton.type = "button";
+    cancelButton.textContent = "閉じる";
+    cancelButton.addEventListener("click", () => {
+      activePublishingSeedCandidateId = "";
+      renderPublishingSeedCandidates();
+    });
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.textContent = "Seedsへ保存";
+    saveButton.addEventListener("click", () => createSeedFromCandidate(candidate, textarea.value));
+    saveRow.append(cancelButton, saveButton);
+    convert.append(label, saveRow);
+    card.append(convert);
+    setTimeout(() => textarea.focus(), 0);
+  }
+
+  return card;
+}
+
+function renderPublishingSeedCandidates() {
+  const target = $("#publishingSeedCandidateList");
+  if (!target) return;
+  updatePublishingSeedCandidateSummary();
+  const fetchedDate = $("#publishingSeedCandidateFetchedDate");
+  if (fetchedDate && !fetchedDate.value) fetchedDate.value = activeDate;
+  const candidates = filteredPublishingSeedCandidates();
+  const count = $("#publishingSeedCandidateSearchCount");
+  if (count) count.textContent = `${candidates.length}件表示`;
+  if (!candidates.length) {
+    const empty = document.createElement("div");
+    empty.className = "publishing-seed-candidate-empty";
+    const title = document.createElement("strong");
+    title.textContent = publishingSeedCandidates.length ? "この状態の候補はありません。" : "まだSeed候補はありません。";
+    const message = document.createElement("p");
+    message.textContent = publishingSeedCandidates.length
+      ? "状態フィルターを変えると、別の候補を確認できます。"
+      : "手動入力かJSON取り込みで、まず候補を並べられます。気になったものだけSeedsへ送ります。";
+    empty.append(title, message);
+    target.replaceChildren(empty);
+    return;
+  }
+  target.replaceChildren(...candidates.map(createPublishingSeedCandidateCard));
+}
+
+function savePublishingSeedCandidateFromForm(event) {
+  event?.preventDefault();
+  const values = readPublishingSeedCandidateForm();
+  const status = $("#publishingSeedCandidateStatus");
+  if (!values.originalTopic && !values.summary && !values.questionForSelf) {
+    if (status) status.textContent = "元の話題、要点、問いのどれかを入れると候補にできます。";
+    return;
+  }
+  const now = new Date().toISOString();
+  const candidate = normalizePublishingSeedCandidate({
+    ...blankPublishingSeedCandidate(),
+    ...values,
+    createdAt: now,
+    updatedAt: now,
+  });
+  publishingSeedCandidates.unshift(candidate);
+  savePublishingSeedCandidates();
+  clearPublishingSeedCandidateForm();
+  renderPublishingSeedCandidates();
+  if (status) status.textContent = "Seed候補を追加しました。";
+}
+
+function candidateItemsFromJson(value) {
+  const parsed = JSON.parse(value);
+  if (Array.isArray(parsed)) return parsed;
+  if (Array.isArray(parsed?.candidates)) return parsed.candidates;
+  if (Array.isArray(parsed?.items)) return parsed.items;
+  if (Array.isArray(parsed?.results)) return parsed.results;
+  if (parsed && typeof parsed === "object") return [parsed];
+  return [];
+}
+
+function importPublishingSeedCandidatesFromJson() {
+  const field = $("#publishingSeedCandidateJson");
+  const status = $("#publishingSeedCandidateImportStatus");
+  const raw = field?.value.trim() || "";
+  if (!raw) {
+    if (status) status.textContent = "JSONを貼り付けると取り込めます。";
+    return;
+  }
+  try {
+    const now = new Date().toISOString();
+    const imported = candidateItemsFromJson(raw)
+      .map((item) => normalizePublishingSeedCandidate({ ...item, createdAt: item?.createdAt || now, updatedAt: now }))
+      .filter((candidate) => publishingSeedCandidateSummaryText(candidate));
+    if (!imported.length) {
+      if (status) status.textContent = "取り込める候補が見つかりませんでした。";
+      return;
+    }
+    publishingSeedCandidates = [...imported, ...publishingSeedCandidates];
+    savePublishingSeedCandidates();
+    renderPublishingSeedCandidates();
+    if (field) field.value = "";
+    if (status) status.textContent = `${imported.length}件のSeed候補を取り込みました。`;
+  } catch (error) {
+    if (status) status.textContent = "JSONとして読み取れませんでした。形式を確認してください。";
+  }
 }
 
 function publishingSeedExcerpt(value, maxLength = 82) {
@@ -9743,6 +10071,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  renderPublishingSeedCandidates();
   renderPublishingSeeds();
   renderXExperimentLogs();
   renderOperationExperiment();
@@ -10217,6 +10546,17 @@ function bindEvents() {
     publishingSeedStatusFilter = event.target.value;
     renderPublishingSeeds();
   });
+  $("#publishingSeedCandidateForm")?.addEventListener("submit", savePublishingSeedCandidateFromForm);
+  $("#clearPublishingSeedCandidateForm")?.addEventListener("click", () => {
+    clearPublishingSeedCandidateForm();
+    const status = $("#publishingSeedCandidateStatus");
+    if (status) status.textContent = "入力を空にしました。";
+  });
+  $("#importPublishingSeedCandidates")?.addEventListener("click", importPublishingSeedCandidatesFromJson);
+  $("#publishingSeedCandidateFilterStatus")?.addEventListener("change", (event) => {
+    publishingSeedCandidateStatusFilter = event.target.value;
+    renderPublishingSeedCandidates();
+  });
   $("#xExperimentForm")?.addEventListener("submit", saveXExperimentFromForm);
   $("#newXExperiment")?.addEventListener("click", () => toggleXExperimentCreateForm());
   $("#xExperimentCreateForm")?.addEventListener("submit", createNewXExperiment);
@@ -10374,6 +10714,7 @@ const BACKUP_KEYS = [
   OPERATION_EXPERIMENT_STORAGE_KEY,
   X_EXPERIMENT_LOG_STORAGE_KEY,
   PUBLISHING_SEEDS_STORAGE_KEY,
+  PUBLISHING_SEED_CANDIDATES_STORAGE_KEY,
   CUSTOM_DAILY_TASKS_STORAGE_KEY,
   DAILY_TASK_ORDER_STORAGE_KEY,
   LATER_STORAGE_KEY,
@@ -10486,6 +10827,7 @@ function createBackup() {
   data[OPERATION_EXPERIMENT_STORAGE_KEY] = readStoredJson(OPERATION_EXPERIMENT_STORAGE_KEY, defaultOperationExperimentStore());
   data[X_EXPERIMENT_LOG_STORAGE_KEY] = readStoredJson(X_EXPERIMENT_LOG_STORAGE_KEY, []);
   data[PUBLISHING_SEEDS_STORAGE_KEY] = readStoredJson(PUBLISHING_SEEDS_STORAGE_KEY, []);
+  data[PUBLISHING_SEED_CANDIDATES_STORAGE_KEY] = readStoredJson(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY, []);
   data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
   data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
@@ -10703,6 +11045,9 @@ function buildSakuraSnapshot(mode) {
   const publishingSeedItems = asArray(readStoredJson(PUBLISHING_SEEDS_STORAGE_KEY, []))
     .map(normalizePublishingSeed)
     .filter((seed) => seed.savedDate >= logFromKey || seed.status === "種");
+  const publishingSeedCandidateItems = asArray(readStoredJson(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY, []))
+    .map(normalizePublishingSeedCandidate)
+    .filter((candidate) => candidate.fetchedDate >= logFromKey || candidate.status === "未確認");
   const conversationFeedbackItems = asArray(readStoredJson(CONVERSATION_FEEDBACK_STORAGE_KEY, []));
   const conversationImprovementItems = asArray(readStoredJson(CONVERSATION_IMPROVEMENTS_STORAGE_KEY, []));
   const conversationReflectionItems = asArray(readStoredJson(CONVERSATION_REFLECTIONS_STORAGE_KEY, []));
@@ -11017,7 +11362,7 @@ function buildSakuraSnapshot(mode) {
     apps: {
       "operation-dashboard": {
         schemaVersion: 1,
-        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, publishingSeeds: publishingSeedItems, xExperimentLogs: xExperimentLogItems, learningSummary, learningHint, learningConfidence, memory },
+        data: { recentDays, olderDaysCount, laterItems, persistentMemos, learningLog: learningLogItems, publishingSeedCandidates: publishingSeedCandidateItems, publishingSeeds: publishingSeedItems, xExperimentLogs: xExperimentLogItems, learningSummary, learningHint, learningConfidence, memory },
       },
       "discovery-labo": {
         schemaVersion: 1,
