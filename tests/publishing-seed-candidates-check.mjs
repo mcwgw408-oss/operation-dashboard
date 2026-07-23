@@ -31,7 +31,7 @@ for (const id of [
   "publishingSeedCandidateForm",
   "publishingSeedCandidateTopic",
   "publishingSeedCandidateSummary",
-  "publishingSeedCandidateQuestion",
+  "publishingSeedCandidateReason",
   "publishingSeedCandidateSourceName",
   "publishingSeedCandidateSourceUrl",
   "publishingSeedCandidateFetchedDate",
@@ -45,7 +45,7 @@ for (const label of [
   "Seed候補",
   "元の話題",
   "要点",
-  "自分に向けた問い",
+  "なぜ、さくら向け？",
   "出典名",
   "出典URL",
   "未確認",
@@ -63,6 +63,8 @@ check(
 check(appJs.includes('const PUBLISHING_SEED_CANDIDATE_STATUSES = ["未確認", "Seed化", "見送り"];'), "Seed candidate statuses are not fixed");
 check(appJs.includes("let publishingSeedCandidates = loadPublishingSeedCandidates();"), "Seed candidates are not loaded at startup");
 check(appJs.includes("function normalizePublishingSeedCandidate"), "Seed candidate normalizer is missing");
+check(appJs.includes("source.reason ??"), "Seed candidate JSON import does not support reason");
+check(appJs.includes('source["なぜ、さくら向け？"]'), "Seed candidate JSON import does not support Japanese reason key");
 check(appJs.includes("function savePublishingSeedCandidateFromForm"), "Seed candidate manual save handler is missing");
 check(appJs.includes("function importPublishingSeedCandidatesFromJson"), "Seed candidate JSON import handler is missing");
 check(appJs.includes("function createSeedFromCandidate"), "Seed candidate conversion function is missing");
@@ -73,6 +75,7 @@ for (const token of [
   'candidate.status = "Seed化"',
   "seedCandidateId: candidate.id",
   "sourceUrl: candidate.sourceUrl",
+  "なぜ、さくら向け？",
   "savePublishingSeeds();",
   "savePublishingSeedCandidates();",
   "renderPublishingSeeds();",
@@ -92,6 +95,7 @@ check(createBackupBody.includes("data[PUBLISHING_SEED_CANDIDATES_STORAGE_KEY]"),
 check(appJs.includes("publishingSeedCandidates: publishingSeedCandidateItems"), "Seed candidates are not included in Sakura snapshot payload");
 
 check(stylesCss.includes(".publishing-seed-candidates-panel"), "Seed candidate panel styles are missing");
+check(stylesCss.includes(".publishing-seed-candidate-reason"), "Seed candidate reason styles are missing");
 check(stylesCss.includes(".publishing-seed-candidate-card.status-Seed化"), "Seed candidate Seed化 styles are missing");
 check(stylesCss.includes(".publishing-seed-candidate-card.status-見送り"), "Seed candidate 見送り styles are missing");
 

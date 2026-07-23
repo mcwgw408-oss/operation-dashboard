@@ -402,7 +402,7 @@ function blankPublishingSeedCandidate() {
     id: crypto.randomUUID(),
     originalTopic: "",
     summary: "",
-    questionForSelf: "",
+    reason: "",
     sourceName: "",
     sourceUrl: "",
     fetchedDate: activeDate,
@@ -433,16 +433,17 @@ function normalizePublishingSeedCandidate(raw) {
   const aliases = {
     originalTopic: source.originalTopic ?? source.topic ?? source.title ?? source.originalTheme ?? source["元の話題"] ?? "",
     summary: source.summary ?? source.point ?? source.description ?? source["要点"] ?? "",
-    questionForSelf: source.questionForSelf ?? source.question ?? source.prompt ?? source["自分に向けた問い"] ?? "",
+    reason: source.reason ?? source.whySakura ?? source.why ?? source.questionForSelf ?? source.question ?? source.prompt ?? source["なぜ、さくら向け？"] ?? source["自分に向けた問い"] ?? "",
     sourceName: source.sourceName ?? source.source ?? source.media ?? source["出典名"] ?? "",
     sourceUrl: source.sourceUrl ?? source.url ?? source.link ?? source["出典URL"] ?? "",
     fetchedDate: source.fetchedDate ?? source.date ?? source.createdDate ?? source["取得日"] ?? "",
   };
   const candidate = { ...base, ...source, ...aliases };
   candidate.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["originalTopic", "summary", "questionForSelf", "sourceName", "sourceUrl", "fetchedDate", "createdAt", "updatedAt"].forEach((key) => {
+  ["originalTopic", "summary", "reason", "sourceName", "sourceUrl", "fetchedDate", "createdAt", "updatedAt"].forEach((key) => {
     candidate[key] = String(candidate[key] ?? "");
   });
+  delete candidate.questionForSelf;
   candidate.status = PUBLISHING_SEED_CANDIDATE_STATUSES.includes(source.status) ? source.status : "未確認";
   if (!candidate.fetchedDate) candidate.fetchedDate = activeDate;
   if (!candidate.createdAt) candidate.createdAt = candidate.updatedAt || base.createdAt;
@@ -2782,7 +2783,7 @@ function readPublishingSeedCandidateForm() {
   return {
     originalTopic: $("#publishingSeedCandidateTopic")?.value.trim() || "",
     summary: $("#publishingSeedCandidateSummary")?.value.trim() || "",
-    questionForSelf: $("#publishingSeedCandidateQuestion")?.value.trim() || "",
+    reason: $("#publishingSeedCandidateReason")?.value.trim() || "",
     sourceName: $("#publishingSeedCandidateSourceName")?.value.trim() || "",
     sourceUrl: $("#publishingSeedCandidateSourceUrl")?.value.trim() || "",
     fetchedDate: $("#publishingSeedCandidateFetchedDate")?.value || activeDate,
@@ -2793,7 +2794,7 @@ function clearPublishingSeedCandidateForm() {
   [
     "#publishingSeedCandidateTopic",
     "#publishingSeedCandidateSummary",
-    "#publishingSeedCandidateQuestion",
+    "#publishingSeedCandidateReason",
     "#publishingSeedCandidateSourceName",
     "#publishingSeedCandidateSourceUrl",
   ].forEach((selector) => {
@@ -2805,7 +2806,7 @@ function clearPublishingSeedCandidateForm() {
 }
 
 function publishingSeedCandidateSummaryText(candidate) {
-  return [candidate.originalTopic, candidate.summary, candidate.questionForSelf, candidate.sourceName]
+  return [candidate.originalTopic, candidate.summary, candidate.reason, candidate.sourceName]
     .filter(Boolean)
     .join(" ");
 }
@@ -2852,7 +2853,7 @@ function createSeedFromCandidate(candidate, personalTake) {
     originalTheme: [
       candidate.originalTopic,
       candidate.summary ? `要点: ${candidate.summary}` : "",
-      candidate.questionForSelf ? `問い: ${candidate.questionForSelf}` : "",
+      candidate.reason ? `なぜ、さくら向け？: ${candidate.reason}` : "",
     ].filter(Boolean).join("\n"),
     personalTake: take,
     tags: [candidate.sourceName, "Seed候補"].filter(Boolean).join(", "),
@@ -2885,7 +2886,7 @@ function createPublishingSeedCandidateCard(candidate) {
   const title = document.createElement("h3");
   title.textContent = candidate.originalTopic || publishingSeedExcerpt(candidate.summary, 54) || "無題の候補";
   const meta = document.createElement("span");
-  meta.textContent = `${candidate.fetchedDate || "-"} / ${candidate.status}`;
+  meta.textContent = candidate.status;
   titleBlock.append(title, meta);
   header.append(titleBlock);
 
@@ -2893,9 +2894,9 @@ function createPublishingSeedCandidateCard(candidate) {
   summary.className = "publishing-seed-candidate-summary";
   summary.textContent = candidate.summary || "要点はまだありません。";
 
-  const question = document.createElement("p");
-  question.className = "publishing-seed-candidate-question";
-  question.textContent = candidate.questionForSelf ? `問い: ${candidate.questionForSelf}` : "問いはまだありません。";
+  const reason = document.createElement("p");
+  reason.className = "publishing-seed-candidate-reason";
+  reason.textContent = candidate.reason ? `なぜ、さくら向け？: ${candidate.reason}` : "なぜ、さくら向け？はまだありません。";
 
   const source = document.createElement("div");
   source.className = "publishing-seed-candidate-source";
@@ -2910,6 +2911,10 @@ function createPublishingSeedCandidateCard(candidate) {
     link.textContent = "出典を開く";
     source.append(link);
   }
+
+  const date = document.createElement("p");
+  date.className = "publishing-seed-candidate-date";
+  date.textContent = `日付: ${candidate.fetchedDate || "-"}`;
 
   const actions = document.createElement("div");
   actions.className = "publishing-seed-candidate-actions";
@@ -2929,7 +2934,7 @@ function createPublishingSeedCandidateCard(candidate) {
   skipButton.addEventListener("click", () => setPublishingSeedCandidateStatus(candidate, candidate.status === "見送り" ? "未確認" : "見送り"));
   actions.append(seedButton, skipButton);
 
-  card.append(header, summary, question, source, actions);
+  card.append(header, summary, reason, source, date, actions);
 
   if (activePublishingSeedCandidateId === candidate.id && candidate.status !== "Seed化") {
     const convert = document.createElement("div");
@@ -2992,8 +2997,8 @@ function savePublishingSeedCandidateFromForm(event) {
   event?.preventDefault();
   const values = readPublishingSeedCandidateForm();
   const status = $("#publishingSeedCandidateStatus");
-  if (!values.originalTopic && !values.summary && !values.questionForSelf) {
-    if (status) status.textContent = "元の話題、要点、問いのどれかを入れると候補にできます。";
+  if (!values.originalTopic && !values.summary && !values.reason) {
+    if (status) status.textContent = "元の話題、要点、なぜ、さくら向け？のどれかを入れると候補にできます。";
     return;
   }
   const now = new Date().toISOString();

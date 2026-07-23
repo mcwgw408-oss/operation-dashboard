@@ -63,7 +63,7 @@ function createNode(tagName = "div") {
 function createDocumentStub(values) {
   const nodes = new Map();
   for (const [id, value] of Object.entries(values)) {
-    const node = createNode(id.includes("Summary") || id.includes("Question") || id.includes("Json") ? "textarea" : "input");
+    const node = createNode(id.includes("Summary") || id.includes("Reason") || id.includes("Json") ? "textarea" : "input");
     node.value = value;
     nodes.set(`#${id}`, node);
   }
@@ -127,7 +127,7 @@ const context = {
   document: createDocumentStub({
     publishingSeedCandidateTopic: "AI時代の毎日発信",
     publishingSeedCandidateSummary: "書く前の反応を保存する人が増えている",
-    publishingSeedCandidateQuestion: "自分は何に反応したのか？",
+    publishingSeedCandidateReason: "さくらの毎日発信に近い悩みだから",
     publishingSeedCandidateSourceName: "manual",
     publishingSeedCandidateSourceUrl: "https://example.com/topic",
     publishingSeedCandidateFetchedDate: "2026-07-23",
@@ -135,7 +135,7 @@ const context = {
       candidates: [{
         "元の話題": "JSON候補",
         "要点": "外部取得をあとで接続できる形",
-        "自分に向けた問い": "どこに自分の視点がある？",
+        "なぜ、さくら向け？": "候補からSeedへ移す判断を試せるから",
         "出典名": "json",
         "出典URL": "https://example.com/json",
         "取得日": "2026-07-23",
@@ -183,8 +183,10 @@ vm.runInNewContext(`${stripStartup(readFileSync(sourcePath, "utf8"))}\n${exposed
 const result = context.__seedCandidateFlowResult;
 check(result.afterManual.length === 1, "Manual candidate was not saved");
 check(result.afterManual[0].originalTopic === "AI時代の毎日発信", "Manual candidate topic was not persisted");
+check(result.afterManual[0].reason === "さくらの毎日発信に近い悩みだから", "Manual candidate reason was not persisted");
 check(result.afterImport.length === 2, "JSON candidate was not imported");
 check(result.afterImport[0].originalTopic === "JSON候補", "Japanese JSON keys were not normalized");
+check(result.afterImport[0].reason === "候補からSeedへ移す判断を試せるから", "Japanese reason key was not normalized");
 check(result.afterSeed[0].status === "Seed化", "Candidate was not marked Seed化");
 check(result.seeds.length === 1, "Seed was not created from candidate");
 check(result.seeds[0].personalTake.includes("自分の視点"), "Created Seed did not use personal take");

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260723-seed-candidates-mvp" />
+    <link rel="stylesheet" href="./styles.css?v=20260723-seed-candidate-reason" />
   </head>
   <body>
     <div class="app">
@@ -1067,7 +1067,7 @@
             <label>出典名<input id="publishingSeedCandidateSourceName" type="text" placeholder="X, Substack, note など" /></label>
             <label>取得日<input id="publishingSeedCandidateFetchedDate" type="date" /></label>
             <label class="publishing-seed-candidate-wide-field">要点<textarea id="publishingSeedCandidateSummary" rows="3" placeholder="何が話題なのか、どこが気になったのか"></textarea></label>
-            <label class="publishing-seed-candidate-wide-field">自分に向けた問い<textarea id="publishingSeedCandidateQuestion" rows="3" placeholder="自分なら何を考える？どこに違和感がある？"></textarea></label>
+            <label class="publishing-seed-candidate-wide-field">なぜ、さくら向け？<textarea id="publishingSeedCandidateReason" rows="3" placeholder="なぜ、この候補をさくらに見せたいと思ったか"></textarea></label>
             <label class="publishing-seed-candidate-wide-field">出典URL<input id="publishingSeedCandidateSourceUrl" type="url" placeholder="https://..." /></label>
             <div class="publishing-seed-candidate-save-row">
               <p id="publishingSeedCandidateStatus" class="publishing-seed-candidate-status" role="status" aria-live="polite">手動で1件ずつ候補を追加できます。</p>
@@ -1078,7 +1078,7 @@
 
           <details class="publishing-seed-candidate-import">
             <summary>JSONで候補を取り込む</summary>
-            <textarea id="publishingSeedCandidateJson" rows="8" placeholder='[{"originalTopic":"話題","summary":"要点","questionForSelf":"自分への問い","sourceName":"X","sourceUrl":"https://...","fetchedDate":"2026-07-23"}]'></textarea>
+            <textarea id="publishingSeedCandidateJson" rows="8" placeholder='[{"originalTopic":"話題","summary":"要点","reason":"なぜ、さくら向け？","sourceName":"X","sourceUrl":"https://...","fetchedDate":"2026-07-23"}]'></textarea>
             <div class="publishing-seed-candidate-save-row">
               <p id="publishingSeedCandidateImportStatus" class="publishing-seed-candidate-status" role="status" aria-live="polite">配列、または candidates / items / results を含むJSONを取り込めます。</p>
               <button class="ghost-button" id="importPublishingSeedCandidates" type="button">取り込む</button>
@@ -1716,6 +1716,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260723-seed-candidates-mvp"></script>
+    <script src="./app.js?v=20260723-seed-candidate-reason"></script>
   </body>
 </html>

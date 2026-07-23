@@ -3766,23 +3766,29 @@ textarea {
 
 .publishing-seed-candidate-card-header span,
 .publishing-seed-candidate-source,
+.publishing-seed-candidate-date,
 .publishing-seed-candidate-empty p {
   color: var(--muted);
   font-size: 12px;
 }
 
 .publishing-seed-candidate-summary,
-.publishing-seed-candidate-question {
+.publishing-seed-candidate-reason,
+.publishing-seed-candidate-date {
   margin: 0;
   overflow-wrap: anywhere;
   font-size: 13px;
   line-height: 1.65;
 }
 
-.publishing-seed-candidate-question {
+.publishing-seed-candidate-reason {
   border-left: 3px solid var(--blue-line);
   background: rgba(246, 250, 253, 0.92);
   padding: 8px 10px;
+}
+
+.publishing-seed-candidate-date {
+  font-size: 12px;
 }
 
 .publishing-seed-candidate-source {
