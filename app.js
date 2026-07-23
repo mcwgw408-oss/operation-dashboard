@@ -209,6 +209,7 @@ let publishingSeedStatusFilter = "all";
 let publishingSeedCandidates = loadPublishingSeedCandidates();
 let publishingSeedCandidateStatusFilter = "all";
 let activePublishingSeedCandidateId = "";
+let editingPublishingSeedCandidateId = "";
 let publishingSeedActiveView = "news";
 let editingPublishingSeedId = "";
 let mergingPublishingSeedId = "";
@@ -2998,9 +2999,71 @@ function addCandidateToExistingSeed(candidate, seedId, decisionNote) {
   if (status) status.textContent = "既存のSeedへニュースを追加しました。";
 }
 
+function updatePublishingSeedCandidateFromEdit(candidate, form) {
+  candidate.originalTopic = form.querySelector("[data-candidate-edit='originalTopic']")?.value.trim() || "";
+  candidate.summary = form.querySelector("[data-candidate-edit='summary']")?.value.trim() || "";
+  candidate.reason = form.querySelector("[data-candidate-edit='reason']")?.value.trim() || "";
+  candidate.sourceName = form.querySelector("[data-candidate-edit='sourceName']")?.value.trim() || "";
+  candidate.sourceUrl = form.querySelector("[data-candidate-edit='sourceUrl']")?.value.trim() || "";
+  candidate.fetchedDate = form.querySelector("[data-candidate-edit='fetchedDate']")?.value || activeDate;
+  candidate.decisionNote = form.querySelector("[data-candidate-edit='decisionNote']")?.value.trim() || "";
+  candidate.updatedAt = new Date().toISOString();
+  editingPublishingSeedCandidateId = "";
+  savePublishingSeedCandidates();
+  renderPublishingSeedCandidates();
+  renderPublishingSeeds();
+}
+
 function createPublishingSeedCandidateCard(candidate) {
   const card = document.createElement("article");
   card.className = `publishing-seed-candidate-card status-${candidate.status}`;
+
+  if (editingPublishingSeedCandidateId === candidate.id) {
+    candidate.collapsed = false;
+    const form = document.createElement("form");
+    form.className = "publishing-seed-candidate-edit-form";
+    const fields = [
+      ["originalTopic", "ニュースタイトル", "input", candidate.originalTopic],
+      ["summary", "要点", "textarea", candidate.summary],
+      ["reason", "選定理由", "textarea", candidate.reason],
+      ["sourceName", "出典名", "input", candidate.sourceName],
+      ["sourceUrl", "出典URL", "input", candidate.sourceUrl],
+      ["fetchedDate", "取得日", "date", candidate.fetchedDate || activeDate],
+      ["decisionNote", "判断メモ", "textarea", candidate.decisionNote],
+    ];
+    fields.forEach(([key, labelText, type, value]) => {
+      const label = document.createElement("label");
+      label.textContent = labelText;
+      const field = document.createElement(type === "textarea" ? "textarea" : "input");
+      field.dataset.candidateEdit = key;
+      if (type !== "textarea") field.type = type;
+      field.value = value || "";
+      if (type === "textarea") field.rows = key === "decisionNote" ? 3 : 4;
+      label.append(field);
+      form.append(label);
+    });
+    const actions = document.createElement("div");
+    actions.className = "publishing-seed-candidate-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "ghost-button";
+    cancelButton.type = "button";
+    cancelButton.textContent = "キャンセル";
+    cancelButton.addEventListener("click", () => {
+      editingPublishingSeedCandidateId = "";
+      renderPublishingSeedCandidates();
+    });
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.textContent = "保存";
+    actions.append(cancelButton, saveButton);
+    form.append(actions);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      updatePublishingSeedCandidateFromEdit(candidate, form);
+    });
+    card.append(form);
+    return card;
+  }
 
   const header = document.createElement("div");
   header.className = "publishing-seed-candidate-card-header";
@@ -3024,7 +3087,18 @@ function createPublishingSeedCandidateCard(candidate) {
     const compactMeta = document.createElement("span");
     compactMeta.textContent = `${publishingSeedCandidateDecisionLabel(candidate)} / ${publishingSeedCandidateSeededLabel(candidate)}`;
     compact.append(compactTitle, compactMeta);
-    card.replaceChildren(compact);
+    const compactActions = document.createElement("div");
+    compactActions.className = "publishing-seed-candidate-actions";
+    const editCompactButton = document.createElement("button");
+    editCompactButton.className = "ghost-button";
+    editCompactButton.type = "button";
+    editCompactButton.textContent = "編集";
+    editCompactButton.addEventListener("click", () => {
+      editingPublishingSeedCandidateId = candidate.id;
+      renderPublishingSeedCandidates();
+    });
+    compactActions.append(editCompactButton);
+    card.replaceChildren(compact, compactActions);
     return card;
   }
 
@@ -3083,6 +3157,15 @@ function createPublishingSeedCandidateCard(candidate) {
 
   const actions = document.createElement("div");
   actions.className = "publishing-seed-candidate-actions";
+  const editButton = document.createElement("button");
+  editButton.className = "ghost-button";
+  editButton.type = "button";
+  editButton.textContent = "編集";
+  editButton.addEventListener("click", () => {
+    editingPublishingSeedCandidateId = candidate.id;
+    activePublishingSeedCandidateId = "";
+    renderPublishingSeedCandidates();
+  });
   const seedButton = document.createElement("button");
   seedButton.className = "ghost-button";
   seedButton.type = "button";
@@ -3103,7 +3186,7 @@ function createPublishingSeedCandidateCard(candidate) {
   collapseButton.textContent = publishingSeedCandidateIsDecided(candidate) ? "折りたたむ" : "あとで折りたたむ";
   collapseButton.disabled = !publishingSeedCandidateIsDecided(candidate);
   collapseButton.addEventListener("click", () => togglePublishingSeedCandidateCollapsed(candidate));
-  actions.append(seedButton, skipButton, collapseButton);
+  actions.append(editButton, seedButton, skipButton, collapseButton);
 
   card.append(header, summary, reason, source, date);
   if (publishingSeedCandidateIsDecided(candidate)) card.append(decision);

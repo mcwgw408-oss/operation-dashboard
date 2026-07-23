@@ -3917,6 +3917,19 @@ textarea {
   padding: 12px;
 }
 
+.publishing-seed-candidate-edit-form {
+  display: grid;
+  gap: 10px;
+}
+
+.publishing-seed-candidate-edit-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .publishing-seed-candidate-convert select {
   width: 100%;
 }

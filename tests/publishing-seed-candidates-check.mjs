@@ -68,6 +68,8 @@ check(appJs.includes('source["なぜ、さくら向け？"]'), "Seed candidate J
 check(appJs.includes("function savePublishingSeedCandidateFromForm"), "Seed candidate manual save handler is missing");
 check(appJs.includes("function importPublishingSeedCandidatesFromJson"), "Seed candidate JSON import handler is missing");
 check(appJs.includes("function createSeedFromCandidate"), "Seed candidate conversion function is missing");
+check(appJs.includes("function updatePublishingSeedCandidateFromEdit"), "Seed candidate edit handler is missing");
+check(appJs.includes("data-candidate-edit='summary'"), "Seed candidate edit form is missing summary field");
 
 const conversionBody = extractDelimitedBlock(appJs, "function createSeedFromCandidate", "{", "}");
 for (const token of [
@@ -97,6 +99,7 @@ check(appJs.includes("publishingSeedCandidates: publishingSeedCandidateItems"), 
 
 check(stylesCss.includes(".publishing-seed-candidates-panel"), "Seed candidate panel styles are missing");
 check(stylesCss.includes(".publishing-seed-candidate-reason"), "Seed candidate reason styles are missing");
+check(stylesCss.includes(".publishing-seed-candidate-edit-form"), "Seed candidate edit styles are missing");
 check(stylesCss.includes(".publishing-seed-candidate-card.status-Seed化"), "Seed candidate Seed化 styles are missing");
 check(stylesCss.includes(".publishing-seed-candidate-card.status-見送り"), "Seed candidate 見送り styles are missing");
 
