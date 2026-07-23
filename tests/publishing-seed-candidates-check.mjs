@@ -72,8 +72,9 @@ check(appJs.includes("function createSeedFromCandidate"), "Seed candidate conver
 const conversionBody = extractDelimitedBlock(appJs, "function createSeedFromCandidate", "{", "}");
 for (const token of [
   "publishingSeeds.unshift(seed)",
-  'candidate.status = "Seed化"',
+  "ensurePublishingSeedCandidateLink(seed, candidate, take)",
   "seedCandidateId: candidate.id",
+  "candidateIds: [candidate.id]",
   "sourceUrl: candidate.sourceUrl",
   "選定理由",
   "savePublishingSeeds();",

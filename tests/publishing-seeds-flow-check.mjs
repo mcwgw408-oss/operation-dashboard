@@ -64,7 +64,7 @@ function createNode(tagName = "div") {
 function createDocumentStub(seedValues) {
   const nodes = new Map();
   for (const [id, value] of Object.entries(seedValues)) {
-    const node = createNode(id.includes("Theme") || id.includes("Take") ? "textarea" : "input");
+    const node = createNode(id.includes("Theme") || id.includes("Take") || id.includes("Summary") ? "textarea" : "input");
     node.value = value;
     nodes.set(`#${id}`, node);
   }
@@ -76,6 +76,10 @@ function createDocumentStub(seedValues) {
     "publishingSeedSearchCount",
     "publishingSeedSaveStatus",
     "publishingSeedList",
+    "publishing-seed-candidates",
+    "publishing-seeds",
+    "publishingSeedNewsTab",
+    "publishingSeedSeedsTab",
   ]) {
     nodes.set(`#${id}`, nodes.get(`#${id}`) || createNode());
   }
@@ -120,6 +124,8 @@ const context = {
   },
   document: createDocumentStub({
     publishingSeedTitle: "Seeds MVP",
+    publishingSeedThemeName: "未来の発信",
+    publishingSeedSummary: "書けない日に備える思考メモ",
     publishingSeedOriginalTheme: "書けない日に未来の自分を助ける",
     publishingSeedPersonalTake: "記事を貯めるのではなく、自分の反応を貯める。",
     publishingSeedTags: "発信, Seeds",
@@ -139,12 +145,30 @@ context.window = context;
 const exposed = `
 savePublishingSeedFromForm({ preventDefault() {} });
 const savedSeeds = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
+publishingSeedCandidates = [
+  normalizePublishingSeedCandidate({ id: "candidate-a", originalTopic: "関連ニュースA", status: "Seed化", seedIds: [publishingSeeds[0].id] }),
+  normalizePublishingSeedCandidate({ id: "candidate-b", originalTopic: "関連ニュースB", status: "Seed化", seedIds: ["merge-source"] }),
+];
+publishingSeeds.push(normalizePublishingSeed({
+  id: "merge-source",
+  title: "統合元Seed",
+  summary: "統合元の要約",
+  personalTake: "統合元のメモ",
+  tags: "統合",
+  candidateIds: ["candidate-b"],
+}));
+publishingSeeds[0].candidateIds = ["candidate-a"];
+mergePublishingSeeds(publishingSeeds[0], "merge-source");
+const mergedSeeds = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
+const mergedCandidates = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY));
 convertPublishingSeedToExperiment(publishingSeeds[0]);
 const articleSeeds = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
 const experimentLogs = JSON.parse(localStorage.getItem(X_EXPERIMENT_LOG_STORAGE_KEY));
 const backup = createBackup();
 globalThis.__seedsFlowResult = {
   savedSeeds,
+  mergedSeeds,
+  mergedCandidates,
   articleSeeds,
   experimentLogs,
   backupSeeds: backup.data[PUBLISHING_SEEDS_STORAGE_KEY],
@@ -159,7 +183,12 @@ vm.runInNewContext(`${stripStartup(readFileSync(sourcePath, "utf8"))}\n${exposed
 const result = context.__seedsFlowResult;
 check(result.savedSeeds.length === 1, "Seed was not saved");
 check(result.savedSeeds[0].title === "Seeds MVP", "Seed title was not persisted");
+check(result.savedSeeds[0].summary === "書けない日に備える思考メモ", "Seed summary was not persisted");
+check(result.savedSeeds[0].themeName === "未来の発信", "Seed theme name was not persisted");
 check(result.savedSeeds[0].personalTake.includes("自分の反応"), "Seed personal take was not persisted");
+check(result.mergedSeeds.length === 1, "Merged source Seed was not removed");
+check(result.mergedSeeds[0].candidateIds.includes("candidate-a") && result.mergedSeeds[0].candidateIds.includes("candidate-b"), "Merged Seed did not preserve candidate links");
+check(result.mergedCandidates.find((candidate) => candidate.id === "candidate-b").seedIds.includes(result.mergedSeeds[0].id), "Merged candidate was not relinked");
 check(result.articleSeeds[0].status === "記事化", "Seed was not marked as article");
 check(Boolean(result.articleSeeds[0].articleExperimentId), "Seed articleExperimentId was not set");
 check(result.experimentLogs.length === 1, "Experiment log was not created from Seed");

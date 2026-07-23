@@ -3633,6 +3633,32 @@ textarea {
   gap: 6px;
 }
 
+.publishing-seed-workbench-tabs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 8px;
+}
+
+.publishing-seed-workbench-tabs button {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.publishing-seed-workbench-tabs button.is-active {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+  color: var(--text);
+}
+
 .publishing-seed-candidates-panel {
   display: grid;
   gap: 14px;
@@ -3744,6 +3770,37 @@ textarea {
   padding: 12px;
 }
 
+.publishing-seed-candidate-card.is-collapsed {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.publishing-seed-candidate-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 12px;
+  text-align: left;
+}
+
+.publishing-seed-candidate-compact strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.publishing-seed-candidate-compact span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .publishing-seed-candidate-card.status-Seed化 {
   border-color: var(--green-line);
   background: var(--green-soft);
@@ -3830,6 +3887,22 @@ textarea {
   text-underline-offset: 3px;
 }
 
+.publishing-seed-candidate-decision {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.78);
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.publishing-seed-candidate-decision p {
+  margin: 0;
+  color: var(--text);
+}
+
 .publishing-seed-candidate-actions,
 .publishing-seed-candidate-convert-actions {
   justify-content: flex-end;
@@ -3842,6 +3915,10 @@ textarea {
   border-radius: var(--radius-item);
   background: rgba(251, 253, 251, 0.92);
   padding: 12px;
+}
+
+.publishing-seed-candidate-convert select {
+  width: 100%;
 }
 
 .publishing-seeds-panel {
@@ -3962,6 +4039,7 @@ textarea {
   width: min(120px, 100%);
 }
 
+.publishing-seed-summary,
 .publishing-seed-original,
 .publishing-seed-take,
 .publishing-seed-empty p {
@@ -3969,6 +4047,12 @@ textarea {
   overflow-wrap: anywhere;
   font-size: 13px;
   line-height: 1.65;
+}
+
+.publishing-seed-summary {
+  border-left: 3px solid var(--green-line);
+  background: rgba(247, 250, 248, 0.78);
+  padding: 8px 10px;
 }
 
 .publishing-seed-original {
@@ -4000,6 +4084,52 @@ textarea {
 
 .publishing-seed-actions {
   justify-content: flex-end;
+}
+
+.publishing-seed-edit-form,
+.publishing-seed-merge,
+.publishing-seed-related {
+  display: grid;
+  gap: 10px;
+}
+
+.publishing-seed-edit-form label,
+.publishing-seed-merge label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.publishing-seed-related {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px;
+}
+
+.publishing-seed-related strong {
+  font-size: 12px;
+}
+
+.publishing-seed-related ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.publishing-seed-related li {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.publishing-seed-merge {
+  border: 1px dashed var(--green-line);
+  border-radius: var(--radius-item);
+  background: rgba(247, 250, 248, 0.82);
+  padding: 10px;
 }
 
 .x-experiment-panel {

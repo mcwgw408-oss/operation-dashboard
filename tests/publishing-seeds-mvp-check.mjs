@@ -28,8 +28,12 @@ function extractDelimitedBlock(source, marker, openCharacter, closeCharacter) {
 
 for (const id of [
   "publishing-seeds",
+  "publishingSeedNewsTab",
+  "publishingSeedSeedsTab",
   "publishingSeedForm",
   "publishingSeedTitle",
+  "publishingSeedSummary",
+  "publishingSeedThemeName",
   "publishingSeedOriginalTheme",
   "publishingSeedPersonalTake",
   "publishingSeedTags",
@@ -59,6 +63,10 @@ check(appJs.includes('const PUBLISHING_SEED_STATUSES = ["種", "記事化", "保
 check(appJs.includes("let publishingSeeds = loadPublishingSeeds();"), "Seeds data is not loaded at startup");
 check(appJs.includes("function savePublishingSeedFromForm"), "Seeds save handler is missing");
 check(appJs.includes("function convertPublishingSeedToExperiment"), "Seeds article conversion is missing");
+check(appJs.includes("function updatePublishingSeedFromEdit"), "Seeds edit handler is missing");
+check(appJs.includes("function mergePublishingSeeds"), "Seeds merge handler is missing");
+check(appJs.includes("function publishingSeedRelatedCandidates"), "Seeds related news renderer is missing");
+check(appJs.includes("function setPublishingSeedActiveView"), "Seed workbench tabs are not wired");
 check(appJs.includes("renderPublishingSeeds();"), "Seeds render is not connected");
 check(appJs.includes('$("#publishingSeedForm")?.addEventListener("submit", savePublishingSeedFromForm);'), "Seeds form submit is not bound");
 

@@ -209,6 +209,10 @@ let publishingSeedStatusFilter = "all";
 let publishingSeedCandidates = loadPublishingSeedCandidates();
 let publishingSeedCandidateStatusFilter = "all";
 let activePublishingSeedCandidateId = "";
+let publishingSeedActiveView = "news";
+let editingPublishingSeedId = "";
+let mergingPublishingSeedId = "";
+linkPublishingSeedRecords();
 let editingXExperimentId = "";
 let activeXExperimentDetailId = "";
 let savingXExperiment = false;
@@ -382,6 +386,8 @@ function blankPublishingSeed() {
   return {
     id: crypto.randomUUID(),
     title: "",
+    summary: "",
+    themeName: "",
     originalTheme: "",
     personalTake: "",
     tags: "",
@@ -390,6 +396,7 @@ function blankPublishingSeed() {
     source: "",
     sourceUrl: "",
     seedCandidateId: "",
+    candidateIds: [],
     articleExperimentId: "",
     createdAt: now,
     updatedAt: now,
@@ -407,6 +414,9 @@ function blankPublishingSeedCandidate() {
     sourceUrl: "",
     fetchedDate: activeDate,
     status: "未確認",
+    collapsed: false,
+    seedIds: [],
+    decisionNote: "",
     createdAt: now,
     updatedAt: now,
   };
@@ -417,9 +427,15 @@ function normalizePublishingSeed(raw) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const seed = { ...base, ...source };
   seed.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["title", "originalTheme", "personalTake", "tags", "savedDate", "source", "sourceUrl", "seedCandidateId", "articleExperimentId", "createdAt", "updatedAt"].forEach((key) => {
+  seed.summary = source.summary ?? source.description ?? "";
+  seed.themeName = source.themeName ?? source.theme ?? "";
+  ["title", "summary", "themeName", "originalTheme", "personalTake", "tags", "savedDate", "source", "sourceUrl", "seedCandidateId", "articleExperimentId", "createdAt", "updatedAt"].forEach((key) => {
     seed[key] = String(seed[key] ?? "");
   });
+  seed.candidateIds = [...new Set([
+    ...(Array.isArray(source.candidateIds) ? source.candidateIds : []),
+    source.seedCandidateId,
+  ].filter(Boolean).map(String))];
   seed.status = PUBLISHING_SEED_STATUSES.includes(source.status) ? source.status : "種";
   if (!seed.savedDate) seed.savedDate = activeDate;
   if (!seed.createdAt) seed.createdAt = seed.updatedAt || base.createdAt;
@@ -440,9 +456,11 @@ function normalizePublishingSeedCandidate(raw) {
   };
   const candidate = { ...base, ...source, ...aliases };
   candidate.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["originalTopic", "summary", "reason", "sourceName", "sourceUrl", "fetchedDate", "createdAt", "updatedAt"].forEach((key) => {
+  ["originalTopic", "summary", "reason", "sourceName", "sourceUrl", "fetchedDate", "decisionNote", "createdAt", "updatedAt"].forEach((key) => {
     candidate[key] = String(candidate[key] ?? "");
   });
+  candidate.seedIds = Array.isArray(source.seedIds) ? [...new Set(source.seedIds.filter(Boolean).map(String))] : [];
+  candidate.collapsed = Boolean(source.collapsed);
   delete candidate.questionForSelf;
   candidate.status = PUBLISHING_SEED_CANDIDATE_STATUSES.includes(source.status) ? source.status : "未確認";
   if (!candidate.fetchedDate) candidate.fetchedDate = activeDate;
@@ -2811,6 +2829,20 @@ function publishingSeedCandidateSummaryText(candidate) {
     .join(" ");
 }
 
+function linkPublishingSeedRecords() {
+  if (!Array.isArray(publishingSeeds) || !Array.isArray(publishingSeedCandidates)) return;
+  const candidatesById = new Map(publishingSeedCandidates.map((candidate) => [candidate.id, candidate]));
+  publishingSeeds.forEach((seed) => {
+    seed.candidateIds = [...new Set([...(seed.candidateIds || []), seed.seedCandidateId].filter(Boolean))];
+    seed.candidateIds.forEach((candidateId) => {
+      const candidate = candidatesById.get(candidateId);
+      if (!candidate) return;
+      candidate.seedIds = [...new Set([...(candidate.seedIds || []), seed.id])];
+      if (candidate.status !== "見送り") candidate.status = "Seed化";
+    });
+  });
+}
+
 function filteredPublishingSeedCandidates() {
   return [...publishingSeedCandidates]
     .filter((candidate) => publishingSeedCandidateStatusFilter === "all" || candidate.status === publishingSeedCandidateStatusFilter)
@@ -2828,15 +2860,83 @@ function updatePublishingSeedCandidateSummary() {
   if (skipped) skipped.textContent = publishingSeedCandidates.filter((candidate) => candidate.status === "見送り").length;
 }
 
+function publishingSeedCandidateIsDecided(candidate) {
+  return candidate.status === "Seed化" || candidate.status === "見送り";
+}
+
+function publishingSeedCandidateSeededLabel(candidate) {
+  return candidate.seedIds?.length ? "Seed化済み" : "Seed未作成";
+}
+
+function publishingSeedCandidateDecisionLabel(candidate) {
+  if (candidate.status === "Seed化") return "採用";
+  if (candidate.status === "見送り") return "不採用";
+  return "未確認";
+}
+
+function findPublishingSeed(id) {
+  return publishingSeeds.find((seed) => seed.id === id) || null;
+}
+
+function findPublishingSeedCandidate(id) {
+  return publishingSeedCandidates.find((candidate) => candidate.id === id) || null;
+}
+
+function publishingSeedDisplayTitle(seed) {
+  return seed?.title || publishingSeedExcerpt(seed?.personalTake || seed?.originalTheme || seed?.summary, 48) || "無題のSeed";
+}
+
+function publishingSeedCandidateDisplayTitle(candidate) {
+  return candidate?.originalTopic || publishingSeedExcerpt(candidate?.summary, 54) || "無題の候補";
+}
+
+function ensurePublishingSeedCandidateLink(seed, candidate, decisionNote = "") {
+  if (!seed || !candidate) return;
+  seed.candidateIds = [...new Set([...(seed.candidateIds || []), candidate.id])];
+  if (!seed.seedCandidateId) seed.seedCandidateId = candidate.id;
+  candidate.seedIds = [...new Set([...(candidate.seedIds || []), seed.id])];
+  if (decisionNote) candidate.decisionNote = decisionNote;
+  candidate.status = "Seed化";
+  candidate.collapsed = true;
+  const now = new Date().toISOString();
+  seed.updatedAt = now;
+  candidate.updatedAt = now;
+}
+
 function setPublishingSeedCandidateStatus(candidate, status) {
   if (!PUBLISHING_SEED_CANDIDATE_STATUSES.includes(status)) return;
   candidate.status = status;
+  if (publishingSeedCandidateIsDecided(candidate)) {
+    candidate.collapsed = true;
+  }
   candidate.updatedAt = new Date().toISOString();
   if (activePublishingSeedCandidateId === candidate.id && status !== "未確認") {
     activePublishingSeedCandidateId = "";
   }
   savePublishingSeedCandidates();
   renderPublishingSeedCandidates();
+}
+
+function togglePublishingSeedCandidateCollapsed(candidate) {
+  if (!publishingSeedCandidateIsDecided(candidate)) return;
+  candidate.collapsed = !candidate.collapsed;
+  candidate.updatedAt = new Date().toISOString();
+  savePublishingSeedCandidates();
+  renderPublishingSeedCandidates();
+}
+
+function setPublishingSeedActiveView(view) {
+  publishingSeedActiveView = view === "seed" ? "seed" : "news";
+  const newsPanel = $("#publishing-seed-candidates");
+  const seedPanel = $("#publishing-seeds");
+  const newsTab = $("#publishingSeedNewsTab");
+  const seedTab = $("#publishingSeedSeedsTab");
+  if (newsPanel) newsPanel.hidden = publishingSeedActiveView !== "news";
+  if (seedPanel) seedPanel.hidden = publishingSeedActiveView !== "seed";
+  newsTab?.classList.toggle("is-active", publishingSeedActiveView === "news");
+  seedTab?.classList.toggle("is-active", publishingSeedActiveView === "seed");
+  newsTab?.setAttribute("aria-pressed", String(publishingSeedActiveView === "news"));
+  seedTab?.setAttribute("aria-pressed", String(publishingSeedActiveView === "seed"));
 }
 
 function createSeedFromCandidate(candidate, personalTake) {
@@ -2850,6 +2950,8 @@ function createSeedFromCandidate(candidate, personalTake) {
   const seed = normalizePublishingSeed({
     ...blankPublishingSeed(),
     title: candidate.originalTopic || publishingSeedExcerpt(candidate.summary, 42) || "Seed候補から保存",
+    summary: candidate.summary,
+    themeName: candidate.sourceName,
     originalTheme: [
       candidate.originalTopic,
       candidate.summary ? `要点: ${candidate.summary}` : "",
@@ -2862,18 +2964,38 @@ function createSeedFromCandidate(candidate, personalTake) {
     source: candidate.sourceName,
     sourceUrl: candidate.sourceUrl,
     seedCandidateId: candidate.id,
+    candidateIds: [candidate.id],
     createdAt: now,
     updatedAt: now,
   });
   publishingSeeds.unshift(seed);
-  candidate.status = "Seed化";
-  candidate.updatedAt = now;
+  ensurePublishingSeedCandidateLink(seed, candidate, take);
   activePublishingSeedCandidateId = "";
   savePublishingSeeds();
   savePublishingSeedCandidates();
   renderPublishingSeedCandidates();
   renderPublishingSeeds();
   if (status) status.textContent = "候補をSeedsへ保存しました。";
+}
+
+function addCandidateToExistingSeed(candidate, seedId, decisionNote) {
+  const status = $("#publishingSeedCandidateStatus");
+  const seed = findPublishingSeed(seedId);
+  const note = String(decisionNote || "").trim();
+  if (!seed) {
+    if (status) status.textContent = "追加先のSeedを選んでください。";
+    return;
+  }
+  ensurePublishingSeedCandidateLink(seed, candidate, note);
+  if (note) {
+    seed.personalTake = [seed.personalTake, `追加メモ: ${note}`].filter(Boolean).join("\n");
+  }
+  activePublishingSeedCandidateId = "";
+  savePublishingSeeds();
+  savePublishingSeedCandidates();
+  renderPublishingSeedCandidates();
+  renderPublishingSeeds();
+  if (status) status.textContent = "既存のSeedへニュースを追加しました。";
 }
 
 function createPublishingSeedCandidateCard(candidate) {
@@ -2886,9 +3008,25 @@ function createPublishingSeedCandidateCard(candidate) {
   const title = document.createElement("h3");
   title.textContent = candidate.originalTopic || publishingSeedExcerpt(candidate.summary, 54) || "無題の候補";
   const meta = document.createElement("span");
-  meta.textContent = candidate.status;
+  meta.textContent = `${publishingSeedCandidateDecisionLabel(candidate)} / ${publishingSeedCandidateSeededLabel(candidate)}`;
   titleBlock.append(title, meta);
   header.append(titleBlock);
+
+  if (publishingSeedCandidateIsDecided(candidate) && candidate.collapsed) {
+    card.classList.add("is-collapsed");
+    const compact = document.createElement("button");
+    compact.className = "publishing-seed-candidate-compact";
+    compact.type = "button";
+    compact.setAttribute("aria-label", "Seed候補の詳細を開く");
+    compact.addEventListener("click", () => togglePublishingSeedCandidateCollapsed(candidate));
+    const compactTitle = document.createElement("strong");
+    compactTitle.textContent = publishingSeedCandidateDisplayTitle(candidate);
+    const compactMeta = document.createElement("span");
+    compactMeta.textContent = `${publishingSeedCandidateDecisionLabel(candidate)} / ${publishingSeedCandidateSeededLabel(candidate)}`;
+    compact.append(compactTitle, compactMeta);
+    card.replaceChildren(compact);
+    return card;
+  }
 
   const summary = document.createElement("section");
   summary.className = "publishing-seed-candidate-summary";
@@ -2926,6 +3064,23 @@ function createPublishingSeedCandidateCard(candidate) {
   date.className = "publishing-seed-candidate-date";
   date.textContent = `日付: ${candidate.fetchedDate || "-"}`;
 
+  const decision = document.createElement("div");
+  decision.className = "publishing-seed-candidate-decision";
+  const decisionStatus = document.createElement("span");
+  decisionStatus.textContent = `判断: ${publishingSeedCandidateDecisionLabel(candidate)}`;
+  const decisionSeeds = document.createElement("span");
+  const linkedSeedTitles = (candidate.seedIds || [])
+    .map((id) => findPublishingSeed(id))
+    .filter(Boolean)
+    .map(publishingSeedDisplayTitle);
+  decisionSeeds.textContent = linkedSeedTitles.length ? `関連Seed: ${linkedSeedTitles.join(" / ")}` : "関連Seed: なし";
+  decision.append(decisionStatus, decisionSeeds);
+  if (candidate.decisionNote) {
+    const note = document.createElement("p");
+    note.textContent = `判断メモ: ${candidate.decisionNote}`;
+    decision.append(note);
+  }
+
   const actions = document.createElement("div");
   actions.className = "publishing-seed-candidate-actions";
   const seedButton = document.createElement("button");
@@ -2942,9 +3097,17 @@ function createPublishingSeedCandidateCard(candidate) {
   skipButton.type = "button";
   skipButton.textContent = candidate.status === "見送り" ? "未確認に戻す" : "見送る";
   skipButton.addEventListener("click", () => setPublishingSeedCandidateStatus(candidate, candidate.status === "見送り" ? "未確認" : "見送り"));
-  actions.append(seedButton, skipButton);
+  const collapseButton = document.createElement("button");
+  collapseButton.className = "ghost-button";
+  collapseButton.type = "button";
+  collapseButton.textContent = publishingSeedCandidateIsDecided(candidate) ? "折りたたむ" : "あとで折りたたむ";
+  collapseButton.disabled = !publishingSeedCandidateIsDecided(candidate);
+  collapseButton.addEventListener("click", () => togglePublishingSeedCandidateCollapsed(candidate));
+  actions.append(seedButton, skipButton, collapseButton);
 
-  card.append(header, summary, reason, source, date, actions);
+  card.append(header, summary, reason, source, date);
+  if (publishingSeedCandidateIsDecided(candidate)) card.append(decision);
+  card.append(actions);
 
   if (activePublishingSeedCandidateId === candidate.id && candidate.status !== "Seed化") {
     const convert = document.createElement("div");
@@ -2967,10 +3130,30 @@ function createPublishingSeedCandidateCard(candidate) {
     });
     const saveButton = document.createElement("button");
     saveButton.type = "button";
-    saveButton.textContent = "Seedsへ保存";
+    saveButton.textContent = "新しいSeedを作る";
     saveButton.addEventListener("click", () => createSeedFromCandidate(candidate, textarea.value));
     saveRow.append(cancelButton, saveButton);
-    convert.append(label, saveRow);
+
+    const existingLabel = document.createElement("label");
+    existingLabel.textContent = "既存のSeedに追加";
+    const seedSelect = document.createElement("select");
+    const emptyOption = document.createElement("option");
+    emptyOption.value = "";
+    emptyOption.textContent = "追加先を選ぶ";
+    seedSelect.append(emptyOption);
+    filteredPublishingSeeds().forEach((seed) => {
+      const option = document.createElement("option");
+      option.value = seed.id;
+      option.textContent = publishingSeedDisplayTitle(seed);
+      seedSelect.append(option);
+    });
+    existingLabel.append(seedSelect);
+    const addExistingButton = document.createElement("button");
+    addExistingButton.type = "button";
+    addExistingButton.textContent = "既存Seedに追加";
+    addExistingButton.addEventListener("click", () => addCandidateToExistingSeed(candidate, seedSelect.value, textarea.value));
+    saveRow.append(addExistingButton);
+    convert.append(label, existingLabel, saveRow);
     card.append(convert);
     setTimeout(() => textarea.focus(), 0);
   }
@@ -3078,6 +3261,8 @@ function publishingSeedTags(value) {
 function readPublishingSeedForm() {
   return {
     title: $("#publishingSeedTitle")?.value.trim() || "",
+    summary: $("#publishingSeedSummary")?.value.trim() || "",
+    themeName: $("#publishingSeedThemeName")?.value.trim() || "",
     originalTheme: $("#publishingSeedOriginalTheme")?.value.trim() || "",
     personalTake: $("#publishingSeedPersonalTake")?.value.trim() || "",
     tags: $("#publishingSeedTags")?.value.trim() || "",
@@ -3086,7 +3271,7 @@ function readPublishingSeedForm() {
 }
 
 function clearPublishingSeedForm() {
-  ["#publishingSeedTitle", "#publishingSeedOriginalTheme", "#publishingSeedPersonalTake", "#publishingSeedTags"].forEach((selector) => {
+  ["#publishingSeedTitle", "#publishingSeedSummary", "#publishingSeedThemeName", "#publishingSeedOriginalTheme", "#publishingSeedPersonalTake", "#publishingSeedTags"].forEach((selector) => {
     const field = $(selector);
     if (field) field.value = "";
   });
@@ -3147,17 +3332,102 @@ function convertPublishingSeedToExperiment(seed) {
   $("#publishing-experiment-lab")?.scrollIntoView?.({ behavior: "smooth", block: "start" });
 }
 
+function publishingSeedRelatedCandidates(seed) {
+  const ids = new Set([...(seed.candidateIds || []), seed.seedCandidateId].filter(Boolean));
+  return publishingSeedCandidates.filter((candidate) => ids.has(candidate.id));
+}
+
+function updatePublishingSeedFromEdit(seed, form) {
+  seed.title = form.querySelector("[data-seed-edit='title']")?.value.trim() || "";
+  seed.summary = form.querySelector("[data-seed-edit='summary']")?.value.trim() || "";
+  seed.themeName = form.querySelector("[data-seed-edit='themeName']")?.value.trim() || "";
+  seed.originalTheme = form.querySelector("[data-seed-edit='originalTheme']")?.value.trim() || "";
+  seed.personalTake = form.querySelector("[data-seed-edit='personalTake']")?.value.trim() || "";
+  seed.tags = form.querySelector("[data-seed-edit='tags']")?.value.trim() || "";
+  seed.updatedAt = new Date().toISOString();
+  editingPublishingSeedId = "";
+  savePublishingSeeds();
+  renderPublishingSeeds();
+}
+
+function mergePublishingSeeds(targetSeed, sourceSeedId) {
+  const sourceSeed = findPublishingSeed(sourceSeedId);
+  if (!targetSeed || !sourceSeed || targetSeed.id === sourceSeed.id) return;
+  targetSeed.title = targetSeed.title || sourceSeed.title;
+  targetSeed.summary = [targetSeed.summary, sourceSeed.summary].filter(Boolean).join("\n");
+  targetSeed.themeName = targetSeed.themeName || sourceSeed.themeName;
+  targetSeed.originalTheme = [targetSeed.originalTheme, sourceSeed.originalTheme].filter(Boolean).join("\n");
+  targetSeed.personalTake = [targetSeed.personalTake, sourceSeed.personalTake].filter(Boolean).join("\n");
+  targetSeed.tags = [...new Set([...publishingSeedTags(targetSeed.tags), ...publishingSeedTags(sourceSeed.tags)])].join(", ");
+  targetSeed.candidateIds = [...new Set([...(targetSeed.candidateIds || []), ...(sourceSeed.candidateIds || []), sourceSeed.seedCandidateId].filter(Boolean))];
+  publishingSeedCandidates.forEach((candidate) => {
+    if (!candidate.seedIds?.includes(sourceSeed.id)) return;
+    candidate.seedIds = [...new Set(candidate.seedIds.map((id) => id === sourceSeed.id ? targetSeed.id : id))];
+  });
+  publishingSeeds = publishingSeeds.filter((seed) => seed.id !== sourceSeed.id);
+  targetSeed.updatedAt = new Date().toISOString();
+  mergingPublishingSeedId = "";
+  savePublishingSeeds();
+  savePublishingSeedCandidates();
+  renderPublishingSeeds();
+  renderPublishingSeedCandidates();
+}
+
 function createPublishingSeedCard(seed) {
   const card = document.createElement("article");
   card.className = `publishing-seed-card status-${seed.status}`;
+
+  if (editingPublishingSeedId === seed.id) {
+    const form = document.createElement("form");
+    form.className = "publishing-seed-edit-form";
+    const fields = [
+      ["title", "Seedタイトル", "input", seed.title],
+      ["themeName", "テーマ名", "input", seed.themeName],
+      ["summary", "要約", "textarea", seed.summary],
+      ["originalTheme", "元テーマ", "textarea", seed.originalTheme],
+      ["personalTake", "自分の考え・メモ", "textarea", seed.personalTake],
+      ["tags", "タグ", "input", seed.tags],
+    ];
+    fields.forEach(([key, labelText, tagName, value]) => {
+      const label = document.createElement("label");
+      label.textContent = labelText;
+      const field = document.createElement(tagName);
+      field.dataset.seedEdit = key;
+      field.value = value || "";
+      if (tagName === "textarea") field.rows = key === "personalTake" ? 5 : 3;
+      label.append(field);
+      form.append(label);
+    });
+    const actions = document.createElement("div");
+    actions.className = "publishing-seed-actions";
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "ghost-button";
+    cancelButton.type = "button";
+    cancelButton.textContent = "キャンセル";
+    cancelButton.addEventListener("click", () => {
+      editingPublishingSeedId = "";
+      renderPublishingSeeds();
+    });
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.textContent = "保存";
+    actions.append(cancelButton, saveButton);
+    form.append(actions);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      updatePublishingSeedFromEdit(seed, form);
+    });
+    card.append(form);
+    return card;
+  }
 
   const header = document.createElement("div");
   header.className = "publishing-seed-card-header";
   const titleBlock = document.createElement("div");
   const title = document.createElement("h3");
-  title.textContent = seed.title || publishingSeedExcerpt(seed.personalTake || seed.originalTheme, 48) || "無題の種";
+  title.textContent = publishingSeedDisplayTitle(seed);
   const meta = document.createElement("span");
-  meta.textContent = `${seed.savedDate || "-"} / ${seed.status}`;
+  meta.textContent = `${seed.savedDate || "-"} / ${seed.status}${seed.themeName ? ` / ${seed.themeName}` : ""}`;
   titleBlock.append(title, meta);
   const status = document.createElement("select");
   status.setAttribute("aria-label", "Seedsの状態");
@@ -3170,6 +3440,10 @@ function createPublishingSeedCard(seed) {
   status.value = seed.status;
   status.addEventListener("change", (event) => setPublishingSeedStatus(seed, event.target.value));
   header.append(titleBlock, status);
+
+  const summary = document.createElement("p");
+  summary.className = "publishing-seed-summary";
+  summary.textContent = seed.summary ? `要約: ${seed.summary}` : "要約はまだありません。";
 
   const original = document.createElement("p");
   original.className = "publishing-seed-original";
@@ -3187,8 +3461,58 @@ function createPublishingSeedCard(seed) {
     tags.append(item);
   });
 
+  const related = document.createElement("div");
+  related.className = "publishing-seed-related";
+  const relatedTitle = document.createElement("strong");
+  relatedTitle.textContent = "関連ニュース";
+  related.append(relatedTitle);
+  const relatedList = document.createElement("ul");
+  const relatedCandidates = publishingSeedRelatedCandidates(seed);
+  if (relatedCandidates.length) {
+    relatedCandidates.forEach((candidate) => {
+      const item = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "text-button";
+      button.textContent = publishingSeedCandidateDisplayTitle(candidate);
+      button.addEventListener("click", () => {
+        candidate.collapsed = false;
+        activePublishingSeedCandidateId = "";
+        publishingSeedCandidateStatusFilter = "all";
+        savePublishingSeedCandidates();
+        setPublishingSeedActiveView("news");
+        renderPublishingSeedCandidates();
+      });
+      item.append(button);
+      relatedList.append(item);
+    });
+  } else {
+    const item = document.createElement("li");
+    item.textContent = "関連づけられたニュースはまだありません。";
+    relatedList.append(item);
+  }
+  related.append(relatedList);
+
   const actions = document.createElement("div");
   actions.className = "publishing-seed-actions";
+  const editButton = document.createElement("button");
+  editButton.className = "ghost-button";
+  editButton.type = "button";
+  editButton.textContent = "編集";
+  editButton.addEventListener("click", () => {
+    editingPublishingSeedId = seed.id;
+    mergingPublishingSeedId = "";
+    renderPublishingSeeds();
+  });
+  const mergeButton = document.createElement("button");
+  mergeButton.className = "ghost-button";
+  mergeButton.type = "button";
+  mergeButton.textContent = "統合";
+  mergeButton.disabled = publishingSeeds.length < 2;
+  mergeButton.addEventListener("click", () => {
+    mergingPublishingSeedId = mergingPublishingSeedId === seed.id ? "" : seed.id;
+    renderPublishingSeeds();
+  });
   const articleButton = document.createElement("button");
   articleButton.className = "ghost-button";
   articleButton.type = "button";
@@ -3214,13 +3538,43 @@ function createPublishingSeedCard(seed) {
   deleteButton.addEventListener("click", () => {
     if (!confirm("このSeedを削除します。よろしいですか？")) return;
     publishingSeeds = publishingSeeds.filter((item) => item.id !== seed.id);
+    publishingSeedCandidates.forEach((candidate) => {
+      candidate.seedIds = (candidate.seedIds || []).filter((id) => id !== seed.id);
+      if (candidate.status === "Seed化" && !candidate.seedIds.length) {
+        candidate.status = "未確認";
+        candidate.collapsed = false;
+      }
+    });
     savePublishingSeeds();
+    savePublishingSeedCandidates();
     renderPublishingSeeds();
+    renderPublishingSeedCandidates();
   });
-  actions.append(articleButton, holdButton, deleteButton);
+  actions.append(editButton, mergeButton, articleButton, holdButton, deleteButton);
 
-  card.append(header, original, take);
+  card.append(header, summary, original, take);
   if (tags.childElementCount) card.append(tags);
+  card.append(related);
+  if (mergingPublishingSeedId === seed.id) {
+    const mergeBox = document.createElement("div");
+    mergeBox.className = "publishing-seed-merge";
+    const label = document.createElement("label");
+    label.textContent = "このSeedへ統合するSeed";
+    const select = document.createElement("select");
+    publishingSeeds.filter((item) => item.id !== seed.id).forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = publishingSeedDisplayTitle(item);
+      select.append(option);
+    });
+    label.append(select);
+    const mergeConfirm = document.createElement("button");
+    mergeConfirm.type = "button";
+    mergeConfirm.textContent = "統合する";
+    mergeConfirm.addEventListener("click", () => mergePublishingSeeds(seed, select.value));
+    mergeBox.append(label, mergeConfirm);
+    card.append(mergeBox);
+  }
   card.append(actions);
   return card;
 }
@@ -3252,8 +3606,8 @@ function savePublishingSeedFromForm(event) {
   event?.preventDefault();
   const values = readPublishingSeedForm();
   const status = $("#publishingSeedSaveStatus");
-  if (!values.personalTake && !values.title && !values.originalTheme) {
-    if (status) status.textContent = "タイトル、元テーマ、自分の一言のどれかを入れると保存できます。";
+  if (!values.personalTake && !values.title && !values.originalTheme && !values.summary && !values.themeName) {
+    if (status) status.textContent = "タイトル、要約、テーマ名、元テーマ、自分の一言のどれかを入れると保存できます。";
     return;
   }
   const now = new Date().toISOString();
@@ -10086,6 +10440,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  setPublishingSeedActiveView(publishingSeedActiveView);
   renderPublishingSeedCandidates();
   renderPublishingSeeds();
   renderXExperimentLogs();
@@ -10559,6 +10914,11 @@ function bindEvents() {
   });
   $("#publishingSeedFilterStatus")?.addEventListener("change", (event) => {
     publishingSeedStatusFilter = event.target.value;
+    renderPublishingSeeds();
+  });
+  $("#publishingSeedNewsTab")?.addEventListener("click", () => setPublishingSeedActiveView("news"));
+  $("#publishingSeedSeedsTab")?.addEventListener("click", () => {
+    setPublishingSeedActiveView("seed");
     renderPublishingSeeds();
   });
   $("#publishingSeedCandidateForm")?.addEventListener("submit", savePublishingSeedCandidateFromForm);

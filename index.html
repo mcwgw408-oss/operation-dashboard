@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260723-seed-candidate-reason-label" />
+    <link rel="stylesheet" href="./styles.css?v=20260724-seed-workbench" />
   </head>
   <body>
     <div class="app">
@@ -1054,6 +1054,11 @@
           <p id="publishingOpsStatus" class="publishing-ops-status">本日の発信運営はまだ保存されていません。</p>
         </section>
 
+        <div class="publishing-seed-workbench-tabs span-2" aria-label="Seedワークベンチ切り替え">
+          <button id="publishingSeedNewsTab" type="button" class="is-active">News</button>
+          <button id="publishingSeedSeedsTab" type="button">Seed</button>
+        </div>
+
         <section id="publishing-seed-candidates" class="panel publishing-seed-candidates-panel span-2" aria-label="Seed候補">
           <div class="panel-heading">
             <div>
@@ -1117,6 +1122,7 @@
 
           <form id="publishingSeedForm" class="publishing-seed-form">
             <label>タイトル（仮）<input id="publishingSeedTitle" type="text" placeholder="あとで見つけやすい仮タイトル" /></label>
+            <label>テーマ名<input id="publishingSeedThemeName" type="text" placeholder="AI時代の信頼 など" /></label>
             <label>タグ<input id="publishingSeedTags" type="text" placeholder="AI, 発信, 日々の違和感 など" /></label>
             <label>状態
               <select id="publishingSeedStatus">
@@ -1125,6 +1131,7 @@
                 <option>保留</option>
               </select>
             </label>
+            <label class="publishing-seed-wide-field">要約<textarea id="publishingSeedSummary" rows="3" placeholder="このSeedが扱う論点や方向性"></textarea></label>
             <label class="publishing-seed-wide-field">元テーマ<textarea id="publishingSeedOriginalTheme" rows="3" placeholder="AI巡回やX/Substackなどで気になったテーマ"></textarea></label>
             <label class="publishing-seed-wide-field publishing-seed-take-field">自分の一言<textarea id="publishingSeedPersonalTake" rows="5" placeholder="これは自分ならこう考える、という反応"></textarea></label>
             <div class="publishing-seed-save-row">
@@ -1716,6 +1723,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260723-seed-candidate-reason-label"></script>
+    <script src="./app.js?v=20260724-seed-workbench"></script>
   </body>
 </html>
