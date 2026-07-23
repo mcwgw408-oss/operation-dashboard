@@ -2890,13 +2890,23 @@ function createPublishingSeedCandidateCard(candidate) {
   titleBlock.append(title, meta);
   header.append(titleBlock);
 
-  const summary = document.createElement("p");
+  const summary = document.createElement("section");
   summary.className = "publishing-seed-candidate-summary";
-  summary.textContent = candidate.summary || "要点はまだありません。";
+  const summaryLabel = document.createElement("span");
+  summaryLabel.className = "publishing-seed-candidate-field-label";
+  summaryLabel.textContent = "要点";
+  const summaryBody = document.createElement("p");
+  summaryBody.textContent = candidate.summary || "要点はまだありません。";
+  summary.append(summaryLabel, summaryBody);
 
-  const reason = document.createElement("p");
+  const reason = document.createElement("section");
   reason.className = "publishing-seed-candidate-reason";
-  reason.textContent = candidate.reason ? `選定理由: ${candidate.reason}` : "選定理由はまだありません。";
+  const reasonLabel = document.createElement("span");
+  reasonLabel.className = "publishing-seed-candidate-field-label";
+  reasonLabel.textContent = "選定理由";
+  const reasonBody = document.createElement("p");
+  reasonBody.textContent = candidate.reason || "選定理由はまだありません。";
+  reason.append(reasonLabel, reasonBody);
 
   const source = document.createElement("div");
   source.className = "publishing-seed-candidate-source";
@@ -2998,7 +3008,7 @@ function savePublishingSeedCandidateFromForm(event) {
   const values = readPublishingSeedCandidateForm();
   const status = $("#publishingSeedCandidateStatus");
   if (!values.originalTopic && !values.summary && !values.reason) {
-    if (status) status.textContent = "元の話題、要点、なぜ、さくら向け？のどれかを入れると候補にできます。";
+    if (status) status.textContent = "元の話題、要点、選定理由のどれかを入れると候補にできます。";
     return;
   }
   const now = new Date().toISOString();
