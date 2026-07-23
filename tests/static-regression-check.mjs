@@ -215,14 +215,24 @@ for (const token of [
   'id="xAnalysisPost1"',
   'id="xAnalysisPost2"',
   'id="xAnalysisPost3"',
-  'id="xAnalysisImpressions"',
-  'id="xAnalysisEngagements"',
-  'id="xAnalysisDetailClicks"',
-  'id="xAnalysisProfileAccesses"',
-  'id="xAnalysisFollowDelta"',
-  'id="xAnalysisReposts"',
-  'id="xAnalysisLikes"',
-  'id="xAnalysisBookmarks"',
+  'id="xAnalysisPost1Impressions"',
+  'id="xAnalysisPost1Engagements"',
+  'id="xAnalysisPost1DetailClicks"',
+  'id="xAnalysisPost1ProfileAccesses"',
+  'id="xAnalysisPost1FollowDelta"',
+  'id="xAnalysisPost1Takeaway"',
+  'id="xAnalysisPost2Impressions"',
+  'id="xAnalysisPost2Engagements"',
+  'id="xAnalysisPost2DetailClicks"',
+  'id="xAnalysisPost2ProfileAccesses"',
+  'id="xAnalysisPost2FollowDelta"',
+  'id="xAnalysisPost2Takeaway"',
+  'id="xAnalysisPost3Impressions"',
+  'id="xAnalysisPost3Engagements"',
+  'id="xAnalysisPost3DetailClicks"',
+  'id="xAnalysisPost3ProfileAccesses"',
+  'id="xAnalysisPost3FollowDelta"',
+  'id="xAnalysisPost3Takeaway"',
   'id="xAnalysisHypothesis"',
   'id="xAnalysisResult"',
   'id="xAnalysisNextTry"',
@@ -235,9 +245,10 @@ for (const token of [
 ]) {
   check(indexHtml.includes(token), `SNS投稿アイデア欄がありません: ${token}`);
 }
-for (const key of ["xPost1", "xPost2", "xPost3", "impressions", "engagements", "hypothesis", "result", "nextTry", "notesIdeas", "chatIdeas", "articleIdeas"]) {
+for (const key of ["xPost1", "xPost2", "xPost3", "xPost1Impressions", "xPost2Impressions", "xPost3Impressions", "xPost1Takeaway", "xPost2Takeaway", "xPost3Takeaway", "hypothesis", "result", "nextTry", "notesIdeas", "chatIdeas", "articleIdeas"]) {
   check(appJs.includes(key), `SNS投稿アイデアの保存キーがありません: ${key}`);
 }
+check(!indexHtml.includes('id="xAnalysisImpressions"'), "X分析室に共通インプレッション欄が残っています");
 check(appJs.includes("const PUBLISHING_OPS_RECENT_DAYS = 7;"), "recent publishing ops period is not fixed to 7 days");
 check(appJs.includes("function buildPublishingOpsRecentFlow"), "recent publishing ops aggregation function is missing");
 check(appJs.includes("function renderPublishingOpsRecentFlow"), "recent publishing ops render function is missing");

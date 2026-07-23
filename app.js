@@ -324,16 +324,26 @@ function defaultXAnalysis(date = activeDate) {
   return {
     date,
     xPost1: "",
+    xPost1Impressions: "",
+    xPost1Engagements: "",
+    xPost1DetailClicks: "",
+    xPost1ProfileAccesses: "",
+    xPost1FollowDelta: "",
+    xPost1Takeaway: "",
     xPost2: "",
+    xPost2Impressions: "",
+    xPost2Engagements: "",
+    xPost2DetailClicks: "",
+    xPost2ProfileAccesses: "",
+    xPost2FollowDelta: "",
+    xPost2Takeaway: "",
     xPost3: "",
-    impressions: "",
-    engagements: "",
-    detailClicks: "",
-    profileAccesses: "",
-    followDelta: "",
-    reposts: "",
-    likes: "",
-    bookmarks: "",
+    xPost3Impressions: "",
+    xPost3Engagements: "",
+    xPost3DetailClicks: "",
+    xPost3ProfileAccesses: "",
+    xPost3FollowDelta: "",
+    xPost3Takeaway: "",
     hypothesis: "",
     result: "",
     nextTry: "",
@@ -777,6 +787,18 @@ function ensureXAnalysis(day) {
   ].forEach(([legacyKey, nextKey]) => {
     if (!day.xAnalysis[nextKey] && legacyOps[legacyKey]) {
       day.xAnalysis[nextKey] = legacyOps[legacyKey];
+      changed = true;
+    }
+  });
+  [
+    ["impressions", "xPost1Impressions"],
+    ["engagements", "xPost1Engagements"],
+    ["detailClicks", "xPost1DetailClicks"],
+    ["profileAccesses", "xPost1ProfileAccesses"],
+    ["followDelta", "xPost1FollowDelta"],
+  ].forEach(([legacyKey, nextKey]) => {
+    if (!day.xAnalysis[nextKey] && day.xAnalysis[legacyKey]) {
+      day.xAnalysis[nextKey] = day.xAnalysis[legacyKey];
       changed = true;
     }
   });
@@ -2500,16 +2522,26 @@ const publishingOpsCountFields = [
 const xAnalysisFields = {
   date: "#xAnalysisDate",
   xPost1: "#xAnalysisPost1",
+  xPost1Impressions: "#xAnalysisPost1Impressions",
+  xPost1Engagements: "#xAnalysisPost1Engagements",
+  xPost1DetailClicks: "#xAnalysisPost1DetailClicks",
+  xPost1ProfileAccesses: "#xAnalysisPost1ProfileAccesses",
+  xPost1FollowDelta: "#xAnalysisPost1FollowDelta",
+  xPost1Takeaway: "#xAnalysisPost1Takeaway",
   xPost2: "#xAnalysisPost2",
+  xPost2Impressions: "#xAnalysisPost2Impressions",
+  xPost2Engagements: "#xAnalysisPost2Engagements",
+  xPost2DetailClicks: "#xAnalysisPost2DetailClicks",
+  xPost2ProfileAccesses: "#xAnalysisPost2ProfileAccesses",
+  xPost2FollowDelta: "#xAnalysisPost2FollowDelta",
+  xPost2Takeaway: "#xAnalysisPost2Takeaway",
   xPost3: "#xAnalysisPost3",
-  impressions: "#xAnalysisImpressions",
-  engagements: "#xAnalysisEngagements",
-  detailClicks: "#xAnalysisDetailClicks",
-  profileAccesses: "#xAnalysisProfileAccesses",
-  followDelta: "#xAnalysisFollowDelta",
-  reposts: "#xAnalysisReposts",
-  likes: "#xAnalysisLikes",
-  bookmarks: "#xAnalysisBookmarks",
+  xPost3Impressions: "#xAnalysisPost3Impressions",
+  xPost3Engagements: "#xAnalysisPost3Engagements",
+  xPost3DetailClicks: "#xAnalysisPost3DetailClicks",
+  xPost3ProfileAccesses: "#xAnalysisPost3ProfileAccesses",
+  xPost3FollowDelta: "#xAnalysisPost3FollowDelta",
+  xPost3Takeaway: "#xAnalysisPost3Takeaway",
   hypothesis: "#xAnalysisHypothesis",
   result: "#xAnalysisResult",
   nextTry: "#xAnalysisNextTry",

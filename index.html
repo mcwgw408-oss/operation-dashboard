@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260724-x-analysis-room" />
+    <link rel="stylesheet" href="./styles.css?v=20260724-x-post-analysis" />
   </head>
   <body>
     <div class="app">
@@ -1067,27 +1067,46 @@
             <button class="ghost-button" id="saveXAnalysis" type="button">本日のX分析を保存する</button>
           </div>
 
+          <label class="x-analysis-date-field">日付<input id="xAnalysisDate" type="date" /></label>
+
           <div class="x-analysis-grid">
             <section class="x-analysis-block">
-              <h3>今日のX投稿</h3>
-              <label>日付<input id="xAnalysisDate" type="date" /></label>
-              <label>X投稿①<textarea id="xAnalysisPost1" rows="3"></textarea></label>
-              <label>X投稿②<textarea id="xAnalysisPost2" rows="3"></textarea></label>
-              <label>X投稿③<textarea id="xAnalysisPost3" rows="3"></textarea></label>
+              <h3>X投稿①</h3>
+              <label>本文<textarea id="xAnalysisPost1" rows="3"></textarea></label>
+              <div class="x-analysis-number-grid">
+                <label>インプレッション<input id="xAnalysisPost1Impressions" type="number" min="0" inputmode="numeric" /></label>
+                <label>エンゲージメント<input id="xAnalysisPost1Engagements" type="number" min="0" inputmode="numeric" /></label>
+                <label>詳細クリック<input id="xAnalysisPost1DetailClicks" type="number" min="0" inputmode="numeric" /></label>
+                <label>プロフィールアクセス<input id="xAnalysisPost1ProfileAccesses" type="number" min="0" inputmode="numeric" /></label>
+                <label>フォロー増減<input id="xAnalysisPost1FollowDelta" type="number" inputmode="numeric" /></label>
+              </div>
+              <label>気づいたこと<textarea id="xAnalysisPost1Takeaway" rows="3"></textarea></label>
             </section>
 
             <section class="x-analysis-block">
-              <h3>数値</h3>
+              <h3>X投稿②</h3>
+              <label>本文<textarea id="xAnalysisPost2" rows="3"></textarea></label>
               <div class="x-analysis-number-grid">
-                <label>インプレッション<input id="xAnalysisImpressions" type="number" min="0" inputmode="numeric" /></label>
-                <label>エンゲージメント<input id="xAnalysisEngagements" type="number" min="0" inputmode="numeric" /></label>
-                <label>詳細クリック<input id="xAnalysisDetailClicks" type="number" min="0" inputmode="numeric" /></label>
-                <label>プロフィールアクセス<input id="xAnalysisProfileAccesses" type="number" min="0" inputmode="numeric" /></label>
-                <label>フォロー増減<input id="xAnalysisFollowDelta" type="number" inputmode="numeric" /></label>
-                <label>リポスト<input id="xAnalysisReposts" type="number" min="0" inputmode="numeric" /></label>
-                <label>いいね<input id="xAnalysisLikes" type="number" min="0" inputmode="numeric" /></label>
-                <label>ブックマーク<input id="xAnalysisBookmarks" type="number" min="0" inputmode="numeric" /></label>
+                <label>インプレッション<input id="xAnalysisPost2Impressions" type="number" min="0" inputmode="numeric" /></label>
+                <label>エンゲージメント<input id="xAnalysisPost2Engagements" type="number" min="0" inputmode="numeric" /></label>
+                <label>詳細クリック<input id="xAnalysisPost2DetailClicks" type="number" min="0" inputmode="numeric" /></label>
+                <label>プロフィールアクセス<input id="xAnalysisPost2ProfileAccesses" type="number" min="0" inputmode="numeric" /></label>
+                <label>フォロー増減<input id="xAnalysisPost2FollowDelta" type="number" inputmode="numeric" /></label>
               </div>
+              <label>気づいたこと<textarea id="xAnalysisPost2Takeaway" rows="3"></textarea></label>
+            </section>
+
+            <section class="x-analysis-block">
+              <h3>X投稿③</h3>
+              <label>本文<textarea id="xAnalysisPost3" rows="3"></textarea></label>
+              <div class="x-analysis-number-grid">
+                <label>インプレッション<input id="xAnalysisPost3Impressions" type="number" min="0" inputmode="numeric" /></label>
+                <label>エンゲージメント<input id="xAnalysisPost3Engagements" type="number" min="0" inputmode="numeric" /></label>
+                <label>詳細クリック<input id="xAnalysisPost3DetailClicks" type="number" min="0" inputmode="numeric" /></label>
+                <label>プロフィールアクセス<input id="xAnalysisPost3ProfileAccesses" type="number" min="0" inputmode="numeric" /></label>
+                <label>フォロー増減<input id="xAnalysisPost3FollowDelta" type="number" inputmode="numeric" /></label>
+              </div>
+              <label>気づいたこと<textarea id="xAnalysisPost3Takeaway" rows="3"></textarea></label>
             </section>
 
             <section class="x-analysis-block x-analysis-wide-block">
@@ -1769,6 +1788,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260724-x-analysis-room"></script>
+    <script src="./app.js?v=20260724-x-post-analysis"></script>
   </body>
 </html>
