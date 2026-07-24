@@ -3973,6 +3973,25 @@ function mergePublishingSeeds(targetSeed, sourceSeedId) {
   renderPublishingSeedCandidates();
 }
 
+function deletePublishingSeed(seed) {
+  if (!seed) return;
+  if (!confirm("このSeedを削除します。よろしいですか？")) return;
+  publishingSeeds = publishingSeeds.filter((item) => item.id !== seed.id);
+  publishingSeedCandidates.forEach((candidate) => {
+    candidate.seedIds = (candidate.seedIds || []).filter((id) => id !== seed.id);
+    if (candidate.status === "Seed化" && !candidate.seedIds.length) {
+      candidate.status = "未確認";
+      candidate.collapsed = false;
+    }
+  });
+  editingPublishingSeedId = editingPublishingSeedId === seed.id ? "" : editingPublishingSeedId;
+  mergingPublishingSeedId = mergingPublishingSeedId === seed.id ? "" : mergingPublishingSeedId;
+  savePublishingSeeds();
+  savePublishingSeedCandidates();
+  renderPublishingSeeds();
+  renderPublishingSeedCandidates();
+}
+
 function createPublishingSeedCard(seed) {
   const card = document.createElement("article");
   card.className = `publishing-seed-card status-${seed.status}`;
@@ -4011,7 +4030,12 @@ function createPublishingSeedCard(seed) {
     const saveButton = document.createElement("button");
     saveButton.type = "submit";
     saveButton.textContent = "保存";
-    actions.append(cancelButton, saveButton);
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-button";
+    deleteButton.type = "button";
+    deleteButton.textContent = "削除する";
+    deleteButton.addEventListener("click", () => deletePublishingSeed(seed));
+    actions.append(cancelButton, deleteButton, saveButton);
     form.append(actions);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -4134,22 +4158,8 @@ function createPublishingSeedCard(seed) {
   const deleteButton = document.createElement("button");
   deleteButton.className = "delete-button";
   deleteButton.type = "button";
-  deleteButton.textContent = "削除";
-  deleteButton.addEventListener("click", () => {
-    if (!confirm("このSeedを削除します。よろしいですか？")) return;
-    publishingSeeds = publishingSeeds.filter((item) => item.id !== seed.id);
-    publishingSeedCandidates.forEach((candidate) => {
-      candidate.seedIds = (candidate.seedIds || []).filter((id) => id !== seed.id);
-      if (candidate.status === "Seed化" && !candidate.seedIds.length) {
-        candidate.status = "未確認";
-        candidate.collapsed = false;
-      }
-    });
-    savePublishingSeeds();
-    savePublishingSeedCandidates();
-    renderPublishingSeeds();
-    renderPublishingSeedCandidates();
-  });
+  deleteButton.textContent = "削除する";
+  deleteButton.addEventListener("click", () => deletePublishingSeed(seed));
   actions.append(editButton, mergeButton, articleButton, holdButton, deleteButton);
 
   card.append(header, summary, original, take);

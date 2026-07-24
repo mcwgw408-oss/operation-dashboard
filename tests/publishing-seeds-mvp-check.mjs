@@ -65,10 +65,12 @@ check(appJs.includes("function savePublishingSeedFromForm"), "Seeds save handler
 check(appJs.includes("function convertPublishingSeedToExperiment"), "Seeds article conversion is missing");
 check(appJs.includes("function updatePublishingSeedFromEdit"), "Seeds edit handler is missing");
 check(appJs.includes("function mergePublishingSeeds"), "Seeds merge handler is missing");
+check(appJs.includes("function deletePublishingSeed"), "Seeds delete handler is missing");
 check(appJs.includes("function publishingSeedRelatedCandidates"), "Seeds related news renderer is missing");
 check(appJs.includes("function setPublishingSeedActiveView"), "Seed workbench tabs are not wired");
 check(appJs.includes("renderPublishingSeeds();"), "Seeds render is not connected");
 check(appJs.includes('$("#publishingSeedForm")?.addEventListener("submit", savePublishingSeedFromForm);'), "Seeds form submit is not bound");
+check(appJs.includes('deleteButton.textContent = "削除する";'), "Seeds delete button label is missing");
 
 const convertBody = extractDelimitedBlock(appJs, "function convertPublishingSeedToExperiment", "{", "}");
 for (const token of [

@@ -164,6 +164,9 @@ const mergedCandidates = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDA
 convertPublishingSeedToExperiment(publishingSeeds[0]);
 const articleSeeds = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
 const experimentLogs = JSON.parse(localStorage.getItem(X_EXPERIMENT_LOG_STORAGE_KEY));
+deletePublishingSeed(publishingSeeds[0]);
+const deletedSeeds = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
+const deletedCandidates = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY));
 const backup = createBackup();
 globalThis.__seedsFlowResult = {
   savedSeeds,
@@ -171,6 +174,8 @@ globalThis.__seedsFlowResult = {
   mergedCandidates,
   articleSeeds,
   experimentLogs,
+  deletedSeeds,
+  deletedCandidates,
   backupSeeds: backup.data[PUBLISHING_SEEDS_STORAGE_KEY],
   backupExperiments: backup.data[X_EXPERIMENT_LOG_STORAGE_KEY],
 };
@@ -193,7 +198,9 @@ check(result.articleSeeds[0].status === "記事化", "Seed was not marked as art
 check(Boolean(result.articleSeeds[0].articleExperimentId), "Seed articleExperimentId was not set");
 check(result.experimentLogs.length === 1, "Experiment log was not created from Seed");
 check(result.experimentLogs[0].hypothesis.includes("自分の反応"), "Experiment hypothesis did not use the personal take");
-check(result.backupSeeds.length === 1, "Backup does not include Seeds");
+check(result.deletedSeeds.length === 0, "Deleted Seed was not removed");
+check(result.deletedCandidates.every((candidate) => candidate.status === "未確認" && !candidate.seedIds.length), "Deleted Seed did not unlink related candidates");
+check(result.backupSeeds.length === 0, "Backup still includes deleted Seeds");
 check(result.backupExperiments.length === 1, "Backup does not include generated experiment log");
 
 if (failures.length) {
