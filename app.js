@@ -577,9 +577,12 @@ function blankLearningAsset() {
     impression: "",
     rayDialogue: "",
     myThought: "",
+    hypothesis: "",
     experimentIdea: "",
     articleIdea: "",
     experimentResult: "",
+    relatedArticleTitle: "",
+    relatedArticleUrl: "",
     publishedTo: [],
     connectsTo: [],
     createdAt: now,
@@ -592,7 +595,7 @@ function normalizeLearningAsset(raw) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const item = { ...base, ...source };
   item.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["date", "title", "impression", "rayDialogue", "myThought", "experimentIdea", "articleIdea", "experimentResult", "createdAt", "updatedAt"].forEach((key) => {
+  ["date", "title", "impression", "rayDialogue", "myThought", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
     item[key] = String(item[key] ?? "");
   });
   item.sourceType = LEARNING_ASSET_SOURCES.includes(source.sourceType) ? source.sourceType : base.sourceType;
@@ -2377,9 +2380,12 @@ function readLearningAssetForm() {
     impression: $("#learningAssetImpression")?.value.trim() || "",
     rayDialogue: $("#learningAssetRayDialogue")?.value.trim() || "",
     myThought: $("#learningAssetMyThought")?.value.trim() || "",
+    hypothesis: $("#learningAssetHypothesis")?.value.trim() || "",
     experimentIdea: $("#learningAssetExperimentIdea")?.value.trim() || "",
     articleIdea: $("#learningAssetArticleIdea")?.value.trim() || "",
     experimentResult: $("#learningAssetExperimentResult")?.value.trim() || "",
+    relatedArticleTitle: $("#learningAssetRelatedArticleTitle")?.value.trim() || "",
+    relatedArticleUrl: $("#learningAssetRelatedArticleUrl")?.value.trim() || "",
     publishedTo: selectedLearningAssetValues("learningAssetPublishedTo"),
     connectsTo: selectedLearningAssetValues("learningAssetConnectsTo"),
   };
@@ -2394,9 +2400,12 @@ function fillLearningAssetForm(item) {
   $("#learningAssetImpression").value = asset.impression || "";
   $("#learningAssetRayDialogue").value = asset.rayDialogue || "";
   $("#learningAssetMyThought").value = asset.myThought || "";
+  $("#learningAssetHypothesis").value = asset.hypothesis || "";
   $("#learningAssetExperimentIdea").value = asset.experimentIdea || "";
   $("#learningAssetArticleIdea").value = asset.articleIdea || "";
   $("#learningAssetExperimentResult").value = asset.experimentResult || "";
+  $("#learningAssetRelatedArticleTitle").value = asset.relatedArticleTitle || "";
+  $("#learningAssetRelatedArticleUrl").value = asset.relatedArticleUrl || "";
   setLearningAssetCheckedValues("learningAssetPublishedTo", asset.publishedTo);
   setLearningAssetCheckedValues("learningAssetConnectsTo", asset.connectsTo);
 }
@@ -2469,9 +2478,12 @@ function learningAssetSearchText(item) {
     item.impression,
     item.rayDialogue,
     item.myThought,
+    item.hypothesis,
     item.experimentIdea,
     item.articleIdea,
     item.experimentResult,
+    item.relatedArticleTitle,
+    item.relatedArticleUrl,
     ...(item.publishedTo || []),
     ...(item.connectsTo || []),
   ].map((value) => normalizeLaterText(value || "")).join(" ");
@@ -2550,6 +2562,7 @@ function createLearningAssetCard(item) {
   details.className = "learning-asset-card-details";
   [
     ["レイと話したこと", item.rayDialogue],
+    ["仮説", item.hypothesis],
     ["試したいこと", item.experimentIdea],
     ["記事候補", item.articleIdea],
     ["実験した結果", item.experimentResult],
@@ -2561,6 +2574,23 @@ function createLearningAssetCard(item) {
     row.append(labelNode, value);
     details.append(row);
   });
+  if (item.relatedArticleTitle || item.relatedArticleUrl) {
+    const row = document.createElement("p");
+    const labelNode = document.createElement("span");
+    labelNode.textContent = "関連する記事";
+    row.append(labelNode);
+    if (item.relatedArticleUrl) {
+      const link = document.createElement("a");
+      link.href = item.relatedArticleUrl;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = item.relatedArticleTitle || item.relatedArticleUrl;
+      row.append(link);
+    } else {
+      row.append(item.relatedArticleTitle);
+    }
+    details.append(row);
+  }
 
   const actions = document.createElement("div");
   actions.className = "learning-asset-card-actions";

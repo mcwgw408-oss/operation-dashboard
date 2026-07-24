@@ -5165,6 +5165,13 @@ textarea {
   font-weight: 800;
 }
 
+.learning-asset-card-details a {
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .learning-asset-card-actions {
   justify-content: flex-end;
 }

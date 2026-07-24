@@ -459,6 +459,11 @@ const learningAssetTokens = [
   'id="learning-asset-flow"',
   "学びを資産に変えるフロー",
   "私はどう考えた？",
+  "仮説",
+  "learningAssetHypothesis",
+  "関連する記事タイトル",
+  "learningAssetRelatedArticleTitle",
+  "learningAssetRelatedArticleUrl",
   "learningAssetWaitingCount",
   "learningAssetDialoguedCount",
   "learningAssetExperimentCount",
@@ -473,6 +478,9 @@ for (const token of learningAssetTokens) {
 check(appJs.includes('const LEARNING_ASSETS_STORAGE_KEY = "operation-dashboard-learning-assets-v1";'), "学び資産化の保存キーがありません");
 check(appJs.includes('const LEARNING_ASSET_STATUSES = ["学び待ち", "対話済み", "実験待ち", "記事化待ち", "資産化完了"];'), "学び資産化の固定ステータスがありません");
 check(appJs.includes("function normalizeLearningAsset"), "学び資産化データの正規化がありません");
+check(appJs.includes('"hypothesis"'), "学び資産化に仮説フィールドが保存されません");
+check(appJs.includes('"relatedArticleTitle"'), "学び資産化に関連記事タイトルが保存されません");
+check(appJs.includes('"relatedArticleUrl"'), "学び資産化に関連記事URLが保存されません");
 check(appJs.includes("function renderLearningAssets"), "学び資産化一覧の描画がありません");
 check(appJs.includes("renderLearningAssets();"), "学び資産化一覧がrenderAllで更新されません");
 check(appJs.includes("LEARNING_ASSETS_STORAGE_KEY,"), "学び資産化データがバックアップ対象に入っていません");
