@@ -40,6 +40,7 @@
           <a href="#publishing-seed-candidates">Seed候補</a>
           <a href="#publishing-seeds">Seeds</a>
           <a href="#publishing-experiment-lab">発信実験室</a>
+          <a href="#learning-asset-flow">学び資産化</a>
           <a href="#reading-notes">学びメモ</a>
           <a href="#dashboard-accumulation">ためる</a>
           <a href="#dashboard-closed">閉じているもの</a>
@@ -1329,6 +1330,101 @@
               <div id="xExperimentDetail" class="x-experiment-detail"></div>
             </section>
           </div>
+        </section>
+
+        <section id="learning-asset-flow" class="panel learning-asset-panel span-2" aria-label="学びを資産に変えるフロー">
+          <div class="panel-heading learning-asset-heading">
+            <div>
+              <h2>学びを資産に変えるフロー</h2>
+              <p class="section-note">知識が記事になり、記事が資産になるまでを管理します。</p>
+            </div>
+            <button class="ghost-button" id="newLearningAsset" type="button">新規作成</button>
+          </div>
+
+          <div class="learning-asset-flow-map" aria-label="学びの進行状況">
+            <div><span>学び待ち</span><strong id="learningAssetWaitingCount">0件</strong></div>
+            <div><span>対話済み</span><strong id="learningAssetDialoguedCount">0件</strong></div>
+            <div><span>実験待ち</span><strong id="learningAssetExperimentCount">0件</strong></div>
+            <div><span>記事化待ち</span><strong id="learningAssetArticleCount">0件</strong></div>
+            <div><span>資産化完了</span><strong id="learningAssetDoneCount">0件</strong></div>
+          </div>
+
+          <form id="learningAssetForm" class="learning-asset-form" hidden>
+            <div class="learning-asset-form-heading">
+              <div>
+                <h3 id="learningAssetFormTitle">新しい学び資産</h3>
+                <p class="section-note">一番大事なのは「私はどう考えた？」です。他人の知識を、自分の考えに変えて残します。</p>
+              </div>
+              <button class="ghost-button" id="cancelLearningAssetEdit" type="button">一覧に戻る</button>
+            </div>
+            <label>日付<input id="learningAssetDate" type="date" /></label>
+            <label>インプット元
+              <select id="learningAssetSourceType">
+                <option>本</option>
+                <option>Kindle Unlimited</option>
+                <option>Brain</option>
+                <option>ポッドキャスト</option>
+                <option>YouTube</option>
+                <option>ライブ配信</option>
+                <option>人との会話</option>
+                <option>その他</option>
+              </select>
+            </label>
+            <label>タイトル<input id="learningAssetTitle" type="text" placeholder="本・動画・配信・会話のタイトル" /></label>
+            <label>状態
+              <select id="learningAssetStatus">
+                <option>学び待ち</option>
+                <option>対話済み</option>
+                <option>実験待ち</option>
+                <option>記事化待ち</option>
+                <option>資産化完了</option>
+              </select>
+            </label>
+            <label class="learning-asset-wide-field">一番印象に残ったこと（1〜3行）<textarea id="learningAssetImpression" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">レイと話したこと<textarea id="learningAssetRayDialogue" rows="4"></textarea></label>
+            <label class="learning-asset-primary-field">私はどう考えた？<textarea id="learningAssetMyThought" rows="6" placeholder="自分はどう受け取ったか。どこに違和感や可能性を感じたか。"></textarea></label>
+            <label class="learning-asset-wide-field">試したいこと<textarea id="learningAssetExperimentIdea" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">記事候補<textarea id="learningAssetArticleIdea" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">実験した結果<textarea id="learningAssetExperimentResult" rows="3"></textarea></label>
+            <fieldset class="learning-asset-checkboxes">
+              <legend>記事化</legend>
+              <label><input type="checkbox" value="Substack" name="learningAssetPublishedTo" />Substack</label>
+              <label><input type="checkbox" value="note" name="learningAssetPublishedTo" />note</label>
+              <label><input type="checkbox" value="WordPress" name="learningAssetPublishedTo" />WordPress</label>
+              <label><input type="checkbox" value="X" name="learningAssetPublishedTo" />X</label>
+              <label><input type="checkbox" value="Notes" name="learningAssetPublishedTo" />Notes</label>
+            </fieldset>
+            <fieldset class="learning-asset-checkboxes">
+              <legend>この学びは何につながる？</legend>
+              <label><input type="checkbox" value="発信" name="learningAssetConnectsTo" />発信</label>
+              <label><input type="checkbox" value="AI" name="learningAssetConnectsTo" />AI</label>
+              <label><input type="checkbox" value="暮らし" name="learningAssetConnectsTo" />暮らし</label>
+              <label><input type="checkbox" value="回復" name="learningAssetConnectsTo" />回復</label>
+              <label><input type="checkbox" value="ブランディング" name="learningAssetConnectsTo" />ブランディング</label>
+              <label><input type="checkbox" value="マーケティング" name="learningAssetConnectsTo" />マーケティング</label>
+              <label><input type="checkbox" value="OS" name="learningAssetConnectsTo" />OS</label>
+              <label><input type="checkbox" value="その他" name="learningAssetConnectsTo" />その他</label>
+            </fieldset>
+            <div class="learning-asset-actions">
+              <p id="learningAssetStatusMessage" class="learning-asset-status" role="status" aria-live="polite">タイトルか印象、または自分の考えを書くと保存できます。</p>
+              <button class="ghost-button" id="deleteLearningAsset" type="button" hidden>削除</button>
+              <button class="ghost-button" type="submit">保存</button>
+            </div>
+          </form>
+
+          <div class="learning-asset-controls">
+            <input id="learningAssetSearch" type="search" placeholder="タイトル・考え・実験・記事候補・テーマを検索" aria-label="学び資産を検索" />
+            <select id="learningAssetStatusFilter" aria-label="学び資産の状態で絞り込み">
+              <option value="all">すべて</option>
+              <option>学び待ち</option>
+              <option>対話済み</option>
+              <option>実験待ち</option>
+              <option>記事化待ち</option>
+              <option>資産化完了</option>
+            </select>
+            <span id="learningAssetSearchCount">0件表示</span>
+          </div>
+          <div id="learningAssetList" class="learning-asset-list" aria-label="保存済みの学び資産"></div>
         </section>
 
         <section id="reading-notes" class="panel reading-notes-panel span-2" aria-label="読書・記事の学びメモ">

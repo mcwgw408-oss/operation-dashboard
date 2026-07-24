@@ -261,6 +261,7 @@ textarea {
 #publishing-seed-candidates,
 #publishing-seeds,
 #publishing-experiment-lab,
+#learning-asset-flow,
 #reading-notes {
   scroll-margin-top: 18px;
 }
@@ -4932,6 +4933,242 @@ textarea {
   justify-content: flex-end;
 }
 
+.learning-asset-panel {
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+}
+
+.learning-asset-heading {
+  align-items: flex-start;
+}
+
+.learning-asset-flow-map {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.learning-asset-flow-map div {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--blue-line);
+  border-radius: var(--radius-item);
+  background: var(--blue-soft);
+  padding: 10px;
+}
+
+.learning-asset-flow-map span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.learning-asset-flow-map strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.learning-asset-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  border: 1px solid var(--blue-line);
+  border-radius: var(--radius-item);
+  background: #f7fbfd;
+  padding: 16px;
+}
+
+.learning-asset-form[hidden] {
+  display: none;
+}
+
+.learning-asset-form-heading,
+.learning-asset-primary-field,
+.learning-asset-wide-field,
+.learning-asset-checkboxes,
+.learning-asset-actions {
+  grid-column: 1 / -1;
+}
+
+.learning-asset-form-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.learning-asset-form-heading h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.learning-asset-form label,
+.learning-asset-checkboxes {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.learning-asset-primary-field textarea {
+  min-height: 180px;
+}
+
+.learning-asset-checkboxes {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.74);
+  padding: 12px;
+}
+
+.learning-asset-checkboxes legend {
+  grid-column: 1 / -1;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.learning-asset-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.learning-asset-checkboxes input {
+  width: auto;
+}
+
+.learning-asset-actions,
+.learning-asset-controls,
+.learning-asset-card-meta,
+.learning-asset-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.learning-asset-actions {
+  justify-content: flex-end;
+}
+
+.learning-asset-status {
+  margin: 0 auto 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.learning-asset-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 220px) auto;
+}
+
+.learning-asset-controls span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.learning-asset-list {
+  display: grid;
+  gap: 10px;
+}
+
+.learning-asset-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--blue);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.learning-asset-card.status-資産化完了 {
+  border-left-color: var(--green);
+}
+
+.learning-asset-card.status-記事化待ち {
+  border-left-color: var(--pink);
+}
+
+.learning-asset-card.editing {
+  border-color: var(--blue-line);
+  background: var(--blue-soft);
+}
+
+.learning-asset-card-meta {
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.learning-asset-card-meta select {
+  max-width: 180px;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.learning-asset-card h3,
+.learning-asset-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.learning-asset-card h3 {
+  font-size: 15px;
+}
+
+.learning-asset-card-impression,
+.learning-asset-card-thought,
+.learning-asset-card-details {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.learning-asset-card-thought {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.learning-asset-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.learning-asset-tags span {
+  border: 1px solid var(--green-line);
+  border-radius: 999px;
+  background: var(--green-soft);
+  padding: 3px 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.learning-asset-card-details {
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  color: var(--muted);
+}
+
+.learning-asset-card-details span {
+  margin-right: 6px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.learning-asset-card-actions {
+  justify-content: flex-end;
+}
+
 .publishing-ops-recent-texts p,
 .publishing-ops-recent-empty {
   margin: 0;
@@ -5194,6 +5431,10 @@ textarea {
   order: 32;
 }
 
+.dashboard .learning-asset-panel {
+  order: 32;
+}
+
 .dashboard .reading-notes-panel {
   order: 32;
 }
@@ -5295,6 +5536,7 @@ textarea {
 .publishing-ops-history-panel,
 .publishing-seed-candidates-panel,
 .publishing-seeds-panel,
+.learning-asset-panel,
 .reading-notes-panel,
 .daily-input-panel,
 .dashboard-task-panel,
@@ -5467,6 +5709,10 @@ textarea {
 
   .persistent-memo-actions,
   .learning-item,
+  .learning-asset-flow-map,
+  .learning-asset-form,
+  .learning-asset-checkboxes,
+  .learning-asset-controls,
   .reading-note-form,
   .reading-notes-search,
   .publishing-seed-candidate-form,
@@ -5536,6 +5782,10 @@ textarea {
 
   .reading-note-form-heading,
   .reading-note-actions,
+  .learning-asset-form-heading,
+  .learning-asset-actions,
+  .learning-asset-card-meta,
+  .learning-asset-card-actions,
   .publishing-seed-candidate-save-row,
   .publishing-seed-candidate-card-header,
   .publishing-seed-candidate-actions,
@@ -5549,6 +5799,7 @@ textarea {
   }
 
   .reading-note-status,
+  .learning-asset-status,
   .publishing-seed-candidate-status,
   .publishing-seed-status {
     margin-right: 0;
