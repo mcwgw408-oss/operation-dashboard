@@ -165,12 +165,17 @@ const afterImport = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDATES_S
 createSeedFromCandidate(publishingSeedCandidates[0], "ここは自分の視点で書ける。");
 const afterSeed = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY));
 const seeds = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
+deletePublishingSeedCandidate(publishingSeedCandidates[0]);
+const afterDelete = JSON.parse(localStorage.getItem(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY));
+const seedsAfterDelete = JSON.parse(localStorage.getItem(PUBLISHING_SEEDS_STORAGE_KEY));
 const backup = createBackup();
 globalThis.__seedCandidateFlowResult = {
   afterManual,
   afterImport,
   afterSeed,
   seeds,
+  afterDelete,
+  seedsAfterDelete,
   backupCandidates: backup.data[PUBLISHING_SEED_CANDIDATES_STORAGE_KEY],
   backupSeeds: backup.data[PUBLISHING_SEEDS_STORAGE_KEY],
 };
@@ -194,7 +199,11 @@ check(result.seeds.length === 1, "Seed was not created from candidate");
 check(result.seeds[0].personalTake.includes("自分の視点"), "Created Seed did not use personal take");
 check(result.seeds[0].candidateIds.includes(result.afterSeed[0].id), "Created Seed does not include candidateIds");
 check(result.seeds[0].seedCandidateId === result.afterSeed[0].id, "Created Seed does not link back to candidate");
-check(result.backupCandidates.length === 2, "Backup does not include Seed candidates");
+check(result.afterDelete.length === 1, "Deleted candidate was not removed");
+check(!result.afterDelete.some((candidate) => candidate.id === result.afterSeed[0].id), "Deleted candidate is still present");
+check(!result.seedsAfterDelete[0].candidateIds.includes(result.afterSeed[0].id), "Deleted candidate link stayed on Seed");
+check(result.seedsAfterDelete[0].seedCandidateId === "", "Deleted candidate primary link stayed on Seed");
+check(result.backupCandidates.length === 1, "Backup still includes deleted Seed candidate");
 check(result.backupSeeds.length === 1, "Backup does not include created Seed");
 
 if (failures.length) {

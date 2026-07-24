@@ -3531,6 +3531,23 @@ function updatePublishingSeedCandidateFromEdit(candidate, form) {
   renderPublishingSeeds();
 }
 
+function deletePublishingSeedCandidate(candidate) {
+  if (!candidate) return;
+  if (!confirm("このSeed候補を削除します。よろしいですか？")) return;
+  publishingSeeds.forEach((seed) => {
+    seed.candidateIds = (seed.candidateIds || []).filter((id) => id !== candidate.id);
+    if (seed.seedCandidateId === candidate.id) seed.seedCandidateId = "";
+    seed.updatedAt = new Date().toISOString();
+  });
+  publishingSeedCandidates = publishingSeedCandidates.filter((item) => item.id !== candidate.id);
+  if (activePublishingSeedCandidateId === candidate.id) activePublishingSeedCandidateId = "";
+  if (editingPublishingSeedCandidateId === candidate.id) editingPublishingSeedCandidateId = "";
+  savePublishingSeeds();
+  savePublishingSeedCandidates();
+  renderPublishingSeedCandidates();
+  renderPublishingSeeds();
+}
+
 function createPublishingSeedCandidateCard(candidate) {
   const card = document.createElement("article");
   card.className = `publishing-seed-candidate-card status-${candidate.status}`;
@@ -3572,7 +3589,12 @@ function createPublishingSeedCandidateCard(candidate) {
     const saveButton = document.createElement("button");
     saveButton.type = "submit";
     saveButton.textContent = "保存";
-    actions.append(cancelButton, saveButton);
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-button";
+    deleteButton.type = "button";
+    deleteButton.textContent = "削除する";
+    deleteButton.addEventListener("click", () => deletePublishingSeedCandidate(candidate));
+    actions.append(cancelButton, deleteButton, saveButton);
     form.append(actions);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -3614,7 +3636,12 @@ function createPublishingSeedCandidateCard(candidate) {
       editingPublishingSeedCandidateId = candidate.id;
       renderPublishingSeedCandidates();
     });
-    compactActions.append(editCompactButton);
+    const deleteCompactButton = document.createElement("button");
+    deleteCompactButton.className = "delete-button";
+    deleteCompactButton.type = "button";
+    deleteCompactButton.textContent = "削除する";
+    deleteCompactButton.addEventListener("click", () => deletePublishingSeedCandidate(candidate));
+    compactActions.append(editCompactButton, deleteCompactButton);
     card.replaceChildren(compact, compactActions);
     return card;
   }
@@ -3703,7 +3730,12 @@ function createPublishingSeedCandidateCard(candidate) {
   collapseButton.textContent = publishingSeedCandidateIsDecided(candidate) ? "折りたたむ" : "あとで折りたたむ";
   collapseButton.disabled = !publishingSeedCandidateIsDecided(candidate);
   collapseButton.addEventListener("click", () => togglePublishingSeedCandidateCollapsed(candidate));
-  actions.append(editButton, seedButton, skipButton, collapseButton);
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "delete-button";
+  deleteButton.type = "button";
+  deleteButton.textContent = "削除する";
+  deleteButton.addEventListener("click", () => deletePublishingSeedCandidate(candidate));
+  actions.append(editButton, seedButton, skipButton, collapseButton, deleteButton);
 
   card.append(header, summary, reason, source, date);
   if (publishingSeedCandidateIsDecided(candidate)) card.append(decision);
