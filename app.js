@@ -758,7 +758,25 @@ function blankDay() {
       blockedToday: "",
       tomorrowPlan: "",
     },
+    codexDailyLog: defaultCodexDailyLog(),
+    codexDailyLogUpdatedAt: "",
     updatedAt: new Date().toISOString(),
+  };
+}
+
+function defaultCodexDailyLog() {
+  return {
+    tried: "",
+    learned: "",
+    people: "",
+    ai: "",
+    ideas: "",
+    experiments: "",
+    failures: "",
+    successes: "",
+    conversations: "",
+    tomorrow: "",
+    prompt: "",
   };
 }
 
@@ -859,6 +877,26 @@ function ensureXAnalysis(day) {
   });
   if (!("xAnalysisUpdatedAt" in day)) {
     day.xAnalysisUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureCodexDailyLog(day) {
+  let changed = false;
+  if (!day.codexDailyLog || typeof day.codexDailyLog !== "object") {
+    day.codexDailyLog = defaultCodexDailyLog();
+    changed = true;
+  }
+  const defaults = defaultCodexDailyLog();
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.codexDailyLog)) {
+      day.codexDailyLog[key] = value;
+      changed = true;
+    }
+  });
+  if (!("codexDailyLogUpdatedAt" in day)) {
+    day.codexDailyLogUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1683,6 +1721,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureTodayWeather(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureCodexDailyLog(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   return store[activeDate];
@@ -2896,6 +2937,33 @@ const xAnalysisFields = {
   nextTry: "#xAnalysisNextTry",
 };
 
+const codexDailyLogFields = {
+  tried: "#codexLogTried",
+  learned: "#codexLogLearned",
+  people: "#codexLogPeople",
+  ai: "#codexLogAi",
+  ideas: "#codexLogIdeas",
+  experiments: "#codexLogExperiments",
+  failures: "#codexLogFailures",
+  successes: "#codexLogSuccesses",
+  conversations: "#codexLogConversations",
+  tomorrow: "#codexLogTomorrow",
+  prompt: "#codexDailyLogPrompt",
+};
+
+const codexDailyLogLabels = {
+  tried: "試したこと",
+  learned: "学んだこと",
+  people: "人物",
+  ai: "AI",
+  ideas: "アイデア",
+  experiments: "実験",
+  failures: "失敗",
+  successes: "成功",
+  conversations: "会話",
+  tomorrow: "明日見たいこと",
+};
+
 const publishingOpsTextSections = [
   ["今日の一番の学び", ["yoshidaLearning"]],
   ["明日に活かすこと", ["yoshidaTomorrow"]],
@@ -3198,6 +3266,116 @@ function saveXAnalysisFromForm() {
   saveStore();
   const action = wasSaved ? "更新" : "保存";
   renderXAnalysisSaveState(day, `本日のX分析を${action}しました。最終更新 ${formatSavedAt(day.xAnalysisUpdatedAt)}`);
+}
+
+function readCodexDailyLogForm() {
+  return Object.fromEntries(Object.entries(codexDailyLogFields).map(([key, selector]) => {
+    const field = $(selector);
+    return [key, field ? field.value : ""];
+  }));
+}
+
+function normalizeCodexDailyLog(log) {
+  return { ...defaultCodexDailyLog(), ...(log && typeof log === "object" ? log : {}) };
+}
+
+function buildCodexDailyLogPrompt(day = getDay(), log = normalizeCodexDailyLog(day.codexDailyLog)) {
+  const reflection = day.reflection || {};
+  const sectionText = Object.entries(codexDailyLogLabels)
+    .map(([key, label]) => `## ${label}\n${String(log[key] || "").trim() || "-"}`
+    )
+    .join("\n\n");
+  const reflectionText = [
+    ["今日できたこと", reflection.didToday],
+    ["困ったこと", reflection.blockedToday],
+    ["明日やること", reflection.tomorrowPlan],
+  ]
+    .map(([label, value]) => `## ${label}\n${String(value || "").trim() || "-"}`)
+    .join("\n\n");
+
+  return `以下は ${activeDate} の終わりの記録です。
+Obsidianの「06 デイリーログ」に日次ログとして追加し、必要なものは発信戦略KBにもつないでください。
+
+分類してほしい項目：
+- 試したこと
+- 学んだこと
+- 人物
+- AI
+- アイデア
+- 実験
+- 失敗
+- 成功
+- 会話
+
+ルール：
+- 事実と解釈を分けてください。
+- あとから検索しやすいように tags と aliases を付けてください。
+- 関連する既存ノートがあれば [[リンク]] でつないでください。
+- 新しいノートが必要なら作ってください。
+- 日次ログには、今日の要約と各分類へのリンクを残してください。
+- 記事化はせず、Obsidian用の記録にしてください。
+
+# ダッシュボード内の振り返り
+
+${reflectionText}
+
+# Codexへ渡す分類済み素材
+
+${sectionText}`;
+}
+
+function renderCodexDailyLogStatus(day, confirmation = "") {
+  const status = $("#codexDailyLogStatus");
+  if (!status) return;
+  const savedAt = formatSavedAt(day?.codexDailyLogUpdatedAt);
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (String(day?.codexDailyLog?.prompt || "").trim()) {
+    status.textContent = "まとめ作成済みです。コピーしてCodexへ渡せます。";
+  } else {
+    status.textContent = "まだまとめを作っていません。";
+  }
+}
+
+function renderCodexDailyLog(day = getDay(), confirmation = "") {
+  const log = normalizeCodexDailyLog(day.codexDailyLog);
+  Object.entries(codexDailyLogFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field || document.activeElement === field) return;
+    if (field.value !== (log[key] || "")) {
+      field.value = log[key] || "";
+    }
+  });
+  renderCodexDailyLogStatus(day, confirmation);
+}
+
+function saveCodexDailyLogFromForm({ buildPrompt = false } = {}) {
+  const day = getDay();
+  const formLog = normalizeCodexDailyLog(readCodexDailyLogForm());
+  if (buildPrompt) {
+    formLog.prompt = buildCodexDailyLogPrompt(day, formLog);
+  }
+  day.codexDailyLog = formLog;
+  day.codexDailyLogUpdatedAt = new Date().toISOString();
+  saveStore();
+  renderCodexDailyLog(day, buildPrompt
+    ? `Codex用まとめを作りました。最終更新 ${formatSavedAt(day.codexDailyLogUpdatedAt)}`
+    : "");
+  return day.codexDailyLog;
+}
+
+async function copyCodexDailyLogPrompt() {
+  const log = saveCodexDailyLogFromForm({ buildPrompt: true });
+  const text = String(log.prompt || "").trim();
+  if (!text) return;
+  try {
+    await copySnapshotText(text);
+    renderCodexDailyLogStatus(getDay(), `Codex用まとめをコピーしました（約${Math.round(text.length / 1000)}千文字）。`);
+  } catch (error) {
+    renderCodexDailyLogStatus(getDay(), "コピーできませんでした。欄の文章を手動でコピーしてください。");
+  }
 }
 
 const operationExperimentDefinitionFields = {
@@ -11084,6 +11262,7 @@ function renderAll() {
   renderLearningGlobalSearch();
   renderPublishingOps();
   renderXAnalysis();
+  renderCodexDailyLog();
   setPublishingSeedActiveView(publishingSeedActiveView);
   renderPublishingSeedCandidates();
   renderPublishingSeeds();
@@ -11538,6 +11717,13 @@ function bindEvents() {
     if (!field) return;
     field.addEventListener("input", () => updateField("reflection", key, field));
   });
+  Object.values(codexDailyLogFields).forEach((selector) => {
+    const field = $(selector);
+    if (!field || field.readOnly) return;
+    field.addEventListener("input", () => saveCodexDailyLogFromForm());
+  });
+  $("#buildCodexDailyLog")?.addEventListener("click", () => saveCodexDailyLogFromForm({ buildPrompt: true }));
+  $("#copyCodexDailyLog")?.addEventListener("click", copyCodexDailyLogPrompt);
   $("#savePublishingOps")?.addEventListener("click", savePublishingOpsFromForm);
   Object.values(publishingOpsFields).forEach((selector) => {
     const field = $(selector);

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260724-seed-candidate-delete" />
+    <link rel="stylesheet" href="./styles.css?v=20260727-codex-daily-log" />
   </head>
   <body>
     <div class="app">
@@ -43,6 +43,7 @@
           <a href="#learning-asset-flow">学び資産化</a>
           <a href="#reading-notes">学びメモ</a>
           <a href="#dashboard-accumulation">ためる</a>
+          <a href="#codex-daily-log">Codexへ渡す</a>
           <a href="#dashboard-closed">閉じているもの</a>
         </nav>
 
@@ -1653,6 +1654,33 @@
           </div>
         </section>
 
+        <section id="codex-daily-log" class="panel codex-daily-log-panel span-2" aria-label="Codexへ渡す今日のまとめ">
+          <div class="panel-heading">
+            <div>
+              <h2>Codexへ渡す今日のまとめ</h2>
+              <p class="section-note">夜に今日の素材をここへためて、Codexへコピーします。CodexがObsidianのデイリーログと知識ベースへ整理します。</p>
+            </div>
+            <div class="codex-daily-log-actions">
+              <button class="ghost-button" id="buildCodexDailyLog" type="button">まとめを作る</button>
+              <button class="ghost-button" id="copyCodexDailyLog" type="button">Codex用をコピー</button>
+            </div>
+          </div>
+          <div class="codex-daily-log-grid">
+            <label>試したこと<textarea id="codexLogTried" rows="4" placeholder="今日、実際にやってみたこと"></textarea></label>
+            <label>学んだこと<textarea id="codexLogLearned" rows="4" placeholder="気づき、考え方が変わったこと"></textarea></label>
+            <label>人物<textarea id="codexLogPeople" rows="4" placeholder="名前が出た人、助言をくれた人、参考にした人"></textarea></label>
+            <label>AI<textarea id="codexLogAi" rows="4" placeholder="AIに頼んだこと、AIでできたこと、詰まったこと"></textarea></label>
+            <label>アイデア<textarea id="codexLogIdeas" rows="4" placeholder="まだ実験前の思いつき"></textarea></label>
+            <label>実験<textarea id="codexLogExperiments" rows="4" placeholder="仮説を置いて試したこと、これから検証すること"></textarea></label>
+            <label>失敗<textarea id="codexLogFailures" rows="4" placeholder="うまくいかなかったこと、予想と違ったこと"></textarea></label>
+            <label>成功<textarea id="codexLogSuccesses" rows="4" placeholder="うまくいったこと、反応があったこと"></textarea></label>
+            <label class="codex-daily-log-wide-field">会話<textarea id="codexLogConversations" rows="4" placeholder="人との会話、相談、印象に残ったやり取り"></textarea></label>
+            <label class="codex-daily-log-wide-field">明日見たいこと<textarea id="codexLogTomorrow" rows="3" placeholder="明日、Codexや自分が見るとよいこと"></textarea></label>
+          </div>
+          <label class="codex-daily-log-output">Codexへ渡す文<textarea id="codexDailyLogPrompt" rows="12" readonly></textarea></label>
+          <p class="section-note" id="codexDailyLogStatus">まだまとめを作っていません。</p>
+        </section>
+
         <section class="panel span-2">
           <details>
             <summary>育てるプロジェクト</summary>
@@ -1887,6 +1915,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260724-seed-candidate-delete"></script>
+    <script src="./app.js?v=20260727-codex-daily-log"></script>
   </body>
 </html>

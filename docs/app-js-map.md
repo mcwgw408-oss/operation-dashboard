@@ -12,7 +12,7 @@ Epic 3 / Step11-d 時点の保守用地図です。`app.js` はまだ分割し�
 | 699-858 | save関数、メインstore保存 |
 | 858-1523 | 日次データ取得、サマリー、タスク、定期予定、メモ、学びの描画 |
 | 1524-1776 | 発信運営、最近7日の発信運営 |
-| 1776-2105 | あとで見る、日次入力、履歴表示 |
+| 1776-2105 | あとで見る、日次入力、Codex日次まとめ、履歴表示 |
 | 2105-2563 | Memory追加、記憶一覧、記憶検索、記憶文脈 |
 | 2563-5512 | 会話文脈、返答設計、人格/関係/実行状態、Health、Conversation feedback |
 | 5513-6208 | Priority Engine、Recommendation Engine、Learning Layer |
@@ -93,6 +93,8 @@ save入口:
 `localStorage.setItem` は原則として上記save関数、バックアップ復元、Snapshot設定、既存初期化補完の中だけに置きます。
 
 毎日タスクの表示順は 2026-07-15 を基準にし、それ以降の日付では前日の並びを引き継ぎます。
+
+`STORAGE_KEY` の日付別データには、夜にCodexへ渡してObsidianへ整理するための `codexDailyLog` と `codexDailyLogUpdatedAt` も含まれます。
 
 ## Backup / Snapshot入口
 
