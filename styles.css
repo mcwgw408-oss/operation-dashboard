@@ -5707,6 +5707,14 @@ button.launch-card {
   order: 17;
 }
 
+.dashboard #noteAiPage {
+  order: 18;
+}
+
+.dashboard #noteBeginnerPage {
+  order: 19;
+}
+
 .dashboard > .panel:has(#projects) {
   order: 83;
 }

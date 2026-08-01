@@ -351,6 +351,20 @@ function defaultSubstack() {
   };
 }
 
+function defaultNotePage(extraStockKey = "stockExtra") {
+  return {
+    articleTitle: "",
+    articlePublished: false,
+    views: "",
+    likes: "",
+    insight: "",
+    todayArticleTheme: "",
+    todayTasks: "",
+    stockArticleIdeas: "",
+    [extraStockKey]: "",
+  };
+}
+
 function defaultXAnalysis(date = activeDate) {
   return {
     date,
@@ -756,6 +770,10 @@ function blankDay() {
     publishingOpsUpdatedAt: "",
     substack: defaultSubstack(),
     substackUpdatedAt: "",
+    noteAiRecovery: defaultNotePage("seoQueue"),
+    noteAiRecoveryUpdatedAt: "",
+    noteSubstackBeginner: defaultNotePage("commonQuestions"),
+    noteSubstackBeginnerUpdatedAt: "",
     xAnalysis: defaultXAnalysis(),
     xAnalysisUpdatedAt: "",
     dailyInput: "",
@@ -879,6 +897,26 @@ function ensureSubstack(day) {
   });
   if (!("substackUpdatedAt" in day)) {
     day.substackUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureNotePage(day, key, updatedAtKey, extraStockKey) {
+  let changed = false;
+  if (!day[key] || typeof day[key] !== "object" || Array.isArray(day[key])) {
+    day[key] = defaultNotePage(extraStockKey);
+    changed = true;
+  }
+  const defaults = defaultNotePage(extraStockKey);
+  Object.entries(defaults).forEach(([fieldKey, value]) => {
+    if (!(fieldKey in day[key])) {
+      day[key][fieldKey] = value;
+      changed = true;
+    }
+  });
+  if (!(updatedAtKey in day)) {
+    day[updatedAtKey] = "";
     changed = true;
   }
   return changed;
@@ -1767,6 +1805,12 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureSubstack(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureNotePage(store[activeDate], "noteAiRecovery", "noteAiRecoveryUpdatedAt", "seoQueue")) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureNotePage(store[activeDate], "noteSubstackBeginner", "noteSubstackBeginnerUpdatedAt", "commonQuestions")) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureXAnalysis(store[activeDate])) {
@@ -2985,6 +3029,51 @@ const substackFields = {
   stockSeed: "#substackStockSeed",
 };
 
+const notePageConfigs = {
+  "note（いつものnote）": {
+    pageId: "#noteAiPage",
+    storeKey: "noteAiRecovery",
+    updatedAtKey: "noteAiRecoveryUpdatedAt",
+    title: "note①",
+    emptyStatus: "今日のnote①はまだ保存されていません。",
+    extraStockKey: "seoQueue",
+    fields: {
+      articleTitle: "#noteAiArticleTitle",
+      articlePublished: "#noteAiArticlePublished",
+      views: "#noteAiViews",
+      likes: "#noteAiLikes",
+      insight: "#noteAiInsight",
+      todayArticleTheme: "#noteAiTodayArticleTheme",
+      todayTasks: "#noteAiTodayTasks",
+      stockArticleIdeas: "#noteAiStockArticleIdeas",
+      seoQueue: "#noteAiSeoQueue",
+    },
+    saveButton: "#saveNoteAi",
+    status: "#noteAiStatus",
+  },
+  "note（Substack初心者向け）": {
+    pageId: "#noteBeginnerPage",
+    storeKey: "noteSubstackBeginner",
+    updatedAtKey: "noteSubstackBeginnerUpdatedAt",
+    title: "note②",
+    emptyStatus: "今日のnote②はまだ保存されていません。",
+    extraStockKey: "commonQuestions",
+    fields: {
+      articleTitle: "#noteBeginnerArticleTitle",
+      articlePublished: "#noteBeginnerArticlePublished",
+      views: "#noteBeginnerViews",
+      likes: "#noteBeginnerLikes",
+      insight: "#noteBeginnerInsight",
+      todayArticleTheme: "#noteBeginnerTodayArticleTheme",
+      todayTasks: "#noteBeginnerTodayTasks",
+      stockArticleIdeas: "#noteBeginnerStockArticleIdeas",
+      commonQuestions: "#noteBeginnerCommonQuestions",
+    },
+    saveButton: "#saveNoteBeginner",
+    status: "#noteBeginnerStatus",
+  },
+};
+
 const PUBLISHING_OPS_RECENT_DAYS = 7;
 const publishingOpsCountFields = [
   ["notesCount", "ノート投稿数"],
@@ -3121,6 +3210,74 @@ function saveSubstackFromForm() {
   renderSubstackSaveState(
     day,
     `Substackを${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.substackUpdatedAt)}`,
+  );
+  renderBrainPrototype();
+}
+
+function readNotePageForm(config) {
+  const defaults = defaultNotePage(config.extraStockKey);
+  return Object.fromEntries(Object.entries(config.fields).map(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return [key, defaults[key]];
+    return [key, field.type === "checkbox" ? field.checked : field.value];
+  }));
+}
+
+function hasNotePageRecord(rawNote, note) {
+  if (!rawNote || typeof rawNote !== "object") return false;
+  return Object.values(note).some((value) =>
+    typeof value === "boolean" ? value : Boolean(String(value || "").trim()));
+}
+
+function renderNotePageSaveState(config, day, confirmation = "") {
+  const note = { ...defaultNotePage(config.extraStockKey), ...(day?.[config.storeKey] || {}) };
+  const saved = Boolean(day?.[config.updatedAtKey]) || hasNotePageRecord(day?.[config.storeKey], note);
+  const button = $(config.saveButton);
+  const status = $(config.status);
+  const savedAt = formatSavedAt(day?.[config.updatedAtKey]);
+  if (button) button.textContent = saved ? `${config.title}を更新する` : `${config.title}を保存する`;
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = config.emptyStatus;
+  }
+}
+
+function renderNotePage(config) {
+  const day = getDay();
+  const note = { ...defaultNotePage(config.extraStockKey), ...(day[config.storeKey] || {}) };
+  Object.entries(config.fields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return;
+    if (field.type === "checkbox") {
+      field.checked = Boolean(note[key]);
+    } else if (field.value !== String(note[key] || "")) {
+      field.value = note[key] || "";
+    }
+  });
+  renderNotePageSaveState(config, day);
+}
+
+function renderNotePages() {
+  Object.values(notePageConfigs).forEach(renderNotePage);
+}
+
+function saveNotePageFromForm(config) {
+  const day = getDay();
+  const existing = { ...defaultNotePage(config.extraStockKey), ...(day[config.storeKey] || {}) };
+  const wasSaved = Boolean(day[config.updatedAtKey]) || hasNotePageRecord(day[config.storeKey], existing);
+  day[config.storeKey] = { ...defaultNotePage(config.extraStockKey), ...readNotePageForm(config) };
+  day[config.updatedAtKey] = new Date().toISOString();
+  saveStore();
+  renderNotePageSaveState(
+    config,
+    day,
+    `${config.title}を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day[config.updatedAtKey])}`,
   );
   renderBrainPrototype();
 }
@@ -11437,6 +11594,7 @@ function renderAll() {
   renderLearningGlobalSearch();
   renderPublishingOps();
   renderSubstack();
+  renderNotePages();
   renderXAnalysis();
   renderCodexDailyLog();
   setPublishingSeedActiveView(publishingSeedActiveView);
@@ -11519,13 +11677,20 @@ function scrollBackToTop() {
 
 function showPageEntry(entryName = "") {
   const substackPanel = $("#substackPage");
+  const noteConfig = notePageConfigs[entryName];
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
+  const isNote = Boolean(noteConfig);
   if (substackPanel) substackPanel.hidden = !isSubstack;
-  if (placeholder) placeholder.hidden = isSubstack || !entryName;
+  Object.values(notePageConfigs).forEach((config) => {
+    const panel = $(config.pageId);
+    if (panel) panel.hidden = config !== noteConfig;
+  });
+  if (placeholder) placeholder.hidden = isSubstack || isNote || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
+  if (noteConfig) renderNotePage(noteConfig);
 }
 
 function bindEvents() {
@@ -11956,6 +12121,19 @@ function bindEvents() {
     };
     field.addEventListener("input", markDirty);
     field.addEventListener("change", markDirty);
+  });
+  Object.values(notePageConfigs).forEach((config) => {
+    $(config.saveButton)?.addEventListener("click", () => saveNotePageFromForm(config));
+    Object.values(config.fields).forEach((selector) => {
+      const field = $(selector);
+      if (!field) return;
+      const markDirty = () => {
+        const status = $(config.status);
+        if (status) status.textContent = "未保存の変更があります。";
+      };
+      field.addEventListener("input", markDirty);
+      field.addEventListener("change", markDirty);
+    });
   });
   $("#saveXAnalysis")?.addEventListener("click", saveXAnalysisFromForm);
   Object.values(xAnalysisFields).forEach((selector) => {

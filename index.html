@@ -983,6 +983,134 @@
           <p id="substackStatus" class="substack-status">今日のSubstackはまだ保存されていません。</p>
         </section>
 
+        <section id="noteAiPage" class="panel substack-page-panel note-page-panel span-2" aria-label="note① AI×生活・回復" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2>note①（AI×生活・回復）</h2>
+              <p class="section-note">AI、生活、回復まわりのnoteを日付別に軽く残します。</p>
+            </div>
+            <button class="ghost-button" id="saveNoteAi" type="button">note①を保存する</button>
+          </div>
+          <div class="substack-page-grid">
+            <section class="substack-page-block">
+              <h3>昨日の振り返り</h3>
+              <label>
+                記事タイトル
+                <input id="noteAiArticleTitle" type="text" />
+              </label>
+              <label class="check-row">
+                <input id="noteAiArticlePublished" type="checkbox" />
+                公開したか
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>反応</h3>
+              <label>
+                ビュー
+                <input id="noteAiViews" type="number" min="0" inputmode="numeric" />
+              </label>
+              <label>
+                スキ
+                <input id="noteAiLikes" type="number" min="0" inputmode="numeric" />
+              </label>
+              <label>
+                気づき
+                <input id="noteAiInsight" type="text" maxlength="80" />
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>今日</h3>
+              <label>
+                今日の記事テーマ
+                <input id="noteAiTodayArticleTheme" type="text" />
+              </label>
+              <label>
+                今日やること
+                <textarea id="noteAiTodayTasks" rows="3"></textarea>
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>ストック</h3>
+              <label>
+                記事ネタ
+                <textarea id="noteAiStockArticleIdeas" rows="3"></textarea>
+              </label>
+              <label>
+                SEO化待ち
+                <textarea id="noteAiSeoQueue" rows="3"></textarea>
+              </label>
+            </section>
+          </div>
+          <p id="noteAiStatus" class="substack-status">今日のnote①はまだ保存されていません。</p>
+        </section>
+
+        <section id="noteBeginnerPage" class="panel substack-page-panel note-page-panel span-2" aria-label="note② Substack初心者向け" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2>note②（Substack初心者向け）</h2>
+              <p class="section-note">Substack初心者向けnoteを、いつものnoteとは別に保存します。</p>
+            </div>
+            <button class="ghost-button" id="saveNoteBeginner" type="button">note②を保存する</button>
+          </div>
+          <div class="substack-page-grid">
+            <section class="substack-page-block">
+              <h3>昨日の振り返り</h3>
+              <label>
+                記事タイトル
+                <input id="noteBeginnerArticleTitle" type="text" />
+              </label>
+              <label class="check-row">
+                <input id="noteBeginnerArticlePublished" type="checkbox" />
+                公開したか
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>反応</h3>
+              <label>
+                ビュー
+                <input id="noteBeginnerViews" type="number" min="0" inputmode="numeric" />
+              </label>
+              <label>
+                スキ
+                <input id="noteBeginnerLikes" type="number" min="0" inputmode="numeric" />
+              </label>
+              <label>
+                気づき
+                <input id="noteBeginnerInsight" type="text" maxlength="80" />
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>今日</h3>
+              <label>
+                今日の記事テーマ
+                <input id="noteBeginnerTodayArticleTheme" type="text" />
+              </label>
+              <label>
+                今日やること
+                <textarea id="noteBeginnerTodayTasks" rows="3"></textarea>
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>ストック</h3>
+              <label>
+                記事ネタ
+                <textarea id="noteBeginnerStockArticleIdeas" rows="3"></textarea>
+              </label>
+              <label>
+                よくある質問
+                <textarea id="noteBeginnerCommonQuestions" rows="3"></textarea>
+              </label>
+            </section>
+          </div>
+          <p id="noteBeginnerStatus" class="substack-status">今日のnote②はまだ保存されていません。</p>
+        </section>
+
         <section class="panel dashboard-task-panel span-2">
           <div class="panel-heading">
             <div>
