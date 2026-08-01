@@ -842,13 +842,31 @@
         </section>
 
         <section id="home-capacity-check" class="panel capacity-check-section span-2" aria-label="今日できること">
-          <div class="capacity-check-panel">
-            <div class="capacity-check-heading">
-              <h3>今日できること</h3>
-              <p class="section-note">今日扱いやすいことだけを、○△×で残します。</p>
+          <div class="capacity-check-layout">
+            <div class="capacity-check-panel">
+              <div class="capacity-check-heading">
+                <h3>今日できること</h3>
+                <p class="section-note">今日扱いやすいことだけを、○△×で残します。</p>
+              </div>
+              <div id="capacityCheckGrid" class="capacity-check-grid"></div>
+              <p id="capacityCheckStatus" class="capacity-check-status">今日できることはまだ記録されていません。</p>
             </div>
-            <div id="capacityCheckGrid" class="capacity-check-grid"></div>
-            <p id="capacityCheckStatus" class="capacity-check-status">今日できることはまだ記録されていません。</p>
+            <div class="capacity-metrics-stack">
+              <section class="metrics-panel">
+                <h2>メール</h2>
+                <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
+                <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
+                <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
+                <p class="mail-last-checked">最後に確認した時間：<strong id="mailLastCheckedLabel">未確認</strong></p>
+              </section>
+
+              <section class="metrics-panel">
+                <h2>メッセージ</h2>
+                <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
+                <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
+                <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
+              </section>
+            </div>
           </div>
         </section>
 
@@ -1997,21 +2015,6 @@
             </summary>
             <div id="healthAnalysisMount" class="health-analysis-body"></div>
           </details>
-        </section>
-
-        <section class="panel metrics-panel span-2">
-          <h2>メール</h2>
-          <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
-          <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
-          <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
-          <p class="mail-last-checked">最後に確認した時間：<strong id="mailLastCheckedLabel">未確認</strong></p>
-        </section>
-
-        <section class="panel metrics-panel span-2">
-          <h2>メッセージ</h2>
-          <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
-          <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
-          <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
         </section>
 
         <section class="panel publishing-ops-history-panel span-2" aria-label="発信運営の保存済み記録">
