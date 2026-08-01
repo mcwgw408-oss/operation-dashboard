@@ -384,7 +384,6 @@ function defaultXPageV1() {
     stockPostIdeas: "",
     stockPostIdea1: "",
     stockPostIdea2: "",
-    stockPostIdea3: "",
   };
 }
 
@@ -3185,7 +3184,6 @@ const xPageV1Fields = {
   todayTasks: "#xPageTodayTasks",
   stockPostIdea1: "#xPageStockPostIdea1",
   stockPostIdea2: "#xPageStockPostIdea2",
-  stockPostIdea3: "#xPageStockPostIdea3",
 };
 
 const wordpressPageV1Fields = {

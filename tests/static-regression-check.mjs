@@ -136,7 +136,6 @@ const requiredIds = [
   "xPageTodayTasks",
   "xPageStockPostIdea1",
   "xPageStockPostIdea2",
-  "xPageStockPostIdea3",
   "wordpressPageV1",
   "saveWordPressPageV1",
   "wordpressPageV1Status",

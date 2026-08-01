@@ -5400,6 +5400,11 @@ button.launch-card {
   font-size: 15px;
 }
 
+.substack-page-block h4 {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
 .substack-page-block label {
   display: grid;
   gap: 6px;
