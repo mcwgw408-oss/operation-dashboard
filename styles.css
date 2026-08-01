@@ -3255,6 +3255,43 @@ textarea {
   padding: 4px 6px;
 }
 
+.dashboard > .panel:has(#dailyTasks) {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 12px;
+}
+
+.dashboard > .panel:has(#dailyTasks) .panel-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard > .panel:has(#dailyTasks) .section-note {
+  display: none;
+}
+
+.dashboard > .panel:has(#dailyTasks) .inline-form {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.dashboard > .panel:has(#dailyTasks) .task-list {
+  gap: 6px;
+}
+
+.dashboard > .panel:has(#dailyTasks) .task-row {
+  min-height: 38px;
+  padding: 4px 6px;
+}
+
+.metrics-panel {
+  padding: 12px;
+  gap: 8px;
+}
+
 .metrics-panel label,
 .reflection-panel label {
   display: grid;
@@ -5680,10 +5717,12 @@ button.launch-card {
 }
 
 .dashboard .sleep-summary-panel {
+  grid-column: 1 / span 2;
   order: 12;
 }
 
 .dashboard .capacity-check-section {
+  grid-column: 1 / span 2;
   order: 13;
 }
 
@@ -5756,17 +5795,17 @@ button.launch-card {
 
 .dashboard > .panel:has(#dailyTasks) {
   grid-column: 3 / -1;
-  order: 10;
+  order: 12;
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
   grid-column: 3 / span 1;
-  order: 9;
+  order: 13;
 }
 
 .dashboard > .metrics-panel:has(#dmPending) {
   grid-column: 4 / span 1;
-  order: 9;
+  order: 13;
 }
 
 .dashboard .publishing-ops-history-panel {
@@ -5898,7 +5937,7 @@ button.launch-card {
 .metrics-panel {
   align-self: start;
   min-height: 0;
-  padding: 16px;
+  padding: 12px;
 }
 
 @media (max-width: 1080px) {
