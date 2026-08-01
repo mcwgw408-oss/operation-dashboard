@@ -11956,12 +11956,14 @@ function showPageEntry(entryName = "") {
   const noteConfig = notePageConfigs[entryName];
   const xPagePanel = $("#xPageV1");
   const wordpressPagePanel = $("#wordpressPageV1");
+  const seedPagePanel = $("#publishing-seeds");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
   const isNote = Boolean(noteConfig);
   const isXPage = entryName === "X";
   const isWordPressPage = entryName === "WordPress";
+  const isSeedPage = entryName === "Seed";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -11969,12 +11971,17 @@ function showPageEntry(entryName = "") {
   });
   if (xPagePanel) xPagePanel.hidden = !isXPage;
   if (wordpressPagePanel) wordpressPagePanel.hidden = !isWordPressPage;
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || !entryName;
+  if (seedPagePanel && !isSeedPage) seedPagePanel.hidden = true;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
   if (isXPage) renderXPageV1();
   if (isWordPressPage) renderWordPressPageV1();
+  if (isSeedPage) {
+    setPublishingSeedActiveView("seed");
+    renderPublishingSeeds();
+  }
 }
 
 function bindEvents() {
