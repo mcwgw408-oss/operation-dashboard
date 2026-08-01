@@ -5704,8 +5704,8 @@ button.launch-card {
 }
 
 .dashboard .dashboard-task-panel {
-  grid-column: 3 / -1;
-  order: 8;
+  grid-column: 1 / span 2;
+  order: 9;
 }
 
 .dashboard .schedule-panel {
@@ -5727,13 +5727,13 @@ button.launch-card {
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
-  grid-column: 3 / span 1;
-  order: 9;
+  grid-column: 1 / span 2;
+  order: 10;
 }
 
 .dashboard > .metrics-panel:has(#dmPending) {
-  grid-column: 4 / span 1;
-  order: 9;
+  grid-column: 1 / span 2;
+  order: 11;
 }
 
 .dashboard .publishing-ops-history-panel {
@@ -5877,16 +5877,10 @@ button.launch-card {
   .dashboard .after-ten-mode-panel,
   .dashboard .dashboard-task-panel,
   .dashboard .schedule-panel,
-  .dashboard > .panel:has(#dailyTasks) {
-    grid-column: 1 / -1;
-  }
-
-  .dashboard > .metrics-panel:has(#mailMorningChecked) {
-    grid-column: 1 / span 1;
-  }
-
+  .dashboard > .panel:has(#dailyTasks),
+  .dashboard > .metrics-panel:has(#mailMorningChecked),
   .dashboard > .metrics-panel:has(#dmPending) {
-    grid-column: 2 / span 1;
+    grid-column: 1 / -1;
   }
 
   .persistent-memo-list {
