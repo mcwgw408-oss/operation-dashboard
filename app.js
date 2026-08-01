@@ -3300,7 +3300,7 @@ function renderSubstackSaveState(day, confirmation = "") {
   const button = $("#saveSubstack");
   const status = $("#substackStatus");
   const savedAt = formatSavedAt(day?.substackUpdatedAt);
-  if (button) button.textContent = saved ? "Substackを更新する" : "Substackを保存する";
+  if (button) button.textContent = saved ? "Substackを更新する" : "Substackを保存・更新する";
   if (!status) return;
   if (confirmation) {
     status.textContent = confirmation;
@@ -3309,7 +3309,7 @@ function renderSubstackSaveState(day, confirmation = "") {
   } else if (saved) {
     status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
   } else {
-    status.textContent = "今日のSubstackはまだ保存されていません。";
+    status.textContent = "今日のSubstackはまだ保存されていません。保存後は同じボタンで更新できます。";
   }
 }
 
@@ -3362,7 +3362,7 @@ function renderNotePageSaveState(config, day, confirmation = "") {
   const button = $(config.saveButton);
   const status = $(config.status);
   const savedAt = formatSavedAt(day?.[config.updatedAtKey]);
-  if (button) button.textContent = saved ? `${config.title}を更新する` : `${config.title}を保存する`;
+  if (button) button.textContent = saved ? `${config.title}を更新する` : `${config.title}を保存・更新する`;
   if (!status) return;
   if (confirmation) {
     status.textContent = confirmation;
@@ -3371,7 +3371,7 @@ function renderNotePageSaveState(config, day, confirmation = "") {
   } else if (saved) {
     status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
   } else {
-    status.textContent = config.emptyStatus;
+    status.textContent = `${config.emptyStatus} 保存後は同じボタンで更新できます。`;
   }
 }
 
@@ -3427,7 +3427,7 @@ function renderXPageV1SaveState(day, confirmation = "") {
   const button = $("#saveXPageV1");
   const status = $("#xPageV1Status");
   const savedAt = formatSavedAt(day?.xPageV1UpdatedAt);
-  if (button) button.textContent = saved ? "X Ver.1を更新する" : "X Ver.1を保存する";
+  if (button) button.textContent = saved ? "X Ver.1を更新する" : "X Ver.1を保存・更新する";
   if (!status) return;
   if (confirmation) {
     status.textContent = confirmation;
@@ -3436,7 +3436,7 @@ function renderXPageV1SaveState(day, confirmation = "") {
   } else if (saved) {
     status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
   } else {
-    status.textContent = "今日のX Ver.1はまだ保存されていません。";
+    status.textContent = "今日のX Ver.1はまだ保存されていません。保存後は同じボタンで更新できます。";
   }
 }
 
@@ -3486,7 +3486,7 @@ function renderWordPressPageV1SaveState(day, confirmation = "") {
   const button = $("#saveWordPressPageV1");
   const status = $("#wordpressPageV1Status");
   const savedAt = formatSavedAt(day?.wordpressPageV1UpdatedAt);
-  if (button) button.textContent = saved ? "WordPress Ver.1を更新する" : "WordPress Ver.1を保存する";
+  if (button) button.textContent = saved ? "WordPress Ver.1を更新する" : "WordPress Ver.1を保存・更新する";
   if (!status) return;
   if (confirmation) {
     status.textContent = confirmation;
@@ -3495,7 +3495,7 @@ function renderWordPressPageV1SaveState(day, confirmation = "") {
   } else if (saved) {
     status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
   } else {
-    status.textContent = "今日のWordPress Ver.1はまだ保存されていません。";
+    status.textContent = "今日のWordPress Ver.1はまだ保存されていません。保存後は同じボタンで更新できます。";
   }
 }
 
