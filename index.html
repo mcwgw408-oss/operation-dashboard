@@ -892,6 +892,97 @@
           </div>
         </section>
 
+        <section id="substackPage" class="panel substack-page-panel span-2" aria-label="Substack" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2>Substack</h2>
+              <p class="section-note">昨日の振り返り、今日やること、ストックだけを軽く残します。</p>
+            </div>
+            <button class="ghost-button" id="saveSubstack" type="button">Substackを保存する</button>
+          </div>
+          <div class="substack-page-grid">
+            <section class="substack-page-block">
+              <h3>🌙 昨日の振り返り</h3>
+              <label>
+                記事タイトル
+                <input id="substackArticleTitle" type="text" placeholder="昨日出した記事、または下書き名" />
+              </label>
+              <label class="check-row">
+                <input id="substackArticlePublished" type="checkbox" />
+                公開したか
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>📈 反応</h3>
+              <label>
+                引用リスタック
+                <input id="substackQuoteRestacks" type="number" min="0" inputmode="numeric" />
+              </label>
+              <label>
+                新規購読者
+                <input id="substackNewSubscribers" type="number" min="0" inputmode="numeric" />
+              </label>
+              <label>
+                総フォロワー数
+                <input id="substackTotalFollowers" type="number" min="0" inputmode="numeric" />
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>✅ やったこと</h3>
+              <div class="substack-done-grid">
+                <label class="check-row"><input id="substackDidArticle" type="checkbox" /> 記事</label>
+                <label class="check-row"><input id="substackDidNotes" type="checkbox" /> Notes</label>
+                <label class="check-row"><input id="substackDidComments" type="checkbox" /> コメント</label>
+                <label class="check-row"><input id="substackDidMorningStack" type="checkbox" /> おはスタック！</label>
+                <label class="check-row"><input id="substackDidLive" type="checkbox" /> ライブ</label>
+              </div>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>💭 気づき</h3>
+              <label>
+                一言だけ
+                <input id="substackInsight" type="text" maxlength="80" placeholder="一言だけ" />
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>☀️ 今日</h3>
+              <label>
+                今日の記事テーマ
+                <input id="substackTodayArticleTheme" type="text" />
+              </label>
+              <label>
+                今日やること
+                <textarea id="substackTodayTasks" rows="3"></textarea>
+              </label>
+              <label>
+                今日試したいこと
+                <textarea id="substackTodayExperiment" rows="3"></textarea>
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>🌱 ストック</h3>
+              <label>
+                記事ネタ
+                <textarea id="substackStockArticleIdeas" rows="3"></textarea>
+              </label>
+              <label>
+                Notesネタ
+                <textarea id="substackStockNotesIdeas" rows="3"></textarea>
+              </label>
+              <label>
+                Seed
+                <textarea id="substackStockSeed" rows="3"></textarea>
+              </label>
+            </section>
+          </div>
+          <p id="substackStatus" class="substack-status">今日のSubstackはまだ保存されていません。</p>
+        </section>
+
         <section class="panel dashboard-task-panel span-2">
           <div class="panel-heading">
             <div>

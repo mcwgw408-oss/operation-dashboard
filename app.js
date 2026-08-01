@@ -329,6 +329,28 @@ function defaultPublishingOps(date = activeDate) {
   };
 }
 
+function defaultSubstack() {
+  return {
+    articleTitle: "",
+    articlePublished: false,
+    quoteRestacks: "",
+    newSubscribers: "",
+    totalFollowers: "",
+    didArticle: false,
+    didNotes: false,
+    didComments: false,
+    didMorningStack: false,
+    didLive: false,
+    insight: "",
+    todayArticleTheme: "",
+    todayTasks: "",
+    todayExperiment: "",
+    stockArticleIdeas: "",
+    stockNotesIdeas: "",
+    stockSeed: "",
+  };
+}
+
 function defaultXAnalysis(date = activeDate) {
   return {
     date,
@@ -732,6 +754,8 @@ function blankDay() {
     learnings: [],
     publishingOps: defaultPublishingOps(),
     publishingOpsUpdatedAt: "",
+    substack: defaultSubstack(),
+    substackUpdatedAt: "",
     xAnalysis: defaultXAnalysis(),
     xAnalysisUpdatedAt: "",
     dailyInput: "",
@@ -835,6 +859,26 @@ function ensurePublishingOps(day) {
   });
   if (!("publishingOpsUpdatedAt" in day)) {
     day.publishingOpsUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureSubstack(day) {
+  let changed = false;
+  if (!day.substack || typeof day.substack !== "object" || Array.isArray(day.substack)) {
+    day.substack = defaultSubstack();
+    changed = true;
+  }
+  const defaults = defaultSubstack();
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.substack)) {
+      day.substack[key] = value;
+      changed = true;
+    }
+  });
+  if (!("substackUpdatedAt" in day)) {
+    day.substackUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1720,6 +1764,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensurePublishingOps(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureSubstack(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureXAnalysis(store[activeDate])) {
@@ -2918,6 +2965,26 @@ const publishingOpsFields = {
   operationFindings: "#publishingOpsOperationFindings",
 };
 
+const substackFields = {
+  articleTitle: "#substackArticleTitle",
+  articlePublished: "#substackArticlePublished",
+  quoteRestacks: "#substackQuoteRestacks",
+  newSubscribers: "#substackNewSubscribers",
+  totalFollowers: "#substackTotalFollowers",
+  didArticle: "#substackDidArticle",
+  didNotes: "#substackDidNotes",
+  didComments: "#substackDidComments",
+  didMorningStack: "#substackDidMorningStack",
+  didLive: "#substackDidLive",
+  insight: "#substackInsight",
+  todayArticleTheme: "#substackTodayArticleTheme",
+  todayTasks: "#substackTodayTasks",
+  todayExperiment: "#substackTodayExperiment",
+  stockArticleIdeas: "#substackStockArticleIdeas",
+  stockNotesIdeas: "#substackStockNotesIdeas",
+  stockSeed: "#substackStockSeed",
+};
+
 const PUBLISHING_OPS_RECENT_DAYS = 7;
 const publishingOpsCountFields = [
   ["notesCount", "ノート投稿数"],
@@ -2995,6 +3062,67 @@ function readPublishingOpsForm() {
     const field = $(selector);
     return [key, field ? field.value : ""];
   }));
+}
+
+function readSubstackForm() {
+  return Object.fromEntries(Object.entries(substackFields).map(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return [key, defaultSubstack()[key]];
+    return [key, field.type === "checkbox" ? field.checked : field.value];
+  }));
+}
+
+function hasSubstackRecord(rawSubstack, substack) {
+  if (!rawSubstack || typeof rawSubstack !== "object") return false;
+  return Object.values(substack).some((value) =>
+    typeof value === "boolean" ? value : Boolean(String(value || "").trim()));
+}
+
+function renderSubstackSaveState(day, confirmation = "") {
+  const substack = { ...defaultSubstack(), ...(day?.substack || {}) };
+  const saved = Boolean(day?.substackUpdatedAt) || hasSubstackRecord(day?.substack, substack);
+  const button = $("#saveSubstack");
+  const status = $("#substackStatus");
+  const savedAt = formatSavedAt(day?.substackUpdatedAt);
+  if (button) button.textContent = saved ? "Substackを更新する" : "Substackを保存する";
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = "今日のSubstackはまだ保存されていません。";
+  }
+}
+
+function renderSubstack() {
+  const day = getDay();
+  const substack = { ...defaultSubstack(), ...(day.substack || {}) };
+  Object.entries(substackFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return;
+    if (field.type === "checkbox") {
+      field.checked = Boolean(substack[key]);
+    } else if (field.value !== String(substack[key] || "")) {
+      field.value = substack[key] || "";
+    }
+  });
+  renderSubstackSaveState(day);
+}
+
+function saveSubstackFromForm() {
+  const day = getDay();
+  const wasSaved = Boolean(day.substackUpdatedAt) || hasSubstackRecord(day.substack, { ...defaultSubstack(), ...(day.substack || {}) });
+  day.substack = { ...defaultSubstack(), ...readSubstackForm() };
+  day.substackUpdatedAt = new Date().toISOString();
+  saveStore();
+  renderSubstackSaveState(
+    day,
+    `Substackを${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.substackUpdatedAt)}`,
+  );
+  renderBrainPrototype();
 }
 
 function shiftDateKey(dateKey, offsetDays) {
@@ -11308,6 +11436,7 @@ function renderAll() {
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
+  renderSubstack();
   renderXAnalysis();
   renderCodexDailyLog();
   setPublishingSeedActiveView(publishingSeedActiveView);
@@ -11386,6 +11515,17 @@ function scrollBackToTop() {
     top: 0,
     behavior: reduceMotion ? "auto" : "smooth",
   });
+}
+
+function showPageEntry(entryName = "") {
+  const substackPanel = $("#substackPage");
+  const placeholder = $("#pageSwitchPlaceholder");
+  const title = $("#pageSwitchTitle");
+  const isSubstack = entryName === "Substack";
+  if (substackPanel) substackPanel.hidden = !isSubstack;
+  if (placeholder) placeholder.hidden = isSubstack || !entryName;
+  if (title) title.textContent = entryName;
+  if (isSubstack) renderSubstack();
 }
 
 function bindEvents() {
@@ -11503,10 +11643,7 @@ function bindEvents() {
       document.querySelectorAll("[data-page-entry]").forEach((entry) => {
         entry.classList.toggle("is-active", entry === button);
       });
-      const placeholder = $("#pageSwitchPlaceholder");
-      const title = $("#pageSwitchTitle");
-      if (title) title.textContent = button.dataset.pageEntry || "";
-      if (placeholder) placeholder.hidden = false;
+      showPageEntry(button.dataset.pageEntry || "");
     });
   });
   document.querySelectorAll("[data-weather-choice]").forEach((button) => {
@@ -11808,6 +11945,17 @@ function bindEvents() {
       const status = $("#publishingOpsStatus");
       if (status) status.textContent = "未保存の変更があります。";
     });
+  });
+  $("#saveSubstack")?.addEventListener("click", saveSubstackFromForm);
+  Object.values(substackFields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    const markDirty = () => {
+      const status = $("#substackStatus");
+      if (status) status.textContent = "未保存の変更があります。";
+    };
+    field.addEventListener("input", markDirty);
+    field.addEventListener("change", markDirty);
   });
   $("#saveXAnalysis")?.addEventListener("click", saveXAnalysisFromForm);
   Object.values(xAnalysisFields).forEach((selector) => {
