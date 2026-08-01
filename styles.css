@@ -3104,6 +3104,28 @@ textarea {
   padding: 10px 12px;
 }
 
+.recurring-schedule-panel summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.recurring-schedule-panel summary small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.recurring-schedule-panel:not([open]) {
+  gap: 0;
+}
+
 .recurring-schedule-heading h3,
 .recurring-due-panel h4,
 .recurring-template-panel h4 {
@@ -5701,16 +5723,16 @@ button.launch-card {
 
 .dashboard > .panel:has(#dailyTasks) {
   grid-column: 3 / -1;
-  order: 9;
+  order: 10;
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
-  grid-column: 1 / span 1;
+  grid-column: 3 / span 1;
   order: 9;
 }
 
 .dashboard > .metrics-panel:has(#dmPending) {
-  grid-column: 2 / span 1;
+  grid-column: 4 / span 1;
   order: 9;
 }
 

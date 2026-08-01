@@ -1336,13 +1336,11 @@
             <button type="submit">追加</button>
           </form>
           <div id="todayEvents" class="event-list"></div>
-          <div class="recurring-schedule-panel">
-            <div class="recurring-schedule-heading">
-              <div>
-                <h3>定期予定</h3>
-                <p>毎週・数週間ごとの予定を保存し、今日該当するものだけ候補に出します。</p>
-              </div>
-            </div>
+          <details class="recurring-schedule-panel">
+            <summary>
+              <span>定期予定</span>
+              <small>毎週・数週間ごとの予定を保存し、今日該当するものだけ候補に出します。</small>
+            </summary>
             <section class="recurring-due-panel" aria-label="今日の定期予定候補">
               <h4>今日の予定候補</h4>
               <div id="dueRecurringSchedules" class="recurring-schedule-list"></div>
@@ -1384,7 +1382,7 @@
                 <div id="recurringScheduleList" class="recurring-schedule-list"></div>
               </section>
             </details>
-          </div>
+          </details>
         </section>
 
         <section class="panel span-2">
