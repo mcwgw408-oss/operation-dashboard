@@ -3232,6 +3232,7 @@ textarea {
 
 .persistent-memo-list {
   gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .persistent-memo-item {
@@ -6066,6 +6067,10 @@ button.launch-card {
   .persistent-memo-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .persistent-memo-list {
+    grid-template-columns: 1fr;
   }
 
   .persistent-memo-meta {
