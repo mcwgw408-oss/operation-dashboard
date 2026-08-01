@@ -176,7 +176,7 @@ Health:
 | 移設元 | 移設先 | 目的 |
 |---|---|---|
 | `.generated-reply-panel` | `#generatedReplyMount` | 生成返答を会話導線の位置に置く |
-| `.health-check-panel` | `#healthCheckInputMount` | 体調入力を今日を書くゾーンへ移す |
+| `.health-check-panel` | `#homeSleepHealthCheckMount` | 体調入力をホームの睡眠欄へ移す |
 | `.health-insight-panel` | `#healthAnalysisMount` | 体調分析詳細へ移す |
 | `.health-trend-panel` | `#healthAnalysisMount` | 体調トレンド詳細へ移す |
 | `.health-context-panel` | `#healthAnalysisMount` | 体調文脈詳細へ移す |

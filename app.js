@@ -11337,7 +11337,7 @@ function moveDashboardNode(selector, targetSelector) {
 
 function arrangeDashboardUxSections() {
   moveDashboardNode(".generated-reply-panel", "#generatedReplyMount");
-  moveDashboardNode(".health-check-panel", "#healthCheckInputMount");
+  moveDashboardNode(".health-check-panel", "#homeSleepHealthCheckMount");
   moveDashboardNode(".health-insight-panel", "#healthAnalysisMount");
   moveDashboardNode(".health-trend-panel", "#healthAnalysisMount");
   moveDashboardNode(".health-context-panel", "#healthAnalysisMount");

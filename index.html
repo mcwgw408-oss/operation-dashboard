@@ -128,15 +128,10 @@
           <div class="panel-heading">
             <div>
               <h2>睡眠</h2>
-              <p class="section-note">ライフの睡眠記録から、朝に見る分だけ表示します。</p>
+              <p class="section-note">以前作った体調チェック項目をここで使います。</p>
             </div>
           </div>
-          <div class="sleep-summary-grid">
-            <div><span>合計睡眠時間</span><strong id="homeSleepHours">未記録</strong></div>
-            <div><span>睡眠回数</span><strong id="homeSleepCount">未記録</strong></div>
-            <div><span>最長睡眠時間</span><strong id="homeLongestSleep">未記録</strong></div>
-            <div><span>一言</span><strong id="homeSleepNote">未記録</strong></div>
-          </div>
+          <div id="homeSleepHealthCheckMount"></div>
         </section>
 
         <section class="panel brain-panel">
@@ -1549,7 +1544,7 @@
           </section>
         </section>
 
-        <section class="panel dashboard-health-input-panel span-2" aria-label="体調チェック">
+        <section class="panel dashboard-health-input-panel span-2" aria-label="体調チェック" hidden>
           <div class="panel-heading">
             <div>
               <h2>体調チェック</h2>
@@ -1559,7 +1554,7 @@
           <div id="healthCheckInputMount"></div>
           <script>
             (() => {
-              const target = document.querySelector("#healthCheckInputMount");
+              const target = document.querySelector("#homeSleepHealthCheckMount") || document.querySelector("#healthCheckInputMount");
               const panel = document.querySelector(".health-check-panel");
               if (target && panel && panel.parentElement !== target) target.append(panel);
             })();

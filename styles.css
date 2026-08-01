@@ -586,13 +586,16 @@ textarea {
 }
 
 .after-ten-mode-options {
-  display: grid;
+  display: flex;
+  overflow-x: auto;
   gap: 10px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding-bottom: 2px;
+  scrollbar-width: thin;
 }
 
 .after-ten-mode-options label {
   display: flex;
+  flex: 1 0 128px;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -601,6 +604,8 @@ textarea {
   border-radius: var(--radius-item);
   background: #fff;
   color: var(--text);
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
 }
 
 .welcome-weather-card,
@@ -5487,28 +5492,28 @@ button.launch-card {
   order: 4;
 }
 
-.dashboard .dashboard-proposal-heading {
+.dashboard .brain-panel {
   order: 5;
 }
 
-.dashboard .welcome-home-panel {
+.dashboard .dashboard-proposal-heading {
   order: 6;
 }
 
-.dashboard .sleep-summary-panel {
+.dashboard .welcome-home-panel {
   order: 7;
 }
 
-.dashboard .capacity-check-section {
+.dashboard .sleep-summary-panel {
   order: 8;
 }
 
-.dashboard .after-ten-mode-panel {
+.dashboard .capacity-check-section {
   order: 9;
 }
 
-.dashboard .brain-panel {
-  order: 50;
+.dashboard .after-ten-mode-panel {
+  order: 10;
 }
 
 .dashboard .dashboard-input-heading {
@@ -5556,11 +5561,11 @@ button.launch-card {
 }
 
 .dashboard .dashboard-task-panel {
-  order: 10;
+  order: 11;
 }
 
 .dashboard .schedule-panel {
-  order: 11;
+  order: 12;
 }
 
 .dashboard .dashboard-health-input-panel {
@@ -5572,15 +5577,15 @@ button.launch-card {
 }
 
 .dashboard > .panel:has(#dailyTasks) {
-  order: 12;
-}
-
-.dashboard > .metrics-panel:has(#mailMorningChecked) {
   order: 13;
 }
 
-.dashboard > .metrics-panel:has(#dmPending) {
+.dashboard > .metrics-panel:has(#mailMorningChecked) {
   order: 14;
+}
+
+.dashboard > .metrics-panel:has(#dmPending) {
+  order: 15;
 }
 
 .dashboard .publishing-ops-history-panel {
@@ -5624,7 +5629,7 @@ button.launch-card {
 }
 
 .dashboard .home-launch-panel {
-  order: 15;
+  order: 16;
 }
 
 .dashboard > .panel:has(#projects) {
@@ -5719,8 +5724,7 @@ button.launch-card {
   .summary-panel,
   .daily-focus-grid,
   .welcome-home-layout,
-  .sleep-summary-grid,
-  .after-ten-mode-options {
+  .sleep-summary-grid {
     grid-template-columns: 1fr;
   }
 
