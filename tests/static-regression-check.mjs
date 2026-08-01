@@ -68,6 +68,10 @@ const requiredIds = [
   "backToTop",
   "laterSortToggle",
   "dashboard-start",
+  "home-sleep-summary",
+  "home-capacity-check",
+  "home-after-ten-mode",
+  "home-launch",
   "dashboard-input",
   "dashboard-accumulation",
   "dashboard-closed",
@@ -333,13 +337,10 @@ check(accumulationHeadingIndex > publishingOpsHistoryIndex, "保存済み記録�
 check(indexHtml.includes('class="dashboard-page-nav"'), "ページ内ナビがありません");
 const dashboardZoneTargets = [
   "#dashboard-start",
-  "#dashboard-input",
-  "#sns-posting",
-  "#x-analysis-room",
-  "#learning-asset-flow",
-  "#reading-notes",
-  "#dashboard-accumulation",
-  "#dashboard-closed",
+  "#home-sleep-summary",
+  "#home-capacity-check",
+  "#home-after-ten-mode",
+  "#home-launch",
 ];
 for (const target of dashboardZoneTargets) {
   check(indexHtml.includes(`href="${target}"`), `ページ内ナビのリンクがありません: ${target}`);
@@ -347,25 +348,34 @@ for (const target of dashboardZoneTargets) {
 }
 
 const requiredOrders = new Map([
-  [".dashboard .dashboard-page-nav", "8"],
-  [".dashboard .dashboard-proposal-heading", "9"],
-  [".dashboard .morning-guidance-panel", "10"],
-  [".dashboard .summary-panel", "11"],
-  [".dashboard .daily-focus-panel", "12"],
-  [".dashboard .welcome-home-panel", "13"],
-  [".dashboard .brain-panel", "14"],
-  [".dashboard .dashboard-input-heading", "30"],
-  [".dashboard .publishing-ops-panel", "31"],
-  [".dashboard .operation-experiment-panel", "32"],
-  [".dashboard .learning-asset-panel", "32"],
-  [".dashboard .daily-input-panel", "33"],
-  [".dashboard .dashboard-task-panel", "34"],
-  [".dashboard .schedule-panel", "35"],
-  [".dashboard .dashboard-health-input-panel", "36"],
-  [".dashboard .dashboard-memory-input-panel", "37"],
-  [".dashboard > .panel:has(#dailyTasks)", "38"],
-  [".dashboard > .metrics-panel:has(#mailMorningChecked)", "39"],
-  [".dashboard > .metrics-panel:has(#dmPending)", "40"],
+  [".dashboard .dashboard-page-nav", "1"],
+  [".dashboard .summary-panel", "2"],
+  [".dashboard .morning-guidance-panel", "3"],
+  [".dashboard .daily-focus-panel", "4"],
+  [".dashboard .dashboard-proposal-heading", "5"],
+  [".dashboard .welcome-home-panel", "6"],
+  [".dashboard .sleep-summary-panel", "7"],
+  [".dashboard .capacity-check-section", "8"],
+  [".dashboard .after-ten-mode-panel", "9"],
+  [".dashboard .dashboard-task-panel", "10"],
+  [".dashboard .schedule-panel", "11"],
+  [".dashboard > .panel:has(#dailyTasks)", "12"],
+  [".dashboard > .metrics-panel:has(#mailMorningChecked)", "13"],
+  [".dashboard > .metrics-panel:has(#dmPending)", "14"],
+  [".dashboard .home-launch-panel", "15"],
+  [".dashboard .brain-panel", "50"],
+  [".dashboard .dashboard-input-heading", "58"],
+  [".dashboard .daily-input-panel", "59"],
+  [".dashboard .publishing-ops-panel", "61"],
+  [".dashboard .x-analysis-panel", "62"],
+  [".dashboard .publishing-seed-candidates-panel", "63"],
+  [".dashboard .publishing-seeds-panel", "64"],
+  [".dashboard .x-experiment-panel", "65"],
+  [".dashboard .learning-asset-panel", "66"],
+  [".dashboard .reading-notes-panel", "67"],
+  [".dashboard .operation-experiment-panel", "68"],
+  [".dashboard .dashboard-health-input-panel", "69"],
+  [".dashboard .dashboard-memory-input-panel", "70"],
   [".dashboard .publishing-ops-history-panel", "41"],
   [".dashboard .dashboard-accumulation-heading", "59"],
   [".dashboard .reflection-panel", "60"],
@@ -375,7 +385,6 @@ const requiredOrders = new Map([
   [".dashboard .memory-library-panel", "64"],
   [".dashboard .dashboard-closed-heading", "79"],
   [".dashboard .sakura-panel", "80"],
-  [".dashboard .home-launch-panel", "81"],
   [".dashboard > .panel:has(#projects)", "83"],
   [".dashboard .dashboard-ai-analysis-panel", "85"],
   [".dashboard .data-panel", "86"],
@@ -385,7 +394,7 @@ for (const [selector, order] of requiredOrders) {
   const pattern = new RegExp(`${escapedSelector}\\s*\\{[^}]*\\border:\\s*${order}\\s*;`, "s");
   check(pattern.test(stylesCss), `CSS orderが見つからないか変更されています: ${selector} = ${order}`);
 }
-check(/\.dashboard\s+\.dashboard-page-nav\s*\{[^}]*\border:\s*8\s*;/s.test(stylesCss), "ページ内ナビのorder 8が維持されていません");
+check(/\.dashboard\s+\.dashboard-page-nav\s*\{[^}]*\border:\s*1\s*;/s.test(stylesCss), "ページ内ナビのorder 1が維持されていません");
 
 const knownEnglishEmptyMessages = [
   "Retrieved memory is not available yet.",

@@ -710,7 +710,6 @@ const CAPACITY_CHECK_ITEMS = [
   { key: "mood", label: "気分" },
   { key: "reading", label: "読む" },
   { key: "writing", label: "書く（新規記事）" },
-  { key: "ideas", label: "アイデア" },
   { key: "comments", label: "コメント・交流" },
   { key: "housework", label: "掃除・家事" },
   { key: "development", label: "実装・開発" },
@@ -739,6 +738,8 @@ function blankDay() {
     dailyInputUpdatedAt: "",
     capacityCheck: {},
     capacityCheckUpdatedAt: "",
+    afterTenMode: [],
+    afterTenModeUpdatedAt: "",
     todayWeather: "",
     todayWeatherUpdatedAt: "",
     metrics: {
@@ -931,6 +932,19 @@ function ensureCapacityCheck(day) {
   }
   if (!("capacityCheckUpdatedAt" in day)) {
     day.capacityCheckUpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureAfterTenMode(day) {
+  let changed = false;
+  if (!Array.isArray(day.afterTenMode)) {
+    day.afterTenMode = [];
+    changed = true;
+  }
+  if (!("afterTenModeUpdatedAt" in day)) {
+    day.afterTenModeUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1718,6 +1732,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureCapacityCheck(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureAfterTenMode(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureTodayWeather(store[activeDate])) {
@@ -8210,6 +8227,36 @@ function renderHealthState() {
   if (summaryTarget) summaryTarget.textContent = buildHealthSummaryUi(health);
 }
 
+function renderHomeSleepSummary() {
+  const health = healthState.find((item) => item.date === activeDate) || null;
+  const setHomeSleepText = (selector, value) => {
+    const target = $(selector);
+    if (target) target.textContent = value;
+  };
+  setHomeSleepText("#homeSleepHours", health?.sleepHours ? `${health.sleepHours}時間` : "未記録");
+  setHomeSleepText("#homeSleepCount", health?.sleepCount ? `${health.sleepCount}回` : "未記録");
+  setHomeSleepText("#homeLongestSleep", health?.longestSleepMinutes ? formatSleepDuration(health.longestSleepMinutes) : "未記録");
+  setHomeSleepText("#homeSleepNote", String(health?.bodyNote || "").trim() || "未記録");
+}
+
+function renderAfterTenMode(day = getDay()) {
+  const selectedModes = new Set(asArray(day.afterTenMode).map(String));
+  document.querySelectorAll("#afterTenModeOptions input[type='checkbox']").forEach((input) => {
+    input.checked = selectedModes.has(input.value);
+  });
+  const status = $("#afterTenModeStatus");
+  if (!status) return;
+  const selectedLabels = [...selectedModes].filter(Boolean);
+  if (selectedLabels.length) {
+    const savedAt = formatSavedAt(day.afterTenModeUpdatedAt);
+    status.textContent = savedAt
+      ? `${selectedLabels.join("、")}で保存済みです。最終更新 ${savedAt}。`
+      : `${selectedLabels.join("、")}で保存済みです。`;
+  } else {
+    status.textContent = "まだ選ばれていません。";
+  }
+}
+
 function getRecentHealthStates(limit = 7) {
   return [...asArray(healthState)]
     .sort((a, b) =>
@@ -11270,6 +11317,9 @@ function renderAll() {
   renderOperationExperiment();
   renderLaterItems();
   renderFields();
+  renderHomeSleepSummary();
+  renderAfterTenMode();
+  renderHealthState();
   renderWelcomeHomePanel();
   renderSummary();
   renderHistory();
@@ -11439,6 +11489,26 @@ function bindEvents() {
     saveStore();
     renderCapacityCheck(day, `「${CAPACITY_CHECK_ITEMS.find((item) => item.key === key)?.label || key}」を保存しました。`);
   });
+  $("#afterTenModeOptions")?.addEventListener("change", (event) => {
+    if (!event.target.matches("input[type='checkbox']")) return;
+    const day = getDay();
+    day.afterTenMode = [...document.querySelectorAll("#afterTenModeOptions input[type='checkbox']:checked")]
+      .map((input) => input.value);
+    day.afterTenModeUpdatedAt = new Date().toISOString();
+    saveStore();
+    renderAfterTenMode(day);
+  });
+  document.querySelectorAll("[data-page-entry]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-page-entry]").forEach((entry) => {
+        entry.classList.toggle("is-active", entry === button);
+      });
+      const placeholder = $("#pageSwitchPlaceholder");
+      const title = $("#pageSwitchTitle");
+      if (title) title.textContent = button.dataset.pageEntry || "";
+      if (placeholder) placeholder.hidden = false;
+    });
+  });
   document.querySelectorAll("[data-weather-choice]").forEach((button) => {
     button.addEventListener("click", () => {
       const weather = normalizeTodayWeather(button.dataset.weatherChoice);
@@ -11479,6 +11549,7 @@ function bindEvents() {
     $(selector)?.addEventListener(eventName, (event) => {
       upsertHealthState({ [key]: event.target.value });
       renderHealthState();
+      renderHomeSleepSummary();
       renderHealthInsight();
       renderHealthTrend();
       renderHealthContext();
@@ -11494,6 +11565,7 @@ function bindEvents() {
     $(selector)?.addEventListener("input", () => {
       upsertHealthState({ longestSleepMinutes: sleepDurationFromInputs() });
       renderHealthState();
+      renderHomeSleepSummary();
       renderHealthInsight();
       renderHealthTrend();
       renderHealthContext();

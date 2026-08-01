@@ -34,17 +34,10 @@
         <nav class="dashboard-page-nav" aria-label="目次">
           <span class="dashboard-page-nav-title">目次</span>
           <a href="#dashboard-start">今日のはじまり</a>
-          <a href="#dashboard-input">今日を書く</a>
-          <a href="#sns-posting">SNS投稿</a>
-          <a href="#x-analysis-room">X分析室</a>
-          <a href="#publishing-seed-candidates">Seed候補</a>
-          <a href="#publishing-seeds">Seeds</a>
-          <a href="#publishing-experiment-lab">発信実験室</a>
-          <a href="#learning-asset-flow">学び資産化</a>
-          <a href="#reading-notes">学びメモ</a>
-          <a href="#dashboard-accumulation">ためる</a>
-          <a href="#codex-daily-log">Codexへ渡す</a>
-          <a href="#dashboard-closed">閉じているもの</a>
+          <a href="#home-sleep-summary">睡眠</a>
+          <a href="#home-capacity-check">今日できること</a>
+          <a href="#home-after-ten-mode">10時以降</a>
+          <a href="#home-launch">入口</a>
         </nav>
 
         <section class="summary-panel">
@@ -128,6 +121,21 @@
               <span class="brain-label">前の自分から</span>
               <div id="welcomeReunionCards" class="welcome-reunion-list"></div>
             </div>
+          </div>
+        </section>
+
+        <section id="home-sleep-summary" class="panel sleep-summary-panel span-2" aria-label="睡眠">
+          <div class="panel-heading">
+            <div>
+              <h2>睡眠</h2>
+              <p class="section-note">ライフの睡眠記録から、朝に見る分だけ表示します。</p>
+            </div>
+          </div>
+          <div class="sleep-summary-grid">
+            <div><span>合計睡眠時間</span><strong id="homeSleepHours">未記録</strong></div>
+            <div><span>睡眠回数</span><strong id="homeSleepCount">未記録</strong></div>
+            <div><span>最長睡眠時間</span><strong id="homeLongestSleep">未記録</strong></div>
+            <div><span>一言</span><strong id="homeSleepNote">未記録</strong></div>
           </div>
         </section>
 
@@ -836,52 +844,57 @@
             <button class="ghost-button" id="saveDailyInput" type="button">本日の入力を保存する</button>
             <p id="dailyInputStatus">本日の入力はまだ保存されていません。</p>
           </div>
-          <div class="capacity-check-panel" aria-label="今日できること">
+        </section>
+
+        <section id="home-capacity-check" class="panel capacity-check-section span-2" aria-label="今日できること">
+          <div class="capacity-check-panel">
             <div class="capacity-check-heading">
               <h3>今日できること</h3>
-              <p class="section-note">調子をひとまとめにせず、今日扱いやすいことを4段階で残します。</p>
+              <p class="section-note">今日扱いやすいことだけを、○△×で残します。</p>
             </div>
             <div id="capacityCheckGrid" class="capacity-check-grid"></div>
             <p id="capacityCheckStatus" class="capacity-check-status">今日できることはまだ記録されていません。</p>
           </div>
         </section>
 
-        <section class="panel home-launch-panel">
-          <details>
-            <summary>最初に開く入口 / 必要な時だけ使う</summary>
-            <div class="panel-heading">
-              <div>
-                <h2>最初に開く入口</h2>
-                <p class="section-note">毎日使う場所と、必要な時だけ使う場所をここに集めます。</p>
-              </div>
+        <section id="home-after-ten-mode" class="panel after-ten-mode-panel span-2" aria-label="10時以降モード">
+          <div class="panel-heading">
+            <div>
+              <h2>10時以降モード</h2>
+              <p class="section-note">朝の立ち上がり後に見るモードを選びます。複数選べます。</p>
             </div>
-            <div class="launch-grid">
-              <a class="launch-card" href="https://mcwgw408-oss.github.io/substack-labo/">
-                <strong>サブスタックラボ</strong>
-                <span>サブスタック専用</span>
-              </a>
-              <a class="launch-card" href="https://mcwgw408-oss.github.io/discovery-Labo/">
-                <strong>発見ラボ</strong>
-                <span>発見と整理</span>
-              </a>
-              <a class="launch-card" href="https://mcwgw408-oss.github.io/action-Labo/">
-                <strong>交流ログ</strong>
-                <span>サブスタック以外の交流</span>
-              </a>
-              <a class="launch-card" href="https://mcwgw408-oss.github.io/observation-Labo/">
-                <strong>発信観察ラボ</strong>
-                <span>今後使う観察場所</span>
-              </a>
-              <a class="launch-card" href="https://mcwgw408-oss.github.io/Stock-Labo/">
-                <strong>ストック管理ラボ</strong>
-                <span>日用品・食材</span>
-              </a>
-              <a class="launch-card compact-link" href="https://mcwgw408-oss.github.io/article-Labo/">
-                <strong>記事ラボ</strong>
-                <span>必要な時だけ開く</span>
-              </a>
+          </div>
+          <div class="after-ten-mode-options" id="afterTenModeOptions">
+            <label><input type="checkbox" value="Seed" /> Seed</label>
+            <label><input type="checkbox" value="読書" /> 読書</label>
+            <label><input type="checkbox" value="Brain" /> Brain</label>
+            <label><input type="checkbox" value="生活" /> 生活</label>
+            <label><input type="checkbox" value="発信" /> 発信</label>
+          </div>
+          <p id="afterTenModeStatus" class="section-note">まだ選ばれていません。</p>
+        </section>
+
+        <section id="home-launch" class="panel home-launch-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>各ページへの入口</h2>
+              <p class="section-note">詳細ページはこれから作ります。今は入口と切り替えだけ用意します。</p>
             </div>
-          </details>
+          </div>
+          <div class="launch-grid dashboard-v2-launch-grid">
+            <button class="launch-card" type="button" data-page-entry="Substack"><strong>Substack</strong><span>発信</span></button>
+            <button class="launch-card" type="button" data-page-entry="note（いつものnote）"><strong>note</strong><span>いつものnote</span></button>
+            <button class="launch-card" type="button" data-page-entry="note（Substack初心者向け）"><strong>note</strong><span>Substack初心者向け</span></button>
+            <button class="launch-card" type="button" data-page-entry="X"><strong>X</strong><span>投稿・観察</span></button>
+            <button class="launch-card" type="button" data-page-entry="WordPress"><strong>WordPress</strong><span>記事</span></button>
+            <button class="launch-card" type="button" data-page-entry="Seed"><strong>Seed</strong><span>思考</span></button>
+            <button class="launch-card" type="button" data-page-entry="読書"><strong>読書</strong><span>思考</span></button>
+            <button class="launch-card" type="button" data-page-entry="メモ"><strong>メモ</strong><span>思考</span></button>
+          </div>
+          <div id="pageSwitchPlaceholder" class="page-switch-placeholder" hidden>
+            <strong id="pageSwitchTitle">-</strong>
+            <p>このページは次のステップで作ります。</p>
+          </div>
         </section>
 
         <section class="panel dashboard-task-panel span-2">

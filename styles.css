@@ -549,6 +549,60 @@ textarea {
   gap: 12px;
 }
 
+.sleep-summary-panel,
+.after-ten-mode-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.sleep-summary-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sleep-summary-grid div {
+  display: grid;
+  gap: 5px;
+  min-height: 78px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.sleep-summary-grid span,
+.after-ten-mode-options label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sleep-summary-grid strong {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.after-ten-mode-options {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.after-ten-mode-options label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  color: var(--text);
+}
+
 .welcome-weather-card,
 .welcome-reunion-card {
   display: grid;
@@ -5251,6 +5305,12 @@ textarea {
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
+button.launch-card {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
 .launch-card:hover {
   border-color: var(--green-line);
   background: var(--green-soft);
@@ -5262,6 +5322,11 @@ textarea {
   transform: translateY(0) scale(0.98);
 }
 
+.launch-card.is-active {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+
 .launch-card strong {
   font-size: 15px;
 }
@@ -5269,6 +5334,26 @@ textarea {
 .launch-card span {
   color: var(--muted);
   font-size: 12.5px;
+}
+
+.page-switch-placeholder {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-item);
+  background: var(--green-soft);
+  padding: 12px;
+}
+
+.page-switch-placeholder strong,
+.page-switch-placeholder p {
+  margin: 0;
+}
+
+.page-switch-placeholder p {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .later-form {
@@ -5387,99 +5472,115 @@ textarea {
 
 /* ===== Step 1: ゾーン別の表示順 ===== */
 .dashboard .dashboard-page-nav {
-  order: 8;
+  order: 1;
 }
 
 .dashboard .morning-guidance-panel {
-  order: 10;
+  order: 3;
 }
 
 .dashboard .summary-panel {
-  order: 11;
+  order: 2;
 }
 
 .dashboard .daily-focus-panel {
-  order: 12;
+  order: 4;
 }
 
 .dashboard .dashboard-proposal-heading {
-  order: 9;
+  order: 5;
 }
 
 .dashboard .welcome-home-panel {
-  order: 13;
+  order: 6;
+}
+
+.dashboard .sleep-summary-panel {
+  order: 7;
+}
+
+.dashboard .capacity-check-section {
+  order: 8;
+}
+
+.dashboard .after-ten-mode-panel {
+  order: 9;
 }
 
 .dashboard .brain-panel {
-  order: 14;
+  order: 50;
 }
 
 .dashboard .dashboard-input-heading {
-  order: 30;
+  order: 58;
 }
 
 .dashboard .publishing-ops-panel {
-  order: 31;
+  order: 61;
 }
 
 .dashboard .x-analysis-panel {
-  order: 31;
+  order: 62;
 }
 
 .dashboard .publishing-seed-candidates-panel {
-  order: 32;
+  order: 63;
+}
+
+.dashboard .publishing-seed-workbench-tabs {
+  order: 63;
 }
 
 .dashboard .publishing-seeds-panel {
-  order: 32;
+  order: 64;
 }
 
 .dashboard .x-experiment-panel {
-  order: 32;
+  order: 65;
 }
 
 .dashboard .learning-asset-panel {
-  order: 32;
+  order: 66;
 }
 
 .dashboard .reading-notes-panel {
-  order: 32;
+  order: 67;
 }
 
 .dashboard .operation-experiment-panel {
-  order: 32;
+  order: 68;
 }
 
 .dashboard .daily-input-panel {
-  order: 33;
+  order: 59;
 }
 
 .dashboard .dashboard-task-panel {
-  order: 34;
+  order: 10;
 }
 
 .dashboard .schedule-panel {
-  order: 35;
+  order: 11;
 }
 
 .dashboard .dashboard-health-input-panel {
-  order: 36;
+  order: 69;
 }
 
 .dashboard .dashboard-memory-input-panel {
-  order: 37;
+  order: 70;
 }
 
 .dashboard > .panel:has(#dailyTasks) {
-  order: 38;
+  order: 12;
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
-  order: 39;
+  order: 13;
 }
 
 .dashboard > .metrics-panel:has(#dmPending) {
-  order: 40;
+  order: 14;
 }
 
 .dashboard .publishing-ops-history-panel {
@@ -5510,6 +5611,10 @@ textarea {
   order: 60;
 }
 
+.dashboard .codex-daily-log-panel {
+  order: 60;
+}
+
 .dashboard .dashboard-closed-heading {
   order: 79;
 }
@@ -5519,7 +5624,7 @@ textarea {
 }
 
 .dashboard .home-launch-panel {
-  order: 81;
+  order: 15;
 }
 
 .dashboard > .panel:has(#projects) {
@@ -5613,7 +5718,9 @@ textarea {
   .dashboard,
   .summary-panel,
   .daily-focus-grid,
-  .welcome-home-layout {
+  .welcome-home-layout,
+  .sleep-summary-grid,
+  .after-ten-mode-options {
     grid-template-columns: 1fr;
   }
 
