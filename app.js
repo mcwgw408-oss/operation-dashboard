@@ -12140,6 +12140,7 @@ function showPageEntry(entryName = "") {
   const xPagePanel = $("#xPageV1");
   const wordpressPagePanel = $("#wordpressPageV1");
   const seedPagePanel = $("#publishing-seeds");
+  const seedWorkbenchTabs = document.querySelector(".publishing-seed-workbench-tabs");
   const readingPagePanel = $("#reading-notes");
   const learningAssetPagePanel = $("#learning-asset-flow");
   const memoPagePanel = $("#memo-page");
@@ -12171,6 +12172,7 @@ function showPageEntry(entryName = "") {
   if (archivePagePanel) archivePagePanel.hidden = !isArchivePage;
   setTodayInputPageVisible(isTodayInputPage);
   setArchivePageVisible(isArchivePage);
+  if (seedWorkbenchTabs) seedWorkbenchTabs.hidden = !(isSeedPage || isArchivePage);
   if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
@@ -12178,7 +12180,8 @@ function showPageEntry(entryName = "") {
   if (isXPage) renderXPageV1();
   if (isWordPressPage) renderWordPressPageV1();
   if (isSeedPage) {
-    setPublishingSeedActiveView("seed");
+    setPublishingSeedActiveView("news");
+    renderPublishingSeedCandidates();
     renderPublishingSeeds();
   }
   if (isReadingPage) renderLearningAssets();
