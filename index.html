@@ -2099,11 +2099,11 @@
           </details>
         </section>
 
-        <section class="panel persistent-memo-panel span-2">
+        <section id="memo-page" class="panel persistent-memo-panel span-2" aria-label="メモ" hidden>
           <div class="panel-heading">
             <div>
-              <h2>研究ノート・残るメモ</h2>
-              <p class="section-note">日付を変えても残る、いつでも書き足せる研究ノートです。今日の達成率には含めません。</p>
+              <h2>メモ</h2>
+              <p class="section-note">目的：何でも置く。思いつき、アイデア、気になったこと、後で調べたいこと、一時保存、今日のひらめき。</p>
             </div>
             <button class="ghost-button" id="addPersistentMemo" type="button">追加</button>
           </div>
@@ -2111,7 +2111,7 @@
             <span id="persistentMemoSearchCount" hidden>検索 <strong>0</strong></span>
           </div>
           <div class="later-search">
-            <input id="persistentMemoSearch" type="search" placeholder="研究ノートを検索" aria-label="研究ノート・残るメモを検索" />
+            <input id="persistentMemoSearch" type="search" placeholder="タイトル・本文を検索" aria-label="メモを検索" />
           </div>
           <div id="persistentMemoList" class="persistent-memo-list"></div>
         </section>
@@ -2273,7 +2273,8 @@
 
     <template id="persistentMemoTemplate">
       <div class="persistent-memo-item">
-        <textarea rows="9" placeholder="次の日も残したいことを自由に書く"></textarea>
+        <input class="persistent-memo-title" type="text" placeholder="タイトル" aria-label="メモのタイトル" />
+        <textarea rows="10" placeholder="自由に書く"></textarea>
         <div class="persistent-memo-actions">
           <span class="persistent-memo-meta"></span>
           <button class="ghost-button edit-button" type="button">編集</button>

@@ -3226,6 +3226,10 @@ textarea {
   min-height: 360px;
 }
 
+.persistent-memo-panel[hidden] {
+  display: none;
+}
+
 .persistent-memo-list {
   gap: 12px;
 }
@@ -3237,6 +3241,11 @@ textarea {
   border-radius: var(--radius-item);
   background: #fff;
   padding: 12px;
+}
+
+.persistent-memo-title {
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .persistent-memo-item textarea {
@@ -5703,7 +5712,7 @@ button.launch-card {
 }
 
 .dashboard .persistent-memo-panel {
-  order: 63;
+  order: 24;
 }
 
 .dashboard .memory-library-panel {

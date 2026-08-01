@@ -626,10 +626,23 @@ function newPersistentMemo() {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
+    title: "",
     text: "",
     createdAt: now,
     updatedAt: now,
   };
+}
+
+function normalizePersistentMemo(memo) {
+  const normalized = {
+    ...newPersistentMemo(),
+    ...(memo && typeof memo === "object" ? memo : {}),
+  };
+  normalized.title = normalized.title || "";
+  normalized.text = normalized.text || "";
+  if (!normalized.createdAt) normalized.createdAt = normalized.updatedAt || new Date().toISOString();
+  if (!normalized.updatedAt) normalized.updatedAt = normalized.createdAt;
+  return normalized;
 }
 
 function newReadingNote() {
@@ -1236,7 +1249,7 @@ function loadLaterSortOrder() {
 function loadPersistentMemos() {
   try {
     const saved = JSON.parse(localStorage.getItem(PERSISTENT_MEMO_STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
+    return Array.isArray(saved) ? saved.map(normalizePersistentMemo) : [];
   } catch {
     return [];
   }
@@ -2375,7 +2388,7 @@ function renderPersistentMemos({ focusId } = {}) {
   }
   const searchQuery = normalizeLaterText(persistentMemoSearchQuery);
   const visibleMemos = persistentMemos.filter((memo) =>
-    normalizeLaterText(memo.text || "").includes(searchQuery)
+    normalizeLaterText([memo.title, memo.text].filter(Boolean).join(" ")).includes(searchQuery)
   );
   const searchCount = $("#persistentMemoSearchCount");
   if (searchCount) {
@@ -2386,17 +2399,20 @@ function renderPersistentMemos({ focusId } = {}) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
     empty.textContent = searchQuery
-      ? "検索に一致する残るメモはありません。"
-      : "残るメモはまだありません。";
+      ? "検索に一致するメモはありません。"
+      : "メモはまだありません。";
     target.append(empty);
     return;
   }
   visibleMemos.forEach((memo) => {
+    memo = normalizePersistentMemo(memo);
     const row = template.content.firstElementChild.cloneNode(true);
     row.dataset.brainSource = "operation-dashboard.persistentMemos";
-    row.dataset.brainId = memo.id || `operation-dashboard.persistentMemos:${memo.text || ""}`;
+    row.dataset.brainId = memo.id || `operation-dashboard.persistentMemos:${memo.title || memo.text || ""}`;
+    const title = row.querySelector(".persistent-memo-title");
     const textarea = row.querySelector("textarea");
     const meta = row.querySelector(".persistent-memo-meta");
+    title.value = memo.title || "";
     textarea.value = memo.text || "";
     meta.textContent = memo.updatedAt
       ? `更新 ${new Intl.DateTimeFormat("ja-JP", {
@@ -2406,30 +2422,37 @@ function renderPersistentMemos({ focusId } = {}) {
           minute: "2-digit",
         }).format(new Date(memo.updatedAt))}`
       : "";
-    textarea.addEventListener("input", () => {
-      memo.text = textarea.value;
-      memo.updatedAt = new Date().toISOString();
+    const persistMemoEdit = () => {
+      const targetMemo = persistentMemos.find((candidate) => candidate.id === memo.id);
+      if (!targetMemo) return;
+      targetMemo.title = title.value;
+      targetMemo.text = textarea.value;
+      targetMemo.updatedAt = new Date().toISOString();
+      persistentMemos = persistentMemos.map(normalizePersistentMemo);
       savePersistentMemos();
       meta.textContent = `更新 ${new Intl.DateTimeFormat("ja-JP", {
         month: "numeric",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-      }).format(new Date(memo.updatedAt))}`;
-    });
+      }).format(new Date(targetMemo.updatedAt))}`;
+    };
+    title.addEventListener("input", persistMemoEdit);
+    textarea.addEventListener("input", persistMemoEdit);
     row.querySelector(".edit-button").addEventListener("click", () => {
-      textarea.focus();
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      const field = title.value ? textarea : title;
+      field.focus();
+      field.setSelectionRange(field.value.length, field.value.length);
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
-      if (!confirm("この残るメモを削除しますか？")) return;
+      if (!confirm("このメモを削除しますか？")) return;
       persistentMemos = persistentMemos.filter((candidate) => candidate.id !== memo.id);
       savePersistentMemos();
       renderPersistentMemos();
     });
     target.append(row);
     if (memo.id === focusId) {
-      textarea.focus();
+      title.focus();
     }
   });
 }
@@ -11983,6 +12006,7 @@ function showPageEntry(entryName = "") {
   const wordpressPagePanel = $("#wordpressPageV1");
   const seedPagePanel = $("#publishing-seeds");
   const readingPagePanel = $("#reading-notes");
+  const memoPagePanel = $("#memo-page");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
@@ -11991,6 +12015,7 @@ function showPageEntry(entryName = "") {
   const isWordPressPage = entryName === "WordPress";
   const isSeedPage = entryName === "Seed";
   const isReadingPage = entryName === "読書";
+  const isMemoPage = entryName === "メモ";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -12000,7 +12025,8 @@ function showPageEntry(entryName = "") {
   if (wordpressPagePanel) wordpressPagePanel.hidden = !isWordPressPage;
   if (seedPagePanel && !isSeedPage) seedPagePanel.hidden = true;
   if (readingPagePanel) readingPagePanel.hidden = !isReadingPage;
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || !entryName;
+  if (memoPagePanel) memoPagePanel.hidden = !isMemoPage;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
@@ -12011,6 +12037,7 @@ function showPageEntry(entryName = "") {
     renderPublishingSeeds();
   }
   if (isReadingPage) renderReadingNotes();
+  if (isMemoPage) renderPersistentMemos();
 }
 
 function bindEvents() {

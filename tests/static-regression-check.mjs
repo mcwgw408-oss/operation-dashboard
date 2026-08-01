@@ -465,7 +465,7 @@ const requiredOrders = new Map([
   [".dashboard .reflection-panel", "60"],
   [".dashboard .learning-panel", "61"],
   [".dashboard .later-panel", "62"],
-  [".dashboard .persistent-memo-panel", "63"],
+  [".dashboard .persistent-memo-panel", "24"],
   [".dashboard .memory-library-panel", "64"],
   [".dashboard .dashboard-closed-heading", "79"],
   [".dashboard .sakura-panel", "80"],
