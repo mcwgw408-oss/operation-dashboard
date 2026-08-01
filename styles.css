@@ -5815,12 +5815,12 @@ button.launch-card {
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
-  grid-column: 3 / span 1;
+  grid-column: 3 / -1;
   order: 13;
 }
 
 .dashboard > .metrics-panel:has(#dmPending) {
-  grid-column: 4 / span 1;
+  grid-column: 3 / -1;
   order: 13;
 }
 
