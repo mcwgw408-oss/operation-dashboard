@@ -5387,11 +5387,11 @@ button.launch-card {
   padding: 14px;
 }
 
-.note-page-panel .note-tall-block {
+.substack-page-panel .note-tall-block {
   min-height: 280px;
 }
 
-.note-page-panel .note-tall-block textarea {
+.substack-page-panel .note-tall-block textarea {
   min-height: 140px;
 }
 
