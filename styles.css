@@ -5723,6 +5723,11 @@ button.launch-card {
 
 .dashboard .archive-page-panel {
   grid-column: 1 / -1;
+  order: 26;
+}
+
+.dashboard .today-input-page-panel {
+  grid-column: 1 / -1;
   order: 25;
 }
 
@@ -5814,6 +5819,7 @@ button.launch-card {
 .memory-library-panel,
 .reflection-panel,
 .sakura-panel,
+.today-input-page-panel,
 .archive-page-panel,
 .home-launch-panel,
 .substack-page-panel,

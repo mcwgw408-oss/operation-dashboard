@@ -839,22 +839,27 @@ const ARCHIVE_PAGE_SELECTORS = [
   "#x-analysis-room",
   ".publishing-seed-workbench-tabs",
   "#publishing-seed-candidates",
-  "#publishing-experiment-lab",
   ".operation-experiment-panel",
   ".dashboard-health-input-panel",
   ".dashboard-memory-input-panel",
   ".dashboard-ai-analysis-panel",
   ".publishing-ops-history-panel",
   ".later-panel",
-  "#dashboard-accumulation",
-  ".reflection-panel",
-  "#codex-daily-log",
   ".panel:has(#projects)",
-  ".learning-panel",
   ".memory-library-panel",
   ".data-panel",
   "#dashboard-closed",
   ".sakura-panel",
+];
+
+const TODAY_INPUT_PAGE_SELECTORS = [
+  "#dashboard-input",
+  ".daily-input-panel",
+  "#dashboard-accumulation",
+  ".reflection-panel",
+  "#publishing-experiment-lab",
+  ".learning-panel",
+  "#codex-daily-log",
 ];
 
 function blankDay() {
@@ -12032,6 +12037,14 @@ function setArchivePageVisible(visible) {
   });
 }
 
+function setTodayInputPageVisible(visible) {
+  TODAY_INPUT_PAGE_SELECTORS.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((node) => {
+      node.hidden = !visible;
+    });
+  });
+}
+
 function showPageEntry(entryName = "") {
   activePageEntry = entryName;
   const substackPanel = $("#substackPage");
@@ -12042,6 +12055,7 @@ function showPageEntry(entryName = "") {
   const readingPagePanel = $("#reading-notes");
   const learningAssetPagePanel = $("#learning-asset-flow");
   const memoPagePanel = $("#memo-page");
+  const todayInputPagePanel = $("#todayInputPage");
   const archivePagePanel = $("#archivePage");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
@@ -12052,6 +12066,7 @@ function showPageEntry(entryName = "") {
   const isSeedPage = entryName === "Seed";
   const isReadingPage = entryName === "読書";
   const isMemoPage = entryName === "メモ";
+  const isTodayInputPage = entryName === "今日の入力";
   const isArchivePage = entryName === "Archive";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
@@ -12064,9 +12079,11 @@ function showPageEntry(entryName = "") {
   if (readingPagePanel) readingPagePanel.hidden = true;
   if (learningAssetPagePanel) learningAssetPagePanel.hidden = !isReadingPage;
   if (memoPagePanel) memoPagePanel.hidden = !isMemoPage;
+  if (todayInputPagePanel) todayInputPagePanel.hidden = !isTodayInputPage;
   if (archivePagePanel) archivePagePanel.hidden = !isArchivePage;
+  setTodayInputPageVisible(isTodayInputPage);
   setArchivePageVisible(isArchivePage);
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isArchivePage || !entryName;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
@@ -12078,6 +12095,12 @@ function showPageEntry(entryName = "") {
   }
   if (isReadingPage) renderLearningAssets();
   if (isMemoPage) renderPersistentMemos();
+  if (isTodayInputPage) {
+    renderXExperimentLogs();
+    renderLearnings();
+    renderLearningGlobalSearch();
+    renderCodexDailyLog();
+  }
   if (isArchivePage) {
     renderPublishingOps();
     renderXAnalysis();
