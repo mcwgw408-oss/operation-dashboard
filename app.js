@@ -381,6 +381,21 @@ function defaultXPageV1() {
     engagements: "",
     detailClicks: "",
     profileAccesses: "",
+    post1Impressions: "",
+    post1Likes: "",
+    post1Engagements: "",
+    post1DetailClicks: "",
+    post1ProfileAccesses: "",
+    post2Impressions: "",
+    post2Likes: "",
+    post2Engagements: "",
+    post2DetailClicks: "",
+    post2ProfileAccesses: "",
+    post3Impressions: "",
+    post3Likes: "",
+    post3Engagements: "",
+    post3DetailClicks: "",
+    post3ProfileAccesses: "",
     followers: "",
     insight: "",
     todayPost1: "",
@@ -1060,6 +1075,18 @@ function ensureXPageV1(day) {
     day.xPageV1.stockPostIdea1 = day.xPageV1.stockPostIdeas;
     changed = true;
   }
+  [
+    ["impressions", "post1Impressions"],
+    ["likes", "post1Likes"],
+    ["engagements", "post1Engagements"],
+    ["detailClicks", "post1DetailClicks"],
+    ["profileAccesses", "post1ProfileAccesses"],
+  ].forEach(([legacyKey, postKey]) => {
+    if (day.xPageV1[legacyKey] && !day.xPageV1[postKey]) {
+      day.xPageV1[postKey] = day.xPageV1[legacyKey];
+      changed = true;
+    }
+  });
   if (!("xPageV1UpdatedAt" in day)) {
     day.xPageV1UpdatedAt = "";
     changed = true;
@@ -3323,11 +3350,21 @@ const xPageV1Fields = {
   yesterdayPost1: "#xPageYesterdayPost1",
   yesterdayPost2: "#xPageYesterdayPost2",
   yesterdayPost3: "#xPageYesterdayPost3",
-  impressions: "#xPageImpressions",
-  likes: "#xPageLikes",
-  engagements: "#xPageEngagements",
-  detailClicks: "#xPageDetailClicks",
-  profileAccesses: "#xPageProfileAccesses",
+  post1Impressions: "#xPagePost1Impressions",
+  post1Likes: "#xPagePost1Likes",
+  post1Engagements: "#xPagePost1Engagements",
+  post1DetailClicks: "#xPagePost1DetailClicks",
+  post1ProfileAccesses: "#xPagePost1ProfileAccesses",
+  post2Impressions: "#xPagePost2Impressions",
+  post2Likes: "#xPagePost2Likes",
+  post2Engagements: "#xPagePost2Engagements",
+  post2DetailClicks: "#xPagePost2DetailClicks",
+  post2ProfileAccesses: "#xPagePost2ProfileAccesses",
+  post3Impressions: "#xPagePost3Impressions",
+  post3Likes: "#xPagePost3Likes",
+  post3Engagements: "#xPagePost3Engagements",
+  post3DetailClicks: "#xPagePost3DetailClicks",
+  post3ProfileAccesses: "#xPagePost3ProfileAccesses",
   followers: "#xPageFollowers",
   insight: "#xPageInsight",
   todayPost1: "#xPageTodayPost1",

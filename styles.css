@@ -5582,6 +5582,28 @@ button.launch-card {
   font-size: 14px;
 }
 
+.x-reaction-block {
+  gap: 12px;
+}
+
+.x-post-reaction-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.x-post-reaction-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #f8fafc;
+  padding: 10px;
+}
+
+.x-post-reaction-card h4 {
+  margin: 0;
+}
+
 .substack-page-block label {
   display: grid;
   gap: 6px;
