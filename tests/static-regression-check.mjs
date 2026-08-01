@@ -439,7 +439,7 @@ const requiredOrders = new Map([
   [".dashboard .after-ten-mode-panel", "7"],
   [".dashboard .dashboard-task-panel", "8"],
   [".dashboard .schedule-panel", "9"],
-  [".dashboard > .panel:has(#dailyTasks)", "12"],
+  [".dashboard > .panel:has(#dailyTasks)", "9"],
   [".dashboard > .metrics-panel:has(#mailMorningChecked)", "13"],
   [".dashboard > .metrics-panel:has(#dmPending)", "13"],
   [".dashboard .home-launch-panel", "16"],

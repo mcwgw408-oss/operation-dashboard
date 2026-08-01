@@ -837,35 +837,6 @@
           </div>
         </section>
 
-        <section id="home-capacity-check" class="panel capacity-check-section span-2" aria-label="今日できること">
-          <div class="capacity-check-layout">
-            <div class="capacity-check-panel">
-              <div class="capacity-check-heading">
-                <h3>今日できること</h3>
-                <p class="section-note">今日扱いやすいことだけを、○△×で残します。</p>
-              </div>
-              <div id="capacityCheckGrid" class="capacity-check-grid"></div>
-              <p id="capacityCheckStatus" class="capacity-check-status">今日できることはまだ記録されていません。</p>
-            </div>
-            <div class="capacity-metrics-stack">
-              <section class="metrics-panel">
-                <h2>メール</h2>
-                <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
-                <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
-                <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
-                <p class="mail-last-checked">最後に確認した時間：<strong id="mailLastCheckedLabel">未確認</strong></p>
-              </section>
-
-              <section class="metrics-panel">
-                <h2>メッセージ</h2>
-                <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
-                <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
-                <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
-              </section>
-            </div>
-          </div>
-        </section>
-
         <section id="home-after-ten-mode" class="panel after-ten-mode-panel span-2" aria-label="10時以降モード">
           <div class="panel-heading">
             <div>
@@ -1332,76 +1303,107 @@
           <div id="todayTasks" class="task-list"></div>
         </section>
 
-        <section class="panel schedule-panel span-2">
-          <div class="panel-heading">
-            <div>
-              <h2>今日だけの予定（単発）</h2>
-              <p class="section-note today-only-date-note"><strong id="todayEventDateLabel"></strong>にだけ保存されます。Zoom、ライブ配信、記事公開、外出、通院など、時間が決まっている予定を入れます。翌日には引き継がれません。</p>
+        <div class="home-schedule-stack span-2">
+          <section class="panel schedule-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>今日だけの予定（単発）</h2>
+                <p class="section-note today-only-date-note"><strong id="todayEventDateLabel"></strong>にだけ保存されます。Zoom、ライブ配信、記事公開、外出、通院など、時間が決まっている予定を入れます。翌日には引き継がれません。</p>
+              </div>
             </div>
-          </div>
-          <form id="eventForm" class="event-form">
-            <input id="eventTime" type="text" placeholder="14:00 / 午後" aria-label="予定の時間" />
-            <select id="eventType" aria-label="予定の種類">
-              <option value="medical">医療・ケア</option>
-              <option value="meeting">打ち合わせ</option>
-              <option value="outing">外出</option>
-              <option value="delivery">配信</option>
-              <option value="broadcast">コラボ・配信</option>
-              <option value="other">その他</option>
-            </select>
-            <input id="eventTitle" type="text" placeholder="Zoom / ライブ配信 / 買い出し" aria-label="予定名" />
-            <input id="eventNote" type="text" placeholder="メモ" aria-label="予定メモ" />
-            <button type="submit">追加</button>
-          </form>
-          <div id="todayEvents" class="event-list"></div>
-          <details class="recurring-schedule-panel">
-            <summary>
-              <span>定期予定</span>
-              <small>毎週・数週間ごとの予定を保存し、今日該当するものだけ候補に出します。</small>
-            </summary>
-            <section class="recurring-due-panel" aria-label="今日の定期予定候補">
-              <h4>今日の予定候補</h4>
-              <div id="dueRecurringSchedules" class="recurring-schedule-list"></div>
-            </section>
-            <p class="recurring-schedule-help">
-              曜日は候補に出す曜日です。開始日は「○週間ごと」の起点です。毎週の場合、○週間ごとの数値は使いません。
-            </p>
-            <form id="recurringScheduleForm" class="recurring-schedule-form">
-              <input id="recurringTitle" type="text" placeholder="ヘルパー / 訪問看護 / 精神科" aria-label="定期予定名" />
-              <input id="recurringTime" type="text" placeholder="14:00 / 午後" aria-label="定期予定の時間" />
-              <select id="recurringType" aria-label="定期予定の種類">
+            <form id="eventForm" class="event-form">
+              <input id="eventTime" type="text" placeholder="14:00 / 午後" aria-label="予定の時間" />
+              <select id="eventType" aria-label="予定の種類">
                 <option value="medical">医療・ケア</option>
                 <option value="meeting">打ち合わせ</option>
                 <option value="outing">外出</option>
+                <option value="delivery">配信</option>
+                <option value="broadcast">コラボ・配信</option>
                 <option value="other">その他</option>
               </select>
-              <select id="recurringFrequency" aria-label="繰り返し">
-                <option value="weekly">毎週</option>
-                <option value="interval_weeks">○週間ごと</option>
-              </select>
-              <select id="recurringWeekday" aria-label="曜日">
-                <option value="0">日曜</option>
-                <option value="1">月曜</option>
-                <option value="2">火曜</option>
-                <option value="3">水曜</option>
-                <option value="4">木曜</option>
-                <option value="5">金曜</option>
-                <option value="6">土曜</option>
-              </select>
-              <input id="recurringIntervalWeeks" type="number" min="1" value="2" aria-label="何週間ごと" />
-              <input id="recurringStartDate" type="date" aria-label="開始日" />
-              <input id="recurringNote" type="text" placeholder="メモ" aria-label="定期予定メモ" />
-              <button type="submit">定期予定に追加</button>
+              <input id="eventTitle" type="text" placeholder="Zoom / ライブ配信 / 買い出し" aria-label="予定名" />
+              <input id="eventNote" type="text" placeholder="メモ" aria-label="予定メモ" />
+              <button type="submit">追加</button>
             </form>
-            <details>
-              <summary>保存した定期予定</summary>
-              <section class="recurring-template-panel" aria-label="定期予定テンプレート">
-                <h4>保存した定期予定</h4>
-                <div id="recurringScheduleList" class="recurring-schedule-list"></div>
+            <div id="todayEvents" class="event-list"></div>
+            <details class="recurring-schedule-panel">
+              <summary>
+                <span>定期予定</span>
+                <small>毎週・数週間ごとの予定を保存し、今日該当するものだけ候補に出します。</small>
+              </summary>
+              <section class="recurring-due-panel" aria-label="今日の定期予定候補">
+                <h4>今日の予定候補</h4>
+                <div id="dueRecurringSchedules" class="recurring-schedule-list"></div>
               </section>
+              <p class="recurring-schedule-help">
+                曜日は候補に出す曜日です。開始日は「○週間ごと」の起点です。毎週の場合、○週間ごとの数値は使いません。
+              </p>
+              <form id="recurringScheduleForm" class="recurring-schedule-form">
+                <input id="recurringTitle" type="text" placeholder="ヘルパー / 訪問看護 / 精神科" aria-label="定期予定名" />
+                <input id="recurringTime" type="text" placeholder="14:00 / 午後" aria-label="定期予定の時間" />
+                <select id="recurringType" aria-label="定期予定の種類">
+                  <option value="medical">医療・ケア</option>
+                  <option value="meeting">打ち合わせ</option>
+                  <option value="outing">外出</option>
+                  <option value="other">その他</option>
+                </select>
+                <select id="recurringFrequency" aria-label="繰り返し">
+                  <option value="weekly">毎週</option>
+                  <option value="interval_weeks">○週間ごと</option>
+                </select>
+                <select id="recurringWeekday" aria-label="曜日">
+                  <option value="0">日曜</option>
+                  <option value="1">月曜</option>
+                  <option value="2">火曜</option>
+                  <option value="3">水曜</option>
+                  <option value="4">木曜</option>
+                  <option value="5">金曜</option>
+                  <option value="6">土曜</option>
+                </select>
+                <input id="recurringIntervalWeeks" type="number" min="1" value="2" aria-label="何週間ごと" />
+                <input id="recurringStartDate" type="date" aria-label="開始日" />
+                <input id="recurringNote" type="text" placeholder="メモ" aria-label="定期予定メモ" />
+                <button type="submit">定期予定に追加</button>
+              </form>
+              <details>
+                <summary>保存した定期予定</summary>
+                <section class="recurring-template-panel" aria-label="定期予定テンプレート">
+                  <h4>保存した定期予定</h4>
+                  <div id="recurringScheduleList" class="recurring-schedule-list"></div>
+                </section>
+              </details>
             </details>
-          </details>
-        </section>
+          </section>
+
+          <section id="home-capacity-check" class="panel capacity-check-section" aria-label="今日できること">
+            <div class="capacity-check-layout">
+              <div class="capacity-check-panel">
+                <div class="capacity-check-heading">
+                  <h3>今日できること</h3>
+                  <p class="section-note">今日扱いやすいことだけを、○△×で残します。</p>
+                </div>
+                <div id="capacityCheckGrid" class="capacity-check-grid"></div>
+                <p id="capacityCheckStatus" class="capacity-check-status">今日できることはまだ記録されていません。</p>
+              </div>
+              <div class="capacity-metrics-stack">
+                <section class="metrics-panel">
+                  <h2>メール</h2>
+                  <label class="check-row"><input id="mailMorningChecked" type="checkbox" /> 朝チェック</label>
+                  <label class="check-row"><input id="mailNoonChecked" type="checkbox" /> 昼チェック</label>
+                  <label class="check-row"><input id="mailNightChecked" type="checkbox" /> 夜チェック</label>
+                  <p class="mail-last-checked">最後に確認した時間：<strong id="mailLastCheckedLabel">未確認</strong></p>
+                </section>
+
+                <section class="metrics-panel">
+                  <h2>メッセージ</h2>
+                  <label>未対応人数<input id="dmPending" type="number" min="0" inputmode="numeric" /></label>
+                  <label>本日対応<input id="dmHandled" type="number" min="0" inputmode="numeric" /></label>
+                  <label class="check-row"><input id="dmPreviousDone" type="checkbox" /> 前日分まで完了</label>
+                </section>
+              </div>
+            </div>
+          </section>
+        </div>
 
         <section class="panel span-2">
           <div class="panel-heading">

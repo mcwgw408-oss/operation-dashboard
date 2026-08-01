@@ -5831,6 +5831,27 @@ button.launch-card {
   order: 8;
 }
 
+.dashboard .home-schedule-stack {
+  display: grid;
+  grid-column: 1 / span 2;
+  gap: 16px;
+  align-self: start;
+  order: 9;
+}
+
+.dashboard .home-schedule-stack .schedule-panel,
+.dashboard .home-schedule-stack .capacity-check-section {
+  grid-column: 1 / -1;
+}
+
+.dashboard .home-schedule-stack .schedule-panel {
+  order: 1;
+}
+
+.dashboard .home-schedule-stack .capacity-check-section {
+  order: 2;
+}
+
 .dashboard .schedule-panel {
   grid-column: 1 / span 2;
   order: 9;
@@ -5846,7 +5867,7 @@ button.launch-card {
 
 .dashboard > .panel:has(#dailyTasks) {
   grid-column: 3 / -1;
-  order: 12;
+  order: 9;
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
@@ -6004,6 +6025,7 @@ button.launch-card {
   .dashboard .sleep-summary-panel,
   .dashboard .after-ten-mode-panel,
   .dashboard .dashboard-task-panel,
+  .dashboard .home-schedule-stack,
   .dashboard .schedule-panel,
   .dashboard > .panel:has(#dailyTasks),
   .dashboard > .metrics-panel:has(#mailMorningChecked),
@@ -6103,6 +6125,7 @@ button.launch-card {
   .dashboard .sleep-summary-panel,
   .dashboard .after-ten-mode-panel,
   .dashboard .dashboard-task-panel,
+  .dashboard .home-schedule-stack,
   .dashboard .schedule-panel,
   .dashboard > .panel:has(#dailyTasks),
   .dashboard > .metrics-panel:has(#mailMorningChecked),
