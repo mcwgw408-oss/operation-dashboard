@@ -597,7 +597,7 @@ textarea {
 
 .after-ten-mode-options label {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-columns: 22px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   min-height: 44px;
@@ -613,6 +613,21 @@ textarea {
 .after-ten-mode-options input {
   width: 18px;
   height: 18px;
+}
+
+.after-ten-mode-options span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.after-ten-mode-delete {
+  min-height: 32px;
+  border-color: var(--pink-line);
+  background: #fff4f7;
+  color: var(--pink);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .after-ten-mode-add-form {

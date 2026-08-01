@@ -38,6 +38,7 @@ const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v
 const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
 const DELETED_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-deleted-daily-tasks-v1";
 const AFTER_TEN_MODE_OPTIONS_STORAGE_KEY = "operation-dashboard-after-ten-mode-options-v1";
+const AFTER_TEN_MODE_DELETED_OPTIONS_STORAGE_KEY = "operation-dashboard-after-ten-mode-deleted-options-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -165,6 +166,7 @@ let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
 saveCustomDailyTasks();
 let customAfterTenModeOptions = loadCustomAfterTenModeOptions();
+let deletedAfterTenModeOptions = loadDeletedAfterTenModeOptions();
 let deletedDailyTasks = loadDeletedDailyTasks();
 saveDeletedDailyTasks();
 let dailyTaskOrder = loadDailyTaskOrder();
@@ -733,9 +735,11 @@ function configuredDailyTaskTitles() {
 }
 
 function afterTenModeOptions() {
+  const deletedOptions = new Set(deletedAfterTenModeOptions);
   return [...new Set([...DEFAULT_AFTER_TEN_MODE_OPTIONS, ...customAfterTenModeOptions]
     .map(normalizeAfterTenModeOption)
-    .filter(Boolean))];
+    .filter(Boolean))]
+    .filter((option) => !deletedOptions.has(option));
 }
 
 function dailyTaskTitlesFromDay(day) {
@@ -1239,6 +1243,18 @@ function loadCustomAfterTenModeOptions() {
     if (Array.isArray(saved)) {
       return [...new Set(saved.map(normalizeAfterTenModeOption).filter(Boolean))]
         .filter((option) => !DEFAULT_AFTER_TEN_MODE_OPTIONS.includes(option));
+    }
+  } catch {
+    // Ignore malformed saved data.
+  }
+  return [];
+}
+
+function loadDeletedAfterTenModeOptions() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(AFTER_TEN_MODE_DELETED_OPTIONS_STORAGE_KEY));
+    if (Array.isArray(saved)) {
+      return [...new Set(saved.map(normalizeAfterTenModeOption).filter(Boolean))];
     }
   } catch {
     // Ignore malformed saved data.
@@ -1863,6 +1879,28 @@ function saveCustomAfterTenModeOptions() {
   customAfterTenModeOptions = [...new Set(customAfterTenModeOptions.map(normalizeAfterTenModeOption).filter(Boolean))]
     .filter((option) => !DEFAULT_AFTER_TEN_MODE_OPTIONS.includes(option));
   localStorage.setItem(AFTER_TEN_MODE_OPTIONS_STORAGE_KEY, JSON.stringify(customAfterTenModeOptions));
+}
+
+function saveDeletedAfterTenModeOptions() {
+  deletedAfterTenModeOptions = [...new Set(deletedAfterTenModeOptions.map(normalizeAfterTenModeOption).filter(Boolean))];
+  localStorage.setItem(AFTER_TEN_MODE_DELETED_OPTIONS_STORAGE_KEY, JSON.stringify(deletedAfterTenModeOptions));
+}
+
+function removeAfterTenModeOption(option) {
+  const normalizedOption = normalizeAfterTenModeOption(option);
+  if (!normalizedOption) return false;
+  if (DEFAULT_AFTER_TEN_MODE_OPTIONS.includes(normalizedOption)) {
+    deletedAfterTenModeOptions.push(normalizedOption);
+  }
+  customAfterTenModeOptions = customAfterTenModeOptions.filter((candidate) => candidate !== normalizedOption);
+  Object.values(store).forEach((day) => {
+    if (!Array.isArray(day?.afterTenMode)) return;
+    day.afterTenMode = day.afterTenMode.filter((candidate) => candidate !== normalizedOption);
+  });
+  saveCustomAfterTenModeOptions();
+  saveDeletedAfterTenModeOptions();
+  saveStore();
+  return true;
 }
 
 function saveDeletedDailyTasks() {
@@ -8915,10 +8953,18 @@ function renderAfterTenMode(day = getDay()) {
     afterTenModeOptions().forEach((option) => {
       const label = document.createElement("label");
       const input = document.createElement("input");
+      const text = document.createElement("span");
+      const deleteButton = document.createElement("button");
       input.type = "checkbox";
       input.value = option;
       input.checked = selectedModes.has(option);
-      label.append(input, document.createTextNode(option));
+      text.textContent = option;
+      deleteButton.type = "button";
+      deleteButton.className = "after-ten-mode-delete";
+      deleteButton.dataset.afterTenDelete = option;
+      deleteButton.textContent = "削除";
+      deleteButton.setAttribute("aria-label", `${option}を削除`);
+      label.append(input, text, deleteButton);
       optionsTarget.append(label);
     });
   }
@@ -12267,6 +12313,18 @@ function bindEvents() {
     saveStore();
     renderAfterTenMode(day);
   });
+  $("#afterTenModeOptions")?.addEventListener("click", (event) => {
+    const deleteButton = event.target.closest("[data-after-ten-delete]");
+    if (!deleteButton) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const option = deleteButton.dataset.afterTenDelete || "";
+    if (!option) return;
+    removeAfterTenModeOption(option);
+    renderAfterTenMode(getDay());
+    const status = $("#afterTenModeStatus");
+    if (status) status.textContent = `「${option}」を削除しました。`;
+  });
   $("#afterTenModeAddForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
     const input = $("#afterTenModeNewOption");
@@ -12282,8 +12340,10 @@ function bindEvents() {
       input?.focus();
       return;
     }
-    customAfterTenModeOptions.push(value);
+    deletedAfterTenModeOptions = deletedAfterTenModeOptions.filter((option) => option !== value);
+    if (!DEFAULT_AFTER_TEN_MODE_OPTIONS.includes(value)) customAfterTenModeOptions.push(value);
     saveCustomAfterTenModeOptions();
+    saveDeletedAfterTenModeOptions();
     if (input) input.value = "";
     renderAfterTenMode(getDay());
     if (status) status.textContent = `「${value}」を追加しました。必要ならチェックしてください。`;
@@ -12851,6 +12911,7 @@ const BACKUP_KEYS = [
   CUSTOM_DAILY_TASKS_STORAGE_KEY,
   DAILY_TASK_ORDER_STORAGE_KEY,
   AFTER_TEN_MODE_OPTIONS_STORAGE_KEY,
+  AFTER_TEN_MODE_DELETED_OPTIONS_STORAGE_KEY,
   LATER_STORAGE_KEY,
   PERSISTENT_MEMO_STORAGE_KEY,
   READING_NOTES_STORAGE_KEY,
@@ -12966,6 +13027,7 @@ function createBackup() {
   data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
   data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
   data[AFTER_TEN_MODE_OPTIONS_STORAGE_KEY] = readStoredJson(AFTER_TEN_MODE_OPTIONS_STORAGE_KEY, []);
+  data[AFTER_TEN_MODE_DELETED_OPTIONS_STORAGE_KEY] = readStoredJson(AFTER_TEN_MODE_DELETED_OPTIONS_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[READING_NOTES_STORAGE_KEY] = readStoredJson(READING_NOTES_STORAGE_KEY, []);
