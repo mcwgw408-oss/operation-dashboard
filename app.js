@@ -231,6 +231,7 @@ let xExperimentFilters = {
   status: "all",
   experimentType: "all",
 };
+let activePageEntry = "";
 let currentLearningLogId = "";
 let currentReplyText = "";
 let currentConversationContext = null;
@@ -831,6 +832,30 @@ const CAPACITY_CHECK_OPTIONS = [
   { value: "circle", label: "○", title: "少しできそう" },
   { value: "triangle", label: "△", title: "軽くなら" },
   { value: "cross", label: "×", title: "今日は難しい" },
+];
+
+const ARCHIVE_PAGE_SELECTORS = [
+  "#sns-posting",
+  "#x-analysis-room",
+  ".publishing-seed-workbench-tabs",
+  "#publishing-seed-candidates",
+  "#publishing-experiment-lab",
+  "#learning-asset-flow",
+  ".operation-experiment-panel",
+  ".dashboard-health-input-panel",
+  ".dashboard-memory-input-panel",
+  ".dashboard-ai-analysis-panel",
+  ".publishing-ops-history-panel",
+  ".later-panel",
+  "#dashboard-accumulation",
+  ".reflection-panel",
+  "#codex-daily-log",
+  ".panel:has(#projects)",
+  ".learning-panel",
+  ".memory-library-panel",
+  ".data-panel",
+  "#dashboard-closed",
+  ".sakura-panel",
 ];
 
 function blankDay() {
@@ -11937,6 +11962,7 @@ function renderAll() {
   renderBrainPrototype();
   renderMemoryLibrary();
   applySakuraInnerToggle();
+  showPageEntry(activePageEntry);
 }
 
 function moveDashboardNode(selector, targetSelector) {
@@ -11999,7 +12025,16 @@ function scrollBackToTop() {
   });
 }
 
+function setArchivePageVisible(visible) {
+  ARCHIVE_PAGE_SELECTORS.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((node) => {
+      node.hidden = !visible;
+    });
+  });
+}
+
 function showPageEntry(entryName = "") {
+  activePageEntry = entryName;
   const substackPanel = $("#substackPage");
   const noteConfig = notePageConfigs[entryName];
   const xPagePanel = $("#xPageV1");
@@ -12007,6 +12042,7 @@ function showPageEntry(entryName = "") {
   const seedPagePanel = $("#publishing-seeds");
   const readingPagePanel = $("#reading-notes");
   const memoPagePanel = $("#memo-page");
+  const archivePagePanel = $("#archivePage");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
@@ -12016,6 +12052,7 @@ function showPageEntry(entryName = "") {
   const isSeedPage = entryName === "Seed";
   const isReadingPage = entryName === "読書";
   const isMemoPage = entryName === "メモ";
+  const isArchivePage = entryName === "Archive";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -12026,7 +12063,9 @@ function showPageEntry(entryName = "") {
   if (seedPagePanel && !isSeedPage) seedPagePanel.hidden = true;
   if (readingPagePanel) readingPagePanel.hidden = !isReadingPage;
   if (memoPagePanel) memoPagePanel.hidden = !isMemoPage;
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || !entryName;
+  if (archivePagePanel) archivePagePanel.hidden = !isArchivePage;
+  setArchivePageVisible(isArchivePage);
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isArchivePage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
@@ -12038,6 +12077,19 @@ function showPageEntry(entryName = "") {
   }
   if (isReadingPage) renderReadingNotes();
   if (isMemoPage) renderPersistentMemos();
+  if (isArchivePage) {
+    renderPublishingOps();
+    renderXAnalysis();
+    renderPublishingSeedCandidates();
+    renderXExperimentLogs();
+    renderLearningAssets();
+    renderOperationExperiment();
+    renderLaterItems();
+    renderLearnings();
+    renderLearningGlobalSearch();
+    renderMemoryLibrary();
+    renderHistory();
+  }
 }
 
 function bindEvents() {

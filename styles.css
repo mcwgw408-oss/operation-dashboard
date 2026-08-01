@@ -219,6 +219,10 @@ textarea {
   gap: 16px;
 }
 
+.dashboard > [hidden] {
+  display: none !important;
+}
+
 .dashboard-page-nav {
   grid-column: 1 / -1;
   display: flex;
@@ -5717,6 +5721,11 @@ button.launch-card {
   order: 24;
 }
 
+.dashboard .archive-page-panel {
+  grid-column: 1 / -1;
+  order: 25;
+}
+
 .dashboard .memory-library-panel {
   order: 64;
 }
@@ -5805,6 +5814,7 @@ button.launch-card {
 .memory-library-panel,
 .reflection-panel,
 .sakura-panel,
+.archive-page-panel,
 .home-launch-panel,
 .substack-page-panel,
 .panel:has(#projects),
