@@ -590,26 +590,28 @@ textarea {
 }
 
 .after-ten-mode-options {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
+  display: grid;
+  gap: 8px;
 }
 
 .after-ten-mode-options label {
-  display: flex;
-  flex: 1 0 128px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 48px;
+  gap: 10px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: var(--radius-item);
   background: #fff;
   color: var(--text);
-  white-space: nowrap;
+  padding: 8px 10px;
+  white-space: normal;
   writing-mode: horizontal-tb;
+}
+
+.after-ten-mode-options input {
+  width: 18px;
+  height: 18px;
 }
 
 .welcome-weather-card,
@@ -5613,23 +5615,26 @@ button.launch-card {
 }
 
 .dashboard .dashboard-proposal-heading {
+  grid-column: 1 / -1;
   order: 6;
 }
 
 .dashboard .welcome-home-panel {
+  grid-column: 1 / span 2;
   order: 7;
 }
 
 .dashboard .sleep-summary-panel {
-  order: 8;
+  order: 12;
 }
 
 .dashboard .capacity-check-section {
-  order: 9;
+  order: 13;
 }
 
 .dashboard .after-ten-mode-panel {
-  order: 10;
+  grid-column: 3 / -1;
+  order: 7;
 }
 
 .dashboard .dashboard-input-heading {
@@ -5677,11 +5682,13 @@ button.launch-card {
 }
 
 .dashboard .dashboard-task-panel {
-  order: 11;
+  grid-column: 3 / -1;
+  order: 8;
 }
 
 .dashboard .schedule-panel {
-  order: 12;
+  grid-column: 1 / span 2;
+  order: 8;
 }
 
 .dashboard .dashboard-health-input-panel {
@@ -5693,15 +5700,18 @@ button.launch-card {
 }
 
 .dashboard > .panel:has(#dailyTasks) {
-  order: 13;
+  grid-column: 3 / -1;
+  order: 9;
 }
 
 .dashboard > .metrics-panel:has(#mailMorningChecked) {
-  order: 14;
+  grid-column: 1 / span 1;
+  order: 9;
 }
 
 .dashboard > .metrics-panel:has(#dmPending) {
-  order: 15;
+  grid-column: 2 / span 1;
+  order: 9;
 }
 
 .dashboard .publishing-ops-history-panel {
@@ -5841,6 +5851,22 @@ button.launch-card {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .dashboard .welcome-home-panel,
+  .dashboard .after-ten-mode-panel,
+  .dashboard .dashboard-task-panel,
+  .dashboard .schedule-panel,
+  .dashboard > .panel:has(#dailyTasks) {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard > .metrics-panel:has(#mailMorningChecked) {
+    grid-column: 1 / span 1;
+  }
+
+  .dashboard > .metrics-panel:has(#dmPending) {
+    grid-column: 2 / span 1;
+  }
+
   .persistent-memo-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5927,6 +5953,16 @@ button.launch-card {
 
   .span-2 {
     grid-column: span 1;
+  }
+
+  .dashboard .welcome-home-panel,
+  .dashboard .after-ten-mode-panel,
+  .dashboard .dashboard-task-panel,
+  .dashboard .schedule-panel,
+  .dashboard > .panel:has(#dailyTasks),
+  .dashboard > .metrics-panel:has(#mailMorningChecked),
+  .dashboard > .metrics-panel:has(#dmPending) {
+    grid-column: 1 / -1;
   }
 
   .summary-cell {
