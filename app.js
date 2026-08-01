@@ -636,7 +636,10 @@ function newReadingNote() {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
+    date: activeDate,
+    source: "",
     title: "",
+    state: "未読",
     url: "",
     learning: "",
     use: "",
@@ -644,6 +647,21 @@ function newReadingNote() {
     createdAt: now,
     updatedAt: now,
   };
+}
+
+function normalizeReadingNote(note) {
+  const normalized = {
+    ...newReadingNote(),
+    ...(note && typeof note === "object" ? note : {}),
+  };
+  normalized.date = normalized.date || activeDate;
+  normalized.source = normalized.source || normalized.url || "";
+  normalized.state = normalized.state || normalized.status || "未読";
+  normalized.title = normalized.title || "";
+  normalized.memo = normalized.memo || "";
+  if (!normalized.createdAt) normalized.createdAt = normalized.updatedAt || new Date().toISOString();
+  if (!normalized.updatedAt) normalized.updatedAt = normalized.createdAt;
+  return normalized;
 }
 
 function blankLearningAsset() {
@@ -1227,7 +1245,7 @@ function loadPersistentMemos() {
 function loadReadingNotes() {
   try {
     const saved = JSON.parse(localStorage.getItem(READING_NOTES_STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
+    return Array.isArray(saved) ? saved.map(normalizeReadingNote) : [];
   } catch {
     return [];
   }
@@ -2418,6 +2436,9 @@ function renderPersistentMemos({ focusId } = {}) {
 
 function readingNoteSearchText(note) {
   return [
+    note.date,
+    note.source,
+    note.state,
     note.title,
     note.url,
     note.learning,
@@ -2457,20 +2478,23 @@ function autoResizeReadingNoteTextareas() {
 
 function readReadingNoteForm() {
   return {
+    date: $("#readingNoteDate")?.value || activeDate,
+    source: $("#readingNoteSource")?.value.trim() || "",
     title: $("#readingNoteTitle")?.value.trim() || "",
-    url: $("#readingNoteUrl")?.value.trim() || "",
-    learning: $("#readingNoteLearning")?.value.trim() || "",
-    use: $("#readingNoteUse")?.value.trim() || "",
+    state: $("#readingNoteState")?.value || "未読",
     memo: $("#readingNoteMemo")?.value.trim() || "",
   };
 }
 
 function fillReadingNoteForm(note) {
-  $("#readingNoteTitle").value = note?.title || "";
-  $("#readingNoteUrl").value = note?.url || "";
-  $("#readingNoteLearning").value = note?.learning || "";
-  $("#readingNoteUse").value = note?.use || "";
-  $("#readingNoteMemo").value = note?.memo || "";
+  const normalized = normalizeReadingNote(note || newReadingNote());
+  $("#readingNoteDate").value = normalized.date || activeDate;
+  $("#readingNoteSource").value = normalized.source || "";
+  $("#readingNoteTitle").value = normalized.title || "";
+  $("#readingNoteState").value = normalized.state || "未読";
+  $("#readingNoteMemo").value = normalized.memo || [normalized.learning, normalized.use && `活かし方: ${normalized.use}`]
+    .filter(Boolean)
+    .join("\n\n");
   autoResizeReadingNoteTextareas();
 }
 
@@ -2479,14 +2503,16 @@ function openReadingNoteForm(note = null) {
   if (!form) return;
   editingReadingNoteId = note?.id || "";
   form.hidden = false;
-  $("#readingNoteFormTitle").textContent = note ? "学びメモを編集" : "新しい学びメモ";
+  $("#readingNoteFormTitle").textContent = note ? "読書メモを編集" : "新しい読書メモ";
   $("#deleteReadingNote").hidden = !note;
+  const saveButton = $("#saveReadingNote");
+  if (saveButton) saveButton.textContent = note ? "更新する" : "追加する";
   const status = $("#readingNoteStatus");
-  if (status) status.textContent = note ? "編集できます。" : "学び・気づきを書くと保存できます。";
+  if (status) status.textContent = note ? "編集できます。" : "タイトルかメモを書くと保存できます。";
   fillReadingNoteForm(note || newReadingNote());
   renderReadingNotes();
   requestAnimationFrame(() => {
-    $("#readingNoteLearning")?.focus();
+    $("#readingNoteTitle")?.focus();
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
@@ -2497,6 +2523,8 @@ function closeReadingNoteForm() {
   editingReadingNoteId = "";
   form.hidden = true;
   fillReadingNoteForm(newReadingNote());
+  const saveButton = $("#saveReadingNote");
+  if (saveButton) saveButton.textContent = "追加する";
   renderReadingNotes();
 }
 
@@ -2504,9 +2532,9 @@ function saveReadingNoteFromForm(event) {
   event?.preventDefault();
   const values = readReadingNoteForm();
   const status = $("#readingNoteStatus");
-  if (!values.learning) {
-    if (status) status.textContent = "学び・気づきは必須です。";
-    $("#readingNoteLearning")?.focus();
+  if (!values.title && !values.memo) {
+    if (status) status.textContent = "タイトルかメモを書いてください。";
+    $("#readingNoteTitle")?.focus();
     return;
   }
   const now = new Date().toISOString();
@@ -2521,13 +2549,14 @@ function saveReadingNoteFromForm(event) {
       updatedAt: now,
     });
   }
+  readingNotes = readingNotes.map(normalizeReadingNote);
   saveReadingNotes();
   closeReadingNoteForm();
 }
 
 function deleteEditingReadingNote() {
   if (!editingReadingNoteId) return;
-  if (!confirm("この学びメモを削除しますか？")) return;
+  if (!confirm("この読書メモを削除しますか？")) return;
   readingNotes = readingNotes.filter((note) => note.id !== editingReadingNoteId);
   saveReadingNotes();
   closeReadingNoteForm();
@@ -2548,8 +2577,8 @@ function renderReadingNotes() {
     const empty = document.createElement("p");
     empty.className = "empty-note";
     empty.textContent = normalizeLaterText(readingNoteSearchQuery)
-      ? "検索に一致する学びメモはありません。"
-      : "読書・記事の学びメモはまだありません。";
+      ? "検索に一致する読書メモはありません。"
+      : "読書メモはまだありません。";
     target.append(empty);
     return;
   }
@@ -2560,24 +2589,21 @@ function renderReadingNotes() {
 
     const meta = document.createElement("div");
     meta.className = "reading-note-card-meta";
+    const date = document.createElement("span");
+    date.textContent = note.date || "";
+    const source = document.createElement("span");
+    source.textContent = note.source ? `インプット元: ${note.source}` : "インプット元未入力";
+    const state = document.createElement("span");
+    state.textContent = note.state || "未読";
     const time = document.createElement("span");
     time.textContent = note.updatedAt ? `更新 ${formatReadingNoteTime(note.updatedAt)}` : "";
-    const url = document.createElement("a");
-    url.href = note.url || "#";
-    url.target = "_blank";
-    url.rel = "noreferrer";
-    url.textContent = note.url ? "記事を開く" : "URLなし";
-    url.className = note.url ? "" : "disabled";
-    meta.append(time, url);
+    meta.append(date, source, state, time);
 
     const title = document.createElement("h3");
-    title.textContent = note.title || "タイトル未入力の記事メモ";
-    const learning = document.createElement("p");
-    learning.className = "reading-note-card-learning";
-    learning.textContent = note.learning || "";
-    const use = document.createElement("p");
-    use.className = "reading-note-card-use";
-    use.textContent = note.use ? `活かし方: ${note.use}` : "";
+    title.textContent = note.title || "タイトル未入力の読書メモ";
+    const memo = document.createElement("p");
+    memo.className = "reading-note-card-memo";
+    memo.textContent = note.memo || note.learning || "";
 
     const actions = document.createElement("div");
     actions.className = "reading-note-card-actions";
@@ -2593,15 +2619,14 @@ function renderReadingNotes() {
 
     edit.addEventListener("click", () => openReadingNoteForm(note));
     remove.addEventListener("click", () => {
-      if (!confirm("この学びメモを削除しますか？")) return;
+      if (!confirm("この読書メモを削除しますか？")) return;
       readingNotes = readingNotes.filter((candidate) => candidate.id !== note.id);
       saveReadingNotes();
       if (editingReadingNoteId === note.id) closeReadingNoteForm();
       renderReadingNotes();
     });
 
-    article.append(meta, title, learning);
-    if (note.use) article.append(use);
+    article.append(meta, title, memo);
     article.append(actions);
     target.append(article);
   });
@@ -11957,6 +11982,7 @@ function showPageEntry(entryName = "") {
   const xPagePanel = $("#xPageV1");
   const wordpressPagePanel = $("#wordpressPageV1");
   const seedPagePanel = $("#publishing-seeds");
+  const readingPagePanel = $("#reading-notes");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
@@ -11964,6 +11990,7 @@ function showPageEntry(entryName = "") {
   const isXPage = entryName === "X";
   const isWordPressPage = entryName === "WordPress";
   const isSeedPage = entryName === "Seed";
+  const isReadingPage = entryName === "読書";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -11972,7 +11999,8 @@ function showPageEntry(entryName = "") {
   if (xPagePanel) xPagePanel.hidden = !isXPage;
   if (wordpressPagePanel) wordpressPagePanel.hidden = !isWordPressPage;
   if (seedPagePanel && !isSeedPage) seedPagePanel.hidden = true;
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || !entryName;
+  if (readingPagePanel) readingPagePanel.hidden = !isReadingPage;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
@@ -11982,6 +12010,7 @@ function showPageEntry(entryName = "") {
     setPublishingSeedActiveView("seed");
     renderPublishingSeeds();
   }
+  if (isReadingPage) renderReadingNotes();
 }
 
 function bindEvents() {

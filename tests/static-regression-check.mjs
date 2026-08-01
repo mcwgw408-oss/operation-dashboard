@@ -456,7 +456,7 @@ const requiredOrders = new Map([
   [".dashboard .publishing-seeds-panel", "22"],
   [".dashboard .x-experiment-panel", "65"],
   [".dashboard .learning-asset-panel", "66"],
-  [".dashboard .reading-notes-panel", "67"],
+  [".dashboard .reading-notes-panel", "23"],
   [".dashboard .operation-experiment-panel", "68"],
   [".dashboard .dashboard-health-input-panel", "69"],
   [".dashboard .dashboard-memory-input-panel", "70"],

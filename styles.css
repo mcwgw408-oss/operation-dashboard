@@ -4845,6 +4845,10 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.reading-notes-panel[hidden] {
+  display: none;
+}
+
 .reading-notes-heading {
   align-items: flex-start;
 }
@@ -4986,7 +4990,7 @@ textarea {
   font-size: 15px;
 }
 
-.reading-note-card-learning {
+.reading-note-card-memo {
   display: -webkit-box;
   color: var(--text);
   font-size: 14px;
@@ -5647,7 +5651,7 @@ button.launch-card {
 }
 
 .dashboard .reading-notes-panel {
-  order: 67;
+  order: 23;
 }
 
 .dashboard .operation-experiment-panel {
