@@ -513,6 +513,8 @@ function blankPublishingSeed() {
     seedCandidateId: "",
     candidateIds: [],
     articleExperimentId: "",
+    used: false,
+    usedAt: "",
     createdAt: now,
     updatedAt: now,
   };
@@ -552,6 +554,9 @@ function normalizePublishingSeed(raw) {
     source.seedCandidateId,
   ].filter(Boolean).map(String))];
   seed.status = PUBLISHING_SEED_STATUSES.includes(source.status) ? source.status : "種";
+  seed.used = Boolean(source.used);
+  seed.usedAt = typeof source.usedAt === "string" ? source.usedAt : "";
+  if (seed.used && !seed.usedAt) seed.usedAt = seed.updatedAt || seed.createdAt || base.createdAt;
   if (!seed.savedDate) seed.savedDate = activeDate;
   if (!seed.createdAt) seed.createdAt = seed.updatedAt || base.createdAt;
   if (!seed.updatedAt) seed.updatedAt = seed.createdAt;
@@ -4662,6 +4667,16 @@ function setPublishingSeedStatus(seed, status) {
   renderPublishingSeeds();
 }
 
+function setPublishingSeedUsed(seed, used) {
+  if (!seed) return;
+  const now = new Date().toISOString();
+  seed.used = Boolean(used);
+  seed.usedAt = seed.used ? now : "";
+  seed.updatedAt = now;
+  savePublishingSeeds();
+  renderPublishingSeeds();
+}
+
 function convertPublishingSeedToExperiment(seed) {
   const now = new Date().toISOString();
   const title = seed.title || publishingSeedExcerpt(seed.personalTake || seed.originalTheme, 42) || "Seedsからの記事化";
@@ -4718,6 +4733,10 @@ function mergePublishingSeeds(targetSeed, sourceSeedId) {
   targetSeed.personalTake = [targetSeed.personalTake, sourceSeed.personalTake].filter(Boolean).join("\n");
   targetSeed.tags = [...new Set([...publishingSeedTags(targetSeed.tags), ...publishingSeedTags(sourceSeed.tags)])].join(", ");
   targetSeed.candidateIds = [...new Set([...(targetSeed.candidateIds || []), ...(sourceSeed.candidateIds || []), sourceSeed.seedCandidateId].filter(Boolean))];
+  if (sourceSeed.used && !targetSeed.used) {
+    targetSeed.used = true;
+    targetSeed.usedAt = sourceSeed.usedAt || new Date().toISOString();
+  }
   publishingSeedCandidates.forEach((candidate) => {
     if (!candidate.seedIds?.includes(sourceSeed.id)) return;
     candidate.seedIds = [...new Set(candidate.seedIds.map((id) => id === sourceSeed.id ? targetSeed.id : id))];
@@ -4821,7 +4840,16 @@ function createPublishingSeedCard(seed) {
   });
   status.value = seed.status;
   status.addEventListener("change", (event) => setPublishingSeedStatus(seed, event.target.value));
-  header.append(titleBlock, status);
+  const usedLabel = document.createElement("label");
+  usedLabel.className = "publishing-seed-used-check";
+  const usedCheck = document.createElement("input");
+  usedCheck.type = "checkbox";
+  usedCheck.checked = Boolean(seed.used);
+  usedCheck.addEventListener("change", (event) => setPublishingSeedUsed(seed, event.target.checked));
+  const usedText = document.createElement("span");
+  usedText.textContent = seed.used ? `使用済み${seed.usedAt ? ` ${formatSavedAt(seed.usedAt)}` : ""}` : "使用した";
+  usedLabel.append(usedCheck, usedText);
+  header.append(titleBlock, usedLabel, status);
 
   const summary = document.createElement("p");
   summary.className = "publishing-seed-summary";

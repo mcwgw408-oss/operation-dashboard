@@ -4188,6 +4188,20 @@ textarea {
   font-size: 12px;
 }
 
+.publishing-seed-used-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.publishing-seed-used-check input {
+  width: auto;
+}
+
 .publishing-seed-card-header select {
   width: min(120px, 100%);
 }
