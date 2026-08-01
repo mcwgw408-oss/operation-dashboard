@@ -37,6 +37,7 @@ const PUBLISHING_SEED_CANDIDATES_STORAGE_KEY = "operation-dashboard-publishing-s
 const CUSTOM_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-custom-daily-tasks-v1";
 const DAILY_TASK_ORDER_STORAGE_KEY = "operation-dashboard-daily-task-order-v1";
 const DELETED_DAILY_TASKS_STORAGE_KEY = "operation-dashboard-deleted-daily-tasks-v1";
+const AFTER_TEN_MODE_OPTIONS_STORAGE_KEY = "operation-dashboard-after-ten-mode-options-v1";
 
 // ===== さくらスナップショット（Phase 1）の定数 =====
 const SNAPSHOT_FORMAT = "sakura-snapshot";
@@ -75,6 +76,7 @@ const defaultDailyTasks = [
   "おはスタック投稿",
   "チャット投稿",
 ];
+const DEFAULT_AFTER_TEN_MODE_OPTIONS = ["Seed", "読書", "Brain", "生活", "発信"];
 const obsoleteDailyTasks = [
   "ボイスメッセージ（翌日公開分）",
 ];
@@ -162,6 +164,7 @@ let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
 saveCustomDailyTasks();
+let customAfterTenModeOptions = loadCustomAfterTenModeOptions();
 let deletedDailyTasks = loadDeletedDailyTasks();
 saveDeletedDailyTasks();
 let dailyTaskOrder = loadDailyTaskOrder();
@@ -729,6 +732,12 @@ function configuredDailyTaskTitles() {
   return [...defaultDailyTasks, ...customDailyTasks].filter((title) => !deletedTitles.has(title));
 }
 
+function afterTenModeOptions() {
+  return [...new Set([...DEFAULT_AFTER_TEN_MODE_OPTIONS, ...customAfterTenModeOptions]
+    .map(normalizeAfterTenModeOption)
+    .filter(Boolean))];
+}
+
 function dailyTaskTitlesFromDay(day) {
   return asArray(day?.dailyTasks)
     .map((item) => String(item?.title || "").trim())
@@ -1218,6 +1227,23 @@ function loadCustomDailyTasks() {
       .map((item) => String(item?.title || "").trim())
       .filter((title) => title && !builtInTitles.has(title))))];
   return migrated;
+}
+
+function normalizeAfterTenModeOption(value) {
+  return String(value || "").trim();
+}
+
+function loadCustomAfterTenModeOptions() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(AFTER_TEN_MODE_OPTIONS_STORAGE_KEY));
+    if (Array.isArray(saved)) {
+      return [...new Set(saved.map(normalizeAfterTenModeOption).filter(Boolean))]
+        .filter((option) => !DEFAULT_AFTER_TEN_MODE_OPTIONS.includes(option));
+    }
+  } catch {
+    // Ignore malformed saved data.
+  }
+  return [];
 }
 
 function loadDeletedDailyTasks() {
@@ -1831,6 +1857,12 @@ function savePublishingSeedCandidates() {
 
 function saveCustomDailyTasks() {
   localStorage.setItem(CUSTOM_DAILY_TASKS_STORAGE_KEY, JSON.stringify(customDailyTasks));
+}
+
+function saveCustomAfterTenModeOptions() {
+  customAfterTenModeOptions = [...new Set(customAfterTenModeOptions.map(normalizeAfterTenModeOption).filter(Boolean))]
+    .filter((option) => !DEFAULT_AFTER_TEN_MODE_OPTIONS.includes(option));
+  localStorage.setItem(AFTER_TEN_MODE_OPTIONS_STORAGE_KEY, JSON.stringify(customAfterTenModeOptions));
 }
 
 function saveDeletedDailyTasks() {
@@ -8877,9 +8909,19 @@ function renderHomeSleepSummary() {
 
 function renderAfterTenMode(day = getDay()) {
   const selectedModes = new Set(asArray(day.afterTenMode).map(String));
-  document.querySelectorAll("#afterTenModeOptions input[type='checkbox']").forEach((input) => {
-    input.checked = selectedModes.has(input.value);
-  });
+  const optionsTarget = $("#afterTenModeOptions");
+  if (optionsTarget) {
+    optionsTarget.replaceChildren();
+    afterTenModeOptions().forEach((option) => {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = option;
+      input.checked = selectedModes.has(option);
+      label.append(input, document.createTextNode(option));
+      optionsTarget.append(label);
+    });
+  }
   const status = $("#afterTenModeStatus");
   if (!status) return;
   const selectedLabels = [...selectedModes].filter(Boolean);
@@ -12225,6 +12267,27 @@ function bindEvents() {
     saveStore();
     renderAfterTenMode(day);
   });
+  $("#afterTenModeAddForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = $("#afterTenModeNewOption");
+    const value = normalizeAfterTenModeOption(input?.value);
+    const status = $("#afterTenModeStatus");
+    if (!value) {
+      if (status) status.textContent = "追加する項目名を入力してください。";
+      input?.focus();
+      return;
+    }
+    if (afterTenModeOptions().includes(value)) {
+      if (status) status.textContent = `「${value}」はすでにあります。`;
+      input?.focus();
+      return;
+    }
+    customAfterTenModeOptions.push(value);
+    saveCustomAfterTenModeOptions();
+    if (input) input.value = "";
+    renderAfterTenMode(getDay());
+    if (status) status.textContent = `「${value}」を追加しました。必要ならチェックしてください。`;
+  });
   document.querySelectorAll("[data-page-entry]").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelectorAll("[data-page-entry]").forEach((entry) => {
@@ -12787,6 +12850,7 @@ const BACKUP_KEYS = [
   PUBLISHING_SEED_CANDIDATES_STORAGE_KEY,
   CUSTOM_DAILY_TASKS_STORAGE_KEY,
   DAILY_TASK_ORDER_STORAGE_KEY,
+  AFTER_TEN_MODE_OPTIONS_STORAGE_KEY,
   LATER_STORAGE_KEY,
   PERSISTENT_MEMO_STORAGE_KEY,
   READING_NOTES_STORAGE_KEY,
@@ -12901,6 +12965,7 @@ function createBackup() {
   data[PUBLISHING_SEED_CANDIDATES_STORAGE_KEY] = readStoredJson(PUBLISHING_SEED_CANDIDATES_STORAGE_KEY, []);
   data[CUSTOM_DAILY_TASKS_STORAGE_KEY] = readStoredJson(CUSTOM_DAILY_TASKS_STORAGE_KEY, []);
   data[DAILY_TASK_ORDER_STORAGE_KEY] = readStoredJson(DAILY_TASK_ORDER_STORAGE_KEY, []);
+  data[AFTER_TEN_MODE_OPTIONS_STORAGE_KEY] = readStoredJson(AFTER_TEN_MODE_OPTIONS_STORAGE_KEY, []);
   data[LATER_STORAGE_KEY] = readStoredJson(LATER_STORAGE_KEY, []);
   data[PERSISTENT_MEMO_STORAGE_KEY] = readStoredJson(PERSISTENT_MEMO_STORAGE_KEY, []);
   data[READING_NOTES_STORAGE_KEY] = readStoredJson(READING_NOTES_STORAGE_KEY, []);
