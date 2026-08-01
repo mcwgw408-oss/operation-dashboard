@@ -382,6 +382,9 @@ function defaultXPageV1() {
     todayPost3: "",
     todayTasks: "",
     stockPostIdeas: "",
+    stockPostIdea1: "",
+    stockPostIdea2: "",
+    stockPostIdea3: "",
   };
 }
 
@@ -976,6 +979,10 @@ function ensureXPageV1(day) {
       changed = true;
     }
   });
+  if (day.xPageV1.stockPostIdeas && !day.xPageV1.stockPostIdea1) {
+    day.xPageV1.stockPostIdea1 = day.xPageV1.stockPostIdeas;
+    changed = true;
+  }
   if (!("xPageV1UpdatedAt" in day)) {
     day.xPageV1UpdatedAt = "";
     changed = true;
@@ -3176,7 +3183,9 @@ const xPageV1Fields = {
   todayPost2: "#xPageTodayPost2",
   todayPost3: "#xPageTodayPost3",
   todayTasks: "#xPageTodayTasks",
-  stockPostIdeas: "#xPageStockPostIdeas",
+  stockPostIdea1: "#xPageStockPostIdea1",
+  stockPostIdea2: "#xPageStockPostIdea2",
+  stockPostIdea3: "#xPageStockPostIdea3",
 };
 
 const wordpressPageV1Fields = {
