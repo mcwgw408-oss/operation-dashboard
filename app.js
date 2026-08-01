@@ -365,6 +365,26 @@ function defaultNotePage(extraStockKey = "stockExtra") {
   };
 }
 
+function defaultXPageV1() {
+  return {
+    yesterdayPost1: "",
+    yesterdayPost2: "",
+    yesterdayPost3: "",
+    impressions: "",
+    likes: "",
+    engagements: "",
+    detailClicks: "",
+    profileAccesses: "",
+    followers: "",
+    insight: "",
+    todayPost1: "",
+    todayPost2: "",
+    todayPost3: "",
+    todayTasks: "",
+    stockPostIdeas: "",
+  };
+}
+
 function defaultXAnalysis(date = activeDate) {
   return {
     date,
@@ -774,6 +794,8 @@ function blankDay() {
     noteAiRecoveryUpdatedAt: "",
     noteSubstackBeginner: defaultNotePage("commonQuestions"),
     noteSubstackBeginnerUpdatedAt: "",
+    xPageV1: defaultXPageV1(),
+    xPageV1UpdatedAt: "",
     xAnalysis: defaultXAnalysis(),
     xAnalysisUpdatedAt: "",
     dailyInput: "",
@@ -917,6 +939,26 @@ function ensureNotePage(day, key, updatedAtKey, extraStockKey) {
   });
   if (!(updatedAtKey in day)) {
     day[updatedAtKey] = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureXPageV1(day) {
+  let changed = false;
+  if (!day.xPageV1 || typeof day.xPageV1 !== "object" || Array.isArray(day.xPageV1)) {
+    day.xPageV1 = defaultXPageV1();
+    changed = true;
+  }
+  const defaults = defaultXPageV1();
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.xPageV1)) {
+      day.xPageV1[key] = value;
+      changed = true;
+    }
+  });
+  if (!("xPageV1UpdatedAt" in day)) {
+    day.xPageV1UpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1811,6 +1853,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureNotePage(store[activeDate], "noteSubstackBeginner", "noteSubstackBeginnerUpdatedAt", "commonQuestions")) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureXPageV1(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureXAnalysis(store[activeDate])) {
@@ -3074,6 +3119,24 @@ const notePageConfigs = {
   },
 };
 
+const xPageV1Fields = {
+  yesterdayPost1: "#xPageYesterdayPost1",
+  yesterdayPost2: "#xPageYesterdayPost2",
+  yesterdayPost3: "#xPageYesterdayPost3",
+  impressions: "#xPageImpressions",
+  likes: "#xPageLikes",
+  engagements: "#xPageEngagements",
+  detailClicks: "#xPageDetailClicks",
+  profileAccesses: "#xPageProfileAccesses",
+  followers: "#xPageFollowers",
+  insight: "#xPageInsight",
+  todayPost1: "#xPageTodayPost1",
+  todayPost2: "#xPageTodayPost2",
+  todayPost3: "#xPageTodayPost3",
+  todayTasks: "#xPageTodayTasks",
+  stockPostIdeas: "#xPageStockPostIdeas",
+};
+
 const PUBLISHING_OPS_RECENT_DAYS = 7;
 const publishingOpsCountFields = [
   ["notesCount", "ノート投稿数"],
@@ -3278,6 +3341,63 @@ function saveNotePageFromForm(config) {
     config,
     day,
     `${config.title}を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day[config.updatedAtKey])}`,
+  );
+  renderBrainPrototype();
+}
+
+function readXPageV1Form() {
+  return Object.fromEntries(Object.entries(xPageV1Fields).map(([key, selector]) => {
+    const field = $(selector);
+    return [key, field ? field.value : defaultXPageV1()[key]];
+  }));
+}
+
+function hasXPageV1Record(rawXPage, xPage) {
+  if (!rawXPage || typeof rawXPage !== "object") return false;
+  return Object.values(xPage).some((value) => Boolean(String(value || "").trim()));
+}
+
+function renderXPageV1SaveState(day, confirmation = "") {
+  const xPage = { ...defaultXPageV1(), ...(day?.xPageV1 || {}) };
+  const saved = Boolean(day?.xPageV1UpdatedAt) || hasXPageV1Record(day?.xPageV1, xPage);
+  const button = $("#saveXPageV1");
+  const status = $("#xPageV1Status");
+  const savedAt = formatSavedAt(day?.xPageV1UpdatedAt);
+  if (button) button.textContent = saved ? "X Ver.1を更新する" : "X Ver.1を保存する";
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = "今日のX Ver.1はまだ保存されていません。";
+  }
+}
+
+function renderXPageV1() {
+  const day = getDay();
+  const xPage = { ...defaultXPageV1(), ...(day.xPageV1 || {}) };
+  Object.entries(xPageV1Fields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (field && field.value !== String(xPage[key] || "")) {
+      field.value = xPage[key] || "";
+    }
+  });
+  renderXPageV1SaveState(day);
+}
+
+function saveXPageV1FromForm() {
+  const day = getDay();
+  const existing = { ...defaultXPageV1(), ...(day.xPageV1 || {}) };
+  const wasSaved = Boolean(day.xPageV1UpdatedAt) || hasXPageV1Record(day.xPageV1, existing);
+  day.xPageV1 = { ...defaultXPageV1(), ...readXPageV1Form() };
+  day.xPageV1UpdatedAt = new Date().toISOString();
+  saveStore();
+  renderXPageV1SaveState(
+    day,
+    `X Ver.1を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.xPageV1UpdatedAt)}`,
   );
   renderBrainPrototype();
 }
@@ -11595,6 +11715,7 @@ function renderAll() {
   renderPublishingOps();
   renderSubstack();
   renderNotePages();
+  renderXPageV1();
   renderXAnalysis();
   renderCodexDailyLog();
   setPublishingSeedActiveView(publishingSeedActiveView);
@@ -11678,19 +11799,23 @@ function scrollBackToTop() {
 function showPageEntry(entryName = "") {
   const substackPanel = $("#substackPage");
   const noteConfig = notePageConfigs[entryName];
+  const xPagePanel = $("#xPageV1");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
   const isNote = Boolean(noteConfig);
+  const isXPage = entryName === "X";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
     if (panel) panel.hidden = config !== noteConfig;
   });
-  if (placeholder) placeholder.hidden = isSubstack || isNote || !entryName;
+  if (xPagePanel) xPagePanel.hidden = !isXPage;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
+  if (isXPage) renderXPageV1();
 }
 
 function bindEvents() {
@@ -12134,6 +12259,17 @@ function bindEvents() {
       field.addEventListener("input", markDirty);
       field.addEventListener("change", markDirty);
     });
+  });
+  $("#saveXPageV1")?.addEventListener("click", saveXPageV1FromForm);
+  Object.values(xPageV1Fields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    const markDirty = () => {
+      const status = $("#xPageV1Status");
+      if (status) status.textContent = "未保存の変更があります。";
+    };
+    field.addEventListener("input", markDirty);
+    field.addEventListener("change", markDirty);
   });
   $("#saveXAnalysis")?.addEventListener("click", saveXAnalysisFromForm);
   Object.values(xAnalysisFields).forEach((selector) => {

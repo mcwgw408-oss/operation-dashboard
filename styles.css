@@ -5723,6 +5723,10 @@ button.launch-card {
   order: 19;
 }
 
+.dashboard #xPageV1 {
+  order: 20;
+}
+
 .dashboard > .panel:has(#projects) {
   order: 83;
 }
