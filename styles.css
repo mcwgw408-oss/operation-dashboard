@@ -5727,6 +5727,10 @@ button.launch-card {
   order: 20;
 }
 
+.dashboard #wordpressPageV1 {
+  order: 21;
+}
+
 .dashboard > .panel:has(#projects) {
   order: 83;
 }

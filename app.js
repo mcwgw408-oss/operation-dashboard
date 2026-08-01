@@ -385,6 +385,23 @@ function defaultXPageV1() {
   };
 }
 
+function defaultWordPressPageV1() {
+  return {
+    articleTitle: "",
+    articlePublished: false,
+    insight: "",
+    todayNewArticle: "",
+    todayWritingArticle: "",
+    todayFixedPage: "",
+    todayPageProgress: "",
+    todayTasks: "",
+    stockNewArticle: "",
+    stockArticleIdeas: "",
+    stockFixedPage: "",
+    stockImprovementIdeas: "",
+  };
+}
+
 function defaultXAnalysis(date = activeDate) {
   return {
     date,
@@ -796,6 +813,8 @@ function blankDay() {
     noteSubstackBeginnerUpdatedAt: "",
     xPageV1: defaultXPageV1(),
     xPageV1UpdatedAt: "",
+    wordpressPageV1: defaultWordPressPageV1(),
+    wordpressPageV1UpdatedAt: "",
     xAnalysis: defaultXAnalysis(),
     xAnalysisUpdatedAt: "",
     dailyInput: "",
@@ -959,6 +978,26 @@ function ensureXPageV1(day) {
   });
   if (!("xPageV1UpdatedAt" in day)) {
     day.xPageV1UpdatedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureWordPressPageV1(day) {
+  let changed = false;
+  if (!day.wordpressPageV1 || typeof day.wordpressPageV1 !== "object" || Array.isArray(day.wordpressPageV1)) {
+    day.wordpressPageV1 = defaultWordPressPageV1();
+    changed = true;
+  }
+  const defaults = defaultWordPressPageV1();
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.wordpressPageV1)) {
+      day.wordpressPageV1[key] = value;
+      changed = true;
+    }
+  });
+  if (!("wordpressPageV1UpdatedAt" in day)) {
+    day.wordpressPageV1UpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -1856,6 +1895,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureXPageV1(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureWordPressPageV1(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureXAnalysis(store[activeDate])) {
@@ -3137,6 +3179,21 @@ const xPageV1Fields = {
   stockPostIdeas: "#xPageStockPostIdeas",
 };
 
+const wordpressPageV1Fields = {
+  articleTitle: "#wordpressArticleTitle",
+  articlePublished: "#wordpressArticlePublished",
+  insight: "#wordpressInsight",
+  todayNewArticle: "#wordpressTodayNewArticle",
+  todayWritingArticle: "#wordpressTodayWritingArticle",
+  todayFixedPage: "#wordpressTodayFixedPage",
+  todayPageProgress: "#wordpressTodayPageProgress",
+  todayTasks: "#wordpressTodayTasks",
+  stockNewArticle: "#wordpressStockNewArticle",
+  stockArticleIdeas: "#wordpressStockArticleIdeas",
+  stockFixedPage: "#wordpressStockFixedPage",
+  stockImprovementIdeas: "#wordpressStockImprovementIdeas",
+};
+
 const PUBLISHING_OPS_RECENT_DAYS = 7;
 const publishingOpsCountFields = [
   ["notesCount", "ノート投稿数"],
@@ -3398,6 +3455,68 @@ function saveXPageV1FromForm() {
   renderXPageV1SaveState(
     day,
     `X Ver.1を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.xPageV1UpdatedAt)}`,
+  );
+  renderBrainPrototype();
+}
+
+function readWordPressPageV1Form() {
+  return Object.fromEntries(Object.entries(wordpressPageV1Fields).map(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return [key, defaultWordPressPageV1()[key]];
+    return [key, field.type === "checkbox" ? field.checked : field.value];
+  }));
+}
+
+function hasWordPressPageV1Record(rawWordPressPage, wordpressPage) {
+  if (!rawWordPressPage || typeof rawWordPressPage !== "object") return false;
+  return Object.values(wordpressPage).some((value) =>
+    typeof value === "boolean" ? value : Boolean(String(value || "").trim()));
+}
+
+function renderWordPressPageV1SaveState(day, confirmation = "") {
+  const wordpressPage = { ...defaultWordPressPageV1(), ...(day?.wordpressPageV1 || {}) };
+  const saved = Boolean(day?.wordpressPageV1UpdatedAt) || hasWordPressPageV1Record(day?.wordpressPageV1, wordpressPage);
+  const button = $("#saveWordPressPageV1");
+  const status = $("#wordpressPageV1Status");
+  const savedAt = formatSavedAt(day?.wordpressPageV1UpdatedAt);
+  if (button) button.textContent = saved ? "WordPress Ver.1を更新する" : "WordPress Ver.1を保存する";
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = "今日のWordPress Ver.1はまだ保存されていません。";
+  }
+}
+
+function renderWordPressPageV1() {
+  const day = getDay();
+  const wordpressPage = { ...defaultWordPressPageV1(), ...(day.wordpressPageV1 || {}) };
+  Object.entries(wordpressPageV1Fields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return;
+    if (field.type === "checkbox") {
+      field.checked = Boolean(wordpressPage[key]);
+    } else if (field.value !== String(wordpressPage[key] || "")) {
+      field.value = wordpressPage[key] || "";
+    }
+  });
+  renderWordPressPageV1SaveState(day);
+}
+
+function saveWordPressPageV1FromForm() {
+  const day = getDay();
+  const existing = { ...defaultWordPressPageV1(), ...(day.wordpressPageV1 || {}) };
+  const wasSaved = Boolean(day.wordpressPageV1UpdatedAt) || hasWordPressPageV1Record(day.wordpressPageV1, existing);
+  day.wordpressPageV1 = { ...defaultWordPressPageV1(), ...readWordPressPageV1Form() };
+  day.wordpressPageV1UpdatedAt = new Date().toISOString();
+  saveStore();
+  renderWordPressPageV1SaveState(
+    day,
+    `WordPress Ver.1を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.wordpressPageV1UpdatedAt)}`,
   );
   renderBrainPrototype();
 }
@@ -11716,6 +11835,7 @@ function renderAll() {
   renderSubstack();
   renderNotePages();
   renderXPageV1();
+  renderWordPressPageV1();
   renderXAnalysis();
   renderCodexDailyLog();
   setPublishingSeedActiveView(publishingSeedActiveView);
@@ -11800,22 +11920,26 @@ function showPageEntry(entryName = "") {
   const substackPanel = $("#substackPage");
   const noteConfig = notePageConfigs[entryName];
   const xPagePanel = $("#xPageV1");
+  const wordpressPagePanel = $("#wordpressPageV1");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
   const isNote = Boolean(noteConfig);
   const isXPage = entryName === "X";
+  const isWordPressPage = entryName === "WordPress";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
     if (panel) panel.hidden = config !== noteConfig;
   });
   if (xPagePanel) xPagePanel.hidden = !isXPage;
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || !entryName;
+  if (wordpressPagePanel) wordpressPagePanel.hidden = !isWordPressPage;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
   if (isXPage) renderXPageV1();
+  if (isWordPressPage) renderWordPressPageV1();
 }
 
 function bindEvents() {
@@ -12266,6 +12390,17 @@ function bindEvents() {
     if (!field) return;
     const markDirty = () => {
       const status = $("#xPageV1Status");
+      if (status) status.textContent = "未保存の変更があります。";
+    };
+    field.addEventListener("input", markDirty);
+    field.addEventListener("change", markDirty);
+  });
+  $("#saveWordPressPageV1")?.addEventListener("click", saveWordPressPageV1FromForm);
+  Object.values(wordpressPageV1Fields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    const markDirty = () => {
+      const status = $("#wordpressPageV1Status");
       if (status) status.textContent = "未保存の変更があります。";
     };
     field.addEventListener("input", markDirty);
