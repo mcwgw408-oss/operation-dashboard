@@ -434,7 +434,7 @@ const requiredOrders = new Map([
   [".dashboard .brain-panel", "5"],
   [".dashboard .dashboard-proposal-heading", "6"],
   [".dashboard .welcome-home-panel", "7"],
-  [".dashboard .sleep-summary-panel", "12"],
+  [".dashboard .sleep-summary-panel", "7"],
   [".dashboard .capacity-check-section", "13"],
   [".dashboard .after-ten-mode-panel", "7"],
   [".dashboard .dashboard-task-panel", "8"],
