@@ -5661,11 +5661,11 @@ button.launch-card {
 }
 
 .dashboard .learning-asset-panel {
-  order: 66;
+  order: 23;
 }
 
 .dashboard .reading-notes-panel {
-  order: 23;
+  order: 66;
 }
 
 .dashboard .operation-experiment-panel {

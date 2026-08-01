@@ -840,7 +840,6 @@ const ARCHIVE_PAGE_SELECTORS = [
   ".publishing-seed-workbench-tabs",
   "#publishing-seed-candidates",
   "#publishing-experiment-lab",
-  "#learning-asset-flow",
   ".operation-experiment-panel",
   ".dashboard-health-input-panel",
   ".dashboard-memory-input-panel",
@@ -12041,6 +12040,7 @@ function showPageEntry(entryName = "") {
   const wordpressPagePanel = $("#wordpressPageV1");
   const seedPagePanel = $("#publishing-seeds");
   const readingPagePanel = $("#reading-notes");
+  const learningAssetPagePanel = $("#learning-asset-flow");
   const memoPagePanel = $("#memo-page");
   const archivePagePanel = $("#archivePage");
   const placeholder = $("#pageSwitchPlaceholder");
@@ -12061,7 +12061,8 @@ function showPageEntry(entryName = "") {
   if (xPagePanel) xPagePanel.hidden = !isXPage;
   if (wordpressPagePanel) wordpressPagePanel.hidden = !isWordPressPage;
   if (seedPagePanel && !isSeedPage) seedPagePanel.hidden = true;
-  if (readingPagePanel) readingPagePanel.hidden = !isReadingPage;
+  if (readingPagePanel) readingPagePanel.hidden = true;
+  if (learningAssetPagePanel) learningAssetPagePanel.hidden = !isReadingPage;
   if (memoPagePanel) memoPagePanel.hidden = !isMemoPage;
   if (archivePagePanel) archivePagePanel.hidden = !isArchivePage;
   setArchivePageVisible(isArchivePage);
@@ -12075,14 +12076,13 @@ function showPageEntry(entryName = "") {
     setPublishingSeedActiveView("seed");
     renderPublishingSeeds();
   }
-  if (isReadingPage) renderReadingNotes();
+  if (isReadingPage) renderLearningAssets();
   if (isMemoPage) renderPersistentMemos();
   if (isArchivePage) {
     renderPublishingOps();
     renderXAnalysis();
     renderPublishingSeedCandidates();
     renderXExperimentLogs();
-    renderLearningAssets();
     renderOperationExperiment();
     renderLaterItems();
     renderLearnings();
