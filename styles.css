@@ -5387,6 +5387,14 @@ button.launch-card {
   padding: 14px;
 }
 
+.note-page-panel .note-tall-block {
+  min-height: 280px;
+}
+
+.note-page-panel .note-tall-block textarea {
+  min-height: 140px;
+}
+
 .substack-page-block h3 {
   margin: 0;
   font-size: 15px;
