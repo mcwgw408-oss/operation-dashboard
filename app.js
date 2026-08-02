@@ -2234,6 +2234,39 @@ function formatEventScheduleLine(event) {
   ].filter(Boolean).join(" ");
 }
 
+function parseEventTimeMinutes(value) {
+  const source = String(value || "").trim();
+  if (!source) return Number.POSITIVE_INFINITY;
+  const normalized = source
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[：]/g, ":");
+  const clockMatch = normalized.match(/(\d{1,2})\s*[:時]\s*(\d{1,2})?/);
+  if (!clockMatch) return Number.POSITIVE_INFINITY;
+  let hour = Number(clockMatch[1]);
+  const minute = Number(clockMatch[2] || 0);
+  if (!Number.isFinite(hour) || hour < 0 || hour > 24 || !Number.isFinite(minute) || minute < 0 || minute > 59) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const hasPm = /午後|PM|pm|p\.m\./.test(normalized);
+  const hasAm = /午前|AM|am|a\.m\./.test(normalized);
+  if (hasPm && hour < 12) hour += 12;
+  if (hasAm && hour === 12) hour = 0;
+  if (hour === 24 && minute > 0) return Number.POSITIVE_INFINITY;
+  return hour * 60 + minute;
+}
+
+function sortTodayEvents(day = getDay()) {
+  day.todayEvents = asArray(day.todayEvents)
+    .map((event, index) => ({ event, index }))
+    .sort((left, right) => {
+      const leftTime = parseEventTimeMinutes(left.event?.time);
+      const rightTime = parseEventTimeMinutes(right.event?.time);
+      if (leftTime !== rightTime) return leftTime - rightTime;
+      return left.index - right.index;
+    })
+    .map(({ event }) => event);
+}
+
 function dateKeyToLocalDate(dateKey) {
   if (!dateKey) return null;
   const [year, month, day] = String(dateKey).split("-").map(Number);
@@ -2332,6 +2365,7 @@ function autoAddDueRecurringSchedules(dateKey = activeDate) {
         type: item.type,
         note: item.note,
       }));
+      sortTodayEvents(getDay());
       changed = true;
     }
     markRecurringAutoAddLogged(item, dateKey);
@@ -2347,6 +2381,7 @@ function addRecurringScheduleToToday(item) {
     type: item.type,
     note: item.note,
   }));
+  sortTodayEvents(getDay());
   saveStore();
   renderEventList();
   renderRecurringSchedule();
@@ -2358,6 +2393,7 @@ function renderEventList() {
   const target = $("#todayEvents");
   const template = $("#eventTemplate");
   if (!target || !template) return;
+  sortTodayEvents(day);
   target.replaceChildren();
   if (!day.todayEvents.length) {
     const empty = document.createElement("p");
@@ -2372,12 +2408,14 @@ function renderEventList() {
     const type = row.querySelector(".event-type");
     const title = row.querySelector(".event-title");
     const note = row.querySelector(".event-note");
-    const updateEvent = () => {
+    const updateEvent = ({ shouldSort = false } = {}) => {
       event.time = time.value.trim();
       event.type = type.value;
       event.title = title.value.trim();
       event.note = note.value.trim();
+      if (shouldSort) sortTodayEvents(day);
       saveStore();
+      if (shouldSort) renderEventList();
       renderRecurringSchedule();
       renderBrainPrototype();
     };
@@ -2386,8 +2424,8 @@ function renderEventList() {
     title.value = event.title || "";
     note.value = event.note || "";
     [time, type, title, note].forEach((field) => {
-      field.addEventListener("input", updateEvent);
-      field.addEventListener("change", updateEvent);
+      field.addEventListener("input", () => updateEvent());
+      field.addEventListener("change", () => updateEvent({ shouldSort: field === time }));
     });
     row.querySelector(".delete-button").addEventListener("click", () => {
       day.todayEvents = day.todayEvents.filter((candidate) => candidate.id !== event.id);
@@ -12521,6 +12559,7 @@ function bindEvents() {
       type: $("#eventType").value,
       note,
     }));
+    sortTodayEvents(getDay());
     $("#eventTitle").value = "";
     $("#eventTime").value = "";
     $("#eventNote").value = "";
