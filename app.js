@@ -2,6 +2,7 @@ const STORAGE_KEY = "operation-dashboard-v1";
 const LATER_STORAGE_KEY = "operation-dashboard-later-v1";
 const LATER_VIEW_STORAGE_KEY = "operation-dashboard-later-view-v1";
 const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
+const READING_QUEUE_STORAGE_KEY = "operation-dashboard-reading-queue-v1";
 const READING_NOTES_STORAGE_KEY = "operation-dashboard-reading-notes-v1";
 const LEARNING_ASSETS_STORAGE_KEY = "operation-dashboard-learning-assets-v1";
 const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
@@ -178,6 +179,7 @@ let laterSearchQuery = "";
 let laterVisibleLimit = LATER_INITIAL_DISPLAY_LIMIT;
 let persistentMemos = loadPersistentMemos();
 let persistentMemoSearchQuery = "";
+let readingQueue = [];
 let readingNotes = loadReadingNotes();
 let readingNoteSearchQuery = "";
 let editingReadingNoteId = "";
@@ -665,6 +667,116 @@ function normalizePersistentMemo(memo) {
   if (!normalized.updatedAt) normalized.updatedAt = normalized.createdAt;
   return normalized;
 }
+
+const READING_QUEUE_STATUSES = ["未読", "読み途中", "完読", "保留"];
+const READING_QUEUE_SOURCES = ["Unlimited", "Prime Reading", "購入済み", "サンプル", "その他"];
+const DEFAULT_READING_QUEUE = [
+  {
+    id: "marketing-research",
+    title: "マーケティングリサーチとデータ分析の基本",
+    author: "中野 崇",
+    source: "Unlimited",
+    status: "読み途中",
+    progress: 18,
+    memo: "最初に読む。リサーチの型を記事・note設計に転用する。",
+  },
+  {
+    id: "seo-intro",
+    title: "SEO対策・超入門2023",
+    author: "滝口健太郎",
+    source: "Prime Reading",
+    status: "未読",
+    progress: 0,
+    memo: "SEO記事の基礎確認用。",
+  },
+  {
+    id: "content-marketing",
+    title: "コンテンツマーケティングは設計が9割",
+    author: "竹田四郎",
+    source: "Unlimited",
+    status: "未読",
+    progress: 0,
+    memo: "発信全体の設計に使う。",
+  },
+  {
+    id: "x-note-kindle",
+    title: "X・note・Kindleの「点」を「線」に変える最強の導線",
+    author: "SAGOL",
+    source: "Unlimited",
+    status: "未読",
+    progress: 0,
+    memo: "note・Kindle・Xをつなぐ導線づくりの最優先候補。",
+  },
+  {
+    id: "ai-sns-marketing",
+    title: "AI×SNSマーケティング 活用大全",
+    author: "おだじゅん / やまちゃん",
+    source: "Unlimited",
+    status: "未読",
+    progress: 0,
+    memo: "ChatGPTを使ったSNS・note運用の材料にする。",
+  },
+  {
+    id: "simple-writing",
+    title: "伝わるシンプル文章術",
+    author: "飯間浩明",
+    source: "Prime Reading",
+    status: "未読",
+    progress: 0,
+    memo: "読みやすい文章の基礎固め。",
+  },
+  {
+    id: "writing-as-weapon",
+    title: "武器としての書く技術",
+    author: "イケダ ハヤト",
+    source: "Unlimited",
+    status: "未読",
+    progress: 0,
+    memo: "ブログ・noteの表現と構成の参考。",
+  },
+  {
+    id: "local-web-marketing",
+    title: "ローカルビジネスのためのWebマーケティングが基礎から学べる本",
+    author: "栃本 常幸",
+    source: "Unlimited",
+    status: "未読",
+    progress: 0,
+    memo: "地域向けの集客視点が必要なときに読む。",
+  },
+];
+
+function newReadingQueueBook() {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    title: "",
+    author: "",
+    source: "Unlimited",
+    status: "未読",
+    progress: 0,
+    memo: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function normalizeReadingQueueBook(book) {
+  const base = newReadingQueueBook();
+  const source = book && typeof book === "object" ? book : {};
+  const normalized = { ...base, ...source };
+  normalized.id = typeof source.id === "string" && source.id ? source.id : base.id;
+  normalized.title = typeof source.title === "string" ? source.title : "";
+  normalized.author = typeof source.author === "string" ? source.author : "";
+  normalized.source = READING_QUEUE_SOURCES.includes(source.source) ? source.source : "その他";
+  normalized.status = READING_QUEUE_STATUSES.includes(source.status) ? source.status : "未読";
+  normalized.progress = Math.min(100, Math.max(0, Number(source.progress) || 0));
+  normalized.memo = typeof source.memo === "string" ? source.memo : "";
+  normalized.createdAt = source.createdAt || base.createdAt;
+  normalized.updatedAt = source.updatedAt || normalized.createdAt;
+  return normalized;
+}
+
+readingQueue = loadReadingQueue();
 
 function newReadingNote() {
   const now = new Date().toISOString();
@@ -1353,6 +1465,15 @@ function loadPersistentMemos() {
   }
 }
 
+function loadReadingQueue() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(READING_QUEUE_STORAGE_KEY));
+    return Array.isArray(saved) ? saved.map(normalizeReadingQueueBook) : DEFAULT_READING_QUEUE.map(normalizeReadingQueueBook);
+  } catch {
+    return DEFAULT_READING_QUEUE.map(normalizeReadingQueueBook);
+  }
+}
+
 function loadReadingNotes() {
   try {
     const saved = JSON.parse(localStorage.getItem(READING_NOTES_STORAGE_KEY));
@@ -1740,6 +1861,10 @@ function saveLaterView() {
 
 function savePersistentMemos() {
   localStorage.setItem(PERSISTENT_MEMO_STORAGE_KEY, JSON.stringify(persistentMemos));
+}
+
+function saveReadingQueue() {
+  localStorage.setItem(READING_QUEUE_STORAGE_KEY, JSON.stringify(readingQueue.map(normalizeReadingQueueBook)));
 }
 
 function saveReadingNotes() {
@@ -2618,6 +2743,195 @@ function renderPersistentMemos({ focusId } = {}) {
     if (memo.id === focusId) {
       title.focus();
     }
+  });
+}
+
+function readingQueueCounts() {
+  return readingQueue.reduce(
+    (counts, book) => {
+      counts[book.status] = (counts[book.status] || 0) + 1;
+      if (book.source === "Unlimited") counts.unlimited += 1;
+      return counts;
+    },
+    { 未読: 0, 読み途中: 0, 完読: 0, 保留: 0, unlimited: 0 },
+  );
+}
+
+function renderReadingQueue() {
+  const target = $("#readingQueueList");
+  if (!target) return;
+
+  readingQueue = readingQueue.map(normalizeReadingQueueBook);
+  const counts = readingQueueCounts();
+  const nextBook = readingQueue.find((book) => book.status !== "完読");
+  const setText = (selector, value) => {
+    const node = $(selector);
+    if (node) node.textContent = value;
+  };
+
+  setText("#readingQueueNext", nextBook?.title || "すべて完読");
+  setText("#readingQueueUnreadCount", `${counts.未読 || 0}件`);
+  setText("#readingQueueReadingCount", `${counts.読み途中 || 0}件`);
+  setText("#readingQueueFinishedCount", `${counts.完読 || 0}件`);
+  setText("#readingQueueUnlimitedCount", `${counts.unlimited || 0}/20`);
+
+  target.replaceChildren();
+  if (!readingQueue.length) {
+    const empty = document.createElement("p");
+    empty.className = "section-note";
+    empty.textContent = "読む本はまだありません。";
+    target.append(empty);
+    return;
+  }
+
+  readingQueue.forEach((book, index) => {
+    const row = document.createElement("article");
+    row.className = "reading-queue-row";
+    row.classList.toggle("is-reading", book.status === "読み途中");
+    row.classList.toggle("is-finished", book.status === "完読");
+
+    const rank = document.createElement("div");
+    rank.className = "reading-queue-rank";
+    rank.textContent = String(index + 1);
+
+    const body = document.createElement("div");
+    body.className = "reading-queue-body";
+
+    const title = document.createElement("input");
+    title.className = "reading-queue-title";
+    title.type = "text";
+    title.value = book.title;
+    title.placeholder = "本のタイトル";
+    title.setAttribute("aria-label", "本のタイトル");
+    title.addEventListener("input", (event) => {
+      book.title = event.target.value;
+      book.updatedAt = new Date().toISOString();
+      saveReadingQueue();
+    });
+
+    const meta = document.createElement("div");
+    meta.className = "reading-queue-meta";
+
+    const author = document.createElement("input");
+    author.type = "text";
+    author.value = book.author;
+    author.placeholder = "著者";
+    author.setAttribute("aria-label", "著者");
+    author.addEventListener("input", (event) => {
+      book.author = event.target.value;
+      book.updatedAt = new Date().toISOString();
+      saveReadingQueue();
+    });
+
+    const source = document.createElement("select");
+    source.setAttribute("aria-label", "種別");
+    READING_QUEUE_SOURCES.forEach((sourceName) => {
+      const option = document.createElement("option");
+      option.value = sourceName;
+      option.textContent = sourceName;
+      option.selected = book.source === sourceName;
+      source.append(option);
+    });
+    source.addEventListener("change", (event) => {
+      book.source = event.target.value;
+      book.updatedAt = new Date().toISOString();
+      saveReadingQueue();
+      renderReadingQueue();
+    });
+
+    const status = document.createElement("select");
+    status.setAttribute("aria-label", "読書状態");
+    READING_QUEUE_STATUSES.forEach((statusName) => {
+      const option = document.createElement("option");
+      option.value = statusName;
+      option.textContent = statusName;
+      option.selected = book.status === statusName;
+      status.append(option);
+    });
+    status.addEventListener("change", (event) => {
+      book.status = event.target.value;
+      if (book.status === "完読") book.progress = 100;
+      book.updatedAt = new Date().toISOString();
+      saveReadingQueue();
+      renderReadingQueue();
+    });
+
+    meta.append(author, source, status);
+
+    const progressLabel = document.createElement("label");
+    progressLabel.className = "reading-queue-progress";
+    const progressText = document.createElement("span");
+    progressText.textContent = `進捗 ${book.progress}%`;
+    const progress = document.createElement("input");
+    progress.type = "range";
+    progress.min = "0";
+    progress.max = "100";
+    progress.value = String(book.progress);
+    progress.addEventListener("input", (event) => {
+      book.progress = Number(event.target.value);
+      if (book.progress >= 100) book.status = "完読";
+      book.updatedAt = new Date().toISOString();
+      saveReadingQueue();
+      renderReadingQueue();
+    });
+    progressLabel.append(progressText, progress);
+
+    const memo = document.createElement("textarea");
+    memo.value = book.memo;
+    memo.placeholder = "読む目的、使えそうな章、読後メモ";
+    memo.rows = 2;
+    memo.setAttribute("aria-label", "読書メモ");
+    memo.addEventListener("input", (event) => {
+      book.memo = event.target.value;
+      book.updatedAt = new Date().toISOString();
+      saveReadingQueue();
+    });
+
+    body.append(title, meta, progressLabel, memo);
+
+    const actions = document.createElement("div");
+    actions.className = "reading-queue-actions";
+
+    const moveUp = document.createElement("button");
+    moveUp.type = "button";
+    moveUp.className = "ghost-button";
+    moveUp.textContent = "↑";
+    moveUp.title = "上へ";
+    moveUp.disabled = index === 0;
+    moveUp.addEventListener("click", () => {
+      const [item] = readingQueue.splice(index, 1);
+      readingQueue.splice(index - 1, 0, item);
+      saveReadingQueue();
+      renderReadingQueue();
+    });
+
+    const moveDown = document.createElement("button");
+    moveDown.type = "button";
+    moveDown.className = "ghost-button";
+    moveDown.textContent = "↓";
+    moveDown.title = "下へ";
+    moveDown.disabled = index === readingQueue.length - 1;
+    moveDown.addEventListener("click", () => {
+      const [item] = readingQueue.splice(index, 1);
+      readingQueue.splice(index + 1, 0, item);
+      saveReadingQueue();
+      renderReadingQueue();
+    });
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "ghost-button danger-text-button";
+    remove.textContent = "削除";
+    remove.addEventListener("click", () => {
+      if (!confirm("この本を読む本リストから削除しますか？")) return;
+      readingQueue = readingQueue.filter((candidate) => candidate.id !== book.id);
+      saveReadingQueue();
+      renderReadingQueue();
+    });
+
+    actions.append(moveUp, moveDown, remove);
+    row.append(rank, body, actions);
+    target.append(row);
   });
 }
 
@@ -12102,6 +12416,7 @@ function renderAll() {
   renderRecurringSchedule();
   renderMailLastChecked();
   renderPersistentMemos();
+  renderReadingQueue();
   renderReadingNotes();
   renderLearningAssets();
   renderLearnings();
@@ -12259,7 +12574,10 @@ function showPageEntry(entryName = "") {
     renderPublishingSeedCandidates();
     renderPublishingSeeds();
   }
-  if (isReadingPage) renderLearningAssets();
+  if (isReadingPage) {
+    renderReadingQueue();
+    renderLearningAssets();
+  }
   if (isMemoPage) renderPersistentMemos();
   if (isTodayInputPage) {
     renderXExperimentLogs();
@@ -12433,6 +12751,18 @@ function bindEvents() {
       });
       showPageEntry(button.dataset.pageEntry || "");
     });
+  });
+  $("#addReadingQueueBook")?.addEventListener("click", () => {
+    readingQueue.unshift(newReadingQueueBook());
+    saveReadingQueue();
+    renderReadingQueue();
+    requestAnimationFrame(() => {
+      $("#readingQueueList input")?.focus();
+    });
+  });
+  $("#saveReadingQueue")?.addEventListener("click", () => {
+    saveReadingQueue();
+    renderReadingQueue();
   });
   document.querySelectorAll("[data-weather-choice]").forEach((button) => {
     button.addEventListener("click", () => {

@@ -1782,6 +1782,27 @@
             <button class="ghost-button" id="newLearningAsset" type="button">新規作成</button>
           </div>
 
+          <div class="reading-queue-panel" aria-label="読む本リスト">
+            <div class="reading-queue-heading">
+              <div>
+                <h3>読む本リスト</h3>
+                <p class="section-note">Kindle / Unlimited / Prime Reading の読む順番と進捗を管理します。</p>
+              </div>
+              <div class="reading-queue-buttons">
+                <button class="ghost-button" id="addReadingQueueBook" type="button">追加</button>
+                <button class="ghost-button" id="saveReadingQueue" type="button">保存</button>
+              </div>
+            </div>
+            <div class="reading-queue-summary" aria-label="読書状況">
+              <div><span>次に読む</span><strong id="readingQueueNext">-</strong></div>
+              <div><span>未読</span><strong id="readingQueueUnreadCount">0件</strong></div>
+              <div><span>読み途中</span><strong id="readingQueueReadingCount">0件</strong></div>
+              <div><span>完読</span><strong id="readingQueueFinishedCount">0件</strong></div>
+              <div><span>Unlimited</span><strong id="readingQueueUnlimitedCount">0/20</strong></div>
+            </div>
+            <div id="readingQueueList" class="reading-queue-list" aria-label="読む本の順番"></div>
+          </div>
+
           <div class="learning-asset-flow-map" aria-label="学びの進行状況">
             <div><span>学び待ち</span><strong id="learningAssetWaitingCount">0件</strong></div>
             <div><span>対話済み</span><strong id="learningAssetDialoguedCount">0件</strong></div>
