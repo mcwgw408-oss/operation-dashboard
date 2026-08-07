@@ -12766,7 +12766,7 @@ function setTodayInputPageVisible(visible) {
   });
 }
 
-function showPageEntry(entryName = "") {
+function showPageEntry(entryName = "", options = {}) {
   activePageEntry = entryName;
   const substackPanel = $("#substackPage");
   const noteConfig = notePageConfigs[entryName];
@@ -12794,6 +12794,29 @@ function showPageEntry(entryName = "") {
   const isArchivePage = entryName === "Archive";
   const isActivityExperimentPage = entryName === "活動実験";
   const isArticleIdeasPage = entryName === "記事アイデア";
+  const visibleEntryPanel = isSubstack
+    ? substackPanel
+    : isNote
+      ? $(noteConfig.pageId)
+      : isXPage
+        ? xPagePanel
+        : isWordPressPage
+          ? wordpressPagePanel
+          : isSeedPage
+            ? seedPagePanel
+            : isReadingPage
+              ? learningAssetPagePanel
+              : isMemoPage
+                ? memoPagePanel
+                : isTodayInputPage
+                  ? todayInputPagePanel
+                  : isArchivePage
+                    ? archivePagePanel
+                    : isActivityExperimentPage
+                      ? activityExperimentPagePanel
+                      : isArticleIdeasPage
+                        ? articleIdeasPagePanel
+                        : null;
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -12845,6 +12868,11 @@ function showPageEntry(entryName = "") {
     renderLearningGlobalSearch();
     renderMemoryLibrary();
     renderHistory();
+  }
+  if (options.scroll && visibleEntryPanel && !visibleEntryPanel.hidden) {
+    requestAnimationFrame(() => {
+      visibleEntryPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 }
 
@@ -12998,7 +13026,7 @@ function bindEvents() {
       document.querySelectorAll("[data-page-entry]").forEach((entry) => {
         entry.classList.toggle("is-active", entry === button);
       });
-      showPageEntry(button.dataset.pageEntry || "");
+      showPageEntry(button.dataset.pageEntry || "", { scroll: true });
     });
   });
   $("#addReadingQueueBook")?.addEventListener("click", () => {
