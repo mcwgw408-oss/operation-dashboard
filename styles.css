@@ -5724,6 +5724,69 @@ button.launch-card {
   font-size: 12px;
 }
 
+.roadmap-rules {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.roadmap-rules-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.roadmap-rules-heading h3,
+.roadmap-rules-heading p {
+  margin: 0;
+}
+
+.roadmap-rules-heading p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.roadmap-rule-grid,
+.roadmap-caution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.roadmap-rule-card,
+.roadmap-caution {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 12px;
+}
+
+.roadmap-rule-card.strong {
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.roadmap-rule-card strong,
+.roadmap-caution strong {
+  font-size: 13px;
+}
+
+.roadmap-rule-card span,
+.roadmap-caution span {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.roadmap-caution {
+  background: var(--cream);
+}
+
+.roadmap-caution.muted {
+  background: #fff;
+}
+
 .experiment-brief {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -6617,6 +6680,8 @@ button.launch-card {
   .roadmap-brief,
   .roadmap-pill-grid,
   .roadmap-pill-grid.compact,
+  .roadmap-rule-grid,
+  .roadmap-caution-grid,
   .experiment-brief,
   .substack-page-grid,
   .later-form,
