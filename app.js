@@ -12779,6 +12779,7 @@ function showPageEntry(entryName = "") {
   const memoPagePanel = $("#memo-page");
   const todayInputPagePanel = $("#todayInputPage");
   const archivePagePanel = $("#archivePage");
+  const activityExperimentPagePanel = $("#activityExperimentPage");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
@@ -12790,6 +12791,7 @@ function showPageEntry(entryName = "") {
   const isMemoPage = entryName === "メモ";
   const isTodayInputPage = entryName === "今日の入力";
   const isArchivePage = entryName === "Archive";
+  const isActivityExperimentPage = entryName === "活動実験";
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -12803,10 +12805,11 @@ function showPageEntry(entryName = "") {
   if (memoPagePanel) memoPagePanel.hidden = !isMemoPage;
   if (todayInputPagePanel) todayInputPagePanel.hidden = !isTodayInputPage;
   if (archivePagePanel) archivePagePanel.hidden = !isArchivePage;
+  if (activityExperimentPagePanel) activityExperimentPagePanel.hidden = !isActivityExperimentPage;
   setTodayInputPageVisible(isTodayInputPage);
   setArchivePageVisible(isArchivePage);
   if (seedWorkbenchTabs) seedWorkbenchTabs.hidden = !(isSeedPage || isArchivePage);
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || !entryName;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || isActivityExperimentPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);

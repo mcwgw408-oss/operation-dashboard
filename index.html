@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260727-codex-daily-log" />
+    <link rel="stylesheet" href="./styles.css?v=20260807-substack-work" />
   </head>
   <body>
     <div class="app">
@@ -869,6 +869,7 @@
             <button class="launch-card" type="button" data-page-entry="Substack"><strong>Substack</strong><span>発信</span></button>
             <button class="launch-card" type="button" data-page-entry="note（いつものnote）"><strong>note</strong><span>いつものnote</span></button>
             <button class="launch-card" type="button" data-page-entry="note（Substack初心者向け）"><strong>note</strong><span>Substack初心者向け</span></button>
+            <button class="launch-card" type="button" data-page-entry="活動実験"><strong>活動実験</strong><span>相談・ライブ・Podcast</span></button>
             <button class="launch-card" type="button" data-page-entry="X"><strong>X</strong><span>投稿・観察</span></button>
             <button class="launch-card" type="button" data-page-entry="WordPress"><strong>WordPress</strong><span>記事</span></button>
             <button class="launch-card" type="button" data-page-entry="Seed"><strong>Seed</strong><span>思考</span></button>
@@ -1060,9 +1061,28 @@
           <div class="panel-heading">
             <div>
               <h2>note②（Substack初心者向け）</h2>
-              <p class="section-note">Substack初心者向けnoteを、いつものnoteとは別に保存します。</p>
+              <p class="section-note">検索で来た人をSubstackへ案内するためのnoteを、ロードマップに沿って進めます。</p>
             </div>
             <button class="ghost-button" id="saveNoteBeginner" type="button">note②を保存・更新する</button>
+          </div>
+          <section class="roadmap-brief" aria-label="Substack初心者向けnoteのロードマップ">
+            <div>
+              <h3>今月の土台づくり</h3>
+              <p>まずは柱4本、固定フッター、プロフィール文、質問メモを整えます。</p>
+            </div>
+            <ul class="roadmap-check-list">
+              <li>固定フッターの文言を決める</li>
+              <li>柱1〜4の記事構成を作る</li>
+              <li>プロフィール文を差し替える</li>
+              <li>既存14本にフッターを貼る</li>
+              <li>質問メモの置き場所を作る</li>
+            </ul>
+          </section>
+          <div class="roadmap-pill-grid" aria-label="4本の柱">
+            <div class="roadmap-pill"><strong>柱1</strong><span>Substackとは？</span></div>
+            <div class="roadmap-pill"><strong>柱2</strong><span>始め方</span></div>
+            <div class="roadmap-pill"><strong>柱3</strong><span>日本語・不安</span></div>
+            <div class="roadmap-pill"><strong>柱4</strong><span>続ける・増やす</span></div>
           </div>
           <div class="substack-page-grid">
             <section class="substack-page-block">
@@ -1118,6 +1138,50 @@
             </section>
           </div>
           <p id="noteBeginnerStatus" class="substack-status">今日のnote②はまだ保存されていません。保存後は同じボタンで更新できます。</p>
+        </section>
+
+        <section id="activityExperimentPage" class="panel substack-page-panel activity-experiment-page-panel span-2" aria-label="活動実験" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2>活動実験</h2>
+              <p class="section-note">今後の展望から、今日小さく試せるものだけを見るページです。</p>
+            </div>
+          </div>
+          <div class="experiment-brief">
+            <section class="substack-page-block">
+              <h3>今見えている軸</h3>
+              <p>Substack初心者が、反応のない状態でやめてしまわないようにする。</p>
+            </section>
+            <section class="substack-page-block">
+              <h3>今日選ぶなら</h3>
+              <ul class="roadmap-check-list">
+                <li>ライブの時間を一度変える</li>
+                <li>一人の相談を受けてメモする</li>
+                <li>初心者支援企画を3つに絞る</li>
+                <li>Podcastのテーマを5本だけ仮決めする</li>
+              </ul>
+            </section>
+            <section class="substack-page-block note-tall-block">
+              <h3>実験候補</h3>
+              <div class="roadmap-pill-grid compact">
+                <div class="roadmap-pill"><strong>初心者支援</strong><span>最初の反応を届ける</span></div>
+                <div class="roadmap-pill"><strong>Podcast</strong><span>考え途中を話す</span></div>
+                <div class="roadmap-pill"><strong>ライブ</strong><span>時間帯を試す</span></div>
+                <div class="roadmap-pill"><strong>相談</strong><span>困りごとを知る</span></div>
+                <div class="roadmap-pill"><strong>企画</strong><span>応援と実験</span></div>
+              </div>
+            </section>
+            <section class="substack-page-block note-tall-block">
+              <h3>振り返り</h3>
+              <ul class="roadmap-check-list">
+                <li>自分は楽しかったか</li>
+                <li>続けられそうか</li>
+                <li>反応はあったか</li>
+                <li>誰の役に立ったか</li>
+                <li>次もやりたいか</li>
+              </ul>
+            </section>
+          </div>
         </section>
 
         <section id="xPageV1" class="panel substack-page-panel x-page-v1-panel span-2" aria-label="X Ver.1" hidden>
@@ -2370,6 +2434,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260727-codex-daily-log"></script>
+    <script src="./app.js?v=20260807-substack-work"></script>
   </body>
 </html>
