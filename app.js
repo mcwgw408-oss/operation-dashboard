@@ -1127,7 +1127,9 @@ function blankLearningAsset() {
     sourceType: "本",
     title: "",
     knowledgeName: "",
+    oneLineConclusion: "",
     knowledgeOverview: "",
+    todayAction: "",
     useScene: "",
     beginnerExplanation: "",
     articleIdeas: "",
@@ -1137,6 +1139,10 @@ function blankLearningAsset() {
     author: "",
     genre: "",
     rating: "",
+    importanceRating: "",
+    practicalRating: "",
+    beginnerRating: "",
+    rereadRating: "",
     status: "知識化待ち",
     impression: "",
     rayDialogue: "",
@@ -1185,7 +1191,7 @@ function normalizeLearningAsset(raw) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const item = { ...base, ...source };
   item.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["date", "title", "knowledgeName", "knowledgeOverview", "useScene", "beginnerExplanation", "articleIdeas", "podcastIdeas", "aiUseSimple", "tagsSimple", "author", "genre", "rating", "impression", "rayDialogue", "myThought", "summary3Lines", "coreIdea", "top10", "publishingUse", "useSubstack", "useNote", "usePodcast", "useLive", "useNotes", "useX", "useAi", "contentIdeas", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "practiceTomorrow", "practiced", "result", "learning", "knowledgeTags", "contentLinks", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
+  ["date", "title", "knowledgeName", "oneLineConclusion", "knowledgeOverview", "todayAction", "useScene", "beginnerExplanation", "articleIdeas", "podcastIdeas", "aiUseSimple", "tagsSimple", "author", "genre", "rating", "importanceRating", "practicalRating", "beginnerRating", "rereadRating", "impression", "rayDialogue", "myThought", "summary3Lines", "coreIdea", "top10", "publishingUse", "useSubstack", "useNote", "usePodcast", "useLive", "useNotes", "useX", "useAi", "contentIdeas", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "practiceTomorrow", "practiced", "result", "learning", "knowledgeTags", "contentLinks", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
     item[key] = String(item[key] ?? "");
   });
   item.sourceType = LEARNING_ASSET_SOURCES.includes(source.sourceType) ? source.sourceType : base.sourceType;
@@ -3506,7 +3512,9 @@ function readLearningAssetForm() {
     sourceType: $("#learningAssetSourceType")?.value || "本",
     title: $("#learningAssetTitle")?.value.trim() || "",
     knowledgeName: $("#learningAssetKnowledgeName")?.value.trim() || "",
+    oneLineConclusion: $("#learningAssetOneLineConclusion")?.value.trim() || "",
     knowledgeOverview: $("#learningAssetKnowledgeOverview")?.value.trim() || "",
+    todayAction: $("#learningAssetTodayAction")?.value.trim() || "",
     useScene: $("#learningAssetUseScene")?.value.trim() || "",
     beginnerExplanation: $("#learningAssetBeginnerExplanation")?.value.trim() || "",
     articleIdeas: $("#learningAssetArticleIdeas")?.value.trim() || "",
@@ -3516,6 +3524,10 @@ function readLearningAssetForm() {
     author: $("#learningAssetAuthor")?.value.trim() || "",
     genre: $("#learningAssetGenre")?.value.trim() || "",
     rating: $("#learningAssetRating")?.value || "",
+    importanceRating: $("#learningAssetImportanceRating")?.value || "",
+    practicalRating: $("#learningAssetPracticalRating")?.value || "",
+    beginnerRating: $("#learningAssetBeginnerRating")?.value || "",
+    rereadRating: $("#learningAssetRereadRating")?.value || "",
     status: $("#learningAssetStatus")?.value || "知識化待ち",
     summary3Lines: $("#learningAssetSummary3Lines")?.value.trim() || "",
     coreIdea: $("#learningAssetCoreIdea")?.value.trim() || "",
@@ -3563,7 +3575,9 @@ function fillLearningAssetForm(item) {
   setLearningAssetFieldValue("#learningAssetSourceType", asset.sourceType || "本");
   setLearningAssetFieldValue("#learningAssetTitle", asset.title || "");
   setLearningAssetFieldValue("#learningAssetKnowledgeName", asset.knowledgeName || asset.coreIdea || "");
+  setLearningAssetFieldValue("#learningAssetOneLineConclusion", asset.oneLineConclusion || asset.coreIdea || asset.knowledgeName || "");
   setLearningAssetFieldValue("#learningAssetKnowledgeOverview", asset.knowledgeOverview || asset.summary3Lines || "");
+  setLearningAssetFieldValue("#learningAssetTodayAction", asset.todayAction || asset.practiceTomorrow || asset.experimentIdea || "");
   setLearningAssetFieldValue("#learningAssetUseScene", asset.useScene || asset.publishingUse || "");
   setLearningAssetFieldValue("#learningAssetBeginnerExplanation", asset.beginnerExplanation || "");
   setLearningAssetFieldValue("#learningAssetArticleIdeas", asset.articleIdeas || asset.contentIdeas || asset.articleIdea || "");
@@ -3573,6 +3587,10 @@ function fillLearningAssetForm(item) {
   setLearningAssetFieldValue("#learningAssetAuthor", asset.author || "");
   setLearningAssetFieldValue("#learningAssetGenre", asset.genre || "");
   setLearningAssetFieldValue("#learningAssetRating", asset.rating || "");
+  setLearningAssetFieldValue("#learningAssetImportanceRating", asset.importanceRating || asset.rating || "");
+  setLearningAssetFieldValue("#learningAssetPracticalRating", asset.practicalRating || "");
+  setLearningAssetFieldValue("#learningAssetBeginnerRating", asset.beginnerRating || "");
+  setLearningAssetFieldValue("#learningAssetRereadRating", asset.rereadRating || "");
   setLearningAssetFieldValue("#learningAssetStatus", asset.status || "知識化待ち");
   setLearningAssetFieldValue("#learningAssetSummary3Lines", asset.summary3Lines || asset.impression || "");
   setLearningAssetFieldValue("#learningAssetCoreIdea", asset.coreIdea || asset.myThought || "");
@@ -3641,8 +3659,8 @@ function saveLearningAssetFromForm(event) {
   event?.preventDefault();
   const values = readLearningAssetForm();
   const status = $("#learningAssetStatusMessage");
-  if (!values.title && !values.knowledgeName && !values.summary3Lines && !values.coreIdea && !values.publishingUse) {
-    if (status) status.textContent = "知識名、タイトル、3行要約、一番重要な考え方、発信への応用のどれかを入れると保存できます。";
+  if (!values.title && !values.knowledgeName && !values.oneLineConclusion && !values.todayAction && !values.summary3Lines && !values.coreIdea && !values.publishingUse) {
+    if (status) status.textContent = "知識名、一言結論、今日すぐ実践、タイトル、3行要約、一番重要な考え方のどれかを入れると保存できます。";
     $("#learningAssetKnowledgeName")?.focus();
     return;
   }
@@ -3676,7 +3694,9 @@ function learningAssetSearchText(item) {
     item.sourceType,
     item.title,
     item.knowledgeName,
+    item.oneLineConclusion,
     item.knowledgeOverview,
+    item.todayAction,
     item.useScene,
     item.beginnerExplanation,
     item.articleIdeas,
@@ -3686,6 +3706,10 @@ function learningAssetSearchText(item) {
     item.author,
     item.genre,
     item.rating,
+    item.importanceRating,
+    item.practicalRating,
+    item.beginnerRating,
+    item.rereadRating,
     item.status,
     item.summary3Lines,
     item.coreIdea,
@@ -3909,6 +3933,36 @@ function appendLearningAssetDetail(details, label, value) {
   details.append(row);
 }
 
+function learningAssetStars(value) {
+  const count = Math.max(0, Math.min(5, Number.parseInt(value, 10) || 0));
+  return count ? "★".repeat(count) : "未評価";
+}
+
+function appendLearningAssetUseItem(target, label, value) {
+  if (!value) return;
+  const item = document.createElement("div");
+  item.className = "learning-asset-use-item";
+  const labelNode = document.createElement("span");
+  labelNode.textContent = label;
+  const valueNode = document.createElement("p");
+  valueNode.textContent = value;
+  item.append(labelNode, valueNode);
+  target.append(item);
+}
+
+function createLearningAssetDetailSection(title, rows) {
+  const section = document.createElement("section");
+  section.className = "learning-asset-detail-section";
+  const heading = document.createElement("h4");
+  heading.textContent = title;
+  const details = document.createElement("div");
+  details.className = "learning-asset-card-details";
+  rows.forEach(([label, value]) => appendLearningAssetDetail(details, label, value));
+  if (!details.children.length) return null;
+  section.append(heading, details);
+  return section;
+}
+
 function createLearningAssetCard(item) {
   const card = document.createElement("article");
   card.className = `learning-asset-card status-${item.status}`;
@@ -3919,7 +3973,7 @@ function createLearningAssetCard(item) {
   const source = document.createElement("span");
   source.textContent = `${item.date || "読了日未入力"} / ${item.sourceType || "その他"}`;
   const bookMeta = document.createElement("span");
-  bookMeta.textContent = [item.author, item.genre, item.rating ? `${item.rating}★` : ""].filter(Boolean).join(" / ") || "基本情報未入力";
+  bookMeta.textContent = [item.title, item.author, item.genre].filter(Boolean).join(" / ") || "基本情報未入力";
   const status = document.createElement("select");
   status.setAttribute("aria-label", "知識カードの状態");
   LEARNING_ASSET_STATUSES.forEach((statusName) => {
@@ -3939,12 +3993,38 @@ function createLearningAssetCard(item) {
 
   const title = document.createElement("h3");
   title.textContent = item.knowledgeName || item.title || "知識名未入力の知識カード";
+  const conclusion = document.createElement("p");
+  conclusion.className = "learning-asset-conclusion";
+  conclusion.textContent = `結論: ${item.oneLineConclusion || item.coreIdea || item.knowledgeName || "この知識を一言で表す結論は未入力です。"}`;
   const impression = document.createElement("p");
   impression.className = "learning-asset-card-impression";
   impression.textContent = item.knowledgeOverview || item.summary3Lines || item.impression || "概要は未入力です。";
-  const thought = document.createElement("p");
-  thought.className = "learning-asset-card-thought";
-  thought.textContent = item.useScene || item.coreIdea || item.myThought ? `活用場面: ${item.useScene || item.coreIdea || item.myThought}` : "活用場面はまだ未入力です。";
+
+  const dailyUse = document.createElement("section");
+  dailyUse.className = "learning-asset-daily-use";
+  const dailyUseHeading = document.createElement("h4");
+  dailyUseHeading.textContent = "今日使えること";
+  const dailyUseGrid = document.createElement("div");
+  dailyUseGrid.className = "learning-asset-daily-use-grid";
+  appendLearningAssetUseItem(dailyUseGrid, "今日すぐ実践", item.todayAction || item.practiceTomorrow || item.experimentIdea);
+  appendLearningAssetUseItem(dailyUseGrid, "一番重要な考え方", item.coreIdea || item.myThought);
+  appendLearningAssetUseItem(dailyUseGrid, "明日から試すこと", item.practiceTomorrow || item.experimentIdea);
+  appendLearningAssetUseItem(dailyUseGrid, "使う場面", item.useScene || item.publishingUse);
+  if (!dailyUseGrid.children.length) appendLearningAssetUseItem(dailyUseGrid, "今日すぐ実践", "実践内容は未入力です。");
+  dailyUse.append(dailyUseHeading, dailyUseGrid);
+
+  const ratings = document.createElement("div");
+  ratings.className = "learning-asset-rating-grid";
+  [
+    ["重要度", item.importanceRating || item.rating],
+    ["すぐ使える度", item.practicalRating],
+    ["初心者向け度", item.beginnerRating],
+    ["再読したい度", item.rereadRating],
+  ].forEach(([label, value]) => {
+    const rating = document.createElement("span");
+    rating.textContent = `${label}: ${learningAssetStars(value)}`;
+    ratings.append(rating);
+  });
 
   const tags = document.createElement("div");
   tags.className = "learning-asset-tags";
@@ -3970,15 +4050,11 @@ function createLearningAssetCard(item) {
     counts.append(count);
   });
 
-  const details = document.createElement("div");
-  details.className = "learning-asset-card-details";
-  [
-    ["本・入口", item.title],
-    ["初心者向け説明", item.beginnerExplanation],
+  const practicalDetails = createLearningAssetDetailSection("実践用", [
     ["記事アイデア", item.articleIdeas],
     ["Podcastアイデア", item.podcastIdeas],
-    ["AI活用", item.aiUseSimple],
-    ["重要ポイントTOP10", item.top10],
+    ["Notes / X / Kindle / Brain", item.contentIdeas],
+    ["AI活用", item.aiUseSimple || item.useAi],
     ["発信活動への応用", item.publishingUse],
     ["Substack", item.useSubstack],
     ["note", item.useNote],
@@ -3986,16 +4062,21 @@ function createLearningAssetCard(item) {
     ["ライブ配信", item.useLive],
     ["Notes", item.useNotes],
     ["X", item.useX],
-    ["AI活用", item.useAi],
-    ["コンテンツ化", item.contentIdeas],
-    ["明日から試すこと", item.practiceTomorrow || item.experimentIdea],
     ["実践したこと", item.practiced],
     ["結果", item.result || item.experimentResult],
     ["学び", item.learning],
     ["紐付けた成果物", item.contentLinks],
+  ]);
+  const savedDetails = createLearningAssetDetailSection("保存用", [
+    ["本・入口", item.title],
+    ["概要", item.knowledgeOverview || item.summary3Lines],
+    ["3行要約", item.summary3Lines],
+    ["初心者向け説明", item.beginnerExplanation],
+    ["重要ポイントTOP10", item.top10],
+    ["タグ", item.knowledgeTags || item.tagsSimple],
     ["仮説", item.hypothesis],
     ["記事候補", item.articleIdea],
-  ].forEach(([label, value]) => appendLearningAssetDetail(details, label, value));
+  ]);
   if (item.relatedArticleTitle || item.relatedArticleUrl) {
     const row = document.createElement("p");
     const labelNode = document.createElement("span");
@@ -4011,7 +4092,7 @@ function createLearningAssetCard(item) {
     } else {
       row.append(item.relatedArticleTitle);
     }
-    details.append(row);
+    practicalDetails?.querySelector(".learning-asset-card-details")?.append(row);
   }
 
   const actions = document.createElement("div");
@@ -4034,10 +4115,11 @@ function createLearningAssetCard(item) {
   });
   actions.append(edit, remove);
 
-  card.append(meta, title, impression, thought);
+  card.append(meta, title, conclusion, dailyUse, ratings, impression);
   if (tags.children.length) card.append(tags);
   if (counts.children.length) card.append(counts);
-  if (details.children.length) card.append(details);
+  if (practicalDetails) card.append(practicalDetails);
+  if (savedDetails) card.append(savedDetails);
   card.append(actions);
   return card;
 }
@@ -4091,6 +4173,10 @@ function firstKnowledgeSampleCards() {
     author: "",
     genre: "発信 / AI / ライティング",
     rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "4",
+    rereadRating: "5",
     status: "Codex抽出済み",
     contentCounts: {
       article: 0,
@@ -4109,7 +4195,9 @@ function firstKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "AIに考えさせる前に、何を考えるかを決める",
+      oneLineConclusion: "AI活用の前に、誰に何を届けるかを1行で決める。",
       knowledgeOverview: "AI時代は文章量より、最初に思考の芯を1行で決める力が重要になる。",
+      todayAction: "次に作る投稿を、誰に・どんな場面で・何が変わるかの1行にする。",
       useScene: "Substack記事の企画、Podcastテーマ決め、X投稿、講座設計の最初の判断に使う。",
       beginnerExplanation: "AIに文章を書いてもらう前に、誰に何を届けるかを自分で決めるということ。",
       articleIdeas: "AIに書かせる前に決めるべき3つのこと / Substack初心者が最初に作る1行コンセプト",
@@ -4134,7 +4222,9 @@ function firstKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "伝わらない原因は情報不足ではなく、捨てきれていないこと",
+      oneLineConclusion: "伝える力は、足す力より捨てる力で決まる。",
       knowledgeOverview: "説明を増やすほど伝わるのではなく、相手が判断できる材料だけ残すと伝わりやすくなる。",
+      todayAction: "直近の記事タイトルから抽象語を3つ削り、読者の変化が見える言葉にする。",
       useScene: "記事の導入、プロフィール、商品説明、ライブ告知、コミュニティ説明に使う。",
       beginnerExplanation: "たくさん説明するより、相手が迷わない言い方にするということ。",
       articleIdeas: "発信がぼやける人が最初に削るべき言葉 / 説明しすぎるほど伝わらない理由",
@@ -4155,7 +4245,9 @@ function firstKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "ターゲット・状況・変化を決めるとコンテンツが資産になる",
+      oneLineConclusion: "読者・場面・変化が決まると、投稿は単発ではなく資産になる。",
       knowledgeOverview: "誰に、どの困りごとの瞬間で、何がどう変わるかを決めると、記事や商品に展開しやすくなる。",
+      todayAction: "この知識をSubstack・Podcast・Xのどこに転用するか1つ決める。",
       useScene: "Substack初心者向け発信、講座づくり、KindleやBrainの商品設計に使う。",
       beginnerExplanation: "書き始める前に、読む人・困っている場面・読んだ後の変化を決めること。",
       articleIdeas: "Substack初心者のための1行コンセプト設計 / 発信テーマが決まらない時の3問",
@@ -4211,6 +4303,10 @@ function smallBizKnowledgeSampleCards() {
     author: "",
     genre: "スモールビジネス / AI / マーケティング",
     rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "4",
     status: "Codex抽出済み",
     contentCounts: {
       article: 0,
@@ -4229,7 +4325,9 @@ function smallBizKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "スモビジは大きく賭けず、小さく試して反応で磨く",
+      oneLineConclusion: "スモビジは完成品を作る前に、小さく売って反応で磨く。",
       knowledgeOverview: "AI時代のスモールビジネスは、最初から完成品を作るより、低予算の試作品で反応を見ながら育てるほうが現実的。",
+      todayAction: "今ある企画を、無料資料か1投稿で反応確認できる最小版にする。",
       useScene: "新サービス、PDF教材、無料資料、講座、Brain、Substack企画の初期検証に使う。",
       beginnerExplanation: "いきなり大きく作らず、小さく出して『欲しい人がいるか』を先に確かめるということ。",
       articleIdeas: "スモビジ初心者が最初に作るべきは商品ではなく試作品 / AI時代は小さく試す人が強い理由",
@@ -4254,7 +4352,9 @@ function smallBizKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "選択肢が多い時代ほど、比較基準を持つ人が強い",
+      oneLineConclusion: "最強の副業ではなく、自分に合う選択肢を基準で選ぶ。",
       knowledgeOverview: "在宅スモビジは選択肢が多いため、最強を探すより自分の条件に合うものを選ぶ基準が必要。",
+      todayAction: "自分の企画を、始めやすさ・継続性・AI相性・資産化の4軸で採点する。",
       useScene: "事業テーマ選び、媒体選び、商品形式選び、読者へのおすすめ比較記事に使う。",
       beginnerExplanation: "何が一番稼げるかではなく、自分に続けやすくAIとも相性がいい形を選ぶということ。",
       articleIdeas: "在宅スモビジの選び方を比較する5つの基準 / 自分に合う副業を選ぶチェックリスト",
@@ -4276,7 +4376,9 @@ function smallBizKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "売り込みではなく、判断基準を渡す導線が信頼を作る",
+      oneLineConclusion: "売る前に判断基準を渡すと、売り込みではなく信頼導線になる。",
       knowledgeOverview: "無料資料、LINE、オープンチャット、説明会、本命商品という流れで、売り込み感より納得感を高める。",
+      todayAction: "今ある商品やサービスの前に、無料で渡せる判断基準を1つ作る。",
       useScene: "メルマガ導線、Substackから商品への流れ、無料資料、LINE誘導、講座販売に使う。",
       beginnerExplanation: "いきなり売るのではなく、先に役立つ判断材料を渡して信頼を積み上げるということ。",
       articleIdeas: "売り込まずに商品につなげる導線設計 / 無料資料から信頼を作る流れ",
@@ -4300,7 +4402,9 @@ function smallBizKnowledgeSampleCards() {
     {
       ...common,
       knowledgeName: "30日で回る状態を作ると、スモビジは現実になる",
+      oneLineConclusion: "30日で一周回すと、知識は事業の実験に変わる。",
       knowledgeOverview: "現実確認、テーマ選定、一言定義、無料資料、導線、発信、反応確認、改善までを30日で回す。",
+      todayAction: "1週目の現実確認とテーマ選定だけを今日のタスクにする。",
       useScene: "新企画のロードマップ、講座カリキュラム、Substack企画、実験ログに使う。",
       beginnerExplanation: "完璧を目指さず、30日で一周だけ試して改善できる状態にするということ。",
       articleIdeas: "スモビジを30日で立ち上げるロードマップ / 完璧より先に一周回す",
@@ -4359,6 +4463,10 @@ function handleKnowledgeLaboSeedFromUrl() {
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
   window.history.replaceState(null, "", nextUrl);
+  requestAnimationFrame(() => {
+    showPageEntry("Knowledge Labo");
+    renderLearningAssets();
+  });
 }
 
 function learningMatchesSearch(learning, query) {
