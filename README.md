@@ -29,8 +29,9 @@
 - `?seed=forbidden-words` で「挑戦を止める7つの禁止コトバ 実践書」の知識カードをすぐ登録
 - `?seed=twelve-questions` で「ピンチを行動に変える12の質問 実践書」の知識カードをすぐ登録
 - `?seed=social-contribution` で「社会貢献を仕事にする実践書」の知識カードをすぐ登録
+- `?seed=community-village` で「また来たくなる村 コミュニティづくり実践書」の知識カードをすぐ登録
 - `?seed=all-knowledge` でKnowledge Laboの登録済みサンプルカードを未登録分だけ一括追加
-- `?seed=reset-knowledge` でKnowledge Laboの登録済みサンプルカードを68件に復旧
+- `?seed=reset-knowledge` でKnowledge Laboの登録済みサンプルカードを72件に復旧
 - 毎日タスクの追加、編集、削除、完了チェック
 - 今日やることの追加、編集、削除、並び替え、完了チェック
 - 育てるプロジェクトのチェック
