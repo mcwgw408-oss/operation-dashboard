@@ -157,6 +157,7 @@ const ACTION_PROFILE_SAMPLE_TITLE = "行動を生む自己紹介 実践書";
 const COPY_TARGET_SAMPLE_TITLE = "売れる文章は接点で決まる 商品×ターゲット設計 実践書";
 const TRUST_CHARISMA_SAMPLE_TITLE = "信頼で選ばれるカリスマ設計実践書";
 const THREE_WEEK_FUNNEL_SAMPLE_TITLE = "3週間で参加者を集める発信導線実践書";
+const SNS_TRUST_ASSET_SAMPLE_TITLE = "SNS資産を本の代わりにする信頼導線実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -6092,10 +6093,166 @@ function addThreeWeekFunnelKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function snsTrustAssetKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: SNS_TRUST_ASSET_SAMPLE_TITLE,
+    author: "",
+    genre: "SNS資産化 / 信頼導線 / 発信設計 / ブランディング / コンテンツ再編集",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "SNS投稿は流れて消える情報ではなく、本の代わりになる信頼資産にできる",
+      oneLineConclusion: "発信は量より、後から読まれる形に束ねることで信頼になる。",
+      knowledgeOverview: "本が担っていた信頼、権威、体系性、前提理解、紹介材料の役割は、SNSの蓄積でも一部代替できる。ただし単発投稿のままでは弱い。一貫性、判断基準、蓄積、導線、再編集性を持たせることで、投稿は流れる情報から読まれる資産へ変わる。",
+      todayAction: "過去投稿を見返し、後から読ませたい投稿を10本だけ選んでテーマ別に並べる。",
+      useScene: "Xの固定投稿、Substackのまとめ記事、noteマガジン、Podcast概要欄、ライブ後の案内、講座前の信頼形成に使う。",
+      beginnerExplanation: "毎日投稿して終わりではなく、良い投稿をあとから読める棚に並べ直すこと。",
+      articleIdeas: "SNSは本の代わりになるのか / 流れる投稿を読まれる資産に変える方法",
+      podcastIdeas: "本がなくても信頼される発信設計 / 投稿を資産化する5つの条件",
+      aiUseSimple: "AIに過去投稿を渡し、テーマ、一貫性、判断基準、導線の有無で分類させる。",
+      tagsSimple: "SNS資産, 信頼構築, 発信, ブランディング, コンテンツ再編集",
+      summary3Lines: "SNS投稿は単発で流すだけでは信頼になりにくい。本の役割は、信頼、権威、体系性、前提理解、紹介材料にある。投稿を束ね、基準と導線を持たせると、本の代わりになる信頼資産へ変わる。",
+      coreIdea: "発信する視点から、資産化する視点へ切り替える。",
+      top10: "一貫性 / 判断基準 / 蓄積 / 導線 / 再編集性 / 信頼 / 権威 / 体系性 / 紹介材料 / 読まれる資産",
+      publishingUse: "反応の良かった投稿をテーマ別に束ね、次に読む記事や相談導線へつなげる。",
+      useSubstack: "代表記事を目次化し、初めて来た読者が一気読みできる入口を作る。",
+      useNote: "テーマ別マガジンを作り、SNS投稿を長文記事へ再編集する。",
+      usePodcast: "過去配信をテーマ別プレイリスト化し、概要欄に関連回を置く。",
+      useLive: "ライブ後に話した内容をまとめ投稿、記事、チェックリストへ変換する。",
+      useNotes: "短文の気づきを蓄積し、反応があるものを記事化候補にする。",
+      useX: "固定投稿に代表コンテンツ、判断基準、次の導線をまとめる。",
+      useAi: "AIに投稿群を章立てさせ、記事、PDF、講座の下書きに変換する。",
+      contentIdeas: "SNS資産化チェックリスト、固定投稿テンプレート、信頼導線診断、投稿の再編集講座にできる。",
+      practiceTomorrow: "『後から読まれる投稿10本』を選び、1つのまとめ記事タイトルを付ける。",
+      knowledgeTags: "SNS資産, 信頼構築, 発信, ブランディング, コンテンツ再編集, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "プロフィールは本の帯、固定投稿は目次と序章として設計する",
+      oneLineConclusion: "初見の読者が数秒で『この人は自分に必要』と分かる入口を作る。",
+      knowledgeOverview: "SNSのプロフィールは何者かを伝える本の帯、固定投稿は世界観と導線を伝える目次と序章の役割を持つ。肩書、対象、提供価値、判断基準、代表実例、まとめ導線、軽いCTAを置くと、初見の読者が信頼しやすくなる。",
+      todayAction: "プロフィールに『誰の、何を、どう変えるか』と判断基準の一文を入れる。",
+      useScene: "Xプロフィール、Substack About、noteプロフィール、Podcast番組説明、ライブ配信の冒頭説明に使う。",
+      beginnerExplanation: "初めて見た人に、何の専門家で、自分に何をしてくれる人かをすぐ伝えること。",
+      articleIdeas: "プロフィールは本の帯である / 固定投稿に入れるべき6項目",
+      podcastIdeas: "初見で信頼されるプロフィール設計 / 固定投稿を目次にする",
+      aiUseSimple: "AIに現プロフィールを渡し、肩書、対象、価値、判断基準、導線が入っているか添削させる。",
+      tagsSimple: "プロフィール, 固定投稿, 信頼導線, ブランディング, 自己紹介",
+      summary3Lines: "SNSの入口はプロフィールと固定投稿で決まる。プロフィールは本の帯、固定投稿は目次と序章の役割を持つ。何者か、誰をどう変えるか、判断基準、実例、まとめ導線、CTAを置くと信頼されやすい。",
+      coreIdea: "入口設計が整うと、投稿の信頼蓄積が見つけてもらいやすくなる。",
+      top10: "プロフィール / 固定投稿 / 本の帯 / 目次 / 序章 / 肩書 / 対象 / 判断基準 / 実例 / CTA",
+      publishingUse: "すべての発信媒体のプロフィールを、読者が次に進める入口として整える。",
+      useSubstack: "Aboutページに代表記事、対象読者、約束する変化、購読導線を置く。",
+      useNote: "プロフィールと固定記事にテーマ別まとめへのリンクを入れる。",
+      usePodcast: "番組説明に誰向けか、得られる変化、関連リンクを入れる。",
+      useLive: "冒頭30秒で何者か、誰向けか、今日の価値を伝える。",
+      useNotes: "プロフィールに短い判断基準と主要リンクを置く。",
+      useX: "固定投稿を『何者か、価値、基準、実例、まとめ、CTA』で作る。",
+      useAi: "AIに媒体別プロフィールを同じ軸で整えさせ、表現だけ媒体ごとに変える。",
+      contentIdeas: "プロフィール改善テンプレート、固定投稿骨格、Substack About添削企画、自己紹介導線講座にできる。",
+      practiceTomorrow: "固定投稿の骨格を6項目で作り、既存リンクを3つだけ並べる。",
+      knowledgeTags: "プロフィール, 固定投稿, 信頼導線, ブランディング, 自己紹介, X",
+    },
+    {
+      ...common,
+      knowledgeName: "投稿は共感・判断基準・実例・行動の4種類に分けて信頼を積み上げる",
+      oneLineConclusion: "1投稿で全部伝えず、役割を分けると読者の認識が進む。",
+      knowledgeOverview: "SNS投稿には、読者の悩みに寄り添う共感、良し悪しを示す判断基準、再現性を示す実例、次の行動へ進ませる行動投稿がある。1投稿1メッセージで役割を分けると、詳しい人から選ばれる人へ認識が変わる。",
+      todayAction: "次の7日分を、共感2本、判断基準2本、実例2本、行動1本に振り分ける。",
+      useScene: "X投稿カレンダー、Substack連載、note記事、Podcast台本、ライブ構成、募集前の発信設計に使う。",
+      beginnerExplanation: "毎回ノウハウだけ出すのではなく、気持ち、考え方、証拠、行動案内を分けて出すこと。",
+      articleIdeas: "信頼を生む4種類の投稿 / 1投稿1メッセージで発信が伝わる理由",
+      podcastIdeas: "詳しい人から選ばれる人へ変わる投稿設計 / 共感と判断基準の使い分け",
+      aiUseSimple: "AIに1テーマを渡し、共感、判断基準、実例、行動の4投稿へ展開させる。",
+      tagsSimple: "投稿設計, 共感, 判断基準, 実例, 行動",
+      summary3Lines: "信頼は知識提供だけでは積み上がらない。共感、判断基準、実例、行動の4種類の投稿を意図的に使い分ける。1投稿1メッセージにすると、読者は理解しやすく次の行動へ進みやすい。",
+      coreIdea: "投稿は情報ではなく、読者の認識を進める役割を持つ。",
+      top10: "共感 / 判断基準 / 実例 / 行動 / 1投稿1メッセージ / 思想 / 実績 / 事例 / 認識変化 / 信頼",
+      publishingUse: "媒体ごとに4種類の投稿を回し、反応だけでなく信頼と行動を設計する。",
+      useSubstack: "週1記事を判断基準、短い補足を共感や実例として出す。",
+      useNote: "事例記事と考え方記事を分け、読者が比較しやすくする。",
+      usePodcast: "悩み代弁回、判断基準回、事例回、行動案内回を作る。",
+      useLive: "配信内で共感、判断基準、実例、行動の順に話す。",
+      useNotes: "共感と行動の短文投稿を軽く出す。",
+      useX: "4種類の投稿を1週間で回し、固定投稿へ集約する。",
+      useAi: "AIに投稿カレンダーを作らせ、共感だけに偏っていないか確認する。",
+      contentIdeas: "4種類投稿カレンダー、1投稿1メッセージ練習帳、判断基準投稿テンプレートにできる。",
+      practiceTomorrow: "同じテーマで、共感投稿と判断基準投稿を1本ずつ作る。",
+      knowledgeTags: "投稿設計, 共感, 判断基準, 実例, 行動, 信頼構築",
+    },
+    {
+      ...common,
+      knowledgeName: "SNS資産はシリーズ化・まとめ記事化・実践書化・配布資料化で価値が跳ねる",
+      oneLineConclusion: "良い投稿は出して終わりではなく、形を変えるほど強い資産になる。",
+      knowledgeOverview: "反応のあった投稿は、関連投稿をつないでシリーズ化し、まとめ記事にして、実践書やPDF、配布資料へ再編集できる。集める、束ねる、名付けるだけで同じ情報の価値と権威性が上がり、無料入口や講座導線にもつながる。",
+      todayAction: "反応が良かった投稿を3本選び、1つの連載タイトルにまとめる。",
+      useScene: "Substack連載、noteマガジン、Podcastシリーズ、ライブ企画、無料PDF、Kindle、Brain、講座資料に使う。",
+      beginnerExplanation: "よく読まれた投稿を集めて名前をつけると、記事やPDFや講座の材料になるということ。",
+      articleIdeas: "SNS投稿をPDFに変える再編集術 / 反応の取れた投稿を講座にする方法",
+      podcastIdeas: "再編集で発信の価値が跳ねる / 投稿を実践書に育てる",
+      aiUseSimple: "AIに反応の良かった投稿を渡し、シリーズ名、目次、まとめ記事、PDF構成を作らせる。",
+      tagsSimple: "再編集, コンテンツ化, PDF化, シリーズ化, 講座化",
+      summary3Lines: "SNS投稿は再編集すると価値が上がる。シリーズ化、まとめ記事化、実践書化、配布資料化の順に資産度が増す。反応のある投稿を集め、束ね、名付けることで、無料入口や講座導線に転用できる。",
+      coreIdea: "コンテンツの価値は、情報そのものだけでなく編集のされ方で上がる。",
+      top10: "シリーズ化 / まとめ記事化 / 実践書化 / 配布資料化 / 再編集 / 名付け / 体系化 / PDF / 無料入口 / 講座化",
+      publishingUse: "投稿を素材として扱い、媒体をまたいで再編集して資産化する。",
+      useSubstack: "連載記事をPDF特典や有料記事の骨格にする。",
+      useNote: "マガジン化して、反応のあるテーマをBrainやKindleへ展開する。",
+      usePodcast: "シリーズ配信を文字起こしし、記事や講座台本へ変える。",
+      useLive: "ライブ内容をチェックリストやワークシートに変換する。",
+      useNotes: "短文メモを連載の種として保存する。",
+      useX: "スレッドや固定投稿からまとめ記事へ誘導する。",
+      useAi: "AIに投稿群を読み込ませ、目次、PDF、講座、メルマガの構成へ変換する。",
+      contentIdeas: "SNS資産化7日ロードマップ、投稿再編集テンプレート、無料PDF、Kindle、Brain、講座にできる。",
+      practiceTomorrow: "『シリーズ化できる投稿』を3本選び、まとめ記事の見出しを5つ作る。",
+      knowledgeTags: "再編集, コンテンツ化, PDF化, シリーズ化, 講座化, AI活用",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addSnsTrustAssetKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(SNS_TRUST_ASSET_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("SNS投稿は流れて消える情報ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "SNS資産";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "SNS資産を本の代わりにする信頼導線実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...snsTrustAssetKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "SNS資産";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "SNS資産を本の代わりにする信頼導線実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6109,6 +6266,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "copy-target") addCopyTargetKnowledgeSampleCards();
   if (seed === "trust-charisma") addTrustCharismaKnowledgeSampleCards();
   if (seed === "three-week-funnel") addThreeWeekFunnelKnowledgeSampleCards();
+  if (seed === "sns-trust-asset") addSnsTrustAssetKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
