@@ -5378,6 +5378,13 @@ textarea {
   gap: 12px;
 }
 
+.knowledge-base-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .knowledge-base-heading h3,
 .knowledge-base-block h4 {
   margin: 0;
@@ -6693,6 +6700,7 @@ button.launch-card {
   .reading-labo-kpi,
   .reading-labo-output-counts,
   .knowledge-base-heading,
+  .knowledge-base-actions,
   .knowledge-base-grid,
   .learning-asset-controls,
   .reading-queue-summary,

@@ -145,6 +145,7 @@ const LEARNING_ASSET_LEGACY_STATUS_MAP = {
 const LEARNING_ASSET_SOURCES = ["本", "PDF", "Kindle Unlimited", "Brain", "ポッドキャスト", "YouTube", "ライブ配信", "人との会話", "その他"];
 const LEARNING_ASSET_PUBLISHING_PLACES = ["Substack", "note", "Podcast", "ライブ配信", "WordPress", "X", "Notes", "Kindle", "Brain"];
 const LEARNING_ASSET_CONNECTIONS = ["発信", "AI", "ブランディング", "マーケティング", "心理", "習慣", "信頼構築", "コンテンツ化", "暮らし", "回復", "OS", "その他"];
+const FIRST_KNOWLEDGE_SAMPLE_TITLE = "AI時代の1行コンセプト設計";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -4078,6 +4079,126 @@ async function copyReadingLaboTemplate() {
   } catch (error) {
     if (status) status.textContent = "コピーできませんでした。テキストを選択してコピーしてください。";
   }
+}
+
+function firstKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: FIRST_KNOWLEDGE_SAMPLE_TITLE,
+    author: "",
+    genre: "発信 / AI / ライティング",
+    rating: "",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "X", "Notes"],
+    connectsTo: ["発信", "AI", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "AIに考えさせる前に、何を考えるかを決める",
+      knowledgeOverview: "AI時代は文章量より、最初に思考の芯を1行で決める力が重要になる。",
+      useScene: "Substack記事の企画、Podcastテーマ決め、X投稿、講座設計の最初の判断に使う。",
+      beginnerExplanation: "AIに文章を書いてもらう前に、誰に何を届けるかを自分で決めるということ。",
+      articleIdeas: "AIに書かせる前に決めるべき3つのこと / Substack初心者が最初に作る1行コンセプト",
+      podcastIdeas: "AI時代に残る人間の仕事 / 書く前に決める力",
+      aiUseSimple: "ChatGPTに本文を書かせる前に、ターゲット・状況・変化を整理させる。",
+      tagsSimple: "AI, 発信, ライティング, コンセプト設計, Substack",
+      summary3Lines: "情報が増えるほど、発信者には削る力が必要になる。AIは展開が得意だが、何を言うか決めるのは人間の役割。1行に絞ることで発信や企画が判断しやすくなる。",
+      coreIdea: "1行は人間の仕事。展開はAIの仕事。",
+      top10: "全員向けは刺さらない / 誰に届けるかを1人に絞る / 困っている瞬間を決める / Before Afterの変化を1つにする / 修飾語を削る / 判断できる1行にする",
+      publishingUse: "記事や配信の前に、読者が何を判断できるようになるかを1行で決める。",
+      useSubstack: "各号の冒頭に、誰の何を変える記事かを書く。",
+      useNote: "タイトルをテーマではなく読後の変化で作る。",
+      usePodcast: "1エピソード1テーマに絞り、聞いた後に試せることを決める。",
+      useLive: "配信前に視聴者が持ち帰る判断を1つにする。",
+      useNotes: "今日の発信テーマを1行にして投稿する。",
+      useX: "1ポスト1主張にし、誰に止まってほしいかを決める。",
+      useAi: "1行コンセプトを作ってから、AIにタイトル・構成・投稿展開を依頼する。",
+      contentIdeas: "記事、Podcast、Notes、X、講座、テンプレートに展開できる。",
+      practiceTomorrow: "次に書く投稿を、誰に・どの状況で・何が変わるかの1行にする。",
+      knowledgeTags: "AI, 発信, ライティング, コンセプト設計, Substack, 知識資産",
+    },
+    {
+      ...common,
+      knowledgeName: "伝わらない原因は情報不足ではなく、捨てきれていないこと",
+      knowledgeOverview: "説明を増やすほど伝わるのではなく、相手が判断できる材料だけ残すと伝わりやすくなる。",
+      useScene: "記事の導入、プロフィール、商品説明、ライブ告知、コミュニティ説明に使う。",
+      beginnerExplanation: "たくさん説明するより、相手が迷わない言い方にするということ。",
+      articleIdeas: "発信がぼやける人が最初に削るべき言葉 / 説明しすぎるほど伝わらない理由",
+      podcastIdeas: "情報を足すより削る / 相手が判断できる発信",
+      aiUseSimple: "AIに文章を短くするだけでなく、相手がYES/NO判断できるかを点検させる。",
+      tagsSimple: "信頼構築, 発信, マーケティング, ブランディング, ライティング",
+      summary3Lines: "情報爆発の時代は、相手の注意が少ない。発信者は言いたいことではなく、相手が知りたいことを残す必要がある。1行化は思考の交通整理になる。",
+      coreIdea: "相手に必要な判断材料だけを残す。",
+      publishingUse: "読者が迷わず判断できるよう、記事の結論と対象者を最初に出す。",
+      useSubstack: "ニュースレターの説明文を、誰のどんな迷いを解く場所かに変える。",
+      usePodcast: "タイトルを話題名ではなく、聞いた後の判断にする。",
+      useX: "1投稿に複数論点を入れず、1つの判断だけ残す。",
+      useAi: "AIに『この文章で読者は何を判断できますか』と確認させる。",
+      contentIdeas: "プロフィール添削、タイトル添削、告知文改善テンプレートにできる。",
+      practiceTomorrow: "直近の記事タイトルから抽象語を3つ削る。",
+      knowledgeTags: "信頼構築, 発信, マーケティング, ブランディング, ライティング",
+    },
+    {
+      ...common,
+      knowledgeName: "ターゲット・状況・変化を決めるとコンテンツが資産になる",
+      knowledgeOverview: "誰に、どの困りごとの瞬間で、何がどう変わるかを決めると、記事や商品に展開しやすくなる。",
+      useScene: "Substack初心者向け発信、講座づくり、KindleやBrainの商品設計に使う。",
+      beginnerExplanation: "書き始める前に、読む人・困っている場面・読んだ後の変化を決めること。",
+      articleIdeas: "Substack初心者のための1行コンセプト設計 / 発信テーマが決まらない時の3問",
+      podcastIdeas: "初心者が最初に決める読者像 / コンテンツを資産に変える問い",
+      aiUseSimple: "AIにターゲット、状況、変化を10案出させて、最後は自分で選ぶ。",
+      tagsSimple: "Substack, 初心者, コンテンツ化, 講座, Kindle, Brain",
+      summary3Lines: "1行コンセプトは、短い文章を作る技術ではなく、活用できる知識に変える設計。対象者と変化が決まると、媒体ごとに展開できる。複数の本を横断する知識カードにも向いている。",
+      coreIdea: "知識は、使う場面まで決めると資産になる。",
+      publishingUse: "1つの学びから記事、Podcast、Notes、X、講座の展開案を作る。",
+      useSubstack: "初心者向けに、毎回1つの迷いを解く記事にする。",
+      useNote: "発信テーマの決め方を体験談に変える。",
+      usePodcast: "1つの問いを音声で深掘りする。",
+      useNotes: "知識カードの要点を短いメモとして出す。",
+      useX: "知識カード1枚から3投稿を作る。",
+      useAi: "AIに知識カードを媒体別に展開させる。",
+      contentIdeas: "Substack初心者向けテンプレート、講座、Kindle、Brainにできる。",
+      practiceTomorrow: "Knowledge Laboに、この本から3枚の知識カードを作る。",
+      knowledgeTags: "Substack, 初心者, コンテンツ化, 講座, Kindle, Brain",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addFirstKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(FIRST_KNOWLEDGE_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("AIに考えさせる前に")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "1行コンセプト";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "1冊目サンプルはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...firstKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "1行コンセプト";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "1冊目サンプルを知識カードとして3件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function learningMatchesSearch(learning, query) {
@@ -13337,6 +13458,7 @@ function bindEvents() {
     });
   });
   $("#copyReadingLaboTemplate")?.addEventListener("click", copyReadingLaboTemplate);
+  $("#addConceptBookSample")?.addEventListener("click", addFirstKnowledgeSampleCards);
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
     const entry = currentLearningLogEntry();
     if (!entry) return;
