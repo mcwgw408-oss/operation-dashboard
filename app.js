@@ -160,6 +160,7 @@ const THREE_WEEK_FUNNEL_SAMPLE_TITLE = "3週間で参加者を集める発信導
 const SNS_TRUST_ASSET_SAMPLE_TITLE = "SNS資産を本の代わりにする信頼導線実践書";
 const SELLING_COPYWRITING_SAMPLE_TITLE = "売れるコピーライティング実践書";
 const FORBIDDEN_WORDS_SAMPLE_TITLE = "挑戦を止める7つの禁止コトバ 実践書";
+const TWELVE_QUESTIONS_SAMPLE_TITLE = "ピンチを行動に変える12の質問 実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -6563,10 +6564,166 @@ function addForbiddenWordsKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function twelveQuestionsKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: TWELVE_QUESTIONS_SAMPLE_TITLE,
+    author: "",
+    genre: "行動設計 / ピンチ対応 / 思考整理 / 習慣 / セルフコーチング",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["行動設計", "習慣", "心理", "セルフコーチング", "AI活用"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "ピンチの時は正解探しではなく、状態に合う質問を選ぶ",
+      oneLineConclusion: "止まる、揺れる、立て直すのどこにいるかを見て、質問を変える。",
+      knowledgeOverview: "ピンチの時にいきなり正解を探すと、感情や迷いで動けなくなる。まず今の状態を、止まった、揺れた、立て直すの3つに分ける。状態に合う質問を30秒で答え、最後に一文と明日の一手へ落とすことで、迷いを行動に変えやすくなる。",
+      todayAction: "今の自分が『止まる・揺れる・立て直す』のどれにいるかを1つ選び、該当する質問を1つだけ答える。",
+      useScene: "発信が止まった時、仕事で詰まった時、ライブ前に不安な時、Podcast企画が揺れた時、AI壁打ちで整理したい時に使う。",
+      beginnerExplanation: "困った時に全部解決しようとせず、まず今の状態に合う質問を1つ選ぶこと。",
+      articleIdeas: "ピンチの時に正解を探さない / 止まる・揺れる・立て直すで質問を変える",
+      podcastIdeas: "迷った時の質問の選び方 / ピンチを行動に変える30秒セルフコーチング",
+      aiUseSimple: "AIに『今の私は止まる・揺れる・立て直すのどれ？質問を1つ出して』と頼む。",
+      tagsSimple: "ピンチ対応, セルフコーチング, 行動設計, 思考整理, 習慣",
+      summary3Lines: "ピンチの時は正解探しをしない。今の状態を、止まる、揺れる、立て直すに分ける。状態に合う質問へ短く答え、最後に一文と明日の一手へ変換する。",
+      coreIdea: "行動できない時ほど、答えではなく問いを選ぶ。",
+      top10: "止まる / 揺れる / 立て直す / 12の質問 / 30秒 / 正解探しをしない / 一文 / 明日の一手 / 状態選択 / セルフコーチング",
+      publishingUse: "読者の状態別に、今使える質問を出すコンテンツにする。",
+      useSubstack: "週1で『今週の詰まりを1問で動かす』連載にする。",
+      useNote: "自分のピンチ対応ログとして、状態、質問、答え、一手を記録する。",
+      usePodcast: "悩みを3フェーズに分けて、毎回1つの質問を扱う。",
+      useLive: "視聴者のコメントを状態別に分け、その場で質問を投げる。",
+      useNotes: "今日の1問として短文投稿する。",
+      useX: "止まった時、揺れた時、立て直す時の質問をスレッド化する。",
+      useAi: "AIに状態判定と質問選定をさせ、答えを行動文へ整える。",
+      contentIdeas: "12の質問カード、30秒セルフコーチングテンプレート、ピンチ対応ワークシートにできる。",
+      practiceTomorrow: "朝に『今の状態はどれか』を選び、1問だけメモする。",
+      knowledgeTags: "ピンチ対応, セルフコーチング, 行動設計, 思考整理, 習慣, AI活用",
+    },
+    {
+      ...common,
+      knowledgeName: "止まった時は、詰まり・緊急度・最小の一歩・やらない理由を確認する",
+      oneLineConclusion: "止まった時は大きく考えず、今日始める一歩と時刻まで決める。",
+      knowledgeOverview: "止まった時の4問は、今一番の詰まりは何か、それは今日すぐ要ることか、今日の最小の一歩は何か、それをしない理由は何か。最後に『今日の一歩は［具体的な行動］。［時刻］に始める。』と書くことで、迷いを予定へ変換できる。",
+      todayAction: "止まっているタスクを1つ選び、『今日の一歩は〇〇。〇時に始める。』まで書く。",
+      useScene: "記事が書けない、配信準備が進まない、PDF整理が止まった、講座作成に着手できない場面で使う。",
+      beginnerExplanation: "やる気を待つのではなく、いま一番小さくできる行動と開始時刻を決めること。",
+      articleIdeas: "止まった時に使う4つの質問 / 今日の一歩を予定に入れる方法",
+      podcastIdeas: "行動が止まった時の再起動法 / 最小の一歩と時刻を決める",
+      aiUseSimple: "AIに止まっているタスクを渡し、詰まり、緊急度、最小行動、開始時刻の案を出させる。",
+      tagsSimple: "行動再開, 最小行動, 先延ばし, タスク管理, 習慣",
+      summary3Lines: "止まった時は、詰まりの正体と今日必要かを確認する。次に今日の最小の一歩と、それをしない理由を見る。最後に具体的な行動と時刻を書いて、予定へ入れる。",
+      coreIdea: "止まった行動は、最小化して時刻を決めると動き出す。",
+      top10: "詰まり / 今日必要か / 最小の一歩 / しない理由 / 具体的な行動 / 時刻 / 予定化 / 先延ばし / 再起動 / 30秒",
+      publishingUse: "初心者に、行動が止まった時の1行テンプレートとして渡す。",
+      useSubstack: "記事末に『今日の一歩』欄を作る。",
+      useNote: "作業ログに、詰まりと開始時刻を書いて公開する。",
+      usePodcast: "収録前に最小の台本メモだけ作る話題にする。",
+      useLive: "ライブ前の不安を、最小準備と開始時刻へ変える。",
+      useNotes: "今日の一歩を宣言する短文にする。",
+      useX: "『今日の一歩は〇〇。〇時に始める』の型で投稿する。",
+      useAi: "AIにタスクを15分行動へ分解させ、カレンダー文にする。",
+      contentIdeas: "今日の一歩テンプレート、先延ばし再起動シート、30秒行動宣言チャレンジにできる。",
+      practiceTomorrow: "朝一番に1つだけ『今日の一歩』を時刻つきで書く。",
+      knowledgeTags: "行動再開, 最小行動, 先延ばし, タスク管理, 習慣, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "揺れた時は、事実と解釈を分けて今やる一手だけに戻る",
+      oneLineConclusion: "不安を消してから動くのではなく、事実を見て一手だけ決める。",
+      knowledgeOverview: "揺れた時の4問は、それは事実か解釈か、最悪の場合何が起きるか、それは本当に致命的か、それでも残るものは何か。感情と事実を切り離し、『事実は［事実］。今やるのは［一手］。』と書くと、不安に巻き込まれず行動へ戻れる。",
+      todayAction: "不安なことを1つ選び、事実と解釈に分けてから『今やる一手』を1つだけ書く。",
+      useScene: "反応が少ない投稿、失敗した企画、批判への不安、売上が伸びない時、ライブや講座前の緊張に使う。",
+      beginnerExplanation: "不安な気持ちと、実際に起きている事実を分けて見ること。",
+      articleIdeas: "不安な時は事実と解釈を分ける / 揺れた心を行動に戻す4つの質問",
+      podcastIdeas: "反応が少ない時に自分を責めない / 事実と解釈の切り分け方",
+      aiUseSimple: "AIに不安を書き出し、事実、解釈、最悪ケース、今やる一手に整理させる。",
+      tagsSimple: "不安整理, 事実と解釈, 感情整理, 行動設計, 心理",
+      summary3Lines: "揺れた時は、事実と解釈を分ける。最悪の場合と致命度を確認し、それでも残るものを見る。最後に今やる一手だけを決めると、感情に飲まれず動ける。",
+      coreIdea: "不安は消す対象ではなく、事実と行動に分ける対象である。",
+      top10: "事実 / 解釈 / 最悪の場合 / 致命的か / 残るもの / 感情整理 / 一手 / 不安 / ピンチ / 行動",
+      publishingUse: "発信の反応や失敗を、落ち込みではなく検証ログに変える。",
+      useSubstack: "低反応の記事を、事実、解釈、次の一手で振り返る。",
+      useNote: "不安の整理記事として、事実と解釈の表を載せる。",
+      usePodcast: "失敗や不安を事実と解釈に分けて話す回を作る。",
+      useLive: "視聴者の悩みを事実と解釈に分けて整理する。",
+      useNotes: "不安な時の1問『それは事実？解釈？』を投稿する。",
+      useX: "不安を一手に変えるテンプレートを投稿する。",
+      useAi: "AIに感情的な文章を整理させ、事実と次の一手だけに圧縮する。",
+      contentIdeas: "事実と解釈の分解シート、不安整理テンプレート、反応が少ない時の振り返り表にできる。",
+      practiceTomorrow: "不安を1つ、事実と解釈に分けてメモする。",
+      knowledgeTags: "不安整理, 事実と解釈, 感情整理, 行動設計, 心理, AI活用",
+    },
+    {
+      ...common,
+      knowledgeName: "立て直す時は、経験を学びと言葉にして明日の一手へつなげる",
+      oneLineConclusion: "失敗やピンチは、学びを一言にして次の行動へ渡すと資産になる。",
+      knowledgeOverview: "立て直す時の4問は、この経験で身についたことは何か、次に同じ状況なら最初に何をするか、今日の学びを一言で言うと何か、明日の一手は何か。最後に『学びは［一言］。明日は［行動］をやる。』と書くと、経験を次の行動に接続できる。",
+      todayAction: "最近の失敗や停滞を1つ選び、『学びは〇〇。明日は〇〇をやる。』に変える。",
+      useScene: "企画後の振り返り、発信改善、ライブ後レビュー、Podcast配信後、講座改善、AI活用ログに使う。",
+      beginnerExplanation: "うまくいかなかったことを責めず、次に使える学びと明日の行動に変えること。",
+      articleIdeas: "失敗を学びに変える4つの質問 / ピンチを資産化する振り返り",
+      podcastIdeas: "立て直す力の作り方 / 経験を次の行動に変える",
+      aiUseSimple: "AIに失敗ログを渡し、身についたこと、次回の初動、学びの一言、明日の一手を出させる。",
+      tagsSimple: "振り返り, 学び, 失敗活用, 行動改善, 習慣",
+      summary3Lines: "立て直す時は、経験から身についたことを言語化する。次に同じ状況なら何から始めるかを決める。学びを一言にし、明日の一手へつなげるとピンチが資産になる。",
+      coreIdea: "経験は、学びと言葉と次の一手に変えて初めて資産になる。",
+      top10: "立て直す / 身についたこと / 次回の初動 / 学びの一言 / 明日の一手 / 振り返り / 失敗活用 / 経験 / 改善 / 資産化",
+      publishingUse: "失敗談を、読者に役立つ学びと次の行動へ変換して発信する。",
+      useSubstack: "週次ふり返り記事で、学びと明日の一手を固定項目にする。",
+      useNote: "失敗や停滞のログを、学び記事へ変える。",
+      usePodcast: "今週の学びと次の一手を話す定番コーナーにする。",
+      useLive: "ライブ後に、学びと次回改善を視聴者に共有する。",
+      useNotes: "今日の学びを一言で投稿する。",
+      useX: "『学びは〇〇。明日は〇〇』の型で連投する。",
+      useAi: "AIに振り返りを資産化し、記事、投稿、講座改善案へ展開させる。",
+      contentIdeas: "週次ふり返りテンプレート、ピンチ資産化シート、失敗談コンテンツ化講座にできる。",
+      practiceTomorrow: "夜に『学びは〇〇。明日は〇〇』を1行で書く。",
+      knowledgeTags: "振り返り, 学び, 失敗活用, 行動改善, 習慣, コンテンツ化",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addTwelveQuestionsKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(TWELVE_QUESTIONS_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("ピンチの時は正解探しではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "ピンチ対応";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "ピンチを行動に変える12の質問実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...twelveQuestionsKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "ピンチ対応";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "ピンチを行動に変える12の質問実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6583,6 +6740,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "sns-trust-asset") addSnsTrustAssetKnowledgeSampleCards();
   if (seed === "selling-copywriting") addSellingCopywritingKnowledgeSampleCards();
   if (seed === "forbidden-words") addForbiddenWordsKnowledgeSampleCards();
+  if (seed === "twelve-questions") addTwelveQuestionsKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
