@@ -159,6 +159,7 @@ const TRUST_CHARISMA_SAMPLE_TITLE = "信頼で選ばれるカリスマ設計実�
 const THREE_WEEK_FUNNEL_SAMPLE_TITLE = "3週間で参加者を集める発信導線実践書";
 const SNS_TRUST_ASSET_SAMPLE_TITLE = "SNS資産を本の代わりにする信頼導線実践書";
 const SELLING_COPYWRITING_SAMPLE_TITLE = "売れるコピーライティング実践書";
+const FORBIDDEN_WORDS_SAMPLE_TITLE = "挑戦を止める7つの禁止コトバ 実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -6406,10 +6407,166 @@ function addSellingCopywritingKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function forbiddenWordsKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: FORBIDDEN_WORDS_SAMPLE_TITLE,
+    author: "",
+    genre: "行動設計 / チーム運営 / 思考整理 / 合意形成 / 習慣",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "4",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["行動設計", "習慣", "心理", "チーム運営", "AI活用"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "挑戦を止める言葉は、感情ではなく思考停止スイッチとして扱う",
+      oneLineConclusion: "ネガティブな言葉を責めるのではなく、思考が止まった合図として使う。",
+      knowledgeOverview: "できない、やれない、わからない、でも、だって、とりあえず、しょうがないは悪い言葉そのものではない。ただ、その後に思考停止、責任回避、現状維持が続きやすい。言葉を感情論で裁くのではなく、思考を再起動するための検知サインとして扱うことが重要。",
+      todayAction: "今日の発信やメモで、7つの禁止コトバが出たら丸をつけ、すぐ問いに変換する。",
+      useScene: "企画会議、発信の継続、講座運営、相談対応、AIとの壁打ち、コミュニティの合意形成に使う。",
+      beginnerExplanation: "『できない』と言った自分を責めるのではなく、『今、考えるのを止めかけている』と気づくこと。",
+      articleIdeas: "挑戦を止める7つの言葉 / ネガティブ言葉を思考停止サインに変える方法",
+      podcastIdeas: "言葉が行動を止める瞬間 / できないを責めずに再起動する",
+      aiUseSimple: "AIに自分のメモや相談文を渡し、思考停止ワードと問いへの変換案を抽出させる。",
+      tagsSimple: "思考停止, 行動設計, 習慣, 心理, 合意形成",
+      summary3Lines: "挑戦を止める言葉は、気持ちの弱さではなく思考停止のサインとして見る。7つの言葉は、判断を自動終了させる危険がある。禁止の目的は縛ることではなく、止まりかけた思考を再起動すること。",
+      coreIdea: "言葉は思考を止めるスイッチにも、再起動するスイッチにもなる。",
+      top10: "できない / やれない / わからない / でも / だって / とりあえず / しょうがない / 思考停止 / 再起動 / 合意形成",
+      publishingUse: "発信で初心者が止まりやすい言葉を拾い、責めずに問いへ変換する記事や投稿を作る。",
+      useSubstack: "読者の行動が止まる言葉をテーマに連載し、毎回1つの問いを提示する。",
+      useNote: "自分の挑戦ログとして、止まった言葉と再起動した問いを記録する。",
+      usePodcast: "挑戦が止まる口ぐせを1回1テーマで話す。",
+      useLive: "視聴者の『できない』コメントを問いに変えて、その場で行動案にする。",
+      useNotes: "7つの言葉を短文投稿シリーズにする。",
+      useX: "禁止コトバと変換質問をセットで投稿する。",
+      useAi: "AIに『この文章の思考停止ポイントを問いに変えて』と依頼する。",
+      contentIdeas: "禁止コトバ診断、思考再起動カード、7日間言い換えチャレンジ、チーム会議ルールにできる。",
+      practiceTomorrow: "『できない』を使ったら、『何が足りていないのか？』に言い換える。",
+      knowledgeTags: "思考停止, 行動設計, 習慣, 心理, 合意形成, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "できない・やれないは、可能性ゼロではなく条件整理に変換する",
+      oneLineConclusion: "できないで終わらせず、何が足りないか、どこまでならできるかを見る。",
+      knowledgeOverview: "できないは可能性探索の終了、やれないは現状維持バイアスとして働く。そこで、何が足りていないのか、どこまでならできるか、いつならやれるか、何を削ればできるかに変換する。0か100かではなく、条件と範囲を整理すると小さな実行が見える。",
+      todayAction: "先延ばししていることを1つ選び、『どこまでならできるか』を15分単位で書く。",
+      useScene: "新企画、Substack開始、Podcast収録、ライブ配信、講座作成、家事や生活改善の着手に使う。",
+      beginnerExplanation: "全部できないと思ったら、全部ではなく一部ならできるかを探すこと。",
+      articleIdeas: "できないを条件整理に変える / やれない時に使う3つの質問",
+      podcastIdeas: "0か100か思考から抜ける / やれないを小さな実行に変える",
+      aiUseSimple: "AIに目標と制約を渡し、足りない条件、削るもの、最小実行案を出させる。",
+      tagsSimple: "条件整理, 小さな実行, 先延ばし, 行動設計, 習慣",
+      summary3Lines: "できない、やれないは行動を止めやすい。問いに変えると、不足条件、可能範囲、時間軸、トレードオフが見える。全部やる前に、どこまでならできるかを決めることが前進になる。",
+      coreIdea: "不可能の宣言ではなく、実行条件の分解に変える。",
+      top10: "できない / やれない / 不足要素 / どこまでなら / いつなら / 何を削る / 条件整理 / トレードオフ / 小さな実行 / 0か100か",
+      publishingUse: "初心者向けに、大きな目標を15分行動へ分解するテンプレートとして使う。",
+      useSubstack: "記事作成を構成、見出し、冒頭だけなど小さな工程に分ける。",
+      useNote: "書けない時に、タイトル案だけ出す、メモだけ残す運用にする。",
+      usePodcast: "収録できない時に、3分メモ音声だけ録る。",
+      useLive: "長時間配信ではなく、15分テーマ配信にする。",
+      useNotes: "1行だけ今日できることを投稿する。",
+      useX: "大きな挑戦を小さな実行に分解する投稿にする。",
+      useAi: "AIに『この目標を15分でできる最小行動に分けて』と頼む。",
+      contentIdeas: "15分実行テンプレート、できない変換ワーク、先延ばし解消ミニ講座にできる。",
+      practiceTomorrow: "やれない理由を1つ書き、何を削ればできるかを1つ決める。",
+      knowledgeTags: "条件整理, 小さな実行, 先延ばし, 行動設計, 習慣, AI活用",
+    },
+    {
+      ...common,
+      knowledgeName: "わからない・でも・だっては、分解・条件検討・主語を戻す問いに変える",
+      oneLineConclusion: "否定や言い訳を、理解の分解と自分の選択に戻す。",
+      knowledgeOverview: "わからないは学習停止、でもは反射的な否定、だっては他責や過去依存につながりやすい。何が分かっていないのか、どの条件なら成り立つか、今の自分はどうしたいかに変えると、未知を分解し、可能性を残し、主語を自分に戻せる。",
+      todayAction: "『わからない』と思ったテーマを、分かっていること、分からないこと、調べれば分かることに分ける。",
+      useScene: "AI学習、Substack設定、発信テーマ決め、読者相談、企画レビュー、コミュニティ内の対話に使う。",
+      beginnerExplanation: "わからないで止まらず、『何がわからないか』まで小さくすること。",
+      articleIdeas: "わからないを分解するだけで前に進む / でもを建設的な条件検討に変える",
+      podcastIdeas: "反射的な否定をやめる方法 / 主語を自分に戻す問い",
+      aiUseSimple: "AIに『分かっていること・不明点・調べる手順』の表を作らせる。",
+      tagsSimple: "学習, 分解思考, 主体性, フィードバック, 心理",
+      summary3Lines: "わからない、でも、だっては思考を閉じやすい。分からない部分を特定し、成立条件を探し、自分が今選べることに戻す。否定や言い訳を、次の問いへ変えることで前進できる。",
+      coreIdea: "思考を閉じる言葉は、問いにすると学習と対話の入口になる。",
+      top10: "わからない / でも / だって / 分解 / 既知と未知 / 成立条件 / 前提変更 / 主語を戻す / 過去依存 / 主体性",
+      publishingUse: "初心者がつまずく場面を『何が分からないか』から整理する解説にする。",
+      useSubstack: "読者の質問を、既知、未知、次の一歩に分けて回答する。",
+      useNote: "学習ログで、分からなかったことと調べた手順を書く。",
+      usePodcast: "つまずきの分解回、言い訳を選択に変える回を作る。",
+      useLive: "質問を受けたら、すぐ答えずに不明点を分解する。",
+      useNotes: "『でも』を『どの条件なら？』に変える短文を出す。",
+      useX: "わからない時の3分解テンプレートを投稿する。",
+      useAi: "AIに否定文を建設的な問いへ変換させる。",
+      contentIdeas: "わからない分解シート、フィードバック言い換え表、初心者向け学習ロードマップにできる。",
+      practiceTomorrow: "『でも』が出たら、『どの条件なら成り立つか？』を1回だけ書く。",
+      knowledgeTags: "学習, 分解思考, 主体性, フィードバック, 心理, コミュニティ",
+    },
+    {
+      ...common,
+      knowledgeName: "とりあえず・しょうがないは、目的・期限・検証条件と学びに戻す",
+      oneLineConclusion: "惰性で動かず、目的と期限を決めて、結果を学びに変える。",
+      knowledgeOverview: "とりあえずは判断の先送りや検証不能な行動につながり、しょうがないは主体性の放棄や学習機会の消失につながる。目的は何か、期限はいつか、検証できるか、自分で変えられる部分はどこか、次に活かせる学びは何かに変換すると、行動の質が上がる。",
+      todayAction: "今日やる作業を1つ選び、目的、期限、成功条件、撤退ラインを1行ずつ書く。",
+      useScene: "発信計画、実験ログ、AI活用、会議運営、プロジェクト管理、講座改善、ライブ企画に使う。",
+      beginnerExplanation: "なんとなく始める前に、何のために、いつまでに、何を見て成功とするかを決めること。",
+      articleIdeas: "とりあえずを検証可能な行動に変える / しょうがないを学びに変える振り返り術",
+      podcastIdeas: "惰性の行動をやめる / 失敗を次の資産にする問い",
+      aiUseSimple: "AIに行動案を渡し、目的、期限、検証条件、振り返り質問を作らせる。",
+      tagsSimple: "検証, 実験, 振り返り, プロジェクト管理, 習慣",
+      summary3Lines: "とりあえずは行動しているようで判断を先送りしやすい。しょうがないは関与と学習を手放しやすい。目的、期限、検証条件、変えられる範囲、次の学びに戻すと行動が資産になる。",
+      coreIdea: "行動は目的と検証条件があると、失敗しても学びになる。",
+      top10: "とりあえず / しょうがない / 目的 / 期限 / 検証条件 / 成功条件 / 撤退ライン / 変えられる範囲 / 学び / 振り返り",
+      publishingUse: "発信や仕事を実験として扱い、結果を記録して次の改善に変える。",
+      useSubstack: "記事ごとに目的と反応指標を決め、翌週に振り返る。",
+      useNote: "実験記事として、仮説、実行、結果、学びを書く。",
+      usePodcast: "配信前にテーマの目的とリスナーの行動を決める。",
+      useLive: "ライブごとに目的、終了時刻、次の導線を決める。",
+      useNotes: "小さな実験結果を短文で残す。",
+      useX: "検証中の発信テーマを投稿し、反応を学びにする。",
+      useAi: "AIに週次振り返りを渡し、次の改善案を3つ出させる。",
+      contentIdeas: "発信実験ログ、週次ふり返りテンプレート、目的・期限・検証条件シートにできる。",
+      practiceTomorrow: "1つの投稿に目的と検証条件を決めてから出す。",
+      knowledgeTags: "検証, 実験, 振り返り, プロジェクト管理, 習慣, AI活用",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addForbiddenWordsKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(FORBIDDEN_WORDS_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("挑戦を止める言葉は")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "思考停止";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "挑戦を止める7つの禁止コトバ実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...forbiddenWordsKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "思考停止";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "挑戦を止める7つの禁止コトバ実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6425,6 +6582,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "three-week-funnel") addThreeWeekFunnelKnowledgeSampleCards();
   if (seed === "sns-trust-asset") addSnsTrustAssetKnowledgeSampleCards();
   if (seed === "selling-copywriting") addSellingCopywritingKnowledgeSampleCards();
+  if (seed === "forbidden-words") addForbiddenWordsKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
