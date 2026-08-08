@@ -154,6 +154,7 @@ const STORY_PROFILE_SAMPLE_TITLE = "AI時代の自己紹介・発信を物語に
 const CONCEPT_DESIGN_SAMPLE_TITLE = "令和版・コンセプト設計 実践書";
 const VALUE_OS_SAMPLE_TITLE = "令和版 価値で選ばれる思考OS実践書";
 const ACTION_PROFILE_SAMPLE_TITLE = "行動を生む自己紹介 実践書";
+const COPY_TARGET_SAMPLE_TITLE = "売れる文章は接点で決まる 商品×ターゲット設計 実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -5614,10 +5615,173 @@ function addActionProfileKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function copyTargetKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: COPY_TARGET_SAMPLE_TITLE,
+    author: "",
+    genre: "コピーライティング / 商品設計 / ターゲット設計 / マーケティング / 発信導線",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "売れる文章は書き方ではなく、商品理解・相手理解・接点発見で決まる",
+      oneLineConclusion: "売れる文章はうまい言い回しではなく、商品価値と相手の願望が重なる接点の翻訳である。",
+      knowledgeOverview: "文章が売れない原因は、表現力不足よりも設計不足にある。商品を深く理解し、相手の悩みや感情を言語化し、その両者が重なる接点を相手の言葉に翻訳すると、自然に反応される文章になる。",
+      todayAction: "今売りたい商品や企画を1つ選び、『商品理解・相手理解・接点』の3列でメモする。",
+      useScene: "Substack有料導線、募集文、固定投稿、講座LP、相談メニュー、Podcast告知、X投稿に使う。",
+      beginnerExplanation: "売れる文章はかっこいい文章ではなく、『相手が欲しい変化』と『商品ができること』が重なる場所を言葉にしたもの。",
+      articleIdeas: "売れる文章は書き方より接点で決まる / 文章がうまいのに売れない理由",
+      podcastIdeas: "コピーライティングの前にやるべき3つの設計 / 接点が見えると文章は変わる",
+      aiUseSimple: "AIに商品説明と読者像を渡し、商品理解・相手理解・接点を表に整理させる。",
+      tagsSimple: "コピーライティング, 接点, 商品理解, ターゲット理解, マーケティング",
+      summary3Lines: "売れる文章は、書き方より設計で決まる。商品理解、ターゲット理解、接点発見が浅いと、文章は一方通行になる。商品価値と相手の悩みや願望が重なる翻訳地点を見つけると、相手が自分ごととして反応する。",
+      coreIdea: "書き方の前に、商品と相手と接点を設計する。",
+      top10: "商品理解 / ターゲット理解 / 接点発見 / 変化 / 悩み / 感情 / 願望 / 翻訳地点 / 相手の言葉 / 設計",
+      publishingUse: "記事や募集文を書く前に、読者の悩みと自分の提供価値が重なる一点を決める。",
+      useSubstack: "有料記事やニュースレターの説明文を、機能説明ではなく読者の変化から書く。",
+      useNote: "商品紹介記事を、商品の特徴ではなく読者の悩みから始める。",
+      usePodcast: "告知文で、今回聴くと何が解決するかを先に出す。",
+      useLive: "ライブ告知を、話す内容ではなく参加者の悩みと変化で組む。",
+      useNotes: "接点の一文を短く投稿して反応を見る。",
+      useX: "『売れる文章は書き方ではなく接点』の切り口で投稿する。",
+      useAi: "AIに商品価値、相手の悩み、相手の願望を3つずつ出させ、最も強い接点を選ぶ。",
+      contentIdeas: "接点発見テンプレート、募集文添削、商品理解ワーク、Substack有料導線講座にできる。",
+      practiceTomorrow: "次に売りたいものについて、商品価値3つ、相手の悩み3つ、願望3つを書き出す。",
+      knowledgeTags: "コピーライティング, 接点, 商品理解, ターゲット理解, マーケティング, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "商品理解は、特徴ではなく相手に起きる変化まで言える状態",
+      oneLineConclusion: "商品説明を売る側の言葉から、買った後の変化に翻訳する。",
+      knowledgeOverview: "商品理解とは、何をする商品かだけでなく、相手にどんな変化が起きるか、他と何が違うか、なぜ今必要か、向いている人と向いていない人は誰かまで言える状態。特徴ではなく変化で語るほど、文章は相手に届く。",
+      todayAction: "自分の商品や発信メニューについて、『買った後、何が楽になるか』『何を失わずに済むか』を書く。",
+      useScene: "商品ページ、講座説明、相談メニュー、メルマガ案内、記事導入、ライブ販売導線に使う。",
+      beginnerExplanation: "商品の機能を説明するだけではなく、それを使うと相手の日常や仕事がどう楽になるかを書く。",
+      articleIdeas: "商品説明が売れない理由は特徴ばかりだから / 変化で語る商品理解ワーク",
+      podcastIdeas: "特徴を変化に翻訳する / 買った後に何が楽になるのか",
+      aiUseSimple: "AIに機能一覧を渡し、『相手に起きる変化』『楽になること』『防げる損失』に変換させる。",
+      tagsSimple: "商品理解, 変化, ベネフィット, 商品設計, セールス",
+      summary3Lines: "商品理解はスペック把握ではない。相手に起きる大きな変化、小さな変化、違い、必要なタイミング、向き不向きまで言えること。商品を変化で語ると、売る側の説明から相手側の言葉に近づく。",
+      coreIdea: "特徴より、買った後の変化を書く。",
+      top10: "商品名 / 何をする商品か / 大きな変化 / 小さな変化 / 違い / なぜ今必要か / 向いている人 / 向いていない人 / 楽になること / 失わずに済むこと",
+      publishingUse: "発信や商品紹介で、機能紹介の前に読者のBefore/Afterを示す。",
+      useSubstack: "有料購読の説明を、読める内容ではなく読者が得る変化で書く。",
+      useNote: "商品紹介記事に『向いている人・向いていない人』を入れる。",
+      usePodcast: "サービス説明回で、機能ではなく変化の事例を話す。",
+      useLive: "販売ライブで、買った後に楽になることを具体的に話す。",
+      useNotes: "商品特徴を1つ選び、相手の変化に言い換える投稿をする。",
+      useX: "『機能: ○○ → 変化: △△』型の投稿にする。",
+      useAi: "AIに特徴をベネフィット、リスク回避、時間短縮、苦痛除去へ分解させる。",
+      contentIdeas: "商品理解10問シート、特徴から変化への翻訳テンプレート、商品ページ改善講座にできる。",
+      practiceTomorrow: "商品の特徴を3つ選び、それぞれ『だから相手はどう変わるか』を1文にする。",
+      knowledgeTags: "商品理解, 変化, ベネフィット, 商品設計, セールス, マーケティング",
+    },
+    {
+      ...common,
+      knowledgeName: "ターゲット理解は属性ではなく、頭の中と感情を言語化すること",
+      oneLineConclusion: "年齢や職業より、相手が夜に何でモヤモヤしているかを書く。",
+      knowledgeOverview: "ターゲット理解は、30代女性や会社員といったプロフィール設定では足りない。今の状況、困りごと、恐れ、本当の願望、止まっている言い訳、反応する言葉や冷める言葉まで掘ることで、相手の言葉に近づける。",
+      todayAction: "読者やお客さんを1人思い浮かべ、『何を怖がっているか』『本当はどうなりたいか』を書く。",
+      useScene: "記事企画、募集文、固定投稿、Substack読者設計、Podcastテーマ、講座LP、相談メニューに使う。",
+      beginnerExplanation: "ターゲット設定は年齢や肩書きではなく、その人が何に困って、どんな言葉に反応するかを考えること。",
+      articleIdeas: "ターゲットは属性ではなく頭の中で決まる / 読者のモヤモヤを言葉にする方法",
+      podcastIdeas: "読者理解はプロフィール設定で終わらない / 相手の冷める言葉を知る",
+      aiUseSimple: "AIに読者像を渡し、悩み、恐れ、願望、言い訳、反応する言葉、冷める言葉を出させる。",
+      tagsSimple: "ターゲット理解, 読者理解, 感情, ペルソナ, 発信",
+      summary3Lines: "ターゲット理解は属性分類ではなく、相手の頭の中と感情を言語化すること。何に困り、何を恐れ、何を望み、何を言い訳に止まっているかを見る。相手の言葉に近づくほど、文章は押し売りではなく自分ごとになる。",
+      coreIdea: "相手の属性ではなく、相手の内側の言葉を書く。",
+      top10: "今の状況 / 困りごと / 進まない原因 / 恐れ / 願望 / 諦め / 反応する言葉 / 冷める言葉 / 試してダメだったこと / 捨てたくない希望",
+      publishingUse: "記事の冒頭を、読者が普段言えずにいるモヤモヤから始める。",
+      useSubstack: "読者像を『属性』ではなく『悩みと言葉』で保存し、連載テーマに反映する。",
+      useNote: "読者の本音を見出しに入れる。",
+      usePodcast: "リスナーの言えない悩みをテーマにする。",
+      useLive: "参加者のモヤモヤを事前に質問として集める。",
+      useNotes: "読者が反応しそうな一言を短文でテストする。",
+      useX: "『○○で止まってる人へ』型の投稿を作る。",
+      useAi: "AIに読者インタビュー役をさせ、深掘り質問を10個作らせる。",
+      contentIdeas: "読者理解10問シート、冷める言葉チェックリスト、発信ペルソナ再設計ワークにできる。",
+      practiceTomorrow: "自分の読者が『人に言えずにいること』を5個書く。",
+      knowledgeTags: "ターゲット理解, 読者理解, 感情, ペルソナ, 発信, 信頼構築",
+    },
+    {
+      ...common,
+      knowledgeName: "接点は、商品価値と相手の悩み・願望が重なる翻訳地点",
+      oneLineConclusion: "接点を1行にすると、見出し、VSL冒頭、募集文、固定投稿に展開できる。",
+      knowledgeOverview: "接点は商品の特徴そのものではなく、商品価値、相手の悩み、相手の願望が重なる場所。接点を1文に圧縮し、相手、変化、方法を加えると、見出しや募集文、固定投稿、VSL冒頭に横展開できる。",
+      todayAction: "商品価値1つと相手の悩み1つを選び、『○○な人でも△△できる』の1文にする。",
+      useScene: "記事タイトル、X投稿、Substack固定導線、募集文、VSL冒頭、LP見出し、Podcastタイトルに使う。",
+      beginnerExplanation: "商品の良さをそのまま言うのではなく、相手が『それ私のことだ』と思える言葉に変えること。",
+      articleIdeas: "接点を見つけるとタイトルが決まる / 売れる募集文は接点の順番で作る",
+      podcastIdeas: "相手が自分のことだと思う言葉 / 接点からVSL冒頭を作る",
+      aiUseSimple: "AIに接点の1文を、見出し、VSL冒頭、募集文、固定投稿、X投稿に展開させる。",
+      tagsSimple: "接点, 見出し, VSL, 募集文, 固定投稿",
+      summary3Lines: "接点は商品価値と相手の悩み、願望が重なる翻訳地点。接点がずれると、反応はあっても申込につながらない。接点を1行にしてから、媒体ごとの温度に合わせて見出し、冒頭、募集文、固定投稿へ変換する。",
+      coreIdea: "接点を見つけ、相手の言葉に翻訳してから文章にする。",
+      top10: "商品価値 / 相手の悩み / 相手の願望 / 翻訳地点 / 1行化 / 見出し / 問題提起 / 誤解の指摘 / 新しい視点 / 媒体ごとの温度",
+      publishingUse: "1つの接点から複数媒体へ展開し、段階的に信頼を積む。",
+      useSubstack: "接点を有料導線の見出し、記事冒頭、固定案内に分けて使う。",
+      useNote: "接点を記事タイトルと冒頭の問題提起に入れる。",
+      usePodcast: "接点を回タイトルと冒頭の問いにする。",
+      useLive: "ライブ告知を『問題提起、誤解、新視点』で作る。",
+      useNotes: "接点1行を投稿し、反応がある表現を固定投稿に育てる。",
+      useX: "接点を『まだ○○で止まってる？』型に変換する。",
+      useAi: "AIに接点が売る側の言葉になっていないか、痛みが浅くないかを点検させる。",
+      contentIdeas: "接点1行メーカー、VSL冒頭テンプレート、募集文3ブロックテンプレート、固定投稿6ステップ講座にできる。",
+      practiceTomorrow: "接点1行を1つ作り、それを記事見出し、X投稿、募集文冒頭に変換する。",
+      knowledgeTags: "接点, 見出し, VSL, 募集文, 固定投稿, マーケティング, Substack",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addCopyTargetKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(COPY_TARGET_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("売れる文章は書き方ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "接点";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "売れる文章は接点で決まる実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...copyTargetKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "接点";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "売れる文章は接点で決まる実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -5628,6 +5792,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "concept-design") addConceptDesignKnowledgeSampleCards();
   if (seed === "value-os") addValueOsKnowledgeSampleCards();
   if (seed === "action-profile") addActionProfileKnowledgeSampleCards();
+  if (seed === "copy-target") addCopyTargetKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
