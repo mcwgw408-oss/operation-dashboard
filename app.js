@@ -148,6 +148,7 @@ const LEARNING_ASSET_CONNECTIONS = ["発信", "AI", "ブランディング", "�
 const FIRST_KNOWLEDGE_SAMPLE_TITLE = "AI時代の1行コンセプト設計";
 const SMALL_BIZ_SAMPLE_TITLE = "AI時代の小さく始めるスモビジ実践書";
 const PSYCHOLOGY_SAMPLE_TITLE = "人生とビジネスに効く「10の心理学」実践書";
+const TREASURE_SAMPLE_TITLE = "AI時代の宝探し実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -4639,14 +4640,175 @@ function addPsychologyKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function treasureKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: TREASURE_SAMPLE_TITLE,
+    author: "",
+    genre: "AI / コンテンツ / 事業テーマ選定",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "4",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "マーケティング", "ブランディング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "海外事例は探すより、自分の人生で語れるものを選ぶ",
+      oneLineConclusion: "AI時代の宝探しは、流行探しではなく、自分の人生で語れるテーマ選びである。",
+      knowledgeOverview: "海外の成功事例は、そのまま日本に持ち込んでも続かないことがある。市場性や利益構造だけでなく、自分の痛み・物語・思想と接続しているかが重要になる。",
+      todayAction: "気になっている海外事例を1つ選び、『自分の人生を使って語れる理由』を3行で書く。",
+      useScene: "海外トレンド調査、Substackテーマ選定、Brain企画、講座テーマ、Podcastシリーズの候補選びに使う。",
+      beginnerExplanation: "儲かりそうだから選ぶのではなく、自分が長く語れる理由があるかを見るということ。",
+      articleIdeas: "海外で流行っているだけのテーマが続かない理由 / AI時代の宝探しは探すより選ぶ",
+      podcastIdeas: "海外事例を日本で活かす前に見るべきこと / 自分の人生で語れるテーマとは",
+      aiUseSimple: "AIに海外事例を出させた後、自分の体験・痛み・思想との接点を質問形式で点検させる。",
+      tagsSimple: "宝探し, 海外事例, テーマ選定, AI, 発信",
+      summary3Lines: "既存の判断基準は市場性、利益構造、法規リスク、再現性、継続性。だがそれだけでは、儲かっても続かないことがある。第6の軸は、自分の人生を使って語れるか。",
+      coreIdea: "第6の軸は、自分の人生を使って語れるか。",
+      top10: "市場性 / 利益構造 / 法規リスク / 再現性 / 継続性 / 痛みとの接続 / 物語 / 5年後も語れるか / AIに奪われない思想 / 捨てる力",
+      publishingUse: "トレンド紹介ではなく、自分の体験や思想と接続した発信テーマに変換する。",
+      useSubstack: "海外事例を紹介する前に、自分がなぜそれに惹かれたのかを書く。",
+      useNote: "テーマ選びの迷いを、体験談として記事化する。",
+      usePodcast: "気になる海外トレンドを、自分の人生との接点から話す。",
+      useLive: "候補テーマを夢フィルターで一緒に選別する配信にする。",
+      useNotes: "気になるテーマと惹かれた理由を短く記録する。",
+      useX: "『探すな、選べ』を軸にテーマ選定投稿にする。",
+      useAi: "AIにトレンド候補を出させ、最後は人生接続・思想・継続性で絞る。",
+      contentIdeas: "海外トレンド選定テンプレート、夢フィルターワーク、講座テーマ選定チェックリストにできる。",
+      practiceTomorrow: "気になる海外事例を1つだけ選び、儲かる理由ではなく語れる理由を書く。",
+      knowledgeTags: "宝探し, 海外事例, テーマ選定, AI, 発信, ブランディング",
+    },
+    {
+      ...common,
+      knowledgeName: "市場性・利益構造・再現性は前提条件でしかない",
+      oneLineConclusion: "儲かるかどうかだけでは、続くテーマかどうかは判断できない。",
+      knowledgeOverview: "市場性、利益構造、法規リスク、再現性、継続性は大事だが、誰もが見る前提条件。そこだけで選ぶと、正解なのに燃え尽きることがある。",
+      todayAction: "今ある企画を、市場性・利益構造・リスク・再現性・継続性・人生接続の6軸で採点する。",
+      useScene: "事業アイデア評価、教材企画、発信テーマの優先順位、Brainや講座の企画判断に使う。",
+      beginnerExplanation: "売れそうかだけで選ぶと続かない。売れそうかに加えて、自分が続けられる理由を見る。",
+      articleIdeas: "儲かるテーマなのに続かない理由 / 事業テーマを選ぶ6つ目の基準",
+      podcastIdeas: "正解なのに燃え尽きるテーマ / 市場性だけで選ばない",
+      aiUseSimple: "AIに企画案を6軸評価させ、数値だけでなく違和感の理由も出させる。",
+      tagsSimple: "事業判断, 市場性, 継続性, テーマ選定, AI",
+      summary3Lines: "基本の5条件は重要だが、それだけでは足りない。儲かるテーマでも、自分の思想や痛みと接続していなければ続かない。判断基準に人生接続を加えることで、消耗しにくいテーマ選定になる。",
+      coreIdea: "儲かるテーマと続けられるテーマは別。",
+      publishingUse: "読者に『売れるテーマ』だけでなく『続けられるテーマ』の選び方を伝える。",
+      useSubstack: "Substackテーマ選びの6軸チェックとして配布する。",
+      useNote: "テーマ選定の失敗談・成功談にできる。",
+      usePodcast: "事業アイデアを6軸で評価する回にする。",
+      useLive: "参加者の企画を6軸で公開診断する。",
+      useNotes: "企画の6軸メモとして投稿する。",
+      useX: "市場性だけで選ぶ危険を短く投稿する。",
+      useAi: "AIに候補を評価させたあと、人間側で違和感と熱量を確認する。",
+      contentIdeas: "企画評価シート、テーマ選定講座、Brain企画診断テンプレートに展開できる。",
+      practiceTomorrow: "自分の候補テーマを6軸で1から5点評価する。",
+      knowledgeTags: "事業判断, 市場性, 継続性, テーマ選定, AI, マーケティング",
+    },
+    {
+      ...common,
+      knowledgeName: "夢フィルターは、流行への飛びつきを防ぐ7問チェック",
+      oneLineConclusion: "惹かれたテーマは、羨望ではなく必然かを7問で確認する。",
+      knowledgeOverview: "海外事例を見た瞬間に飛びつく前に、惹かれた理由、過去の痛み、否定されても語れるか、AIが完璧にやっても悔しくないかを点検する。",
+      todayAction: "気になるテーマに対して『羨望か、必然か？』を1つ答える。",
+      useScene: "新企画の衝動買い防止、海外トレンド選別、発信テーマの深掘り、ライブ相談、講座ワークに使う。",
+      beginnerExplanation: "流行っているからではなく、自分にとって避けられないテーマか確認するための質問リスト。",
+      articleIdeas: "海外トレンドに飛びつく前の7つの質問 / 羨望と必然を見分ける方法",
+      podcastIdeas: "夢フィルター7問 / それは本当に自分のテーマか",
+      aiUseSimple: "AIに7問の回答を深掘りさせ、薄い理由と強い理由を分けてもらう。",
+      tagsSimple: "夢フィルター, テーマ選定, 自己理解, AI, ブランディング",
+      summary3Lines: "海外事例は魅力的に見えるが、羨望だけで選ぶと続かない。夢フィルターは、過去の痛み・自然な継続・否定されても語れるかを確認する。答えが弱いテーマは、まだ飛びつかない。",
+      coreIdea: "羨望ではなく必然で選ぶ。",
+      publishingUse: "読者が新しいテーマを選ぶ前に使えるチェックリストとして提供する。",
+      useSubstack: "夢フィルター7問をニュースレター特典にする。",
+      useNote: "自分がテーマを選んだ理由を7問で公開する。",
+      usePodcast: "1問ずつ答える音声ワークにする。",
+      useLive: "参加者のテーマを夢フィルターで一緒に点検する。",
+      useNotes: "7問のうち1問だけを日替わりで投稿する。",
+      useX: "『それは羨望か、必然か』を軸に投稿する。",
+      useAi: "AIに夢フィルターの回答を問い返させ、テーマの深さを確認する。",
+      contentIdeas: "夢フィルターPDF、テーマ診断テンプレート、講座ワーク、相談メニューにできる。",
+      practiceTomorrow: "候補テーマを1つ選び、夢フィルター7問に短く答える。",
+      knowledgeTags: "夢フィルター, テーマ選定, 自己理解, ブランディング, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "宝探しの本質は、候補を広げたあとに削ぎ落として一点突破すること",
+      oneLineConclusion: "宝は見つけるものではなく、選び続けて深く掘るもの。",
+      knowledgeOverview: "ロードマップは、候補を広げる、夢・適性・思想で削ぎ落とす、一点突破で深く掘るという流れ。日本初・日本一は、探した人ではなく選び続けた人に来る。",
+      todayAction: "今ある候補を3つ書き出し、今日は1つだけ『やらない候補』を決める。",
+      useScene: "発信テーマ整理、商品ラインナップ整理、講座テーマ決定、Substackの方向性見直しに使う。",
+      beginnerExplanation: "最初は広く見ていい。でも最後は全部やらず、選んだ1つを深く掘ることが大事。",
+      articleIdeas: "宝探しは探すことではなく捨てること / 一点突破できるテーマの選び方",
+      podcastIdeas: "探すな、選べ、捨てろ / テーマを削ぎ落とす勇気",
+      aiUseSimple: "AIに候補を広げさせた後、夢フィルターと6軸評価で削ぎ落とし、1つの突破テーマに絞る。",
+      tagsSimple: "一点突破, 捨てる力, テーマ選定, 発信戦略, AI",
+      summary3Lines: "宝探しは候補を広げるだけでは終わらない。夢・適性・思想で削ぎ落とし、覚悟を決めて一点突破する。捨てる力こそ才能になる。",
+      coreIdea: "探すな。選べ。捨てろ。",
+      publishingUse: "自分の発信テーマを絞る過程をコンテンツ化し、読者にも選ぶ勇気を渡す。",
+      useSubstack: "Substackのテーマ棚卸し記事にする。",
+      useNote: "やらないことを決めた記録として書く。",
+      usePodcast: "候補を削ぎ落とす過程を話す。",
+      useLive: "テーマ棚卸しライブをする。",
+      useNotes: "今日捨てる候補をメモ投稿する。",
+      useX: "探すな、選べ、捨てろの3行投稿にする。",
+      useAi: "AIを候補を広げる役、Codexを知識DB整理役、自分を最後に選ぶ役として分担する。",
+      contentIdeas: "テーマ棚卸しテンプレート、発信戦略講座、Brain企画、相談メニューに展開できる。",
+      practiceTomorrow: "候補を広げるリストと、捨てるリストを分けて作る。",
+      knowledgeTags: "一点突破, 捨てる力, テーマ選定, 発信戦略, AI, Substack",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addTreasureKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(TREASURE_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("海外事例は探すより")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "宝探し";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "AI時代の宝探し実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...treasureKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "宝探し";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "AI時代の宝探し実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
   if (seed === "psychology") addPsychologyKnowledgeSampleCards();
+  if (seed === "treasure") addTreasureKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
