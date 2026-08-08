@@ -162,6 +162,7 @@ const SELLING_COPYWRITING_SAMPLE_TITLE = "売れるコピーライティング�
 const FORBIDDEN_WORDS_SAMPLE_TITLE = "挑戦を止める7つの禁止コトバ 実践書";
 const TWELVE_QUESTIONS_SAMPLE_TITLE = "ピンチを行動に変える12の質問 実践書";
 const SOCIAL_CONTRIBUTION_SAMPLE_TITLE = "社会貢献を仕事にする実践書";
+const COMMUNITY_VILLAGE_SAMPLE_TITLE = "また来たくなる村 コミュニティづくり実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -6877,6 +6878,162 @@ function addSocialContributionKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function communityVillageKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: COMMUNITY_VILLAGE_SAMPLE_TITLE,
+    author: "",
+    genre: "コミュニティ運営 / 体験設計 / Substack / ライブ配信 / 関係性づくり",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["コミュニティ", "信頼構築", "発信", "体験設計", "Substack"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "コミュニティは人を集める場所ではなく、戻ってきたくなる感情の記憶を作る場所",
+      oneLineConclusion: "情報ではなく、安心・共感・余韻が人を戻らせる。",
+      knowledgeOverview: "一度だけ人を集めるなら告知や話題性で足りるが、もう一度来てもらうには感情の記憶が必要。初めて入った時に安心した、名前を呼ばれた、誰かが声をかけてくれた、帰り際にまた来てと言われた。その小さな記憶が再訪理由になる。",
+      todayAction: "次の企画で、参加者に持ち帰ってほしい感情を『安心・笑えた・覚えてもらえた』から1つ選ぶ。",
+      useScene: "Substack読者コミュニティ、ライブ配信、Podcastリスナー交流、オンラインイベント、Notes企画、Xスペースに使う。",
+      beginnerExplanation: "人は便利だからだけでは戻らない。自分もここにいていいと思えた場所に戻る。",
+      articleIdeas: "コミュニティは集める場所ではなく戻る場所 / また来たくなる感情の記憶の作り方",
+      podcastIdeas: "人が戻ってくるコミュニティの条件 / 情報より記憶が大事",
+      aiUseSimple: "AIにイベント内容を渡し、参加者が持ち帰る感情の設計案を出させる。",
+      tagsSimple: "コミュニティ, 体験設計, 感情の記憶, 居場所, 再訪",
+      summary3Lines: "コミュニティは人を集める場所ではなく戻ってくる場所。戻る理由は情報だけでなく、安心、共感、余韻、また会いたい人がいること。最初に設計すべきは、参加者にどんな感情を持ち帰ってもらうかである。",
+      coreIdea: "人は役立つ情報より、自分もここにいていいと思えた記憶に戻る。",
+      top10: "安心 / 共感 / 余韻 / 感情の記憶 / また会いたい人 / 戻る場所 / 名前を呼ぶ / 肯定感 / 居場所 / 再訪",
+      publishingUse: "読者や参加者に、情報だけでなく『また関わりたい』と思う体験を届ける。",
+      useSubstack: "記事末やコメント欄で読者の名前や反応を拾い、戻りたくなる関係性を作る。",
+      useNote: "読者が安心してコメントできる問いを置く。",
+      usePodcast: "リスナーの声を紹介し、聞くだけの人も居場所を感じられる回にする。",
+      useLive: "初参加者に最初の一言をかけ、名前を呼ぶ時間を作る。",
+      useNotes: "今日の村の一言として、余韻が残る短文を投稿する。",
+      useX: "また来たくなるコミュニティの条件をシリーズ投稿にする。",
+      useAi: "AIに参加者体験を入口、交流、余韻に分解させる。",
+      contentIdeas: "また来たくなる場づくり講座、コミュニティ感情設計シート、読者交流テンプレートにできる。",
+      practiceTomorrow: "次の投稿や配信で、初参加者向けの歓迎の一言を用意する。",
+      knowledgeTags: "コミュニティ, 体験設計, 感情の記憶, 居場所, 再訪, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "初参加者を不安にさせない入口設計が、参加者を村人に変える",
+      oneLineConclusion: "入口で迷わせず、誰に聞けばよいか、何をすれば参加かを先に示す。",
+      knowledgeOverview: "初参加者は、入れるか、操作できるか、知らない人ばかりではないか、声を出さないといけないか、途中で抜けてよいかを不安に思う。入口では、どこから入るか、入ったらどこへ行くか、誰に声をかけるか、何をすれば参加か、困った時どうするかを用意する。",
+      todayAction: "次のイベントやライブの案内文に『初めての人はここから』『困ったらここへ』を追記する。",
+      useScene: "Substack初回案内、ライブ配信の冒頭、コミュニティ参加ページ、オンラインイベント、Roblox村、講座初回に使う。",
+      beginnerExplanation: "初めて来た人が迷わないように、最初の道順と助けてくれる人を見えるようにすること。",
+      articleIdeas: "初参加者が安心する入口設計 / コミュニティで放置感を生まない方法",
+      podcastIdeas: "初めての人にやさしい場づくり / 案内役は説明係ではなく安心を渡す人",
+      aiUseSimple: "AIに参加案内文を渡し、初参加者の不安と不足している案内を洗い出させる。",
+      tagsSimple: "入口設計, 初参加者, 案内役, 安心設計, オンボーディング",
+      summary3Lines: "初参加者は場の価値より先に不安を感じる。入口設計では、入る場所、行く場所、声をかける人、参加の条件、困った時の導線を示す。案内役は説明係ではなく、安心を渡す人である。",
+      coreIdea: "入口で安心できると、参加者は場の一員になりやすい。",
+      top10: "初参加者 / 入口 / 案内役 / うさこ案内所 / 放置しない / 困った時 / 参加条件 / 聞くだけ歓迎 / 途中退出 / オンボーディング",
+      publishingUse: "新規読者や初参加者が迷わないよう、最初の導線を明文化する。",
+      useSubstack: "Welcome記事に、読む順番、コメント方法、困った時の連絡先を書く。",
+      useNote: "初めて読む人向けの案内記事を固定する。",
+      usePodcast: "初めて聞く人向けのおすすめ回を概要欄に置く。",
+      useLive: "冒頭で聞くだけ参加歓迎、コメント例、退出自由を伝える。",
+      useNotes: "初参加者への短い案内を定期投稿する。",
+      useX: "初めての人向け導線を固定投稿に入れる。",
+      useAi: "AIに初参加者向けFAQと案内文を作らせる。",
+      contentIdeas: "初参加者オンボーディングテンプレート、コミュニティ入口チェックリスト、ライブ冒頭台本にできる。",
+      practiceTomorrow: "『初めての方へ』の3行案内を作る。",
+      knowledgeTags: "入口設計, 初参加者, 案内役, 安心設計, オンボーディング, コミュニティ",
+    },
+    {
+      ...common,
+      knowledgeName: "会話は正解のない軽い問いと役割で入りやすくする",
+      oneLineConclusion: "会話を盛り上げようとせず、最初の一歩を軽くする。",
+      knowledgeOverview: "会話設計で大切なのは、話す内容を決めすぎることではなく最初の一歩を軽くすること。正解のない問いは参加者を解放する。さらに、迎える人、案内する人、見送る人など名前と役割があると、参加者は人を覚え、関係性が生まれやすくなる。",
+      todayAction: "次の交流で使う正解のない問いを3つ作る。例: 今日いちばん気になった場所は？",
+      useScene: "コメント欄、ライブ配信、Xスペース、Podcastコミュニティ、Substack読者会、オンライン交流会に使う。",
+      beginnerExplanation: "難しい質問ではなく、誰でも答えられる軽い質問を最初に出すこと。",
+      articleIdeas: "会話に入りやすいコミュニティの作り方 / 正解のない問いが参加を生む",
+      podcastIdeas: "初参加者が話しやすい問い / 役割が関係性を作る",
+      aiUseSimple: "AIにテーマと参加者像を渡し、正解のない問いと役割分担を作らせる。",
+      tagsSimple: "会話設計, 問い, 役割設計, 交流, 参加",
+      summary3Lines: "会話を生むには、内容を固めすぎず最初の一歩を軽くする。正解のない問いは参加者を解放する。迎える、案内する、見送るなど役割があると、人の記憶が残り再訪理由になる。",
+      coreIdea: "会話のハードルを下げると、参加者は自分も場に関われたと感じる。",
+      top10: "正解のない問い / 会話設計 / 役割 / 名前 / 迎える / 案内する / 見送る / 短い共有 / 未来を語る / 参加感",
+      publishingUse: "記事や配信の最後に、読者が答えやすい問いを置く。",
+      useSubstack: "コメント欄に『正解のない問い』を置き、読者の言葉を拾う。",
+      useNote: "記事末に軽い問いを入れる。",
+      usePodcast: "エピソード末にリスナーが答えやすい問いを出す。",
+      useLive: "最初のコメント例を出して会話の入口を作る。",
+      useNotes: "今日の軽い問いを投稿する。",
+      useX: "アンケートや引用しやすい問いにする。",
+      useAi: "AIに『初心者も答えやすい問い』を10個作らせる。",
+      contentIdeas: "コミュニティ問い集、ライブ会話カード、Substackコメント促進テンプレートにできる。",
+      practiceTomorrow: "記事か投稿の最後に、正解のない問いを1つ置く。",
+      knowledgeTags: "会話設計, 問い, 役割設計, 交流, 参加, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "帰り際の余韻と次回導線が、また来たくなる理由を作る",
+      oneLineConclusion: "最後の一言、写真、次回予告、共有導線までが体験である。",
+      knowledgeOverview: "どれだけ良い時間でも、最後が曖昧だと記憶に残りにくい。集合写真、今日の一言、次回の予定と変化、SubstackやXでの共有導線、また会いましょうの見送りが余韻を作る。完成された巨大ワールドではなく、また来たくなる理由を30日で作ることが大事。",
+      todayAction: "次の配信やイベントの最後に言う『また会いましょう』の一言と次回予告を決める。",
+      useScene: "ライブ配信の締め、Substack記事末、Podcast概要欄、イベント後投稿、コミュニティ定例会、X共有導線に使う。",
+      beginnerExplanation: "終わった後に思い出せる一言や写真、次の楽しみを残すこと。",
+      articleIdeas: "帰り際の余韻がコミュニティを育てる / また来たくなる次回導線の作り方",
+      podcastIdeas: "最後の一言が記憶を作る / イベント後の余韻設計",
+      aiUseSimple: "AIにイベント内容を渡し、締めの一言、次回予告、共有投稿文を作らせる。",
+      tagsSimple: "余韻設計, 次回導線, イベント運営, 再訪, Substack",
+      summary3Lines: "コミュニティ体験は帰り際まで続く。最後の一言、集合写真、次回予告、共有導線が余韻を作る。余韻があると、参加者はただ来た人からまた戻る人へ変わる。",
+      coreIdea: "体験は終わり方で記憶になる。",
+      top10: "余韻 / 見送り / 集合写真 / 今日の一言 / 次回予告 / 共有導線 / Substack / X / 30日ロードマップ / 再訪",
+      publishingUse: "発信やイベントの終わりに、次に戻ってくる理由を設計する。",
+      useSubstack: "記事末に次回予告と感想返信の導線を置く。",
+      useNote: "イベント後レポートに写真、今日の一言、次回予告を入れる。",
+      usePodcast: "エピソードの最後に次回の楽しみを一言入れる。",
+      useLive: "締めに集合感、感謝、次回予告、共有導線を入れる。",
+      useNotes: "イベント後の余韻を短文で投稿する。",
+      useX: "参加後の写真や一言を共有しやすい形にする。",
+      useAi: "AIにイベント後投稿、次回告知、参加者へのお礼文を作らせる。",
+      contentIdeas: "イベント締め台本、余韻投稿テンプレート、30日コミュニティ設計ロードマップにできる。",
+      practiceTomorrow: "次回予告を1つ作り、最後に添える一言を決める。",
+      knowledgeTags: "余韻設計, 次回導線, イベント運営, 再訪, Substack, コミュニティ",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addCommunityVillageKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(COMMUNITY_VILLAGE_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("コミュニティは人を集める場所ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "コミュニティ";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "また来たくなる村コミュニティづくり実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...communityVillageKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "コミュニティ";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "また来たくなる村コミュニティづくり実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function learningAssetSampleKey(item) {
   return normalizeLaterText(`${item.title || ""}::${item.knowledgeName || ""}`);
 }
@@ -6900,6 +7057,7 @@ function allKnowledgeSampleCards() {
     ...forbiddenWordsKnowledgeSampleCards(),
     ...twelveQuestionsKnowledgeSampleCards(),
     ...socialContributionKnowledgeSampleCards(),
+    ...communityVillageKnowledgeSampleCards(),
   ];
 }
 
@@ -6922,6 +7080,7 @@ function knowledgeSampleTitles() {
     FORBIDDEN_WORDS_SAMPLE_TITLE,
     TWELVE_QUESTIONS_SAMPLE_TITLE,
     SOCIAL_CONTRIBUTION_SAMPLE_TITLE,
+    COMMUNITY_VILLAGE_SAMPLE_TITLE,
   ]);
 }
 
@@ -6963,7 +7122,7 @@ function resetKnowledgeSampleCards() {
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "social-contribution", "all-knowledge", "reset-knowledge"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "social-contribution", "community-village", "all-knowledge", "reset-knowledge"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6982,6 +7141,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "forbidden-words") addForbiddenWordsKnowledgeSampleCards();
   if (seed === "twelve-questions") addTwelveQuestionsKnowledgeSampleCards();
   if (seed === "social-contribution") addSocialContributionKnowledgeSampleCards();
+  if (seed === "community-village") addCommunityVillageKnowledgeSampleCards();
   if (seed === "all-knowledge") addAllKnowledgeSampleCards();
   if (seed === "reset-knowledge") resetKnowledgeSampleCards();
   params.delete("seed");
