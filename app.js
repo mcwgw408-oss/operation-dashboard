@@ -155,6 +155,7 @@ const CONCEPT_DESIGN_SAMPLE_TITLE = "令和版・コンセプト設計 実践書
 const VALUE_OS_SAMPLE_TITLE = "令和版 価値で選ばれる思考OS実践書";
 const ACTION_PROFILE_SAMPLE_TITLE = "行動を生む自己紹介 実践書";
 const COPY_TARGET_SAMPLE_TITLE = "売れる文章は接点で決まる 商品×ターゲット設計 実践書";
+const TRUST_CHARISMA_SAMPLE_TITLE = "信頼で選ばれるカリスマ設計実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -5778,10 +5779,166 @@ function addCopyTargetKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function trustCharismaKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: TRUST_CHARISMA_SAMPLE_TITLE,
+    author: "",
+    genre: "信頼設計 / ブランディング / 発信設計 / 影響力 / 導線設計",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "4",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "信頼で選ばれる影響力は、才能ではなく一貫した構造で作る",
+      oneLineConclusion: "カリスマは演じるものではなく、世界観・基準・実績を一貫運用して育てるもの。",
+      knowledgeOverview: "信頼される発信は、単発のバズや盛った演出では作れない。何者かが分かる肩書き、救う相手、否定する価値観、提示する基準、実績、行動導線が一貫していると、読者の中に信頼が積み上がる。",
+      todayAction: "自分の発信について『誰を救うか』『何を否定するか』『どんな基準を示すか』を1行ずつ書く。",
+      useScene: "SubstackのAbout、Xプロフィール、固定投稿、講座コンセプト、Podcast番組設計、ライブ冒頭に使う。",
+      beginnerExplanation: "信頼される人は、毎回違うことを言うのではなく『この人はこういう基準で考える人』と分かる発信を続けている。",
+      articleIdeas: "カリスマは才能ではなく信頼の構造 / バズより大事な一貫性の作り方",
+      podcastIdeas: "演じない影響力の作り方 / 信頼が積み上がる発信とは",
+      aiUseSimple: "AIに自分の投稿やプロフィールを渡し、肩書き・世界観・基準・導線の一貫性をチェックさせる。",
+      tagsSimple: "信頼構築, カリスマ設計, ブランディング, 発信設計, 一貫性",
+      summary3Lines: "影響力は生まれつきの資質ではなく設計できる。単発の拡散より、読者の判断基準を書き換える一貫した言葉が信頼を作る。肩書き、世界観、象徴ワード、物語、導線、実績をつなげると発信が資産化する。",
+      coreIdea: "信頼は単発投稿ではなく、一貫した構造の反復で積み上がる。",
+      top10: "肩書き設計 / 世界観設計 / 象徴ワード / 物語設計 / 固定導線 / シリーズ化 / 実績設計 / 行動導線 / 一貫性 / 信頼資産",
+      publishingUse: "発信を反応取りではなく、読者の中に判断基準を残す連続体として設計する。",
+      useSubstack: "Aboutと固定記事を、誰の何を解決するかと自分の基準が分かる構成にする。",
+      useNote: "自己紹介記事ではなく、信頼の土台になる世界観記事を書く。",
+      usePodcast: "番組の冒頭に毎回同じ判断基準や象徴ワードを入れる。",
+      useLive: "ライブ冒頭で、今日はどんな基準を持ち帰れるかを伝える。",
+      useNotes: "自分の基準を短く断定する投稿を出す。",
+      useX: "肩書き、基準、象徴ワードを固定ポストに反映する。",
+      useAi: "AIに過去投稿からブレている主張、強い基準、頻出ワードを抽出させる。",
+      contentIdeas: "信頼設計チェックリスト、発信世界観ワーク、プロフィール添削、固定導線講座にできる。",
+      practiceTomorrow: "肩書き3案を作り、誰向けか・何をする人か・個性があるかで見直す。",
+      knowledgeTags: "信頼構築, カリスマ設計, ブランディング, 発信設計, 一貫性, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "肩書きと世界観は、救う相手・否定する価値観・提示する基準で作る",
+      oneLineConclusion: "何者かを一言で示し、誰の味方で何に反対する人かを明確にする。",
+      knowledgeOverview: "抽象的な肩書きや自分語りでは、誰の役に立つ人か伝わらない。対象、手段、問題、解決、世界観、実務を組み合わせ、救う相手、否定する価値観、提示する基準を決めることで、発信の入口が明確になる。",
+      todayAction: "プロフィールを『対象×手段』『問題×解決』『世界観×実務』の3パターンで書く。",
+      useScene: "SNS肩書き、Substack説明文、講座名、相談メニュー、プロフィール、登壇者紹介に使う。",
+      beginnerExplanation: "肩書きはかっこよさより、『誰の何を助ける人か』がすぐ分かることが大事。",
+      articleIdeas: "肩書きが伝わらない人は対象が曖昧 / 世界観は救う相手と否定する価値観で決まる",
+      podcastIdeas: "何者かが伝わる肩書き設計 / 救う相手を決める勇気",
+      aiUseSimple: "AIに活動内容を渡し、対象×手段、問題×解決、世界観×実務の肩書き案を出させる。",
+      tagsSimple: "肩書き設計, 世界観, プロフィール, ブランディング, 発信",
+      summary3Lines: "肩書きは認知の入口であり、世界観は信頼の土台。誰向けか、何をする人か、少しの違和感や個性が必要。救う相手、否定する価値観、提示する基準が決まると、発信の軸がぶれにくくなる。",
+      coreIdea: "肩書きは肩書きではなく、信頼の入口である。",
+      top10: "誰向けか / 何をする人か / 違和感 / 対象×手段 / 問題×解決 / 世界観×実務 / 救う相手 / 否定する価値観 / 提示する基準 / 認知固定",
+      publishingUse: "プロフィールや固定投稿の先頭を、活動説明ではなく読者が判断できる肩書きにする。",
+      useSubstack: "Aboutの冒頭に、救う相手と提示する基準を置く。",
+      useNote: "プロフィール記事で、自分が否定する価値観と新しい基準を書く。",
+      usePodcast: "番組説明に、誰のどんな停滞を解決する番組かを入れる。",
+      useLive: "ライブタイトルを対象と問題が分かる形にする。",
+      useNotes: "肩書き3案を投稿して反応を見る。",
+      useX: "プロフィール欄を対象×手段の短い肩書きにする。",
+      useAi: "AIに肩書き案を比較させ、抽象度・依頼しやすさ・独自性を評価させる。",
+      contentIdeas: "肩書き3案ワーク、世界観設計シート、プロフィール改善テンプレートにできる。",
+      practiceTomorrow: "救う相手、否定する価値観、提示する基準を各1行で書く。",
+      knowledgeTags: "肩書き設計, 世界観, プロフィール, ブランディング, 発信, 信頼構築",
+    },
+    {
+      ...common,
+      knowledgeName: "象徴ワードと発信ルールが、一貫性と記憶を作る",
+      oneLineConclusion: "読者は文章全体ではなく、繰り返される単語と判断基準で覚える。",
+      knowledgeOverview: "発信者は文章全体よりも単語で記憶される。象徴ワードを10個以内に固定し、曖昧な禁句を避け、物語、判断基準、実例、募集の比率を決めることで『この人らしさ』が蓄積される。",
+      todayAction: "自分の象徴ワード10個と、使わない禁句5個を決める。",
+      useScene: "X投稿、Notes、Substack連載、Podcastタイトル、ライブテーマ、講座名に使う。",
+      beginnerExplanation: "毎回違う言葉を使うより、自分らしい言葉を繰り返すと覚えてもらいやすい。",
+      articleIdeas: "発信者は単語で記憶される / 一貫性を作る象徴ワードの決め方",
+      podcastIdeas: "言葉のルールがブランドになる / 使わない言葉を決める意味",
+      aiUseSimple: "AIに過去投稿を分析させ、象徴ワード候補と曖昧な禁句を抽出させる。",
+      tagsSimple: "象徴ワード, 一貫性, 発信ルール, シリーズ化, ブランディング",
+      summary3Lines: "記憶は単語で残る。象徴ワードを繰り返し、曖昧な言葉を避け、発信の終わり方や比率を決めると、読者の中に一貫した印象が残る。単発投稿ではなくシリーズ化すると、次も読みたい期待が生まれる。",
+      coreIdea: "一貫性は気分ではなく、言葉の運用ルールで作る。",
+      top10: "象徴ワード / 禁句リスト / 判断基準 / 物語30% / 判断基準30% / 実例実績20% / 募集行動20% / シリーズ化 / 共通冒頭 / 共通結び",
+      publishingUse: "毎回の投稿に、自分らしい象徴ワードと具体的な行動を入れる。",
+      useSubstack: "連載名と冒頭の型を固定し、象徴ワードを継続して使う。",
+      useNote: "記事カテゴリを象徴ワードで整理する。",
+      usePodcast: "シリーズ名を固定し、判断基準回を作る。",
+      useLive: "毎回同じ締め方や宿題を用意する。",
+      useNotes: "象徴ワードを使った短文投稿を継続する。",
+      useX: "失敗例シリーズ、判断基準シリーズ、誤解を壊すシリーズを回す。",
+      useAi: "AIに投稿案へ象徴ワードと行動導線が入っているか確認させる。",
+      contentIdeas: "象徴ワード辞書、発信ルール表、シリーズ投稿テンプレート、判断基準投稿講座にできる。",
+      practiceTomorrow: "今週使う象徴ワードを3つ選び、投稿案を3本作る。",
+      knowledgeTags: "象徴ワード, 一貫性, シリーズ化, 発信設計, ブランディング, コンテンツ化",
+    },
+    {
+      ...common,
+      knowledgeName: "実績と行動導線は、作為感を消して小さな参加から始める",
+      oneLineConclusion: "信頼は結果自慢ではなく、数字・提出物・変化・第三者反応・途中経過で増える。",
+      knowledgeOverview: "影響力設計の敵は作っている感。自慢に見える実績ではなく、数字、提出物、Before/After、第三者反応、途中経過を見せると信用が増える。行動導線は、投稿、固定記事、軽い参加、本命導線の順に設計する。",
+      todayAction: "見せられる途中経過、提出物、第三者反応を1つ選び、投稿用メモにする。",
+      useScene: "実績投稿、固定記事、無料配布、DM相談、講座募集、ライブ後の導線設計に使う。",
+      beginnerExplanation: "すごい結果だけを見せるより、途中で何を直したか、相手がどう変わったかを見せる方が信頼されやすい。",
+      articleIdeas: "実績投稿が胡散臭く見える理由 / 信頼される途中経過の見せ方",
+      podcastIdeas: "作ってる感を消す実績設計 / いきなり売らず小さく参加してもらう",
+      aiUseSimple: "AIに実績メモを渡し、自慢ではなく貢献・変化・過程が伝わる投稿に直させる。",
+      tagsSimple: "実績設計, 行動導線, 信頼構築, ファネル, リスク管理",
+      summary3Lines: "強い実績は、数字、提出物、変化、第三者反応、途中経過で構成される。過度な演出や断言は信頼を失いやすい。投稿から固定記事、軽い参加、本命導線へ進めると、影響力を行動に変えやすくなる。",
+      coreIdea: "信頼は結果だけでなく、過程と条件を見せることで育つ。",
+      top10: "数字 / 提出物 / BeforeAfter / 第三者反応 / 途中経過 / 失敗と修正 / 断言＋条件 / 対象外明記 / 軽い参加導線 / 1秒でできる行動",
+      publishingUse: "実績投稿を結果自慢ではなく、変化と修正プロセスの共有にする。",
+      useSubstack: "固定記事に判断材料、実績、向いている人、次の行動を入れる。",
+      useNote: "実績記事では結果だけでなく、途中経過と失敗修正を書く。",
+      usePodcast: "実績の裏側や修正プロセスを話す。",
+      useLive: "ライブ終わりに提出物、期限、提出先を明確にする。",
+      useNotes: "途中経過や小さな提出物を投稿する。",
+      useX: "Before/Afterと第三者反応を短く投稿する。",
+      useAi: "AIに断言が強すぎないか、再現条件や対象外が書けているかチェックさせる。",
+      contentIdeas: "実績投稿テンプレート、行動導線ファネル、無料配布導線、リスク管理チェックリストにできる。",
+      practiceTomorrow: "投稿、固定記事、軽い参加、本命導線を1行ずつ書く。",
+      knowledgeTags: "実績設計, 行動導線, 信頼構築, ファネル, リスク管理, マーケティング",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addTrustCharismaKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(TRUST_CHARISMA_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("信頼で選ばれる影響力は")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "信頼構築";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "信頼で選ばれるカリスマ設計実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...trustCharismaKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "信頼構築";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "信頼で選ばれるカリスマ設計実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -5793,6 +5950,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "value-os") addValueOsKnowledgeSampleCards();
   if (seed === "action-profile") addActionProfileKnowledgeSampleCards();
   if (seed === "copy-target") addCopyTargetKnowledgeSampleCards();
+  if (seed === "trust-charisma") addTrustCharismaKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
