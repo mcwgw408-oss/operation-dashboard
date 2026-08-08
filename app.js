@@ -146,6 +146,7 @@ const LEARNING_ASSET_SOURCES = ["本", "PDF", "Kindle Unlimited", "Brain", "ポ�
 const LEARNING_ASSET_PUBLISHING_PLACES = ["Substack", "note", "Podcast", "ライブ配信", "WordPress", "X", "Notes", "Kindle", "Brain"];
 const LEARNING_ASSET_CONNECTIONS = ["発信", "AI", "ブランディング", "マーケティング", "心理", "習慣", "信頼構築", "コンテンツ化", "暮らし", "回復", "OS", "その他"];
 const FIRST_KNOWLEDGE_SAMPLE_TITLE = "AI時代の1行コンセプト設計";
+const SMALL_BIZ_SAMPLE_TITLE = "AI時代の小さく始めるスモビジ実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -4201,11 +4202,159 @@ function addFirstKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function smallBizKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: SMALL_BIZ_SAMPLE_TITLE,
+    author: "",
+    genre: "スモールビジネス / AI / マーケティング",
+    rating: "",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "マーケティング", "ブランディング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "スモビジは大きく賭けず、小さく試して反応で磨く",
+      knowledgeOverview: "AI時代のスモールビジネスは、最初から完成品を作るより、低予算の試作品で反応を見ながら育てるほうが現実的。",
+      useScene: "新サービス、PDF教材、無料資料、講座、Brain、Substack企画の初期検証に使う。",
+      beginnerExplanation: "いきなり大きく作らず、小さく出して『欲しい人がいるか』を先に確かめるということ。",
+      articleIdeas: "スモビジ初心者が最初に作るべきは商品ではなく試作品 / AI時代は小さく試す人が強い理由",
+      podcastIdeas: "完璧な商品より先に反応を見る / 小さく始めるスモビジの現実感",
+      aiUseSimple: "AIに商品案を作らせる前に、ターゲット・小さな試作品・検証方法を出させる。",
+      tagsSimple: "スモビジ, AI, 検証, 商品設計, 小さく始める",
+      summary3Lines: "大きく賭けず、小さく試して、売りながら磨く。最初の目的は完成ではなく反応確認。売れない時は商品だけでなく届け方や順番も見直す。",
+      coreIdea: "完成品を作る前に、反応確認できる最小単位を出す。",
+      top10: "テーマを定義する / 小さく試す / 反応を見る / 売り方を磨く / 導線を作る / 低予算で検証する / 商品の順番を見直す",
+      publishingUse: "新企画を記事・Notes・ライブで小さく出し、反応を見てから商品化する。",
+      useSubstack: "読者に無料資料や小さなワークを出して反応を確認する。",
+      useNote: "小さく始めた実験記録として書く。",
+      usePodcast: "試した企画の反応や改善点を話す。",
+      useLive: "商品化前の相談会や質問回で需要を確認する。",
+      useNotes: "企画の種を出して読者の反応を見る。",
+      useX: "商品案を問いかけ投稿で検証する。",
+      useAi: "AIにLP、無料資料、導線案、検証チェックリストを作らせる。",
+      contentIdeas: "スモビジ30日実験記、無料資料、Brain、講座、テンプレートに展開できる。",
+      practiceTomorrow: "今ある企画を、無料資料か1投稿で反応確認できる形に小さくする。",
+      knowledgeTags: "スモビジ, AI, 検証, 商品設計, 小さく始める, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "選択肢が多い時代ほど、比較基準を持つ人が強い",
+      knowledgeOverview: "在宅スモビジは選択肢が多いため、最強を探すより自分の条件に合うものを選ぶ基準が必要。",
+      useScene: "事業テーマ選び、媒体選び、商品形式選び、読者へのおすすめ比較記事に使う。",
+      beginnerExplanation: "何が一番稼げるかではなく、自分に続けやすくAIとも相性がいい形を選ぶということ。",
+      articleIdeas: "在宅スモビジの選び方を比較する5つの基準 / 自分に合う副業を選ぶチェックリスト",
+      podcastIdeas: "最強探しをやめる / スモビジ選びの判断軸",
+      aiUseSimple: "AIに選択肢を表で比較させ、始めやすさ・収益化の早さ・継続性・AI相性で整理する。",
+      tagsSimple: "スモビジ, 比較, 判断基準, AI活用, 在宅",
+      summary3Lines: "選択肢が多いほど、比較基準が必要になる。始めやすさ、収益化の早さ、継続しやすさ、AIとの相性で見る。時間売りだけでなく資産化も判断軸にする。",
+      coreIdea: "最強の選択肢ではなく、自分の条件に合う選択肢を選ぶ。",
+      publishingUse: "初心者向けに『どれを選べばいいか』を比較記事やPodcastにする。",
+      useSubstack: "Substack読者向けに、在宅スモビジ比較表を配布する。",
+      useNote: "自分の条件別おすすめとして記事化する。",
+      usePodcast: "選択肢を一つずつ比較しながら話すシリーズにする。",
+      useX: "比較基準を短いリスト投稿にする。",
+      useAi: "AIに比較表と診断チャートを作らせる。",
+      contentIdeas: "比較記事、診断テンプレート、無料チェックシート、講座導入に使える。",
+      practiceTomorrow: "自分の企画を、始めやすさ・継続性・AI相性・資産化の4軸で採点する。",
+      knowledgeTags: "スモビジ, 比較, 判断基準, AI活用, 在宅, 資産化",
+    },
+    {
+      ...common,
+      knowledgeName: "売り込みではなく、判断基準を渡す導線が信頼を作る",
+      knowledgeOverview: "無料資料、LINE、オープンチャット、説明会、本命商品という流れで、売り込み感より納得感を高める。",
+      useScene: "メルマガ導線、Substackから商品への流れ、無料資料、LINE誘導、講座販売に使う。",
+      beginnerExplanation: "いきなり売るのではなく、先に役立つ判断材料を渡して信頼を積み上げるということ。",
+      articleIdeas: "売り込まずに商品につなげる導線設計 / 無料資料から信頼を作る流れ",
+      podcastIdeas: "売り込み感を減らす導線 / 納得して買ってもらう設計",
+      aiUseSimple: "AIに無料資料、LINE配信、説明会、本命商品の順番とメッセージ案を作らせる。",
+      tagsSimple: "導線, 信頼構築, マーケティング, セールス, 無料資料",
+      summary3Lines: "スモビジは商品だけでなく導線で勝つ。最初から売らず、判断基準を渡して信頼を積み上げる。売り込み感より納得感を高める設計が大事。",
+      coreIdea: "商品単体ではなく、信頼が積み上がる導線を作る。",
+      publishingUse: "記事や配信の終わりに、購入ではなく無料資料や判断材料へつなげる。",
+      useSubstack: "ニュースレターから無料資料、相談、講座へ自然につなげる。",
+      useNote: "無料資料の価値や使い方を記事化する。",
+      usePodcast: "信頼導線の作り方を音声で説明する。",
+      useLive: "説明会前にオープンな質問回を作る。",
+      useNotes: "無料資料の一部を小出しにする。",
+      useX: "判断基準をスレッド化して、資料へ導線を置く。",
+      useAi: "AIに導線ごとの役割とCTA文を整理させる。",
+      contentIdeas: "無料資料、LINEステップ、説明会台本、セールス導線テンプレートに展開できる。",
+      practiceTomorrow: "今ある商品やサービスの前に、無料で渡せる判断基準を1つ作る。",
+      knowledgeTags: "導線, 信頼構築, マーケティング, セールス, 無料資料, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "30日で回る状態を作ると、スモビジは現実になる",
+      knowledgeOverview: "現実確認、テーマ選定、一言定義、無料資料、導線、発信、反応確認、改善までを30日で回す。",
+      useScene: "新企画のロードマップ、講座カリキュラム、Substack企画、実験ログに使う。",
+      beginnerExplanation: "完璧を目指さず、30日で一周だけ試して改善できる状態にするということ。",
+      articleIdeas: "スモビジを30日で立ち上げるロードマップ / 完璧より先に一周回す",
+      podcastIdeas: "30日で小さく立ち上げる / 1週目から4週目にやること",
+      aiUseSimple: "AIに4週間の実行計画、毎日のタスク、振り返り項目を作らせる。",
+      tagsSimple: "30日, ロードマップ, 習慣, 実験, スモビジ",
+      summary3Lines: "完璧を目指さず、まず30日で回る状態を作る。1週目は現実確認とテーマ選定、2週目は無料資料と導線、3週目は発信と反応確認、4週目は改善と次の商品設計。",
+      coreIdea: "才能より、選び方と進め方で差が出る。",
+      publishingUse: "自分の30日スモビジ実験として連載化する。",
+      useSubstack: "週ごとの進捗をニュースレターにする。",
+      useNote: "30日ロードマップを初心者向け記事にする。",
+      usePodcast: "毎週の進捗や気づきを話す。",
+      useLive: "週1回の公開作業会にする。",
+      useNotes: "毎日の小さな進捗を記録する。",
+      useX: "30日チャレンジの進捗を投稿する。",
+      useAi: "AIに日次タスクと改善案を出させる。",
+      contentIdeas: "30日講座、進捗テンプレート、実験ログ、チェックリストに展開できる。",
+      practiceTomorrow: "1週目の現実確認とテーマ選定だけを今日のタスクにする。",
+      knowledgeTags: "30日, ロードマップ, 習慣, 実験, スモビジ, 進め方",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addSmallBizKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(SMALL_BIZ_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("スモビジは大きく賭けず")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "スモビジ";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "スモビジ実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...smallBizKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "スモビジ";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "スモビジ実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get("seed") !== "concept-book") return;
+  const seed = params.get("seed");
+  if (!["concept-book", "smallbiz"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
-  addFirstKnowledgeSampleCards();
+  if (seed === "concept-book") addFirstKnowledgeSampleCards();
+  if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
