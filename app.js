@@ -135,10 +135,74 @@ const X_EXPERIMENT_STATUSES = ["💡 アイデア", "🛠 準備中", "🧪 実�
 const X_EXPERIMENT_TYPES = ["投稿仮説", "導線検証", "ブランド検証", "反応観察", "継続運用", "その他"];
 const PUBLISHING_SEED_STATUSES = ["種", "記事化", "保留"];
 const PUBLISHING_SEED_CANDIDATE_STATUSES = ["未確認", "Seed化", "見送り"];
-const LEARNING_ASSET_STATUSES = ["学び待ち", "対話済み", "実験待ち", "記事化待ち", "資産化完了"];
-const LEARNING_ASSET_SOURCES = ["本", "Kindle Unlimited", "Brain", "ポッドキャスト", "YouTube", "ライブ配信", "人との会話", "その他"];
-const LEARNING_ASSET_PUBLISHING_PLACES = ["Substack", "note", "WordPress", "X", "Notes"];
-const LEARNING_ASSET_CONNECTIONS = ["発信", "AI", "暮らし", "回復", "ブランディング", "マーケティング", "OS", "その他"];
+const LEARNING_ASSET_STATUSES = ["知識化待ち", "Codex抽出済み", "実践待ち", "コンテンツ化待ち", "資産化完了"];
+const LEARNING_ASSET_LEGACY_STATUS_MAP = {
+  "学び待ち": "知識化待ち",
+  "対話済み": "Codex抽出済み",
+  "実験待ち": "実践待ち",
+  "記事化待ち": "コンテンツ化待ち",
+};
+const LEARNING_ASSET_SOURCES = ["本", "PDF", "Kindle Unlimited", "Brain", "ポッドキャスト", "YouTube", "ライブ配信", "人との会話", "その他"];
+const LEARNING_ASSET_PUBLISHING_PLACES = ["Substack", "note", "Podcast", "ライブ配信", "WordPress", "X", "Notes", "Kindle", "Brain"];
+const LEARNING_ASSET_CONNECTIONS = ["発信", "AI", "ブランディング", "マーケティング", "心理", "習慣", "信頼構築", "コンテンツ化", "暮らし", "回復", "OS", "その他"];
+const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
+
+私は本の要約が欲しいわけではありません。
+今後の発信活動や仕事に活かせる知識だけを、できるだけ実践的な形で整理してください。
+
+本の内容をそのまま並べるのではなく、「この本から何を活用できるか」という視点でまとめてください。
+
+出力してほしい内容:
+Version 1: 1冊を最大限活用するための整理
+1. この本の要点
+2. 発信活動に役立つ内容
+3. 私の活動への活かし方
+4. Substack初心者向けに応用できること
+5. AI活用
+6. コンテンツ化
+7. 明日から実践できること
+8. 名言・印象に残る考え方
+9. 80:20分析
+10. 優先順位
+11. 今後読みたい本とのつながり
+
+Version 2: 知識ベースを育てるための整理
+12. 知識タグ
+この本から得られる知識をタグ化してください。
+例: 発信、マーケティング、AI、ブランディング、心理、習慣、セールス、コミュニティ、ライティング
+
+13. 他の本と統合しやすい形
+この本だけで完結するのではなく、あとから他の本と比較・統合できるように整理してください。
+
+14. 重複しそうな内容
+他の本でも出てきそうな考え方を分けてください。
+
+15. オリジナルな内容
+この本にしかない考え方があれば教えてください。
+
+16. 知識ベース登録用
+最後に以下の形式でまとめてください。
+
+知識名：
+概要：
+活用場面：
+初心者向け説明：
+記事アイデア：
+Podcastアイデア：
+AI活用：
+タグ：
+
+ルール:
+- 本の内容をそのまま長く要約しない
+- 活動に活かせる内容を優先する
+- 実践できる内容を重視する
+- 具体例を入れる
+- 初心者にも説明できるレベルまで噛み砕く
+- 知識ではなく行動に変換する
+- 本単位で閉じず、複数の本やPodcast、ライブ、コメント、自分の実験結果と統合しやすい形にする
+- 他の本でも共通して出てきそうな考え方と、この本ならではの考え方を分ける
+- 後から検索・横断比較しやすいキーワードを残す
+- 最初の1冊目はテンプレート実験として扱い、2冊目以降で改善できる形にする`;
 const X_EXPERIMENT_MEDIA = {
   "ブランドA": ["Substack", "Substack Notes", "note（回復・AI・暮らし）", "X", "WordPress", "Live"],
   "ブランドB": ["note（Substack初心者向け）"],
@@ -1060,14 +1124,51 @@ function blankLearningAsset() {
     date: activeDate,
     sourceType: "本",
     title: "",
-    status: "学び待ち",
+    knowledgeName: "",
+    knowledgeOverview: "",
+    useScene: "",
+    beginnerExplanation: "",
+    articleIdeas: "",
+    podcastIdeas: "",
+    aiUseSimple: "",
+    tagsSimple: "",
+    author: "",
+    genre: "",
+    rating: "",
+    status: "知識化待ち",
     impression: "",
     rayDialogue: "",
     myThought: "",
+    summary3Lines: "",
+    coreIdea: "",
+    top10: "",
+    publishingUse: "",
+    useSubstack: "",
+    useNote: "",
+    usePodcast: "",
+    useLive: "",
+    useNotes: "",
+    useX: "",
+    useAi: "",
+    contentIdeas: "",
     hypothesis: "",
     experimentIdea: "",
     articleIdea: "",
     experimentResult: "",
+    practiceTomorrow: "",
+    practiced: "",
+    result: "",
+    learning: "",
+    knowledgeTags: "",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    contentLinks: "",
     relatedArticleTitle: "",
     relatedArticleUrl: "",
     publishedTo: [],
@@ -1082,17 +1183,22 @@ function normalizeLearningAsset(raw) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const item = { ...base, ...source };
   item.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["date", "title", "impression", "rayDialogue", "myThought", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
+  ["date", "title", "knowledgeName", "knowledgeOverview", "useScene", "beginnerExplanation", "articleIdeas", "podcastIdeas", "aiUseSimple", "tagsSimple", "author", "genre", "rating", "impression", "rayDialogue", "myThought", "summary3Lines", "coreIdea", "top10", "publishingUse", "useSubstack", "useNote", "usePodcast", "useLive", "useNotes", "useX", "useAi", "contentIdeas", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "practiceTomorrow", "practiced", "result", "learning", "knowledgeTags", "contentLinks", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
     item[key] = String(item[key] ?? "");
   });
   item.sourceType = LEARNING_ASSET_SOURCES.includes(source.sourceType) ? source.sourceType : base.sourceType;
-  item.status = LEARNING_ASSET_STATUSES.includes(source.status) ? source.status : base.status;
+  const mappedStatus = LEARNING_ASSET_LEGACY_STATUS_MAP[source.status] || source.status;
+  item.status = LEARNING_ASSET_STATUSES.includes(mappedStatus) ? mappedStatus : base.status;
   item.publishedTo = Array.isArray(source.publishedTo)
     ? source.publishedTo.filter((value) => LEARNING_ASSET_PUBLISHING_PLACES.includes(value))
     : [];
   item.connectsTo = Array.isArray(source.connectsTo)
     ? source.connectsTo.filter((value) => LEARNING_ASSET_CONNECTIONS.includes(value))
     : [];
+  const counts = source.contentCounts && typeof source.contentCounts === "object" ? source.contentCounts : {};
+  item.contentCounts = Object.fromEntries(
+    Object.keys(base.contentCounts).map((key) => [key, Math.max(0, Number.parseInt(counts[key], 10) || 0)])
+  );
   if (!item.date) item.date = activeDate;
   if (!item.createdAt) item.createdAt = item.updatedAt || base.createdAt;
   if (!item.updatedAt) item.updatedAt = item.createdAt;
@@ -3387,12 +3493,40 @@ function setLearningAssetCheckedValues(name, values) {
   });
 }
 
+function setLearningAssetFieldValue(selector, value) {
+  const field = $(selector);
+  if (field) field.value = value ?? "";
+}
+
 function readLearningAssetForm() {
   return {
     date: $("#learningAssetDate")?.value || activeDate,
     sourceType: $("#learningAssetSourceType")?.value || "本",
     title: $("#learningAssetTitle")?.value.trim() || "",
-    status: $("#learningAssetStatus")?.value || "学び待ち",
+    knowledgeName: $("#learningAssetKnowledgeName")?.value.trim() || "",
+    knowledgeOverview: $("#learningAssetKnowledgeOverview")?.value.trim() || "",
+    useScene: $("#learningAssetUseScene")?.value.trim() || "",
+    beginnerExplanation: $("#learningAssetBeginnerExplanation")?.value.trim() || "",
+    articleIdeas: $("#learningAssetArticleIdeas")?.value.trim() || "",
+    podcastIdeas: $("#learningAssetPodcastIdeas")?.value.trim() || "",
+    aiUseSimple: $("#learningAssetAiUseSimple")?.value.trim() || "",
+    tagsSimple: $("#learningAssetTagsSimple")?.value.trim() || "",
+    author: $("#learningAssetAuthor")?.value.trim() || "",
+    genre: $("#learningAssetGenre")?.value.trim() || "",
+    rating: $("#learningAssetRating")?.value || "",
+    status: $("#learningAssetStatus")?.value || "知識化待ち",
+    summary3Lines: $("#learningAssetSummary3Lines")?.value.trim() || "",
+    coreIdea: $("#learningAssetCoreIdea")?.value.trim() || "",
+    top10: $("#learningAssetTop10")?.value.trim() || "",
+    publishingUse: $("#learningAssetPublishingUse")?.value.trim() || "",
+    useSubstack: $("#learningAssetUseSubstack")?.value.trim() || "",
+    useNote: $("#learningAssetUseNote")?.value.trim() || "",
+    usePodcast: $("#learningAssetUsePodcast")?.value.trim() || "",
+    useLive: $("#learningAssetUseLive")?.value.trim() || "",
+    useNotes: $("#learningAssetUseNotes")?.value.trim() || "",
+    useX: $("#learningAssetUseX")?.value.trim() || "",
+    useAi: $("#learningAssetUseAi")?.value.trim() || "",
+    contentIdeas: $("#learningAssetContentIdeas")?.value.trim() || "",
     impression: $("#learningAssetImpression")?.value.trim() || "",
     rayDialogue: $("#learningAssetRayDialogue")?.value.trim() || "",
     myThought: $("#learningAssetMyThought")?.value.trim() || "",
@@ -3400,6 +3534,20 @@ function readLearningAssetForm() {
     experimentIdea: $("#learningAssetExperimentIdea")?.value.trim() || "",
     articleIdea: $("#learningAssetArticleIdea")?.value.trim() || "",
     experimentResult: $("#learningAssetExperimentResult")?.value.trim() || "",
+    practiceTomorrow: $("#learningAssetPracticeTomorrow")?.value.trim() || "",
+    practiced: $("#learningAssetPracticed")?.value.trim() || "",
+    result: $("#learningAssetResult")?.value.trim() || "",
+    learning: $("#learningAssetLearning")?.value.trim() || "",
+    knowledgeTags: $("#learningAssetKnowledgeTags")?.value.trim() || "",
+    contentCounts: {
+      article: Number.parseInt($("#learningAssetCountArticle")?.value, 10) || 0,
+      podcast: Number.parseInt($("#learningAssetCountPodcast")?.value, 10) || 0,
+      notes: Number.parseInt($("#learningAssetCountNotes")?.value, 10) || 0,
+      x: Number.parseInt($("#learningAssetCountX")?.value, 10) || 0,
+      kindle: Number.parseInt($("#learningAssetCountKindle")?.value, 10) || 0,
+      brain: Number.parseInt($("#learningAssetCountBrain")?.value, 10) || 0,
+    },
+    contentLinks: $("#learningAssetContentLinks")?.value.trim() || "",
     relatedArticleTitle: $("#learningAssetRelatedArticleTitle")?.value.trim() || "",
     relatedArticleUrl: $("#learningAssetRelatedArticleUrl")?.value.trim() || "",
     publishedTo: selectedLearningAssetValues("learningAssetPublishedTo"),
@@ -3409,19 +3557,54 @@ function readLearningAssetForm() {
 
 function fillLearningAssetForm(item) {
   const asset = item || blankLearningAsset();
-  $("#learningAssetDate").value = asset.date || activeDate;
-  $("#learningAssetSourceType").value = asset.sourceType || "本";
-  $("#learningAssetTitle").value = asset.title || "";
-  $("#learningAssetStatus").value = asset.status || "学び待ち";
-  $("#learningAssetImpression").value = asset.impression || "";
-  $("#learningAssetRayDialogue").value = asset.rayDialogue || "";
-  $("#learningAssetMyThought").value = asset.myThought || "";
-  $("#learningAssetHypothesis").value = asset.hypothesis || "";
-  $("#learningAssetExperimentIdea").value = asset.experimentIdea || "";
-  $("#learningAssetArticleIdea").value = asset.articleIdea || "";
-  $("#learningAssetExperimentResult").value = asset.experimentResult || "";
-  $("#learningAssetRelatedArticleTitle").value = asset.relatedArticleTitle || "";
-  $("#learningAssetRelatedArticleUrl").value = asset.relatedArticleUrl || "";
+  setLearningAssetFieldValue("#learningAssetDate", asset.date || activeDate);
+  setLearningAssetFieldValue("#learningAssetSourceType", asset.sourceType || "本");
+  setLearningAssetFieldValue("#learningAssetTitle", asset.title || "");
+  setLearningAssetFieldValue("#learningAssetKnowledgeName", asset.knowledgeName || asset.coreIdea || "");
+  setLearningAssetFieldValue("#learningAssetKnowledgeOverview", asset.knowledgeOverview || asset.summary3Lines || "");
+  setLearningAssetFieldValue("#learningAssetUseScene", asset.useScene || asset.publishingUse || "");
+  setLearningAssetFieldValue("#learningAssetBeginnerExplanation", asset.beginnerExplanation || "");
+  setLearningAssetFieldValue("#learningAssetArticleIdeas", asset.articleIdeas || asset.contentIdeas || asset.articleIdea || "");
+  setLearningAssetFieldValue("#learningAssetPodcastIdeas", asset.podcastIdeas || "");
+  setLearningAssetFieldValue("#learningAssetAiUseSimple", asset.aiUseSimple || asset.useAi || "");
+  setLearningAssetFieldValue("#learningAssetTagsSimple", asset.tagsSimple || asset.knowledgeTags || "");
+  setLearningAssetFieldValue("#learningAssetAuthor", asset.author || "");
+  setLearningAssetFieldValue("#learningAssetGenre", asset.genre || "");
+  setLearningAssetFieldValue("#learningAssetRating", asset.rating || "");
+  setLearningAssetFieldValue("#learningAssetStatus", asset.status || "知識化待ち");
+  setLearningAssetFieldValue("#learningAssetSummary3Lines", asset.summary3Lines || asset.impression || "");
+  setLearningAssetFieldValue("#learningAssetCoreIdea", asset.coreIdea || asset.myThought || "");
+  setLearningAssetFieldValue("#learningAssetTop10", asset.top10 || "");
+  setLearningAssetFieldValue("#learningAssetPublishingUse", asset.publishingUse || "");
+  setLearningAssetFieldValue("#learningAssetUseSubstack", asset.useSubstack || "");
+  setLearningAssetFieldValue("#learningAssetUseNote", asset.useNote || "");
+  setLearningAssetFieldValue("#learningAssetUsePodcast", asset.usePodcast || "");
+  setLearningAssetFieldValue("#learningAssetUseLive", asset.useLive || "");
+  setLearningAssetFieldValue("#learningAssetUseNotes", asset.useNotes || "");
+  setLearningAssetFieldValue("#learningAssetUseX", asset.useX || "");
+  setLearningAssetFieldValue("#learningAssetUseAi", asset.useAi || "");
+  setLearningAssetFieldValue("#learningAssetContentIdeas", asset.contentIdeas || asset.articleIdea || "");
+  setLearningAssetFieldValue("#learningAssetImpression", asset.impression || "");
+  setLearningAssetFieldValue("#learningAssetRayDialogue", asset.rayDialogue || "");
+  setLearningAssetFieldValue("#learningAssetMyThought", asset.myThought || "");
+  setLearningAssetFieldValue("#learningAssetHypothesis", asset.hypothesis || "");
+  setLearningAssetFieldValue("#learningAssetExperimentIdea", asset.experimentIdea || "");
+  setLearningAssetFieldValue("#learningAssetArticleIdea", asset.articleIdea || "");
+  setLearningAssetFieldValue("#learningAssetExperimentResult", asset.experimentResult || "");
+  setLearningAssetFieldValue("#learningAssetPracticeTomorrow", asset.practiceTomorrow || asset.experimentIdea || "");
+  setLearningAssetFieldValue("#learningAssetPracticed", asset.practiced || "");
+  setLearningAssetFieldValue("#learningAssetResult", asset.result || asset.experimentResult || "");
+  setLearningAssetFieldValue("#learningAssetLearning", asset.learning || "");
+  setLearningAssetFieldValue("#learningAssetKnowledgeTags", asset.knowledgeTags || "");
+  setLearningAssetFieldValue("#learningAssetCountArticle", asset.contentCounts?.article || "");
+  setLearningAssetFieldValue("#learningAssetCountPodcast", asset.contentCounts?.podcast || "");
+  setLearningAssetFieldValue("#learningAssetCountNotes", asset.contentCounts?.notes || "");
+  setLearningAssetFieldValue("#learningAssetCountX", asset.contentCounts?.x || "");
+  setLearningAssetFieldValue("#learningAssetCountKindle", asset.contentCounts?.kindle || "");
+  setLearningAssetFieldValue("#learningAssetCountBrain", asset.contentCounts?.brain || "");
+  setLearningAssetFieldValue("#learningAssetContentLinks", asset.contentLinks || "");
+  setLearningAssetFieldValue("#learningAssetRelatedArticleTitle", asset.relatedArticleTitle || "");
+  setLearningAssetFieldValue("#learningAssetRelatedArticleUrl", asset.relatedArticleUrl || "");
   setLearningAssetCheckedValues("learningAssetPublishedTo", asset.publishedTo);
   setLearningAssetCheckedValues("learningAssetConnectsTo", asset.connectsTo);
 }
@@ -3431,10 +3614,10 @@ function openLearningAssetForm(item = null) {
   if (!form) return;
   editingLearningAssetId = item?.id || "";
   form.hidden = false;
-  $("#learningAssetFormTitle").textContent = item ? "学び資産を編集" : "新しい学び資産";
+  $("#learningAssetFormTitle").textContent = item ? "知識カードを編集" : "新しい知識カード";
   $("#deleteLearningAsset").hidden = !item;
   const status = $("#learningAssetStatusMessage");
-  if (status) status.textContent = item ? "後日追記や状態変更ができます。" : "タイトルか印象、または自分の考えを書くと保存できます。";
+  if (status) status.textContent = item ? "後日追記や状態変更ができます。" : "知識名、概要、活用場面のどれかを書くと保存できます。";
   fillLearningAssetForm(item || blankLearningAsset());
   renderLearningAssets();
   requestAnimationFrame(() => {
@@ -3456,9 +3639,9 @@ function saveLearningAssetFromForm(event) {
   event?.preventDefault();
   const values = readLearningAssetForm();
   const status = $("#learningAssetStatusMessage");
-  if (!values.title && !values.impression && !values.myThought) {
-    if (status) status.textContent = "タイトル、印象、自分の考えのどれかを入れると保存できます。";
-    $("#learningAssetMyThought")?.focus();
+  if (!values.title && !values.knowledgeName && !values.summary3Lines && !values.coreIdea && !values.publishingUse) {
+    if (status) status.textContent = "知識名、タイトル、3行要約、一番重要な考え方、発信への応用のどれかを入れると保存できます。";
+    $("#learningAssetKnowledgeName")?.focus();
     return;
   }
   const now = new Date().toISOString();
@@ -3479,7 +3662,7 @@ function saveLearningAssetFromForm(event) {
 
 function deleteEditingLearningAsset() {
   if (!editingLearningAssetId) return;
-  if (!confirm("この学び資産を削除しますか？")) return;
+  if (!confirm("この知識カードを削除しますか？")) return;
   learningAssets = learningAssets.filter((item) => item.id !== editingLearningAssetId);
   saveLearningAssets();
   closeLearningAssetForm();
@@ -3490,7 +3673,30 @@ function learningAssetSearchText(item) {
     item.date,
     item.sourceType,
     item.title,
+    item.knowledgeName,
+    item.knowledgeOverview,
+    item.useScene,
+    item.beginnerExplanation,
+    item.articleIdeas,
+    item.podcastIdeas,
+    item.aiUseSimple,
+    item.tagsSimple,
+    item.author,
+    item.genre,
+    item.rating,
     item.status,
+    item.summary3Lines,
+    item.coreIdea,
+    item.top10,
+    item.publishingUse,
+    item.useSubstack,
+    item.useNote,
+    item.usePodcast,
+    item.useLive,
+    item.useNotes,
+    item.useX,
+    item.useAi,
+    item.contentIdeas,
     item.impression,
     item.rayDialogue,
     item.myThought,
@@ -3498,6 +3704,12 @@ function learningAssetSearchText(item) {
     item.experimentIdea,
     item.articleIdea,
     item.experimentResult,
+    item.practiceTomorrow,
+    item.practiced,
+    item.result,
+    item.learning,
+    item.knowledgeTags,
+    item.contentLinks,
     item.relatedArticleTitle,
     item.relatedArticleUrl,
     ...(item.publishedTo || []),
@@ -3515,20 +3727,184 @@ function visibleLearningAssets() {
 
 function renderLearningAssetSummary() {
   const counts = Object.fromEntries(LEARNING_ASSET_STATUSES.map((status) => [status, 0]));
+  const outputCounts = { article: 0, podcast: 0, notes: 0, x: 0 };
   learningAssets.forEach((item) => {
     counts[item.status] = (counts[item.status] || 0) + 1;
+    outputCounts.article += Number(item.contentCounts?.article || 0);
+    outputCounts.podcast += Number(item.contentCounts?.podcast || 0);
+    outputCounts.notes += Number(item.contentCounts?.notes || 0);
+    outputCounts.x += Number(item.contentCounts?.x || 0);
   });
   const targets = {
-    "学び待ち": "#learningAssetWaitingCount",
-    "対話済み": "#learningAssetDialoguedCount",
-    "実験待ち": "#learningAssetExperimentCount",
-    "記事化待ち": "#learningAssetArticleCount",
+    "知識化待ち": "#learningAssetWaitingCount",
+    "Codex抽出済み": "#learningAssetDialoguedCount",
+    "実践待ち": "#learningAssetExperimentCount",
+    "コンテンツ化待ち": "#learningAssetArticleCount",
     "資産化完了": "#learningAssetDoneCount",
   };
   Object.entries(targets).forEach(([status, selector]) => {
     const target = $(selector);
     if (target) target.textContent = `${counts[status] || 0}件`;
   });
+  [
+    ["#readingLaboArticleCount", outputCounts.article],
+    ["#readingLaboPodcastCount", outputCounts.podcast],
+    ["#readingLaboNotesCount", outputCounts.notes],
+    ["#readingLaboXCount", outputCounts.x],
+  ].forEach(([selector, value]) => {
+    const target = $(selector);
+    if (target) target.textContent = `${value}本`;
+  });
+}
+
+function learningAssetSplitTags(value) {
+  return String(value || "")
+    .split(/[,\u3001\s]+/)
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function knowledgeAssetTags(item) {
+  return [...new Set([
+    ...(item.connectsTo || []),
+    ...learningAssetSplitTags(item.tagsSimple),
+    ...learningAssetSplitTags(item.knowledgeTags),
+    ...learningAssetSplitTags(item.genre),
+  ].filter(Boolean))];
+}
+
+function learningAssetOutputTotal(item) {
+  return Object.values(item.contentCounts || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+}
+
+function renderKnowledgeTagCloud() {
+  const target = $("#knowledgeTagCloud");
+  if (!target) return;
+  const tagCounts = new Map();
+  learningAssets.forEach((item) => {
+    knowledgeAssetTags(item).forEach((tag) => {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    });
+  });
+  const tags = [...tagCounts.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0], "ja"));
+  target.replaceChildren();
+  if (!tags.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "タグはまだありません。知識カードにタグを入れるとここに並びます。";
+    target.append(empty);
+    return;
+  }
+  tags.slice(0, 32).forEach(([tag, count]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "knowledge-tag-button";
+    button.classList.toggle("is-active", normalizeLaterText(learningAssetSearchQuery) === normalizeLaterText(tag));
+    button.textContent = `${tag} ${count}`;
+    button.addEventListener("click", () => {
+      learningAssetSearchQuery = tag;
+      renderLearningAssets();
+      $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    target.append(button);
+  });
+}
+
+function createKnowledgeMiniItem(titleText, metaText, noteText = "") {
+  const item = document.createElement("article");
+  item.className = "knowledge-mini-item";
+  const title = document.createElement("strong");
+  title.textContent = titleText;
+  const meta = document.createElement("span");
+  meta.textContent = metaText;
+  item.append(title, meta);
+  if (noteText) {
+    const note = document.createElement("p");
+    note.textContent = noteText;
+    item.append(note);
+  }
+  return item;
+}
+
+function renderKnowledgeUntappedList() {
+  const target = $("#knowledgeUntappedList");
+  if (!target) return;
+  const items = learningAssets
+    .filter((item) => learningAssetOutputTotal(item) === 0 && item.status !== "資産化完了")
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
+    .slice(0, 6);
+  target.replaceChildren();
+  if (!items.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "未活用の知識はありません。";
+    target.append(empty);
+    return;
+  }
+  items.forEach((item) => {
+    const title = item.knowledgeName || item.title || "知識名未入力";
+    const meta = [item.status, knowledgeAssetTags(item).slice(0, 3).join(" / ")].filter(Boolean).join(" - ");
+    const row = createKnowledgeMiniItem(title, meta || "タグ未設定", item.useScene || item.beginnerExplanation || "");
+    row.addEventListener("click", () => {
+      learningAssetSearchQuery = title;
+      renderLearningAssets();
+      $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    target.append(row);
+  });
+}
+
+function renderKnowledgeSourceSummary() {
+  const target = $("#knowledgeSourceSummary");
+  if (!target) return;
+  const groups = new Map();
+  learningAssets.forEach((item) => {
+    const key = item.title || item.sourceType || "情報源未入力";
+    const group = groups.get(key) || { title: key, count: 0, output: 0, tags: new Map(), latest: "" };
+    group.count += 1;
+    group.output += learningAssetOutputTotal(item);
+    if (!group.latest || String(item.updatedAt || item.createdAt || "") > group.latest) {
+      group.latest = item.updatedAt || item.createdAt || "";
+    }
+    knowledgeAssetTags(item).forEach((tag) => group.tags.set(tag, (group.tags.get(tag) || 0) + 1));
+    groups.set(key, group);
+  });
+  const summaries = [...groups.values()]
+    .sort((a, b) => new Date(b.latest || 0) - new Date(a.latest || 0))
+    .slice(0, 6);
+  target.replaceChildren();
+  if (!summaries.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "情報源ごとのまとまりはまだありません。";
+    target.append(empty);
+    return;
+  }
+  summaries.forEach((group) => {
+    const tags = [...group.tags.entries()].sort((left, right) => right[1] - left[1]).slice(0, 3).map(([tag]) => tag).join(" / ");
+    const row = createKnowledgeMiniItem(group.title, `知識${group.count}件 - 成果${group.output}本`, tags ? `主なタグ: ${tags}` : "");
+    row.addEventListener("click", () => {
+      learningAssetSearchQuery = group.title;
+      renderLearningAssets();
+      $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    target.append(row);
+  });
+}
+
+function renderKnowledgeLaboInsights() {
+  renderKnowledgeTagCloud();
+  renderKnowledgeUntappedList();
+  renderKnowledgeSourceSummary();
+}
+
+function appendLearningAssetDetail(details, label, value) {
+  if (!value) return;
+  const row = document.createElement("p");
+  const labelNode = document.createElement("span");
+  labelNode.textContent = label;
+  row.append(labelNode, value);
+  details.append(row);
 }
 
 function createLearningAssetCard(item) {
@@ -3539,9 +3915,11 @@ function createLearningAssetCard(item) {
   const meta = document.createElement("div");
   meta.className = "learning-asset-card-meta";
   const source = document.createElement("span");
-  source.textContent = `${item.date || "日付未入力"} / ${item.sourceType || "その他"}`;
+  source.textContent = `${item.date || "読了日未入力"} / ${item.sourceType || "その他"}`;
+  const bookMeta = document.createElement("span");
+  bookMeta.textContent = [item.author, item.genre, item.rating ? `${item.rating}★` : ""].filter(Boolean).join(" / ") || "基本情報未入力";
   const status = document.createElement("select");
-  status.setAttribute("aria-label", "学び資産の状態");
+  status.setAttribute("aria-label", "知識カードの状態");
   LEARNING_ASSET_STATUSES.forEach((statusName) => {
     const option = document.createElement("option");
     option.value = statusName;
@@ -3555,41 +3933,67 @@ function createLearningAssetCard(item) {
     saveLearningAssets();
     renderLearningAssets();
   });
-  meta.append(source, status);
+  meta.append(source, bookMeta, status);
 
   const title = document.createElement("h3");
-  title.textContent = item.title || "タイトル未入力の学び";
+  title.textContent = item.knowledgeName || item.title || "知識名未入力の知識カード";
   const impression = document.createElement("p");
   impression.className = "learning-asset-card-impression";
-  impression.textContent = item.impression || "印象メモは未入力です。";
+  impression.textContent = item.knowledgeOverview || item.summary3Lines || item.impression || "概要は未入力です。";
   const thought = document.createElement("p");
   thought.className = "learning-asset-card-thought";
-  thought.textContent = item.myThought ? `私はこう考えた: ${item.myThought}` : "自分の考えはまだ未入力です。";
+  thought.textContent = item.useScene || item.coreIdea || item.myThought ? `活用場面: ${item.useScene || item.coreIdea || item.myThought}` : "活用場面はまだ未入力です。";
 
   const tags = document.createElement("div");
   tags.className = "learning-asset-tags";
-  [...(item.connectsTo || []), ...(item.publishedTo || [])].forEach((value) => {
+  [...knowledgeAssetTags(item), ...(item.publishedTo || [])].forEach((value) => {
     const tag = document.createElement("span");
     tag.textContent = value;
     tags.append(tag);
   });
 
+  const counts = document.createElement("div");
+  counts.className = "reading-labo-content-counts";
+  [
+    ["記事", item.contentCounts?.article],
+    ["Podcast", item.contentCounts?.podcast],
+    ["Notes", item.contentCounts?.notes],
+    ["X", item.contentCounts?.x],
+    ["Kindle", item.contentCounts?.kindle],
+    ["Brain", item.contentCounts?.brain],
+  ].forEach(([label, value]) => {
+    if (!value) return;
+    const count = document.createElement("span");
+    count.textContent = `${label} ${value}本`;
+    counts.append(count);
+  });
+
   const details = document.createElement("div");
   details.className = "learning-asset-card-details";
   [
-    ["レイと話したこと", item.rayDialogue],
+    ["本・入口", item.title],
+    ["初心者向け説明", item.beginnerExplanation],
+    ["記事アイデア", item.articleIdeas],
+    ["Podcastアイデア", item.podcastIdeas],
+    ["AI活用", item.aiUseSimple],
+    ["重要ポイントTOP10", item.top10],
+    ["発信活動への応用", item.publishingUse],
+    ["Substack", item.useSubstack],
+    ["note", item.useNote],
+    ["Podcast", item.usePodcast],
+    ["ライブ配信", item.useLive],
+    ["Notes", item.useNotes],
+    ["X", item.useX],
+    ["AI活用", item.useAi],
+    ["コンテンツ化", item.contentIdeas],
+    ["明日から試すこと", item.practiceTomorrow || item.experimentIdea],
+    ["実践したこと", item.practiced],
+    ["結果", item.result || item.experimentResult],
+    ["学び", item.learning],
+    ["紐付けた成果物", item.contentLinks],
     ["仮説", item.hypothesis],
-    ["試したいこと", item.experimentIdea],
     ["記事候補", item.articleIdea],
-    ["実験した結果", item.experimentResult],
-  ].forEach(([label, value]) => {
-    if (!value) return;
-    const row = document.createElement("p");
-    const labelNode = document.createElement("span");
-    labelNode.textContent = label;
-    row.append(labelNode, value);
-    details.append(row);
-  });
+  ].forEach(([label, value]) => appendLearningAssetDetail(details, label, value));
   if (item.relatedArticleTitle || item.relatedArticleUrl) {
     const row = document.createElement("p");
     const labelNode = document.createElement("span");
@@ -3620,7 +4024,7 @@ function createLearningAssetCard(item) {
   remove.textContent = "削除";
   edit.addEventListener("click", () => openLearningAssetForm(item));
   remove.addEventListener("click", () => {
-    if (!confirm("この学び資産を削除しますか？")) return;
+    if (!confirm("この知識カードを削除しますか？")) return;
     learningAssets = learningAssets.filter((candidate) => candidate.id !== item.id);
     saveLearningAssets();
     if (editingLearningAssetId === item.id) closeLearningAssetForm();
@@ -3630,6 +4034,7 @@ function createLearningAssetCard(item) {
 
   card.append(meta, title, impression, thought);
   if (tags.children.length) card.append(tags);
+  if (counts.children.length) card.append(counts);
   if (details.children.length) card.append(details);
   card.append(actions);
   return card;
@@ -3643,6 +4048,7 @@ function renderLearningAssets() {
   const filter = $("#learningAssetStatusFilter");
   if (filter && filter.value !== learningAssetStatusFilter) filter.value = learningAssetStatusFilter;
   renderLearningAssetSummary();
+  renderKnowledgeLaboInsights();
   const items = visibleLearningAssets();
   const count = $("#learningAssetSearchCount");
   if (count) count.textContent = `${items.length}件表示`;
@@ -3650,11 +4056,28 @@ function renderLearningAssets() {
   if (!items.length) {
     const empty = document.createElement("p");
     empty.className = "empty-note";
-    empty.textContent = learningAssets.length ? "条件に一致する学び資産はありません。" : "学び資産はまだありません。";
+    empty.textContent = learningAssets.length ? "条件に一致する知識カードはありません。" : "知識カードはまだありません。";
     target.append(empty);
     return;
   }
   target.append(...items.map(createLearningAssetCard));
+}
+
+function renderReadingLaboTemplate() {
+  const field = $("#readingLaboTemplate");
+  if (field && field.value !== READING_LABO_TEMPLATE) {
+    field.value = READING_LABO_TEMPLATE;
+  }
+}
+
+async function copyReadingLaboTemplate() {
+  const status = $("#readingLaboTemplateStatus");
+  try {
+    await copySnapshotText(READING_LABO_TEMPLATE);
+    if (status) status.textContent = "読書テンプレートをコピーしました。PDFと一緒にCodexへ送れます。";
+  } catch (error) {
+    if (status) status.textContent = "コピーできませんでした。テキストを選択してコピーしてください。";
+  }
 }
 
 function learningMatchesSearch(learning, query) {
@@ -12662,6 +13085,7 @@ function renderAll() {
   renderReadingQueue();
   renderReadingNotes();
   renderLearningAssets();
+  renderReadingLaboTemplate();
   renderLearnings();
   renderLearningGlobalSearch();
   renderPublishingOps();
@@ -12788,7 +13212,7 @@ function showPageEntry(entryName = "", options = {}) {
   const isXPage = entryName === "X";
   const isWordPressPage = entryName === "WordPress";
   const isSeedPage = entryName === "Seed";
-  const isReadingPage = entryName === "読書";
+  const isReadingPage = entryName === "読書" || entryName === "読書Labo" || entryName === "Knowledge Labo" || entryName === "知識ラボ";
   const isMemoPage = entryName === "メモ";
   const isTodayInputPage = entryName === "今日の入力";
   const isArchivePage = entryName === "Archive";
@@ -12849,6 +13273,7 @@ function showPageEntry(entryName = "", options = {}) {
   if (isReadingPage) {
     renderReadingQueue();
     renderLearningAssets();
+    renderReadingLaboTemplate();
   }
   if (isMemoPage) renderPersistentMemos();
   if (isTodayInputPage) {
@@ -12911,6 +13336,7 @@ function bindEvents() {
       renderMemoryLibrary();
     });
   });
+  $("#copyReadingLaboTemplate")?.addEventListener("click", copyReadingLaboTemplate);
   $("#learningFeedbackNote")?.addEventListener("input", (event) => {
     const entry = currentLearningLogEntry();
     if (!entry) return;
@@ -13022,7 +13448,8 @@ function bindEvents() {
     if (status) status.textContent = `「${value}」を追加しました。必要ならチェックしてください。`;
   });
   document.querySelectorAll("[data-page-entry]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
       document.querySelectorAll("[data-page-entry]").forEach((entry) => {
         entry.classList.toggle("is-active", entry === button);
       });
@@ -13229,6 +13656,11 @@ function bindEvents() {
   $("#deleteLearningAsset")?.addEventListener("click", deleteEditingLearningAsset);
   $("#learningAssetSearch")?.addEventListener("input", (event) => {
     learningAssetSearchQuery = event.target.value;
+    renderLearningAssets();
+  });
+  $("#clearKnowledgeSearch")?.addEventListener("click", () => {
+    learningAssetSearchQuery = "";
+    learningAssetStatusFilter = "all";
     renderLearningAssets();
   });
   $("#learningAssetStatusFilter")?.addEventListener("change", (event) => {

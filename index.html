@@ -16,6 +16,7 @@
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/action-Labo/">交流ログ</a>
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/observation-Labo/">発信観察</a>
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/Stock-Labo/">ストック管理</a>
+        <a class="global-nav-link" href="#knowledge-labo" data-page-entry="Knowledge Labo">Knowledge Labo</a>
       </nav>
 
       <header class="topbar">
@@ -874,7 +875,7 @@
             <button class="launch-card" type="button" data-page-entry="X"><strong>X</strong><span>投稿・観察</span></button>
             <button class="launch-card" type="button" data-page-entry="WordPress"><strong>WordPress</strong><span>記事</span></button>
             <button class="launch-card" type="button" data-page-entry="Seed"><strong>Seed</strong><span>思考</span></button>
-            <button class="launch-card" type="button" data-page-entry="読書"><strong>読書</strong><span>思考</span></button>
+            <button class="launch-card" type="button" data-page-entry="Knowledge Labo"><strong>Knowledge Labo</strong><span>知識資産</span></button>
             <button class="launch-card" type="button" data-page-entry="メモ"><strong>メモ</strong><span>思考</span></button>
             <button class="launch-card" type="button" data-page-entry="今日の入力"><strong>今日の入力</strong><span>記録</span></button>
             <button class="launch-card" type="button" data-page-entry="Archive"><strong>Archive</strong><span>旧機能</span></button>
@@ -2158,13 +2159,34 @@
           </div>
         </section>
 
-        <section id="learning-asset-flow" class="panel learning-asset-panel span-2" aria-label="読書" hidden>
+        <section id="learning-asset-flow" class="panel learning-asset-panel reading-labo-panel span-2" aria-label="Knowledge Labo" hidden>
           <div class="panel-heading learning-asset-heading">
             <div>
-              <h2>読書</h2>
-              <p class="section-note">学びを資産に変えるフローの書式で、読書やインプットを残します。</p>
+              <h2>Knowledge Labo（知識ラボ）</h2>
+              <p class="section-note">本の要約ではなく、読書から得た知識を発信・仕事・AI活用へ変換する知識資産管理画面です。</p>
             </div>
             <button class="ghost-button" id="newLearningAsset" type="button">新規作成</button>
+          </div>
+
+          <div class="reading-labo-hero" id="knowledge-labo">
+            <div>
+              <span class="brain-label">基本フロー</span>
+              <ol class="reading-labo-flow">
+                <li>PDFを読む</li>
+                <li>Codexへテンプレートを送る</li>
+                <li>必要な知識だけ抽出する</li>
+                <li>発信・仕事・AIへ展開する</li>
+                <li>知識ベースへ保存する</li>
+              </ol>
+            </div>
+            <div class="reading-labo-template-box">
+              <div class="reading-labo-template-heading">
+                <span class="brain-label">AIテンプレート</span>
+                <button class="ghost-button" id="copyReadingLaboTemplate" type="button">コピー</button>
+              </div>
+              <textarea id="readingLaboTemplate" rows="8" readonly></textarea>
+              <p id="readingLaboTemplateStatus" class="section-note">毎回Codexへ送る読書テンプレートをワンクリックでコピーできます。</p>
+            </div>
           </div>
 
           <div class="reading-queue-panel" aria-label="読む本リスト">
@@ -2188,26 +2210,63 @@
             <div id="readingQueueList" class="reading-queue-list" aria-label="読む本の順番"></div>
           </div>
 
-          <div class="learning-asset-flow-map" aria-label="学びの進行状況">
-            <div><span>学び待ち</span><strong id="learningAssetWaitingCount">0件</strong></div>
-            <div><span>対話済み</span><strong id="learningAssetDialoguedCount">0件</strong></div>
-            <div><span>実験待ち</span><strong id="learningAssetExperimentCount">0件</strong></div>
-            <div><span>記事化待ち</span><strong id="learningAssetArticleCount">0件</strong></div>
+          <div class="learning-asset-flow-map reading-labo-kpi" aria-label="知識資産の進行状況">
+            <div><span>知識化待ち</span><strong id="learningAssetWaitingCount">0件</strong></div>
+            <div><span>Codex抽出済み</span><strong id="learningAssetDialoguedCount">0件</strong></div>
+            <div><span>実践待ち</span><strong id="learningAssetExperimentCount">0件</strong></div>
+            <div><span>コンテンツ化待ち</span><strong id="learningAssetArticleCount">0件</strong></div>
             <div><span>資産化完了</span><strong id="learningAssetDoneCount">0件</strong></div>
+            <div><span>記事</span><strong id="readingLaboArticleCount">0本</strong></div>
+            <div><span>Podcast</span><strong id="readingLaboPodcastCount">0本</strong></div>
+            <div><span>Notes</span><strong id="readingLaboNotesCount">0本</strong></div>
+            <div><span>X</span><strong id="readingLaboXCount">0本</strong></div>
           </div>
+
+          <section class="knowledge-base-panel" aria-label="知識ベース">
+            <div class="knowledge-base-heading">
+              <div>
+                <h3>知識ベース</h3>
+                <p class="section-note">本を入口にしつつ、知識カード単位で横断検索します。同じ本から複数カードを作れます。</p>
+              </div>
+              <button class="ghost-button" id="clearKnowledgeSearch" type="button">検索をクリア</button>
+            </div>
+            <div class="knowledge-base-grid">
+              <section class="knowledge-base-block">
+                <h4>タグで探す</h4>
+                <div id="knowledgeTagCloud" class="knowledge-tag-cloud" aria-label="知識タグ"></div>
+              </section>
+              <section class="knowledge-base-block">
+                <h4>未活用の知識</h4>
+                <div id="knowledgeUntappedList" class="knowledge-mini-list" aria-label="まだコンテンツ化していない知識"></div>
+              </section>
+              <section class="knowledge-base-block">
+                <h4>情報源ごとのまとまり</h4>
+                <div id="knowledgeSourceSummary" class="knowledge-mini-list" aria-label="本や情報源ごとの知識まとめ"></div>
+              </section>
+            </div>
+          </section>
 
           <form id="learningAssetForm" class="learning-asset-form" hidden>
             <div class="learning-asset-form-heading">
               <div>
-                <h3 id="learningAssetFormTitle">新しい学び資産</h3>
-                <p class="section-note">一番大事なのは「私はどう考えた？」です。他人の知識を、自分の考えに変えて残します。</p>
+                <h3 id="learningAssetFormTitle">新しい知識カード</h3>
+                <p class="section-note">一番大事なのは「この知識を何に使うか」です。本単位に閉じ込めず、タグで横断できる形にします。</p>
               </div>
               <button class="ghost-button" id="cancelLearningAssetEdit" type="button">一覧に戻る</button>
             </div>
-            <label>日付<input id="learningAssetDate" type="date" /></label>
+            <label class="learning-asset-wide-field">知識名<input id="learningAssetKnowledgeName" type="text" placeholder="例: 信頼構築は情報量ではなく判断しやすさで生まれる" /></label>
+            <label class="learning-asset-wide-field">概要<textarea id="learningAssetKnowledgeOverview" rows="3" placeholder="あとから見返したときに、この知識の意味が分かる説明"></textarea></label>
+            <label class="learning-asset-wide-field">活用場面<textarea id="learningAssetUseScene" rows="3" placeholder="記事、講座、相談、商品設計、コミュニティ運営など"></textarea></label>
+            <label class="learning-asset-wide-field">初心者向け説明<textarea id="learningAssetBeginnerExplanation" rows="3" placeholder="Substack初心者にも伝わる言い方"></textarea></label>
+            <label class="learning-asset-wide-field">記事アイデア<textarea id="learningAssetArticleIdeas" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">Podcastアイデア<textarea id="learningAssetPodcastIdeas" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">AI活用<textarea id="learningAssetAiUseSimple" rows="3" placeholder="ChatGPT・Claude・Codexでどう使うか"></textarea></label>
+            <label class="learning-asset-wide-field">タグ<input id="learningAssetTagsSimple" type="text" placeholder="マーケティング, ブランディング, AI, 発信, 心理, 習慣" /></label>
+            <label>読了日<input id="learningAssetDate" type="date" /></label>
             <label>インプット元
               <select id="learningAssetSourceType">
                 <option>本</option>
+                <option>PDF</option>
                 <option>Kindle Unlimited</option>
                 <option>Brain</option>
                 <option>ポッドキャスト</option>
@@ -2217,64 +2276,99 @@
                 <option>その他</option>
               </select>
             </label>
-            <label>タイトル<input id="learningAssetTitle" type="text" placeholder="本・動画・配信・会話のタイトル" /></label>
+            <label>本のタイトル<input id="learningAssetTitle" type="text" placeholder="本・PDFのタイトル" /></label>
+            <label>著者<input id="learningAssetAuthor" type="text" placeholder="著者名" /></label>
+            <label>ジャンル<input id="learningAssetGenre" type="text" placeholder="マーケティング、AI、発信など" /></label>
+            <label>評価
+              <select id="learningAssetRating">
+                <option value="">未評価</option>
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★</option>
+                <option value="3">★★★</option>
+                <option value="2">★★</option>
+                <option value="1">★</option>
+              </select>
+            </label>
             <label>状態
               <select id="learningAssetStatus">
-                <option>学び待ち</option>
-                <option>対話済み</option>
-                <option>実験待ち</option>
-                <option>記事化待ち</option>
+                <option>知識化待ち</option>
+                <option>Codex抽出済み</option>
+                <option>実践待ち</option>
+                <option>コンテンツ化待ち</option>
                 <option>資産化完了</option>
               </select>
             </label>
-            <label class="learning-asset-wide-field">一番印象に残ったこと（1〜3行）<textarea id="learningAssetImpression" rows="3"></textarea></label>
-            <label class="learning-asset-wide-field">レイと話したこと<textarea id="learningAssetRayDialogue" rows="4"></textarea></label>
-            <label class="learning-asset-primary-field">私はどう考えた？<textarea id="learningAssetMyThought" rows="6" placeholder="自分はどう受け取ったか。どこに違和感や可能性を感じたか。"></textarea></label>
-            <label class="learning-asset-wide-field">仮説<textarea id="learningAssetHypothesis" rows="3" placeholder="この学びを試すと、何が変わると思う？"></textarea></label>
-            <label class="learning-asset-wide-field">試したいこと<textarea id="learningAssetExperimentIdea" rows="3"></textarea></label>
-            <label class="learning-asset-wide-field">記事候補<textarea id="learningAssetArticleIdea" rows="3"></textarea></label>
-            <label class="learning-asset-wide-field">実験した結果<textarea id="learningAssetExperimentResult" rows="3"></textarea></label>
-            <label>関連する記事タイトル<input id="learningAssetRelatedArticleTitle" type="text" placeholder="発信を続ける私が意味あるのかと思った瞬間" /></label>
-            <label>関連する記事URL<input id="learningAssetRelatedArticleUrl" type="url" placeholder="https://..." /></label>
+            <label class="learning-asset-wide-field">3行要約<textarea id="learningAssetSummary3Lines" rows="3" placeholder="本の内容を長く要約せず、使うための理解だけ残す"></textarea></label>
+            <label class="learning-asset-primary-field">一番重要な考え方<textarea id="learningAssetCoreIdea" rows="4" placeholder="この本から一番使うべき考え方"></textarea></label>
+            <label class="learning-asset-wide-field">重要ポイントTOP10<textarea id="learningAssetTop10" rows="6"></textarea></label>
+            <label class="learning-asset-wide-field">発信活動への応用<textarea id="learningAssetPublishingUse" rows="4"></textarea></label>
+            <label class="learning-asset-wide-field">Substackへの応用<textarea id="learningAssetUseSubstack" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">noteへの応用<textarea id="learningAssetUseNote" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">Podcastへの応用<textarea id="learningAssetUsePodcast" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">ライブ配信への応用<textarea id="learningAssetUseLive" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">Notesへの応用<textarea id="learningAssetUseNotes" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">Xへの応用<textarea id="learningAssetUseX" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">AI活用<textarea id="learningAssetUseAi" rows="4" placeholder="ChatGPT・Claude・Codexと組み合わせる使い方"></textarea></label>
+            <label class="learning-asset-wide-field">コンテンツ化アイデア<textarea id="learningAssetContentIdeas" rows="5" placeholder="記事、Podcast、Notes、X、Kindle、Brain、講座、テンプレート"></textarea></label>
+            <label class="learning-asset-wide-field">明日から試すこと<textarea id="learningAssetPracticeTomorrow" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">実践したこと<textarea id="learningAssetPracticed" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">結果<textarea id="learningAssetResult" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">学び<textarea id="learningAssetLearning" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">知識タグ<input id="learningAssetKnowledgeTags" type="text" placeholder="マーケティング, ブランディング, AI, 発信, 心理, 習慣, 信頼構築" /></label>
+            <fieldset class="learning-asset-checkboxes reading-labo-output-counts">
+              <legend>この本から生まれたコンテンツ実績</legend>
+              <label>記事<input id="learningAssetCountArticle" type="number" min="0" inputmode="numeric" /></label>
+              <label>Podcast<input id="learningAssetCountPodcast" type="number" min="0" inputmode="numeric" /></label>
+              <label>Notes<input id="learningAssetCountNotes" type="number" min="0" inputmode="numeric" /></label>
+              <label>X<input id="learningAssetCountX" type="number" min="0" inputmode="numeric" /></label>
+              <label>Kindle<input id="learningAssetCountKindle" type="number" min="0" inputmode="numeric" /></label>
+              <label>Brain<input id="learningAssetCountBrain" type="number" min="0" inputmode="numeric" /></label>
+            </fieldset>
+            <label class="learning-asset-wide-field">紐付けた成果物・URL<textarea id="learningAssetContentLinks" rows="4" placeholder="記事、Podcast、Notes、X、Kindle、BrainのタイトルやURL"></textarea></label>
             <fieldset class="learning-asset-checkboxes">
-              <legend>記事化</legend>
+              <legend>展開先</legend>
               <label><input type="checkbox" value="Substack" name="learningAssetPublishedTo" />Substack</label>
               <label><input type="checkbox" value="note" name="learningAssetPublishedTo" />note</label>
+              <label><input type="checkbox" value="Podcast" name="learningAssetPublishedTo" />Podcast</label>
+              <label><input type="checkbox" value="ライブ配信" name="learningAssetPublishedTo" />ライブ配信</label>
               <label><input type="checkbox" value="WordPress" name="learningAssetPublishedTo" />WordPress</label>
               <label><input type="checkbox" value="X" name="learningAssetPublishedTo" />X</label>
               <label><input type="checkbox" value="Notes" name="learningAssetPublishedTo" />Notes</label>
+              <label><input type="checkbox" value="Kindle" name="learningAssetPublishedTo" />Kindle</label>
+              <label><input type="checkbox" value="Brain" name="learningAssetPublishedTo" />Brain</label>
             </fieldset>
             <fieldset class="learning-asset-checkboxes">
-              <legend>この学びは何につながる？</legend>
+              <legend>知識ベースタグ</legend>
               <label><input type="checkbox" value="発信" name="learningAssetConnectsTo" />発信</label>
               <label><input type="checkbox" value="AI" name="learningAssetConnectsTo" />AI</label>
-              <label><input type="checkbox" value="暮らし" name="learningAssetConnectsTo" />暮らし</label>
-              <label><input type="checkbox" value="回復" name="learningAssetConnectsTo" />回復</label>
               <label><input type="checkbox" value="ブランディング" name="learningAssetConnectsTo" />ブランディング</label>
               <label><input type="checkbox" value="マーケティング" name="learningAssetConnectsTo" />マーケティング</label>
-              <label><input type="checkbox" value="OS" name="learningAssetConnectsTo" />OS</label>
+              <label><input type="checkbox" value="心理" name="learningAssetConnectsTo" />心理</label>
+              <label><input type="checkbox" value="習慣" name="learningAssetConnectsTo" />習慣</label>
+              <label><input type="checkbox" value="信頼構築" name="learningAssetConnectsTo" />信頼構築</label>
+              <label><input type="checkbox" value="コンテンツ化" name="learningAssetConnectsTo" />コンテンツ化</label>
               <label><input type="checkbox" value="その他" name="learningAssetConnectsTo" />その他</label>
             </fieldset>
             <div class="learning-asset-actions">
-              <p id="learningAssetStatusMessage" class="learning-asset-status" role="status" aria-live="polite">タイトルか印象、または自分の考えを書くと保存できます。</p>
+              <p id="learningAssetStatusMessage" class="learning-asset-status" role="status" aria-live="polite">知識名、概要、活用場面のどれかを書くと保存できます。</p>
               <button class="ghost-button" id="deleteLearningAsset" type="button" hidden>削除</button>
               <button class="ghost-button" type="submit">保存</button>
             </div>
           </form>
 
           <div class="learning-asset-controls">
-            <input id="learningAssetSearch" type="search" placeholder="タイトル・考え・実験・記事候補・テーマを検索" aria-label="学び資産を検索" />
+            <input id="learningAssetSearch" type="search" placeholder="信頼構築、AI、Substack、Podcast化など、複数の本を横断して検索" aria-label="知識資産を検索" />
             <select id="learningAssetStatusFilter" aria-label="学び資産の状態で絞り込み">
               <option value="all">すべて</option>
-              <option>学び待ち</option>
-              <option>対話済み</option>
-              <option>実験待ち</option>
-              <option>記事化待ち</option>
+              <option>知識化待ち</option>
+              <option>Codex抽出済み</option>
+              <option>実践待ち</option>
+              <option>コンテンツ化待ち</option>
               <option>資産化完了</option>
             </select>
             <span id="learningAssetSearchCount">0件表示</span>
           </div>
-          <div id="learningAssetList" class="learning-asset-list" aria-label="保存済みの学び資産"></div>
+          <div id="learningAssetList" class="learning-asset-list" aria-label="保存済みの知識資産"></div>
         </section>
 
         <section id="reading-notes" class="panel reading-notes-panel span-2" aria-label="読書" hidden>
