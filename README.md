@@ -29,6 +29,7 @@
 - `?seed=forbidden-words` で「挑戦を止める7つの禁止コトバ 実践書」の知識カードをすぐ登録
 - `?seed=twelve-questions` で「ピンチを行動に変える12の質問 実践書」の知識カードをすぐ登録
 - `?seed=all-knowledge` でKnowledge Laboの登録済みサンプルカードを未登録分だけ一括追加
+- `?seed=reset-knowledge` でKnowledge Laboの登録済みサンプルカードを64件に復旧
 - 毎日タスクの追加、編集、削除、完了チェック
 - 今日やることの追加、編集、削除、並び替え、完了チェック
 - 育てるプロジェクトのチェック

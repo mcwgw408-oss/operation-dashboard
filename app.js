@@ -6745,6 +6745,27 @@ function allKnowledgeSampleCards() {
   ];
 }
 
+function knowledgeSampleTitles() {
+  return new Set([
+    FIRST_KNOWLEDGE_SAMPLE_TITLE,
+    SMALL_BIZ_SAMPLE_TITLE,
+    PSYCHOLOGY_SAMPLE_TITLE,
+    TREASURE_SAMPLE_TITLE,
+    IDEA_SAMPLE_TITLE,
+    STORY_PROFILE_SAMPLE_TITLE,
+    CONCEPT_DESIGN_SAMPLE_TITLE,
+    VALUE_OS_SAMPLE_TITLE,
+    ACTION_PROFILE_SAMPLE_TITLE,
+    COPY_TARGET_SAMPLE_TITLE,
+    TRUST_CHARISMA_SAMPLE_TITLE,
+    THREE_WEEK_FUNNEL_SAMPLE_TITLE,
+    SNS_TRUST_ASSET_SAMPLE_TITLE,
+    SELLING_COPYWRITING_SAMPLE_TITLE,
+    FORBIDDEN_WORDS_SAMPLE_TITLE,
+    TWELVE_QUESTIONS_SAMPLE_TITLE,
+  ]);
+}
+
 function addAllKnowledgeSampleCards() {
   const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
   const existingKeys = new Set(learningAssets.map((item) => learningAssetSampleKey(item)));
@@ -6765,10 +6786,25 @@ function addAllKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function resetKnowledgeSampleCards() {
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  const sampleTitles = knowledgeSampleTitles();
+  const userCards = learningAssets.filter((item) => !sampleTitles.has(item.title));
+  const sampleCards = allKnowledgeSampleCards();
+  learningAssets = [...sampleCards, ...userCards];
+  saveLearningAssets();
+  learningAssetSearchQuery = "";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = `Knowledge Laboのサンプルカードを${sampleCards.length}件に復旧しました。`;
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "all-knowledge"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "all-knowledge", "reset-knowledge"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6787,6 +6823,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "forbidden-words") addForbiddenWordsKnowledgeSampleCards();
   if (seed === "twelve-questions") addTwelveQuestionsKnowledgeSampleCards();
   if (seed === "all-knowledge") addAllKnowledgeSampleCards();
+  if (seed === "reset-knowledge") resetKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
