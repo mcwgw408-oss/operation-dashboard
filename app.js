@@ -147,6 +147,7 @@ const LEARNING_ASSET_PUBLISHING_PLACES = ["Substack", "note", "Podcast", "ライ
 const LEARNING_ASSET_CONNECTIONS = ["発信", "AI", "ブランディング", "マーケティング", "心理", "習慣", "信頼構築", "コンテンツ化", "暮らし", "回復", "OS", "その他"];
 const FIRST_KNOWLEDGE_SAMPLE_TITLE = "AI時代の1行コンセプト設計";
 const SMALL_BIZ_SAMPLE_TITLE = "AI時代の小さく始めるスモビジ実践書";
+const PSYCHOLOGY_SAMPLE_TITLE = "人生とビジネスに効く「10の心理学」実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -4452,13 +4453,200 @@ function addSmallBizKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function psychologyKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: PSYCHOLOGY_SAMPLE_TITLE,
+    author: "",
+    genre: "心理学 / ビジネス / AI時代の思考",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes"],
+    connectsTo: ["発信", "AI", "マーケティング", "心理", "習慣", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "心理学は人を操る武器ではなく、消耗を減らす理解の地図",
+      oneLineConclusion: "心理学は、相手や自分を責めずに行動の前提を整える地図である。",
+      knowledgeOverview: "AIが情報や選択肢を増やしても、不安・比較・迷い・決断の重さは人間側に残る。心理学はそれを能力不足ではなく構造として理解するために使う。",
+      todayAction: "今日の不安や迷いを『自分がダメ』ではなく『どの心理構造が働いているか』で1つ言語化する。",
+      useScene: "Substack初心者への励まし、相談対応、講座導入、AI活用記事、人間関係や仕事の整理に使う。",
+      beginnerExplanation: "心理学は人を動かす裏技ではなく、自分や相手がなぜ止まるのかを分かりやすく見るための地図。",
+      articleIdeas: "AI時代に心理学が必要な理由 / 心理学を人を操る技術として使わないために",
+      podcastIdeas: "AIが速くなっても人が迷う理由 / 心理学は消耗を減らす地図",
+      aiUseSimple: "AIに悩みをそのまま解決させる前に、不安・比較・損失回避・境界線など心理タグで分類させる。",
+      tagsSimple: "心理学, AI, 自己理解, 消耗予防, 判断",
+      summary3Lines: "AIは情報整理や最適化が得意だが、意味・価値・決断は人間側に残る。心理学は感情や迷いを消す魔法ではなく、前提を整える地図。心の構造を理解すると、無駄な自己否定と消耗を減らせる。",
+      coreIdea: "心理学は操作ではなく理解のために使う。",
+      top10: "心理学は理解の地図 / AIは速さ、人間は意味と決断 / 感情は消す対象ではない / 消耗は能力不足ではなく構造で起きる / 心のクセを前提に設計する",
+      publishingUse: "読者の悩みを『怠け』『性格』ではなく、心理構造としてやさしく説明する記事に使う。",
+      useSubstack: "初心者が発信で止まる理由を心理学の地図としてシリーズ化する。",
+      useNote: "自分を責めない働き方・発信の考え方として記事化する。",
+      usePodcast: "悩み相談型の音声テーマに向いている。",
+      useLive: "ライブ相談で、悩みを心理タグに分けて整理する。",
+      useNotes: "『心理学は武器ではなく地図』という短文投稿にする。",
+      useX: "心理学を使う目的を短い原則として投稿する。",
+      useAi: "AIに悩みを心理タグで分類させ、次の行動に変換するプロンプトを作る。",
+      contentIdeas: "心理学×発信の連載、初心者向け相談テンプレート、講座導入、AIプロンプト集に展開できる。",
+      practiceTomorrow: "自分か読者の悩みを1つ選び、『能力不足ではなく構造で説明すると？』と書き換える。",
+      knowledgeTags: "心理学, AI, 自己理解, 発信, 相談, 消耗予防, 知識資産",
+    },
+    {
+      ...common,
+      knowledgeName: "不安は敵ではなく、未処理の論点を知らせる通知",
+      oneLineConclusion: "不安は消すものではなく、整理すべき論点を教えるサインである。",
+      knowledgeOverview: "不安を消そうとするほど脳は重要な脅威として認識しやすい。不安が出たら、何が未整理なのかを言語化することで行動に変えられる。",
+      todayAction: "今日の不安を3つ書き出し、それぞれ『何が未処理だから怖いのか』に変換する。",
+      useScene: "発信前の不安、商品づくり前の不安、ライブ前の緊張、相談対応、読者の背中を押す記事に使う。",
+      beginnerExplanation: "不安は『やめろ』ではなく『まだ整理できていないことがあるよ』という通知。",
+      articleIdeas: "発信前の不安を消そうとしなくていい理由 / 不安を行動に変える3つの質問",
+      podcastIdeas: "不安は敵じゃない / 未処理の論点を見つける音声ワーク",
+      aiUseSimple: "AIに不安リストを渡し、『未処理の論点』『確認すべきこと』『今日できる一歩』に分解させる。",
+      tagsSimple: "不安, 心理学, 自己理解, 行動, 発信",
+      summary3Lines: "不安は危険を察知する正常な機能。消そうとするより、何が整理されていないのかを見る。不安を論点化すると、自己否定ではなく行動計画に変わる。",
+      coreIdea: "不安は止めるボタンではなく、整えるための通知。",
+      publishingUse: "初心者が発信前に不安になる理由を、正常な反応として説明する。",
+      useSubstack: "不安を整理するワークシートをニュースレターにする。",
+      useNote: "自分の不安を論点化した体験記事にする。",
+      usePodcast: "リスナーの不安を一緒にほどく回を作る。",
+      useLive: "ライブで『不安を論点に変える』公開ワークをする。",
+      useNotes: "不安は通知、という一文から短い投稿を作る。",
+      useX: "不安を3分解するチェックリスト投稿にする。",
+      useAi: "AIに不安を『事実・解釈・未処理論点・次の一手』へ分けさせる。",
+      contentIdeas: "不安整理テンプレート、発信前チェックリスト、相談用質問集にできる。",
+      practiceTomorrow: "漠然とした不安を1つ選び、『未処理の論点』として3行で書く。",
+      knowledgeTags: "不安, 心理学, 発信, 自己理解, AI活用, 行動",
+    },
+    {
+      ...common,
+      knowledgeName: "決断とは正解を選ぶことではなく、何を捨てるかを決めること",
+      oneLineConclusion: "迷いの正体は正解不足ではなく、捨てる痛みを引き受けられないこと。",
+      knowledgeOverview: "選択肢が増えるほど、人は後悔しない選択を探して止まりやすい。プロスペクト理論や損失回避を前提に、選ぶ前に捨てるものを言語化する。",
+      todayAction: "今迷っていることを1つ選び、『これを選ぶ代わりに捨てるもの』を1つ書く。",
+      useScene: "媒体選び、商品設計、企画の優先順位、読者への選択サポート、相談・コーチングに使う。",
+      beginnerExplanation: "決められない時は、正解が足りないのではなく、どれも捨てたくない状態になっている。",
+      articleIdeas: "決められない人に必要なのは情報ではなく捨てる基準 / 発信テーマを決める時に捨てるもの",
+      podcastIdeas: "決断と損失回避 / 正解探しをやめる練習",
+      aiUseSimple: "AIに選択肢ごとのメリットだけでなく『捨てるもの』『後悔しそうな点』『守れる基準』を表にさせる。",
+      tagsSimple: "決断, 損失回避, マーケティング, 発信, 優先順位",
+      summary3Lines: "人は最善より後悔しない選択を求める。損失回避が強いと、現状維持や決断回避が起きる。決断は正解選びではなく、何を捨てるかを決める作業。",
+      coreIdea: "選ぶとは、同時に捨てることを受け入れること。",
+      publishingUse: "読者が迷う場面に、比較表だけでなく『捨てる基準』を提示する。",
+      useSubstack: "Substack初心者向けに媒体選び・テーマ選びの捨てる基準を書く。",
+      useNote: "自分の選択と捨てたものを振り返る記事にする。",
+      usePodcast: "迷い相談に対して『何を捨てるか』を一緒に考える回にする。",
+      useLive: "参加者の迷いを、選択肢と捨てるものに分けるワークにする。",
+      useNotes: "今日捨てることを1つ投稿する。",
+      useX: "決断とは何を捨てるか、という短文投稿にする。",
+      useAi: "AIに選択肢の比較だけでなく、捨てる痛みと対策を出させる。",
+      contentIdeas: "意思決定テンプレート、媒体選びチェックリスト、相談用ワークシートにできる。",
+      practiceTomorrow: "今週やらないことを1つ決める。",
+      knowledgeTags: "決断, 損失回避, 優先順位, 発信, マーケティング, 相談",
+    },
+    {
+      ...common,
+      knowledgeName: "行動は意志ではなく、判断不要レベルまで小さく設計すると続く",
+      oneLineConclusion: "先延ばしと継続の問題は、やる気ではなく行動設計で解決する。",
+      knowledgeOverview: "先延ばしは怠けではなく脳の危険回避。継続は意志の強さではなく、環境・トリガー・摩擦の少なさで決まる。",
+      todayAction: "今日やるタスクを1つ選び、『30秒で着手できる最初の動作』まで小さくする。",
+      useScene: "発信習慣、Podcast収録、記事作成、講座準備、コミュニティ運営、AI作業フローに使う。",
+      beginnerExplanation: "続かないのは根性がないからではなく、始めるまでのハードルが高すぎることが多い。",
+      articleIdeas: "発信が続かない人は意志力より摩擦を減らそう / 30秒で始める記事作成術",
+      podcastIdeas: "やる気を待たない発信習慣 / 先延ばしを責めない設計",
+      aiUseSimple: "AIに大きなタスクを30秒・3分・15分の行動に分解させ、最初の一歩だけ選ぶ。",
+      tagsSimple: "習慣, 先延ばし, 行動設計, 発信継続, AI活用",
+      summary3Lines: "先延ばしは危険回避の反応。継続は意志ではなく環境とトリガーで起きる。行動を判断不要レベルまで小さくすると、脳の警戒が下がる。",
+      coreIdea: "やる気を出すより、摩擦を減らす。",
+      publishingUse: "読者に『頑張れ』ではなく、行動を小さくする具体策を渡す。",
+      useSubstack: "記事作成を30秒単位に分けた初心者向けワークにする。",
+      useNote: "発信習慣の作り方として体験談にする。",
+      usePodcast: "作業前の摩擦を減らす話にする。",
+      useLive: "公開作業会で最初の30秒だけ一緒にやる。",
+      useNotes: "今日の最小行動を1つ投稿する。",
+      useX: "先延ばし対策の小さな行動リストにする。",
+      useAi: "AIにタスク分解、チェックリスト化、毎日の開始文を作らせる。",
+      contentIdeas: "発信習慣テンプレート、30秒着手チェックリスト、AIタスク分解プロンプトにできる。",
+      practiceTomorrow: "次の記事作成を『ファイルを開いて仮タイトルを1行書く』まで小さくする。",
+      knowledgeTags: "習慣, 先延ばし, 行動設計, 発信, AI活用, 継続",
+    },
+    {
+      ...common,
+      knowledgeName: "関係の消耗は性格ではなく、境界線と責任範囲の設計で減らせる",
+      oneLineConclusion: "人間関係は相性だけでなく、期待と責任の線引きで楽になる。",
+      knowledgeOverview: "人間関係の消耗や燃え尽きは、性格の弱さではなく境界線の曖昧さや自己犠牲で起きやすい。相手を尊重しながら、自分の責任範囲を言語化する。",
+      todayAction: "今しんどい関係や仕事を1つ選び、『ここまでは自分の責任、ここからは相手の課題』と書く。",
+      useScene: "相談対応、コミュニティ運営、ライブ配信、クライアントワーク、仕事の線引き、燃え尽き予防に使う。",
+      beginnerExplanation: "相手の気分や反応まで全部背負わなくていい。自分ができる範囲と相手の範囲を分けること。",
+      articleIdeas: "やさしい人ほど境界線が必要な理由 / コミュニティ運営で疲れない責任範囲の作り方",
+      podcastIdeas: "境界線は冷たさではない / 持続可能な善意の作り方",
+      aiUseSimple: "AIに相談文や断り文を、相手を尊重しつつ責任範囲を明確にする形で整えてもらう。",
+      tagsSimple: "境界線, 信頼構築, コミュニティ, バーンアウト, 相談",
+      summary3Lines: "消耗の多くは性格ではなく境界線の曖昧さから起きる。燃え尽きは弱さではなく、使命感と自己犠牲が結びついた時に起きる。貢献を続けるために、自分を守る設計が必要。",
+      coreIdea: "持続可能な善意のために、責任範囲を線引きする。",
+      publishingUse: "読者やコミュニティに、やさしさと線引きは両立することを伝える。",
+      useSubstack: "相談・発信・コミュニティで疲れない境界線の作り方を書く。",
+      useNote: "自分の消耗パターンと境界線の見直しを記事にする。",
+      usePodcast: "人間関係で疲れる時の責任範囲の話にする。",
+      useLive: "コミュニティ運営の悩み相談テーマにする。",
+      useNotes: "『持続可能な善意』という短文投稿にする。",
+      useX: "境界線の言語化テンプレートを投稿する。",
+      useAi: "AIに境界線を保った返信文、断り文、説明文を作らせる。",
+      contentIdeas: "境界線チェックリスト、相談文テンプレート、コミュニティ運営講座、燃え尽き予防ワークにできる。",
+      practiceTomorrow: "今週引き受けすぎていることを1つ選び、責任範囲を一文で書く。",
+      knowledgeTags: "境界線, 信頼構築, コミュニティ, 相談, バーンアウト, 仕事",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addPsychologyKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(PSYCHOLOGY_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("心理学は人を操る武器ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "心理学";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "10の心理学実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...psychologyKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "心理学";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "10の心理学実践書を知識カードとして5件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
+  if (seed === "psychology") addPsychologyKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
