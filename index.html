@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260808-knowledge-labo-smallbiz" />
+    <link rel="stylesheet" href="./styles.css?v=20260808-knowledge-labo-daily-use" />
   </head>
   <body>
     <div class="app">
@@ -2258,7 +2258,9 @@
               <button class="ghost-button" id="cancelLearningAssetEdit" type="button">一覧に戻る</button>
             </div>
             <label class="learning-asset-wide-field">知識名<input id="learningAssetKnowledgeName" type="text" placeholder="例: 信頼構築は情報量ではなく判断しやすさで生まれる" /></label>
+            <label class="learning-asset-wide-field">この知識を一言で言うと<input id="learningAssetOneLineConclusion" type="text" placeholder="例: 売る前に、小さく試して反応で磨く" /></label>
             <label class="learning-asset-wide-field">概要<textarea id="learningAssetKnowledgeOverview" rows="3" placeholder="あとから見返したときに、この知識の意味が分かる説明"></textarea></label>
+            <label class="learning-asset-primary-field">今日すぐ実践できること<textarea id="learningAssetTodayAction" rows="3" placeholder="今日の記事、Podcast、相談、講座、仕事でそのまま使える行動"></textarea></label>
             <label class="learning-asset-wide-field">活用場面<textarea id="learningAssetUseScene" rows="3" placeholder="記事、講座、相談、商品設計、コミュニティ運営など"></textarea></label>
             <label class="learning-asset-wide-field">初心者向け説明<textarea id="learningAssetBeginnerExplanation" rows="3" placeholder="Substack初心者にも伝わる言い方"></textarea></label>
             <label class="learning-asset-wide-field">記事アイデア<textarea id="learningAssetArticleIdeas" rows="3"></textarea></label>
@@ -2292,6 +2294,49 @@
                 <option value="1">★</option>
               </select>
             </label>
+            <fieldset class="learning-asset-checkboxes learning-asset-self-ratings">
+              <legend>自分評価</legend>
+              <label>重要度
+                <select id="learningAssetImportanceRating">
+                  <option value="">未評価</option>
+                  <option value="5">★★★★★</option>
+                  <option value="4">★★★★</option>
+                  <option value="3">★★★</option>
+                  <option value="2">★★</option>
+                  <option value="1">★</option>
+                </select>
+              </label>
+              <label>すぐ使える度
+                <select id="learningAssetPracticalRating">
+                  <option value="">未評価</option>
+                  <option value="5">★★★★★</option>
+                  <option value="4">★★★★</option>
+                  <option value="3">★★★</option>
+                  <option value="2">★★</option>
+                  <option value="1">★</option>
+                </select>
+              </label>
+              <label>初心者向け度
+                <select id="learningAssetBeginnerRating">
+                  <option value="">未評価</option>
+                  <option value="5">★★★★★</option>
+                  <option value="4">★★★★</option>
+                  <option value="3">★★★</option>
+                  <option value="2">★★</option>
+                  <option value="1">★</option>
+                </select>
+              </label>
+              <label>再読したい度
+                <select id="learningAssetRereadRating">
+                  <option value="">未評価</option>
+                  <option value="5">★★★★★</option>
+                  <option value="4">★★★★</option>
+                  <option value="3">★★★</option>
+                  <option value="2">★★</option>
+                  <option value="1">★</option>
+                </select>
+              </label>
+            </fieldset>
             <label>状態
               <select id="learningAssetStatus">
                 <option>知識化待ち</option>
@@ -2852,6 +2897,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260808-knowledge-labo-smallbiz"></script>
+    <script src="./app.js?v=20260808-knowledge-labo-daily-use"></script>
   </body>
 </html>

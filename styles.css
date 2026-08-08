@@ -5531,6 +5531,15 @@ textarea {
   min-height: 180px;
 }
 
+.learning-asset-self-ratings {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.learning-asset-self-ratings label {
+  display: grid;
+  align-items: stretch;
+}
+
 .learning-asset-checkboxes {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid var(--line);
@@ -5666,6 +5675,77 @@ textarea {
   font-weight: 650;
 }
 
+.learning-asset-conclusion {
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-item);
+  background: var(--green-soft);
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.learning-asset-daily-use {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--blue-line);
+  border-radius: var(--radius-item);
+  background: var(--blue-soft);
+  padding: 10px;
+}
+
+.learning-asset-daily-use h4,
+.learning-asset-detail-section h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.learning-asset-daily-use-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.learning-asset-use-item {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-item);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 8px;
+}
+
+.learning-asset-use-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.learning-asset-use-item p {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.learning-asset-rating-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.learning-asset-rating-grid span {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+  padding: 6px 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
 .learning-asset-tags {
   display: flex;
   flex-wrap: wrap;
@@ -5704,6 +5784,11 @@ textarea {
   border-top: 1px solid var(--line);
   padding-top: 8px;
   color: var(--muted);
+}
+
+.learning-asset-detail-section {
+  display: grid;
+  gap: 6px;
 }
 
 .learning-asset-card-details span {
@@ -6696,6 +6781,9 @@ button.launch-card {
   .learning-asset-flow-map,
   .learning-asset-form,
   .learning-asset-checkboxes,
+  .learning-asset-daily-use-grid,
+  .learning-asset-rating-grid,
+  .learning-asset-self-ratings,
   .reading-labo-hero,
   .reading-labo-kpi,
   .reading-labo-output-counts,
