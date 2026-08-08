@@ -158,6 +158,7 @@ const COPY_TARGET_SAMPLE_TITLE = "売れる文章は接点で決まる 商品×�
 const TRUST_CHARISMA_SAMPLE_TITLE = "信頼で選ばれるカリスマ設計実践書";
 const THREE_WEEK_FUNNEL_SAMPLE_TITLE = "3週間で参加者を集める発信導線実践書";
 const SNS_TRUST_ASSET_SAMPLE_TITLE = "SNS資産を本の代わりにする信頼導線実践書";
+const SELLING_COPYWRITING_SAMPLE_TITLE = "売れるコピーライティング実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -6249,10 +6250,166 @@ function addSnsTrustAssetKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function sellingCopywritingKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: SELLING_COPYWRITING_SAMPLE_TITLE,
+    author: "",
+    genre: "コピーライティング / 商品ページ設計 / 海外販売 / SEO / 信頼構築",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "4",
+    rereadRating: "4",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["コピーライティング", "マーケティング", "信頼構築", "商品設計", "AI活用"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "売れるコピーはうまい文章ではなく、買う理由を順番に並べたもの",
+      oneLineConclusion: "文章力より、検索されて読まれ、安心して買える順番が大事。",
+      knowledgeOverview: "海外販売の商品ページで売れるコピーは、きれいな文章ではない。検索されるキーワード、読まれる導入、不安を消す説明、購入に進む安心感を順番に配置することが重要。自己満足の説明やスペック羅列ではなく、買い手が判断する順番に合わせてページを作る。",
+      todayAction: "今ある販売ページやサービス案内を、検索語、導入、不安解消、安心材料の4つに分けて不足を1つ直す。",
+      useScene: "商品ページ、サービス紹介、Substack有料案内、note販売記事、Brain販売ページ、講座募集ページに使う。",
+      beginnerExplanation: "うまく書くより、読者が『探す、読む、不安が消える、買う』の順番で迷わないように書くこと。",
+      articleIdeas: "売れるコピーは文章力ではなく順番で決まる / 買う理由を並べる商品ページ設計",
+      podcastIdeas: "うまい文章では売れない理由 / コピーライティング初心者が最初に直すべき順番",
+      aiUseSimple: "AIに販売ページを渡し、検索語、導入、不安解消、安心材料が足りているか診断させる。",
+      tagsSimple: "コピーライティング, 商品ページ, 販売導線, SEO, 信頼構築",
+      summary3Lines: "売れるコピーは美文ではない。買い手が検索し、読み、不安を消し、安心して購入できる順番がある。スペック羅列ではなく、買う理由を順番に配置することが本質。",
+      coreIdea: "コピーは説得ではなく、購入判断の順番を整える設計である。",
+      top10: "検索キーワード / 読まれる導入 / 不安を消す説明 / 安心感 / 商品ページ / スペック羅列 / 買う理由 / 順番 / 購入判断 / 信頼",
+      publishingUse: "販売ページや有料記事の冒頭から末尾まで、読者の不安が消える順に並べ直す。",
+      useSubstack: "有料購読や講座案内ページに、誰向けか、得られる価値、不安解消、申込後の流れを入れる。",
+      useNote: "販売記事を『読まれる導入→価値→不安解消→購入後の安心』で再構成する。",
+      usePodcast: "販売や告知回で、先に価値と不安解消を話してから案内する。",
+      useLive: "ライブ告知で、参加前の不安と参加後の安心材料を言語化する。",
+      useNotes: "短文で『買う理由』や『不安解消』を1つずつ出す。",
+      useX: "販売投稿をスペックではなく、検索語、価値、安心材料の順で作る。",
+      useAi: "AIに商品説明を買い手目線の順番へ並べ替えさせる。",
+      contentIdeas: "売れるページ診断チェックリスト、商品ページ改善テンプレート、販売文の順番講座にできる。",
+      practiceTomorrow: "1つの商品・サービス案内の冒頭3行を『何の商品か・状態・価値』が伝わる形に直す。",
+      knowledgeTags: "コピーライティング, 商品ページ, 販売導線, SEO, 信頼構築, マーケティング",
+    },
+    {
+      ...common,
+      knowledgeName: "商品説明だけでは売れない。状態・配送・本物感・安心感まで判断材料にする",
+      oneLineConclusion: "買い手は商品そのものだけでなく、届くまでの不安も見ている。",
+      knowledgeOverview: "海外購入者は、商品スペックだけでなく、状態、傷や汚れ、動作確認、配送、追跡、梱包、本物感、信頼感を総合的に見て購入を判断する。商品説明で不安を放置すると離脱される。写真と文章で不安を先回りして消すことが必要。",
+      todayAction: "自分の販売文や案内文に、読者が不安に思う点を5つ書き出し、それぞれに回答を追加する。",
+      useScene: "中古品販売、海外販売、デジタル商品販売、講座案内、相談サービス、コミュニティ募集に使う。",
+      beginnerExplanation: "欲しいと思っても『大丈夫かな』が残ると人は買わない。先に不安に答えること。",
+      articleIdeas: "商品説明だけでは売れない理由 / 不安を消すコピーの作り方",
+      podcastIdeas: "買う前の不安を先回りする / 安心感が売上を作る",
+      aiUseSimple: "AIに商品やサービス内容を渡し、購入前の不安リストと回答文を作らせる。",
+      tagsSimple: "不安解消, 信頼構築, 商品説明, 配送, 安心感",
+      summary3Lines: "買い手は商品だけを見ていない。状態、配送、梱包、追跡、本物感、信頼感を見ている。売る側が不安を先回りして説明すると、安心して購入に進みやすい。",
+      coreIdea: "売れる説明は、商品の魅力だけでなく不安の解除まで含む。",
+      top10: "状態 / 傷 / 汚れ / 動作確認 / 配送 / 追跡番号 / 梱包 / 本物感 / 信頼感 / 不安解消",
+      publishingUse: "商品やサービス紹介に、読者が躊躇する理由への回答を入れる。",
+      useSubstack: "有料購読や講座案内に、対象外の人、解約、更新頻度、得られるものを明記する。",
+      useNote: "購入前FAQや注意点を販売記事の中盤に入れる。",
+      usePodcast: "よくある不安に答える回を作り、申込前の心理的ハードルを下げる。",
+      useLive: "ライブ中に質問されやすい不安を先に回答する。",
+      useNotes: "『申し込む前に不安なこと』に短文で答える投稿を作る。",
+      useX: "安心材料を1投稿1テーマで出す。",
+      useAi: "AIにFAQ、返品・対応方針、参加前の不安解消文を作らせる。",
+      contentIdeas: "不安解消FAQテンプレート、販売ページ安心材料リスト、購入前チェックシートにできる。",
+      practiceTomorrow: "販売文に『よくある不安と回答』を3つ追加する。",
+      knowledgeTags: "不安解消, 信頼構築, 商品説明, FAQ, 販売導線, マーケティング",
+    },
+    {
+      ...common,
+      knowledgeName: "媒体ごとにコピーの優先順位を変える。eBayは検索、Shopeeは短さ、Etsyは物語",
+      oneLineConclusion: "同じ商品でも、売り場が変われば響くコピーも変わる。",
+      knowledgeOverview: "eBayは検索性とSEOが最優先で、ブランド、型番、状態、From Japanなど買い手が検索する語を入れる。Shopeeはスマホで一瞬で伝わる短文、価格、状態、配送安心感が重要。Etsyはストーリーや文化、一点物感、世界観で魅せる。媒体特性に合わせてコピーを出し分ける必要がある。",
+      todayAction: "同じ商品やサービスを、検索型、短文型、ストーリー型の3パターンで書き分ける。",
+      useScene: "eBay、Shopee、Etsy、X、note、Substack、Brain、Kindle説明文など媒体別コピーに使う。",
+      beginnerExplanation: "同じ文章を全部の場所に貼るのではなく、その場所で読まれやすい形に変えること。",
+      articleIdeas: "媒体別にコピーを変えるだけで伝わり方は変わる / eBay・Shopee・Etsyに学ぶ発信文の使い分け",
+      podcastIdeas: "売り場によって言葉を変える / 検索型・短文型・物語型コピー",
+      aiUseSimple: "AIに同じ情報を渡し、eBay向け、Shopee向け、Etsy向け、X向け、Substack向けに書き分けさせる。",
+      tagsSimple: "媒体別コピー, SEO, 短文, ストーリー, 海外販売",
+      summary3Lines: "コピーは媒体ごとに変える必要がある。eBayは検索性、Shopeeは短く視覚的に伝えること、Etsyはストーリーと文化性が重要。同じ商品情報でも、売り場に合わせて表現を変えると伝わりやすくなる。",
+      coreIdea: "コピーは商品だけでなく、売り場の読み方に合わせて設計する。",
+      top10: "eBay / Shopee / Etsy / SEO / 検索性 / 短文 / スマホ / ストーリー / 日本文化 / 一点物感",
+      publishingUse: "同じ告知を媒体ごとにリライトし、読まれる文体と長さへ調整する。",
+      useSubstack: "背景やストーリーを深く書き、信頼や価値観を伝える。",
+      useNote: "検索されるタイトルと、読まれる導入を意識する。",
+      usePodcast: "番組タイトルは検索語、概要欄は安心材料、本文はストーリーに分ける。",
+      useLive: "短く伝える告知文と、背景を語るライブ台本を分ける。",
+      useNotes: "一瞬で伝わる短文コピーを作る。",
+      useX: "検索語とベネフィットを先頭に置き、短く出す。",
+      useAi: "AIに媒体別の文字数、文体、優先要素を指定して複数案を生成させる。",
+      contentIdeas: "媒体別リライトテンプレート、1商品3コピー練習、Substack告知文変換表にできる。",
+      practiceTomorrow: "1つの告知をX用、note用、Substack用の3種類に書き分ける。",
+      knowledgeTags: "媒体別コピー, SEO, 短文, ストーリー, 海外販売, AI活用",
+    },
+    {
+      ...common,
+      knowledgeName: "中古品コピーは欠点を隠さず、正直に魅せることで信頼になる",
+      oneLineConclusion: "欠点は隠すほど不安になり、正直に説明すると価値の一部になる。",
+      knowledgeOverview: "中古品や一点物では、傷や劣化を曖昧に隠すと不信につながる。傷の場所や大きさを具体的に書き、写真を複数枚載せ、経年変化やヴィンテージ感として価値を伝える。正直な説明は、信頼、高評価、リピートにつながる。",
+      todayAction: "自分の商品・サービス・実績紹介で、弱みや注意点を1つ正直に書き、価値に変える説明を添える。",
+      useScene: "中古販売、ヴィンテージ品、相談サービスの向き不向き、講座の注意点、実績紹介、レビュー活用に使う。",
+      beginnerExplanation: "悪いところを隠すより、正直に伝えたほうが信頼されるということ。",
+      articleIdeas: "欠点を隠さないコピーが信頼を作る / 正直に魅せる販売文の作り方",
+      podcastIdeas: "弱みを価値に変える言葉 / 中古品コピーに学ぶ信頼構築",
+      aiUseSimple: "AIに商品の欠点やサービスの注意点を渡し、正直で不安を増やさない表現へ変換させる。",
+      tagsSimple: "中古品コピー, 信頼構築, 正直な説明, 欠点の見せ方, レビュー",
+      summary3Lines: "中古品コピーでは、傷や劣化を隠さない。場所や大きさを具体的に説明し、写真でも見せる。正直な説明は信頼になり、長く売れ続けるページの土台になる。",
+      coreIdea: "信頼されるコピーは、都合の悪い情報も買い手の判断材料として出す。",
+      top10: "中古品 / 傷 / 劣化 / 正直 / 写真 / Vintage patina / Honest condition / As-is / 信頼 / 高評価",
+      publishingUse: "販売や募集で、向いていない人や注意点も出し、信頼できる案内にする。",
+      useSubstack: "有料企画の弱点や向かない人を明記して、信頼を高める。",
+      useNote: "販売記事に注意点、できないこと、向いていない人を入れる。",
+      usePodcast: "弱みや失敗談を話し、正直な発信として信頼につなげる。",
+      useLive: "質問対応で無理に売らず、合わない場合も説明する。",
+      useNotes: "短文で『これは向いていない人』を出す。",
+      useX: "弱みを隠さず、判断基準として投稿する。",
+      useAi: "AIに弱みを信頼に変える説明文、FAQ、注意書きを作らせる。",
+      contentIdeas: "弱みを価値に変えるコピー集、正直な販売ページチェックリスト、信頼される注意書きテンプレートにできる。",
+      practiceTomorrow: "販売ページに『向いていない人』または『注意点』を1つ追加する。",
+      knowledgeTags: "中古品コピー, 信頼構築, 正直な説明, 欠点の見せ方, レビュー, ブランディング",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addSellingCopywritingKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(SELLING_COPYWRITING_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("売れるコピーはうまい文章ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "コピーライティング";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "売れるコピーライティング実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...sellingCopywritingKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "コピーライティング";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "売れるコピーライティング実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6267,6 +6424,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "trust-charisma") addTrustCharismaKnowledgeSampleCards();
   if (seed === "three-week-funnel") addThreeWeekFunnelKnowledgeSampleCards();
   if (seed === "sns-trust-asset") addSnsTrustAssetKnowledgeSampleCards();
+  if (seed === "selling-copywriting") addSellingCopywritingKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
