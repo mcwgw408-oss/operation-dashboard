@@ -161,6 +161,7 @@ const SNS_TRUST_ASSET_SAMPLE_TITLE = "SNS資産を本の代わりにする信頼
 const SELLING_COPYWRITING_SAMPLE_TITLE = "売れるコピーライティング実践書";
 const FORBIDDEN_WORDS_SAMPLE_TITLE = "挑戦を止める7つの禁止コトバ 実践書";
 const TWELVE_QUESTIONS_SAMPLE_TITLE = "ピンチを行動に変える12の質問 実践書";
+const SOCIAL_CONTRIBUTION_SAMPLE_TITLE = "社会貢献を仕事にする実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -6720,6 +6721,162 @@ function addTwelveQuestionsKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function socialContributionKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: SOCIAL_CONTRIBUTION_SAMPLE_TITLE,
+    author: "",
+    genre: "社会貢献 / 事業設計 / コミュニティ運営 / 信頼設計 / 継続運用",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "4",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["社会貢献", "事業設計", "コミュニティ", "信頼構築", "マーケティング"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "社会貢献は善意ではなく、続く構造として設計すると仕事になる",
+      oneLineConclusion: "情熱に頼らず、思想・行動・信頼・収益・成長のOSで回す。",
+      knowledgeOverview: "社会貢献が続かない原因は、能力や熱意の不足ではなく設計不在にある。善意、情熱、使命感は枯渇する前提で、思想OS、行動OS、信頼OS、収益OS、成長OSに分けて設計する。感情ではなく構造で回る状態を作ることが仕事化の本質。",
+      todayAction: "今やっている活動を、思想、行動、信頼、収益、成長の5項目に分けて、空欄を1つ見つける。",
+      useScene: "コミュニティ運営、講座運営、相談活動、無料企画の有料化、社会的テーマの発信、支援活動の継続設計に使う。",
+      beginnerExplanation: "良いことを頑張るだけでは続きにくいので、続けるための仕組みまで作ること。",
+      articleIdeas: "社会貢献は善意だけでは続かない / 活動を仕事に変える5つのOS",
+      podcastIdeas: "感情に頼らない社会貢献の作り方 / いいことを続けるには設計が必要",
+      aiUseSimple: "AIに活動内容を渡し、思想、行動、信頼、収益、成長のOSに分解させる。",
+      tagsSimple: "社会貢献, 事業設計, 継続運用, 信頼設計, 収益化",
+      summary3Lines: "社会貢献が止まる原因は熱意不足ではなく設計不在。善意や使命感は枯渇する前提で、活動をOSとして分解する。思想、行動、信頼、収益、成長を個別に更新できる構造にすると仕事として続く。",
+      coreIdea: "社会貢献は感情ではなく、更新可能な構造で続ける。",
+      top10: "善意 / 設計 / 社会貢献OS / 思想OS / 行動OS / 信頼OS / 収益OS / 成長OS / 継続 / 仕事化",
+      publishingUse: "読者に『好き・使命感』だけでなく、活動を続ける仕組みの作り方を伝える。",
+      useSubstack: "社会的テーマの発信を、思想記事、活動ログ、収益設計、改善ログに分けて連載する。",
+      useNote: "自分の活動をOS分解して、読者に設計プロセスを見せる。",
+      usePodcast: "社会貢献を仕事にするための構造づくりをシリーズ化する。",
+      useLive: "視聴者の活動を5つのOSに分解する相談ライブにする。",
+      useNotes: "善意だけでは続かない理由を短文で発信する。",
+      useX: "社会貢献OSの5分類を図解投稿にする。",
+      useAi: "AIに自分の活動の弱いOSを診断させ、改善案を出させる。",
+      contentIdeas: "社会貢献OS診断、活動設計ワーク、継続できる支援活動テンプレート、講座にできる。",
+      practiceTomorrow: "活動の目的、行動ログ、信頼材料、収益源、改善サイクルを1行ずつ書く。",
+      knowledgeTags: "社会貢献, 事業設計, 継続運用, 信頼設計, 収益化, コミュニティ",
+    },
+    {
+      ...common,
+      knowledgeName: "責任範囲とやめる条件を決めることが、活動と自分を守る",
+      oneLineConclusion: "優しさで範囲を広げず、やること・やらないこと・撤退基準を先に決める。",
+      knowledgeOverview: "社会貢献では、責任範囲を曖昧にすると自己犠牲で穴埋めしやすい。誰に、何を、どうなれば成功かを定義し、対象外ケース、対応時間、品質基準、撤退基準を明文化する。続ける条件よりやめる条件を先に決めることが、長期的には活動と関係者を守る。",
+      todayAction: "自分の活動について『やること3つ』『やらないこと3つ』『やめる条件1つ』を書く。",
+      useScene: "相談受付、コミュニティルール、無料サポート、講座運営、プロジェクト設計、支援活動の境界線作りに使う。",
+      beginnerExplanation: "全部助けようとすると続かないので、どこまでやるか、どこからやらないかを決めること。",
+      articleIdeas: "優しさで責任範囲を広げない / 社会貢献に撤退基準が必要な理由",
+      podcastIdeas: "やめる条件が活動を守る / 自己犠牲で続けない支援の作り方",
+      aiUseSimple: "AIに活動内容を渡し、IN SCOPE、OUT OF SCOPE、撤退基準、対応時間を表にさせる。",
+      tagsSimple: "責任範囲, 境界線, 撤退基準, 自己犠牲防止, 運営設計",
+      summary3Lines: "責任を曖昧にすることは優しさではない。やること、やらないこと、品質基準、撤退基準を決めることで活動は守られる。自己犠牲で設計不備を埋めないことが継続の条件。",
+      coreIdea: "線引きは冷たさではなく、継続のための責任設計である。",
+      top10: "責任範囲 / IN SCOPE / OUT OF SCOPE / 対応時間 / 品質基準 / 対象外 / 撤退基準 / 財務閾値 / 安全閾値 / 自己犠牲",
+      publishingUse: "発信や企画の対象者、対象外、提供範囲を明確にして信頼を作る。",
+      useSubstack: "有料購読や相談企画に、対象者、対象外、返信範囲を明記する。",
+      useNote: "活動のルールや境界線を記事化する。",
+      usePodcast: "支援と自己犠牲の違いをテーマに話す。",
+      useLive: "ライブ相談の対応範囲と答えられないことを冒頭で伝える。",
+      useNotes: "『やらないことリスト』を短文で共有する。",
+      useX: "活動を守るための線引き投稿にする。",
+      useAi: "AIに利用規約、FAQ、撤退基準の下書きを作らせる。",
+      contentIdeas: "責任範囲テンプレート、撤退基準シート、活動ルール設計講座にできる。",
+      practiceTomorrow: "今の活動で断るべきことを1つ決め、文章にする。",
+      knowledgeTags: "責任範囲, 境界線, 撤退基準, 自己犠牲防止, 運営設計, 信頼構築",
+    },
+    {
+      ...common,
+      knowledgeName: "信頼は良い人だからではなく、透明性・SLA・記録で設計する",
+      oneLineConclusion: "人柄に頼らず、誰がやっても同じ品質になる手順とログを残す。",
+      knowledgeOverview: "信頼は人格だけで得られるものではなく、再現可能な構造で担保される。プロセス、ルール、意思決定履歴を可視化し、いつまでに何をするかのSLAを定義し、行動を記録する。日報やログは評価のためではなく、仕組みを改善するためのデータになる。",
+      todayAction: "活動の対応品質を1つ決める。例: 返信は48時間以内、週1で活動ログを公開する。",
+      useScene: "コミュニティ運営、相談対応、メルマガ運営、講座サポート、プロジェクト報告、発信の信頼構築に使う。",
+      beginnerExplanation: "信頼されるには、良い人アピールより、約束したことを見える形で守ること。",
+      articleIdeas: "信頼は人柄ではなく仕組みで作る / 活動ログが信頼資産になる理由",
+      podcastIdeas: "透明性とSLAで信頼を作る / 日報は反省ではなく設計改善のデータ",
+      aiUseSimple: "AIに活動ログを渡し、KPI、行動、翌日の改善に整理させる。",
+      tagsSimple: "信頼設計, 透明性, SLA, 記録, 日報",
+      summary3Lines: "信頼は良い人だからではなく、再現可能な構造で担保する。透明性、SLA、ログ、手順書があると期待値が揃う。記録は人を裁くためではなく、仕組みを改善するために使う。",
+      coreIdea: "信頼は人格ではなく、約束・記録・改善で積み上がる。",
+      top10: "信頼設計 / 透明性 / SLA / 手順書 / 監査ログ / 日報 / KPI / 行動ログ / 改善 / 再現性",
+      publishingUse: "発信活動の裏側や改善ログを見せ、読者に継続性と信頼を伝える。",
+      useSubstack: "月次レポートで活動実績、学び、次の改善を共有する。",
+      useNote: "活動ログや運営の透明性を記事化する。",
+      usePodcast: "今週の活動ログと改善点を話す定番回にする。",
+      useLive: "活動報告ライブで、数字と次の改善を共有する。",
+      useNotes: "今日の活動ログを3行で残す。",
+      useX: "透明性のある進捗報告を投稿する。",
+      useAi: "AIに日報を読ませ、活動のボトルネックと次の改善案を出させる。",
+      contentIdeas: "活動日報テンプレート、信頼設計チェックリスト、運営ログ公開フォーマットにできる。",
+      practiceTomorrow: "数値、行動、翌日の一手の3項目で3分日報を書く。",
+      knowledgeTags: "信頼設計, 透明性, SLA, 記録, 日報, コミュニティ",
+    },
+    {
+      ...common,
+      knowledgeName: "収益はご褒美ではなく、責任を果たし続けるための燃料である",
+      oneLineConclusion: "無償を美徳にせず、価格・役割・参加条件で活動の循環を作る。",
+      knowledgeOverview: "社会貢献における収益は報酬ではなく、継続責任を果たすための資源である。無償で続けて資金不足になることは、支援対象者への裏切りにもなりうる。直接価値と間接価値を設計し、価格仮説、参加条件、役割、更新条件、離脱しやすさまで含めて循環を作る。",
+      todayAction: "自分の活動の直接価値と間接価値を1つずつ書き、それに対する価格仮説を1つ置く。",
+      useScene: "有料コミュニティ、講座、相談サービス、寄付以外の収益化、社会的プロジェクト、BrainやKindle化に使う。",
+      beginnerExplanation: "お金を受け取ることは悪ではなく、活動を明日も続けるための責任の一部。",
+      articleIdeas: "社会貢献でお金を受け取るのは悪いことか / 収益は責任の対価である",
+      podcastIdeas: "無償の美徳から抜ける / 社会貢献を続ける価格設計",
+      aiUseSimple: "AIに活動内容を渡し、直接価値、間接価値、価格仮説、参加条件を整理させる。",
+      tagsSimple: "収益化, 価格設計, 直接価値, 間接価値, コミュニティ",
+      summary3Lines: "収益はご褒美ではなく、継続責任を果たすための燃料。無償を美徳にしすぎると活動停止のリスクが高まる。直接価値と間接価値、価格、役割、参加条件を設計すると循環が生まれる。",
+      coreIdea: "お金を受け取ることは、活動を続ける責任を引き受けることでもある。",
+      top10: "収益 / 責任の対価 / キャッシュフロー / 価格仮説 / 直接価値 / 間接価値 / 役割設計 / 参加条件 / 更新条件 / 離脱設計",
+      publishingUse: "社会的価値と収益化を対立させず、継続するための設計として伝える。",
+      useSubstack: "有料購読の価値を直接価値と間接価値に分けて説明する。",
+      useNote: "無償活動を有料企画へ変える過程を記事化する。",
+      usePodcast: "価格をつける怖さと責任について話す。",
+      useLive: "活動の価値と参加条件を丁寧に説明するライブにする。",
+      useNotes: "お金を受け取る意味を短文で発信する。",
+      useX: "収益は責任の燃料という考え方を投稿する。",
+      useAi: "AIに価格案、参加条件、価値説明文、FAQを作らせる。",
+      contentIdeas: "社会貢献型ビジネス設計シート、価格仮説ワーク、価値二層化テンプレート、講座にできる。",
+      practiceTomorrow: "無料でやっていることを1つ選び、責任範囲と価格仮説を書いてみる。",
+      knowledgeTags: "収益化, 価格設計, 直接価値, 間接価値, コミュニティ, 事業設計",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addSocialContributionKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(SOCIAL_CONTRIBUTION_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("社会貢献は善意ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "社会貢献";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "社会貢献を仕事にする実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...socialContributionKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "社会貢献";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "社会貢献を仕事にする実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function learningAssetSampleKey(item) {
   return normalizeLaterText(`${item.title || ""}::${item.knowledgeName || ""}`);
 }
@@ -6742,6 +6899,7 @@ function allKnowledgeSampleCards() {
     ...sellingCopywritingKnowledgeSampleCards(),
     ...forbiddenWordsKnowledgeSampleCards(),
     ...twelveQuestionsKnowledgeSampleCards(),
+    ...socialContributionKnowledgeSampleCards(),
   ];
 }
 
@@ -6763,6 +6921,7 @@ function knowledgeSampleTitles() {
     SELLING_COPYWRITING_SAMPLE_TITLE,
     FORBIDDEN_WORDS_SAMPLE_TITLE,
     TWELVE_QUESTIONS_SAMPLE_TITLE,
+    SOCIAL_CONTRIBUTION_SAMPLE_TITLE,
   ]);
 }
 
@@ -6804,7 +6963,7 @@ function resetKnowledgeSampleCards() {
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "all-knowledge", "reset-knowledge"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "social-contribution", "all-knowledge", "reset-knowledge"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -6822,6 +6981,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "selling-copywriting") addSellingCopywritingKnowledgeSampleCards();
   if (seed === "forbidden-words") addForbiddenWordsKnowledgeSampleCards();
   if (seed === "twelve-questions") addTwelveQuestionsKnowledgeSampleCards();
+  if (seed === "social-contribution") addSocialContributionKnowledgeSampleCards();
   if (seed === "all-knowledge") addAllKnowledgeSampleCards();
   if (seed === "reset-knowledge") resetKnowledgeSampleCards();
   params.delete("seed");
