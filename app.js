@@ -152,6 +152,7 @@ const TREASURE_SAMPLE_TITLE = "AI時代の宝探し実践書";
 const IDEA_SAMPLE_TITLE = "令和AI時代のアイデア実践書";
 const STORY_PROFILE_SAMPLE_TITLE = "AI時代の自己紹介・発信を物語に変える実践書";
 const CONCEPT_DESIGN_SAMPLE_TITLE = "令和版・コンセプト設計 実践書";
+const VALUE_OS_SAMPLE_TITLE = "令和版 価値で選ばれる思考OS実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -5286,10 +5287,173 @@ function addConceptDesignKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function valueOsKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: VALUE_OS_SAMPLE_TITLE,
+    author: "",
+    genre: "価値設計 / 思考OS / マーケティング / 発信 / 継続設計",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化", "OS"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "価値は価格ではなく、相手にとっての意味で決まる",
+      oneLineConclusion: "高く売るのではなく、意味が立ち上がるから選ばれる。",
+      knowledgeOverview: "人は価格そのものではなく、自分の人生や仕事にどんな意味があるかに反応する。価格を先に考えるより、誰のどんな状態をどう変えるのか、なぜその人に必要なのかを設計することが価値になる。",
+      todayAction: "自分の商品・記事・相談メニューを1つ選び、『これは誰の人生や仕事で何の役に立つか』を1文で書く。",
+      useScene: "Substackの有料案内、相談メニュー、講座設計、記事タイトル、Podcast企画、商品説明、プロフィールに使う。",
+      beginnerExplanation: "値段を上げる前に、『これを受け取ると相手にどんな意味があるのか』を言葉にすること。",
+      articleIdeas: "価値は価格ではなく意味で決まる / 高く売ろうとすると選ばれない理由",
+      podcastIdeas: "人は何にお金を払っているのか / 価格ではなく意味を作る",
+      aiUseSimple: "AIに商品説明を渡し、『価格ではなく意味が伝わる表現』に変換させる。",
+      tagsSimple: "価値設計, 意味, マーケティング, ブランディング, 発信",
+      summary3Lines: "令和の時代はノウハウが古くなり、正解も人によって違う。だから価格や機能だけでは選ばれにくい。相手にとっての意味を設計し、誰のどんな状態をどう変えるかを言語化することが価値になる。",
+      coreIdea: "価値は意味の設計から生まれる。",
+      top10: "意味 / 価格 / 購入理由 / 文脈 / 役割 / 誰の課題か / どんな状態を変えるか / 一文定義 / 価値の再定義 / 選ばれる理由",
+      publishingUse: "発信を情報提供だけで終わらせず、読者にとっての意味を冒頭で示す。",
+      useSubstack: "有料記事やメルマガ説明を『何が読めるか』ではなく『読者の何が変わるか』で書く。",
+      useNote: "記事冒頭に、読むことで得られる意味を1文で入れる。",
+      usePodcast: "各回の導入で、聴く意味を先に伝える。",
+      useLive: "ライブ告知を、話題ではなく参加後の変化で書く。",
+      useNotes: "『価格ではなく意味』を短文で投稿し、自分の商品に当てはめる。",
+      useX: "価値は価格ではなく意味、という切り口で投稿する。",
+      useAi: "AIに読者別の意味づけを複数案出させ、最も自分の文脈に合うものを選ぶ。",
+      contentIdeas: "価値言語化テンプレート、相談メニュー改善ワーク、Substack有料案内添削、価値設計講座にできる。",
+      practiceTomorrow: "今ある発信テーマを『誰のどんな状態をどう変えるか』の一文に直す。",
+      knowledgeTags: "価値設計, 意味, マーケティング, ブランディング, 発信, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "価値は足すより、削ることで輪郭が立つ",
+      oneLineConclusion: "誰に向けないか、何をやらないか、何を言わないかが差別化になる。",
+      knowledgeOverview: "全員に向けるほど、メッセージは薄まる。価値は機能や説明を足した総量ではなく、選ばなかったものによって輪郭が生まれる。対象外、やらないこと、言わないことを決めると、発信や商品が鋭くなる。",
+      todayAction: "今の発信で『やらないこと』を1つ決め、プロフィールやメモに残す。",
+      useScene: "発信テーマの絞り込み、講座内容の整理、サービス設計、プロフィール、固定投稿、記事カテゴリ設計に使う。",
+      beginnerExplanation: "何でも入れると分かりにくくなる。誰に届けたいかを決めるために、届けない人も決める。",
+      articleIdeas: "発信がぼやける原因は足しすぎ / やらないことを決めると選ばれやすくなる",
+      podcastIdeas: "削る勇気が価値を作る / 全員向けをやめる話",
+      aiUseSimple: "AIに発信テーマやサービス案を渡し、『削るべき要素』『対象外にする人』を提案させる。",
+      tagsSimple: "削る, 差別化, ターゲット, ブランディング, 発信設計",
+      summary3Lines: "価値は足し算だけでは強くならない。誰に向けないか、何をやらないか、何を言わないかを決めることで輪郭が立つ。発信や商品は、削るほど相手が判断しやすくなる。",
+      coreIdea: "選ばなかったものの総量が、価値の輪郭を作る。",
+      top10: "削る / 対象外 / やらないこと / 言わないこと / ターゲット / 輪郭 / 差別化 / メッセージ / 判断しやすさ / 勇気",
+      publishingUse: "記事やPodcastのテーマを広げすぎず、今回扱わないことを決めてから作る。",
+      useSubstack: "ニュースレターの対象読者と対象外読者を明確にする。",
+      useNote: "記事内で言いたいことを1つに絞り、余談を別記事に分ける。",
+      usePodcast: "1回のテーマを狭くし、話さないことを先に決める。",
+      useLive: "ライブのテーマを1つに絞り、参加者に持ち帰ってほしい行動だけ残す。",
+      useNotes: "『私はこれはやらない』という発信の線引きを投稿する。",
+      useX: "やらないことリストを短文投稿にする。",
+      useAi: "AIに文章を短くさせるだけでなく、『削っても価値が残る部分』を見つけさせる。",
+      contentIdeas: "やらないことリストテンプレート、発信テーマ整理ワーク、講座内容の削り方チェックリストにできる。",
+      practiceTomorrow: "次の記事で扱わないことを3つ書いてから本文を書く。",
+      knowledgeTags: "削る, 差別化, ブランディング, 発信設計, ターゲット, マーケティング",
+    },
+    {
+      ...common,
+      knowledgeName: "共感はゴールではなく、参加を生む入口",
+      oneLineConclusion: "見てくれる人を増やすより、一緒に動ける役割を渡す。",
+      knowledgeOverview: "共感してもらうだけでは、相手は観客席にいる。熱量は参加できる条件、役割、貢献の場があると生まれる。発信では『分かる』で終わらせず、『一緒にやってみよう』に変える設計が重要になる。",
+      todayAction: "次の投稿の最後に、読者が1分で参加できる小さな問いや行動を入れる。",
+      useScene: "コミュニティ運営、ライブ配信、Substackコメント、Podcast感想募集、Notes投稿、講座ワークに使う。",
+      beginnerExplanation: "読者に共感してもらうだけでなく、『あなたもここで一緒にできます』という参加の入口を作ること。",
+      articleIdeas: "共感だけではコミュニティは育たない / 読者を参加者に変える小さな設計",
+      podcastIdeas: "フォロワーとキョウカンシャの違い / 参加のしやすさを作る",
+      aiUseSimple: "AIに記事やライブ案を渡し、読者が参加できる問い、ワーク、コメント導線を作らせる。",
+      tagsSimple: "参加設計, 共感, コミュニティ, 信頼構築, 発信",
+      summary3Lines: "共感はゴールではなく入口。フォロワーは見ている人で、キョウカンシャは参加している人。参加条件、役割、貢献の場を明示すると、発信は一方通行から一緒に作る場へ変わる。",
+      coreIdea: "共感を求めるのではなく、参加を設計する。",
+      top10: "共感 / 参加 / キョウカンシャ / 役割 / 貢献の場 / 当事者意識 / コメント / 行動 / コミュニティ / 熱量",
+      publishingUse: "投稿の最後に読者が参加できる問いや小さな実験を置く。",
+      useSubstack: "記事末に返信テーマを入れ、読者の経験を次回記事に反映する。",
+      useNote: "コメントで答えやすい問いを1つだけ置く。",
+      usePodcast: "感想募集ではなく、次回扱う問いへの参加を呼びかける。",
+      useLive: "視聴者がその場で答えられるワークや投票を入れる。",
+      useNotes: "短い問いかけ投稿で読者の参加を促す。",
+      useX: "『あなたならどうする？』ではなく、選択肢付きの参加投稿にする。",
+      useAi: "AIに投稿ごとの参加導線を作らせ、コメントしやすさをチェックする。",
+      contentIdeas: "参加設計テンプレート、ライブ台本、コメントが増える記事末チェックリスト、コミュニティ運営講座にできる。",
+      practiceTomorrow: "次のSubstack記事末に、読者が返信できる問いを1つ入れる。",
+      knowledgeTags: "参加設計, 共感, コミュニティ, 信頼構築, 発信, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "令和型の意思決定は、正解探しより仮説・実験・学習",
+      oneLineConclusion: "正しかったかより、早く動いて早く修正できたかを評価する。",
+      knowledgeOverview: "変化が速い時代は、全員の合意や完璧な計画を待つほど価値が古くなる。確からしい仮説を持って小さく動き、反応を見て学習する。判断に迷ったら、誰の課題か、本当に困っているか、自分がやる理由、削るもの、続く形かを確認する。",
+      todayAction: "止まっている企画を1つ選び、完璧版ではなく24時間以内に試せる最小版にする。",
+      useScene: "新企画、記事連載、講座づくり、相談メニュー、ライブ企画、AI実験、発信改善に使う。",
+      beginnerExplanation: "最初から正解を作ろうとせず、小さく試して反応を見ながら直していくこと。",
+      articleIdeas: "正解探しをやめると発信は進む / 令和型の意思決定は仮説と実験",
+      podcastIdeas: "完璧主義より学習速度 / 迷った時の5つの質問",
+      aiUseSimple: "AIに企画を最小実験に分解させ、検証する指標と次の修正案を作らせる。",
+      tagsSimple: "仮説, 実験, 学習, 継続, 意思決定",
+      summary3Lines: "令和型の意思決定では、正しいかどうかより動いたかどうかが価値を生む。仮説を立て、小さく実験し、学習速度を指標にする。迷ったら5つの問いに戻り、続く形かどうかを確認する。",
+      coreIdea: "価値は正解ではなく、仮説・実験・学習のサイクルから育つ。",
+      top10: "スピード / 仮説 / 実験 / 学習 / 修正 / 5つの問い / 誰の課題か / 自分がやる理由 / 削るもの / 続く形",
+      publishingUse: "発信を完成品として出すだけでなく、実験として出して反応から学ぶ。",
+      useSubstack: "新連載をまず1本だけ出し、開封率や返信で次回を修正する。",
+      useNote: "記事テーマを小さく試し、反応があるものを深掘りする。",
+      usePodcast: "仮説回として話し、リスナー反応を次回に活かす。",
+      useLive: "新しい企画をライブで小さく試し、質問内容を教材化する。",
+      useNotes: "企画の仮説を短文で出して反応を見る。",
+      useX: "投稿をテストとして出し、保存や返信の多いテーマを育てる。",
+      useAi: "AIに実験計画、観察指標、改善案を作らせる。",
+      contentIdeas: "仮説実験シート、迷った時の5問テンプレート、発信実験ログ、継続設計講座にできる。",
+      practiceTomorrow: "やらないことを1つ決め、対象の誰を1人まで絞って小さな投稿を出す。",
+      knowledgeTags: "仮説, 実験, 学習, 継続, 意思決定, 発信, AI活用",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addValueOsKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(VALUE_OS_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("価値は価格ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "価値設計";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "価値で選ばれる思考OS実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...valueOsKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "価値設計";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "価値で選ばれる思考OS実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -5298,6 +5462,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "idea") addIdeaKnowledgeSampleCards();
   if (seed === "story-profile") addStoryProfileKnowledgeSampleCards();
   if (seed === "concept-design") addConceptDesignKnowledgeSampleCards();
+  if (seed === "value-os") addValueOsKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
