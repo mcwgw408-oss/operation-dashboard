@@ -153,6 +153,7 @@ const IDEA_SAMPLE_TITLE = "令和AI時代のアイデア実践書";
 const STORY_PROFILE_SAMPLE_TITLE = "AI時代の自己紹介・発信を物語に変える実践書";
 const CONCEPT_DESIGN_SAMPLE_TITLE = "令和版・コンセプト設計 実践書";
 const VALUE_OS_SAMPLE_TITLE = "令和版 価値で選ばれる思考OS実践書";
+const ACTION_PROFILE_SAMPLE_TITLE = "行動を生む自己紹介 実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -5450,10 +5451,173 @@ function addValueOsKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function actionProfileKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: ACTION_PROFILE_SAMPLE_TITLE,
+    author: "",
+    genre: "自己紹介 / プロフィール / 信頼構築 / 営業導線 / 発信設計",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "自己紹介は自分の説明ではなく、相手の未来を提示する設計物",
+      oneLineConclusion: "自己紹介の目的は覚えてもらうことではなく、次の行動を生むこと。",
+      knowledgeOverview: "多くの自己紹介は想い、経歴、肩書きから始まるため、相手にとっての判断材料にならない。行動を生む自己紹介は、相手が得られる変化を先に示し、その根拠と次の一手まで設計する。",
+      todayAction: "今の自己紹介を『私は誰に、どんな変化をもたらす人か』の1文に書き換える。",
+      useScene: "Substackプロフィール、X固定投稿、Podcast冒頭、交流会、商談、ライブ冒頭、講座自己紹介に使う。",
+      beginnerExplanation: "自己紹介は『私は何者か』を話す場ではなく、『あなたに何ができる人か』を伝える場。",
+      articleIdeas: "自己紹介で行動が生まれない理由 / 肩書きより先に相手の未来を話す",
+      podcastIdeas: "自己紹介は自分語りではなく導線設計 / 覚えられる人の話し方",
+      aiUseSimple: "AIに今の自己紹介を渡し、『相手の未来が先に見える形』へ書き換えさせる。",
+      tagsSimple: "自己紹介, プロフィール, 導線設計, 信頼構築, ブランディング",
+      summary3Lines: "自己紹介で成果が出ない原因は能力不足ではなく伝達設計の不備。相手は過去や肩書きではなく、自分にどんな変化をもたらす人かを知りたい。未来、根拠、次の行動の順で設計すると、記憶と行動につながる。",
+      coreIdea: "自己紹介は相手の未来を提示し、次の行動を引き出す設計物である。",
+      top10: "相手の未来 / 伝達設計 / 変化 / 根拠 / 次の行動 / 肩書きではなく提供価値 / 15〜25秒 / 行動要請は1つ / 記憶 / 紹介される状態",
+      publishingUse: "プロフィールや冒頭文を、活動紹介ではなく読者が得られる変化から始める。",
+      useSubstack: "Aboutページの最初を『誰にどんな変化を届けるか』にする。",
+      useNote: "自己紹介記事を、経歴ではなく読者に提供できる未来から書く。",
+      usePodcast: "冒頭の名乗りを、肩書きではなくリスナーが得る変化で始める。",
+      useLive: "ライブ冒頭で、今日参加すると何が変わるかを先に伝える。",
+      useNotes: "短い自己紹介文を投稿し、どの表現が覚えられるか反応を見る。",
+      useX: "固定ポストを『私は誰にどんな変化をもたらす人か』に書き換える。",
+      useAi: "AIに読者別の自己紹介案を作らせ、最も行動につながる表現を選ぶ。",
+      contentIdeas: "行動を生む自己紹介テンプレート、プロフィール添削、Substack About改善講座、交流会用15秒自己紹介ワークにできる。",
+      practiceTomorrow: "自己紹介の1文目を『私は［対象］に［変化］をもたらす人です』で作る。",
+      knowledgeTags: "自己紹介, プロフィール, 導線設計, 信頼構築, ブランディング, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "三文自己紹介は、未来・過去・現在の順で作る",
+      oneLineConclusion: "未来で興味を作り、過去で信頼を作り、現在で行動をお願いする。",
+      knowledgeOverview: "行動を生む自己紹介の基本型は、1文目に相手のメリットや変化、2文目に根拠となる実績や経験、3文目に今してほしい行動を置く。順番を変えると、相手が判断する前に情報が散らばりやすい。",
+      todayAction: "未来、過去、現在の3文で15〜25秒の自己紹介を1本作る。",
+      useScene: "交流会、商談、Podcastゲスト紹介、ライブ自己紹介、講座募集、相談案内に使う。",
+      beginnerExplanation: "最初に『何が変わるか』、次に『なぜ信じられるか』、最後に『何をしてほしいか』を言う。",
+      articleIdeas: "自己紹介は未来・過去・現在の順で話す / 15秒で信頼される三文自己紹介",
+      podcastIdeas: "三文自己紹介の作り方 / 経歴から話すと伝わらない理由",
+      aiUseSimple: "AIに『未来・過去・現在の三文自己紹介にして』と依頼し、15〜25秒に圧縮させる。",
+      tagsSimple: "三文自己紹介, 未来過去現在, CTA, 信頼構築, 営業",
+      summary3Lines: "自己紹介は、未来、過去、現在の順番が重要。未来で相手の興味を固定し、過去の実績で納得を作り、現在の行動要請で次の一手を生む。行動要請は1つに絞ることで相手が動きやすくなる。",
+      coreIdea: "未来、過去、現在の順番が、興味、信頼、行動を作る。",
+      top10: "未来 / 過去 / 現在 / ベネフィット / 実績 / 経験 / 行動要請 / 15〜25秒 / 1CTA / 成約",
+      publishingUse: "記事や音声の冒頭を、読者の変化、根拠、次の行動の順に整える。",
+      useSubstack: "ニュースレター紹介文を三文自己紹介型にする。",
+      useNote: "プロフィール記事の冒頭に三文版を置く。",
+      usePodcast: "番組紹介とゲスト紹介を三文型で作る。",
+      useLive: "ライブ開始時に三文自己紹介を固定で話す。",
+      useNotes: "三文版を1投稿で試す。",
+      useX: "三文自己紹介を固定ポスト候補にする。",
+      useAi: "AIに長い自己紹介を三文型、30秒型、X固定投稿型に変換させる。",
+      contentIdeas: "三文自己紹介テンプレート、15秒自己紹介作成ワーク、営業プロフィール添削、Podcast導入文テンプレートにできる。",
+      practiceTomorrow: "三文自己紹介を音読して、25秒以内に収まるまで削る。",
+      knowledgeTags: "三文自己紹介, CTA, 信頼構築, 営業, 発信, プロフィール",
+    },
+    {
+      ...common,
+      knowledgeName: "自己紹介はベネフィット型とビジョン型を使い分ける",
+      oneLineConclusion: "初対面や商談はベネフィット型、仲間集めや登壇はビジョン型が効く。",
+      knowledgeOverview: "自己紹介には、今すぐ役立つ変化を示すベネフィット型と、中長期の方向性や世界観を示すビジョン型がある。相手がまだ自分に興味を持っていない場ではベネフィット型が無難で、物語を聞く姿勢がある場ではビジョン型が使える。",
+      todayAction: "同じ自分について、ベネフィット型とビジョン型の自己紹介を1本ずつ作る。",
+      useScene: "交流会、商談、採用、登壇、共創募集、Substack紹介文、Podcastプロフィールに使う。",
+      beginnerExplanation: "すぐ役に立つことを伝える自己紹介と、これから一緒に作りたい未来を伝える自己紹介を分けて持つ。",
+      articleIdeas: "自己紹介は場面で使い分ける / ベネフィット型とビジョン型の違い",
+      podcastIdeas: "今役立つ人として語るか、未来を作る人として語るか / 自己紹介の使い分け",
+      aiUseSimple: "AIに同じ素材から、商談用のベネフィット型と登壇用のビジョン型を作らせる。",
+      tagsSimple: "ベネフィット型, ビジョン型, 場面設計, ブランディング, 共創",
+      summary3Lines: "自己紹介は1種類だけでは足りない。直近の課題解決にはベネフィット型、仲間や協力者を集める場にはビジョン型が向く。迷ったらベネフィット型を使い、相手が物語を聞く姿勢になっている時にビジョン型を使う。",
+      coreIdea: "自己紹介は場面ごとに目的を変える。",
+      top10: "ベネフィット型 / ビジョン型 / 即効性 / 共感性 / 商談 / 交流会 / 採用 / 登壇 / 共創募集 / 使い分け",
+      publishingUse: "媒体や場面ごとに、すぐ役立つ紹介文と世界観を伝える紹介文を持つ。",
+      useSubstack: "Aboutページにはビジョン型、購読導線にはベネフィット型を使う。",
+      useNote: "プロフィール記事ではビジョン型、ノウハウ記事冒頭ではベネフィット型にする。",
+      usePodcast: "番組紹介はビジョン型、各回冒頭はベネフィット型にする。",
+      useLive: "企画告知はベネフィット型、コミュニティ募集はビジョン型にする。",
+      useNotes: "2種類の自己紹介を投稿して反応差を見る。",
+      useX: "固定ポストはベネフィット型、プロフィール欄はビジョン型を混ぜる。",
+      useAi: "AIに媒体別、相手別の自己紹介パターンを作らせる。",
+      contentIdeas: "媒体別プロフィール集、自己紹介使い分けテンプレート、共創募集文テンプレート、Substack導線改善講座にできる。",
+      practiceTomorrow: "商談用と登壇用の自己紹介を1つずつスマホメモに保存する。",
+      knowledgeTags: "自己紹介, ベネフィット型, ビジョン型, ブランディング, 共創, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "自己紹介の最終ゴールは、他人に紹介される状態を作ること",
+      oneLineConclusion: "良い自己紹介は、自分がいない場所でも伝言できる短さを持つ。",
+      knowledgeOverview: "自己紹介の完成形は、自分が話して終わることではなく、他人が『あの人は○○な人』と紹介できる状態。20〜30文字程度の紹介用一文、対象と変化、根拠1つを設計し、実戦で使って反応を観察しながら更新する。",
+      todayAction: "『あの人は、○○で△△を起こす人』という紹介用一文を作る。",
+      useScene: "紹介依頼、口コミ、Xプロフィール、Substack About、名刺代わりの一文、登壇者紹介に使う。",
+      beginnerExplanation: "自分だけが言える自己紹介ではなく、他の人もまねして言える短い言葉にすること。",
+      articleIdeas: "紹介される人は自己紹介が短い / 他人が言いやすいプロフィールの作り方",
+      podcastIdeas: "自分がいない場所で名前が出る自己紹介 / 紹介用一文の作り方",
+      aiUseSimple: "AIに自己紹介を20〜30文字の紹介用一文に圧縮させ、言いやすさを比較する。",
+      tagsSimple: "紹介される, 口コミ, 記憶, プロフィール, 改善ログ",
+      summary3Lines: "自己紹介の最終ゴールは、他人に紹介される状態を作ること。対象、変化、根拠1つに絞ると、伝言ゲームでも残りやすい。完成形はなく、使う、観察する、改稿する、再テストするサイクルで育てる。",
+      coreIdea: "自己紹介は一度作って終わりではなく、反応を見て育てる。",
+      top10: "紹介用一文 / 20〜30文字 / 対象×変化 / 根拠1つ / 伝言しやすさ / 復唱された言葉 / 質問 / 次の行動 / 改稿 / 再テスト",
+      publishingUse: "プロフィールや固定投稿を、他人が紹介しやすい短い一文に圧縮する。",
+      useSubstack: "Aboutページの冒頭に紹介用一文を置く。",
+      useNote: "プロフィール記事のタイトルを紹介用一文に近づける。",
+      usePodcast: "番組紹介文を、リスナーが人に説明できる短さにする。",
+      useLive: "参加者に自分を一言で紹介してもらい、残った言葉をログにする。",
+      useNotes: "紹介用一文候補を複数投稿して反応を見る。",
+      useX: "プロフィール欄と固定ポストに20〜30文字の短縮形を入れる。",
+      useAi: "AIに復唱されやすさ、専門用語の有無、Before/Afterの明確さをチェックさせる。",
+      contentIdeas: "紹介用一文メーカー、プロフィール改善ログ、口コミされる自己紹介講座、AI添削プロンプトにできる。",
+      practiceTomorrow: "今週3回使う自己紹介ログ欄を作り、反応・質問・次の行動を記録する。",
+      knowledgeTags: "紹介される, 口コミ, 記憶, プロフィール, 改善, 信頼構築",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addActionProfileKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(ACTION_PROFILE_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("自己紹介は自分の説明ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "自己紹介";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "行動を生む自己紹介 実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...actionProfileKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "自己紹介";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "行動を生む自己紹介 実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -5463,6 +5627,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "story-profile") addStoryProfileKnowledgeSampleCards();
   if (seed === "concept-design") addConceptDesignKnowledgeSampleCards();
   if (seed === "value-os") addValueOsKnowledgeSampleCards();
+  if (seed === "action-profile") addActionProfileKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
