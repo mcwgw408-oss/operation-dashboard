@@ -456,8 +456,10 @@ const requiredOrders = new Map([
   [".dashboard .substack-page-panel", "17"],
   [".dashboard #noteAiPage", "18"],
   [".dashboard #noteBeginnerPage", "19"],
-  [".dashboard #xPageV1", "20"],
-  [".dashboard #wordpressPageV1", "21"],
+  [".dashboard #articleIdeasPage", "20"],
+  [".dashboard #activityExperimentPage", "21"],
+  [".dashboard #xPageV1", "22"],
+  [".dashboard #wordpressPageV1", "23"],
   [".dashboard .dashboard-input-heading", "58"],
   [".dashboard .daily-input-panel", "59"],
   [".dashboard .publishing-ops-panel", "61"],
@@ -560,13 +562,26 @@ check(/\.learning-actions[\s\S]*?flex-direction:\s*column\s*;/.test(mobileCss), 
 
 const learningAssetTokens = [
   'id="learning-asset-flow"',
-  "学びを資産に変えるフロー",
-  "私はどう考えた？",
-  "仮説",
-  "learningAssetHypothesis",
-  "関連する記事タイトル",
-  "learningAssetRelatedArticleTitle",
-  "learningAssetRelatedArticleUrl",
+  "Knowledge Labo（知識ラボ）",
+  "知識カード",
+  "知識名",
+  "learningAssetKnowledgeName",
+  "概要",
+  "learningAssetKnowledgeOverview",
+  "活用場面",
+  "learningAssetUseScene",
+  "初心者向け説明",
+  "learningAssetBeginnerExplanation",
+  "記事アイデア",
+  "learningAssetArticleIdeas",
+  "Podcastアイデア",
+  "learningAssetPodcastIdeas",
+  "learningAssetAiUseSimple",
+  "readingLaboTemplate",
+  "copyReadingLaboTemplate",
+  "知識化待ち",
+  "Codex抽出済み",
+  "コンテンツ化待ち",
   "learningAssetWaitingCount",
   "learningAssetDialoguedCount",
   "learningAssetExperimentCount",
@@ -579,11 +594,14 @@ for (const token of learningAssetTokens) {
   check(indexHtml.includes(token), `学び資産化UIがありません: ${token}`);
 }
 check(appJs.includes('const LEARNING_ASSETS_STORAGE_KEY = "operation-dashboard-learning-assets-v1";'), "学び資産化の保存キーがありません");
-check(appJs.includes('const LEARNING_ASSET_STATUSES = ["学び待ち", "対話済み", "実験待ち", "記事化待ち", "資産化完了"];'), "学び資産化の固定ステータスがありません");
+check(appJs.includes('const LEARNING_ASSET_STATUSES = ["知識化待ち", "Codex抽出済み", "実践待ち", "コンテンツ化待ち", "資産化完了"];'), "学び資産化の固定ステータスがありません");
 check(appJs.includes("function normalizeLearningAsset"), "学び資産化データの正規化がありません");
-check(appJs.includes('"hypothesis"'), "学び資産化に仮説フィールドが保存されません");
-check(appJs.includes('"relatedArticleTitle"'), "学び資産化に関連記事タイトルが保存されません");
-check(appJs.includes('"relatedArticleUrl"'), "学び資産化に関連記事URLが保存されません");
+check(appJs.includes('"knowledgeName"'), "知識カードに知識名フィールドが保存されません");
+check(appJs.includes('"knowledgeOverview"'), "知識カードに概要フィールドが保存されません");
+check(appJs.includes('"beginnerExplanation"'), "知識カードに初心者向け説明フィールドが保存されません");
+check(appJs.includes('"podcastIdeas"'), "知識カードにPodcastアイデアフィールドが保存されません");
+check(appJs.includes("contentCounts"), "知識カードにコンテンツ実績が保存されません");
+check(appJs.includes("READING_LABO_TEMPLATE"), "読書テンプレートが保存されていません");
 check(appJs.includes("function renderLearningAssets"), "学び資産化一覧の描画がありません");
 check(appJs.includes("renderLearningAssets();"), "学び資産化一覧がrenderAllで更新されません");
 check(appJs.includes("LEARNING_ASSETS_STORAGE_KEY,"), "学び資産化データがバックアップ対象に入っていません");
