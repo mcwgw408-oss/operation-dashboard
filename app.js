@@ -150,6 +150,7 @@ const SMALL_BIZ_SAMPLE_TITLE = "AI時代の小さく始めるスモビジ実践�
 const PSYCHOLOGY_SAMPLE_TITLE = "人生とビジネスに効く「10の心理学」実践書";
 const TREASURE_SAMPLE_TITLE = "AI時代の宝探し実践書";
 const IDEA_SAMPLE_TITLE = "令和AI時代のアイデア実践書";
+const STORY_PROFILE_SAMPLE_TITLE = "AI時代の自己紹介・発信を物語に変える実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -4961,16 +4962,177 @@ function addIdeaKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function storyProfileKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: STORY_PROFILE_SAMPLE_TITLE,
+    author: "",
+    genre: "自己紹介 / 発信 / 物語設計 / AI活用",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "自己紹介は経歴の羅列ではなく、変化の流れとして語る",
+      oneLineConclusion: "自己紹介は何をしている人かより、なぜ今そこにいるのかを伝える物語である。",
+      knowledgeOverview: "経歴や実績だけを並べても印象に残りにくい。自己紹介は、過去の状況、転機、今の活動、これからの方向をつなげると、相手が理解しやすくなる。",
+      todayAction: "自分の自己紹介を『今何をしているか、なぜか、土台となる体験』の3点で30秒版に書き換える。",
+      useScene: "Substackプロフィール、SNS名刺、初対面の一言、Podcast冒頭、ライブ自己紹介、講座プロフィールに使う。",
+      beginnerExplanation: "自己紹介は肩書きを並べるより、『こういう経験があって、今これをしています』と流れで話すと伝わりやすい。",
+      articleIdeas: "自己紹介が伝わらない人は経歴を並べすぎている / AI時代のプロフィールは物語で作る",
+      podcastIdeas: "自己紹介を物語に変える / 経歴ではなく変化を語る",
+      aiUseSimple: "AIに経歴を整理させた後、『なぜ今の活動に至ったのか』の流れに組み替えさせる。",
+      tagsSimple: "自己紹介, プロフィール, 物語, ブランディング, 発信",
+      summary3Lines: "従来型の自己紹介は、情報だけ、実績だけ、価値観だけになりがち。物語型にすると、情報と変化、実績と背景、価値観と体験がつながる。相手は何者かではなく、なぜそうなったかで理解する。",
+      coreIdea: "自己紹介は、変化の流れとして語る。",
+      top10: "今の活動 / なぜか / 土台となる体験 / 過去 / 転機 / 今 / これから / 相手が自分ごと化できる具体性 / 余白 / 体温",
+      publishingUse: "プロフィールや固定投稿を、経歴紹介ではなく発信の世界観を伝える入口に変える。",
+      useSubstack: "Aboutページを、活動紹介ではなく変化の物語として書く。",
+      useNote: "自己紹介記事を、過去・転機・今・これからの流れで書く。",
+      usePodcast: "冒頭の自己紹介を30秒の物語にする。",
+      useLive: "ライブ冒頭で、肩書きより今の活動に至った理由を話す。",
+      useNotes: "短い自己紹介文を投稿して反応を見る。",
+      useX: "固定ポストを、今の活動と転機が分かる文章にする。",
+      useAi: "AIに短い版、標準版、長い版の自己紹介を作らせる。",
+      contentIdeas: "自己紹介テンプレート、プロフィール添削、Substack About講座、固定投稿ワークにできる。",
+      practiceTomorrow: "30秒版の自己紹介を1本作り、SubstackやXのプロフィール候補にする。",
+      knowledgeTags: "自己紹介, プロフィール, 物語, ブランディング, 発信, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "物語の基本構造は、主人公・欠落・衝突・転機・回復・使命",
+      oneLineConclusion: "物語は何が起きたかではなく、何を乗り越えて今どうなったかで伝わる。",
+      knowledgeOverview: "物語は主人公、欠落、衝突、転機、回復、使命の6要素で整理できる。短い自己紹介では3要素でも機能し、順番は状況に応じて入れ替えられる。",
+      todayAction: "自分の人生の出来事を時系列で並べ、転機を3つ選び、その前後で何が変わったかを書く。",
+      useScene: "プロフィール文、体験談投稿、サービス紹介の背景ストーリー、講座LP、Podcast自己紹介回に使う。",
+      beginnerExplanation: "ただ出来事を話すのではなく、何に困って、何が変わって、今何をしているのかを並べること。",
+      articleIdeas: "自己紹介を物語にする6要素 / 体験談がただの苦労話で終わる理由",
+      podcastIdeas: "人生の転機を発信の素材にする / 物語の6要素",
+      aiUseSimple: "AIに出来事リストを渡し、主人公・欠落・衝突・転機・回復・使命に整理させる。",
+      tagsSimple: "物語構造, 自己紹介, 体験談, 発信, 信頼構築",
+      summary3Lines: "人は何が起きたかより、何を乗り越えて今どうなったかで相手を理解する。6要素を使うと、体験談がただの出来事ではなく発信の文脈になる。短い自己紹介なら、今の活動、なぜか、土台となる体験だけでも伝わる。",
+      coreIdea: "相手は出来事ではなく、変化の意味を聞いている。",
+      publishingUse: "体験談投稿を、感情だけでなく変化が見える構成にする。",
+      useSubstack: "自己紹介連載やプロフィール記事の骨格にする。",
+      useNote: "過去の転機から現在の活動につながる記事を書く。",
+      usePodcast: "自己紹介回を、転機ごとの物語として構成する。",
+      useLive: "参加者に転機を3つ選んでもらうワークにする。",
+      useNotes: "転機を1つ選び、その前後の変化を短く投稿する。",
+      useX: "過去・転機・今の3行プロフィール投稿にする。",
+      useAi: "AIに抜け漏れチェックと複数パターン生成を任せる。",
+      contentIdeas: "物語整理シート、自己紹介ワーク、プロフィール講座、体験談投稿テンプレートにできる。",
+      practiceTomorrow: "人生の転機を3つ選び、それぞれの前後で変わったことを1行ずつ書く。",
+      knowledgeTags: "物語構造, 自己紹介, 体験談, 信頼構築, ブランディング",
+    },
+    {
+      ...common,
+      knowledgeName: "発信は媒体ごとに物語の圧縮率を変える",
+      oneLineConclusion: "単発投稿は転機、連投は変化の流れ、固定投稿は世界観を凝縮する。",
+      knowledgeOverview: "同じ物語でも、媒体や形式によって入れる情報量を変える。単発投稿は転機に絞り、連投やスレッドは変化の前後を見せ、固定投稿やプロフィールでは世界観と約束を示す。",
+      todayAction: "1つの体験談を、単発投稿・連投・プロフィール文の3パターンに分けて書く。",
+      useScene: "X投稿、Notes、Substack記事、固定投稿、プロフィール文、サービス紹介、LPに使う。",
+      beginnerExplanation: "同じ話でも、短い投稿では一番大事な転機だけ、長い文章では背景から順番に書く。",
+      articleIdeas: "体験談を媒体別に使い分ける方法 / 同じ自己紹介を短・中・長で持つ理由",
+      podcastIdeas: "媒体ごとの物語の圧縮率 / プロフィール文と投稿の違い",
+      aiUseSimple: "AIに1つの体験談を、30秒版、200字版、800字版、X投稿版、Substack版に変換させる。",
+      tagsSimple: "発信設計, X, Substack, プロフィール, コンテンツ化",
+      summary3Lines: "物語は毎回全部説明する必要はない。短い投稿は転機、連投は変化の流れ、固定投稿は世界観、プロフィールは役割と背景を圧縮する。媒体によって物語の圧縮率を変えると、同じ素材を何度も活用できる。",
+      coreIdea: "媒体ごとに、物語の長さと役割を変える。",
+      publishingUse: "1つの体験談からX、Notes、Substack、プロフィールへ横展開する。",
+      useSubstack: "長い版で背景と変化を丁寧に書く。",
+      useNote: "標準版の自己紹介・体験談記事にする。",
+      usePodcast: "体験談の背景や感情を音声で深掘りする。",
+      useLive: "同じ体験を媒体別に変換する実演にする。",
+      useNotes: "転機だけを短文で投稿する。",
+      useX: "単発投稿は転機に絞り、スレッドは起承転結で組む。",
+      useAi: "AIに媒体別の圧縮率で文章を展開させる。",
+      contentIdeas: "媒体別プロフィールテンプレート、体験談リライト講座、固定投稿作成ワークにできる。",
+      practiceTomorrow: "同じ自己紹介を30秒版、200字版、800字版で作る。",
+      knowledgeTags: "発信設計, X, Substack, プロフィール, コンテンツ化, AI活用",
+    },
+    {
+      ...common,
+      knowledgeName: "AIで骨格を作り、自分で体温を入れる",
+      oneLineConclusion: "AIは構造補助の道具であり、意味と体温の責任者は自分である。",
+      knowledgeOverview: "AIには出来事整理、投稿案生成、自己紹介ドラフト、構造チェックを任せられる。一方で、本音、言いたくないこと、一次情報、自分だけが知る体験、感情の重さは自分で調整する。",
+      todayAction: "AIに自己紹介の骨格を作らせた後、自分だけが知っている一次情報を1つ足す。",
+      useScene: "ChatGPT・Claudeでのプロフィール作成、Codexへの知識整理、投稿案作成、自己紹介改善に使う。",
+      beginnerExplanation: "AIに文章を作ってもらっても、最後に自分の本音や体験を入れないと自分らしさは出ない。",
+      articleIdeas: "AIでプロフィールを作る時に失われやすいもの / AIに骨格、自分に体温",
+      podcastIdeas: "AIに任せる部分と自分が担う部分 / 自分らしさはどこに宿るか",
+      aiUseSimple: "AIに構成、叩き台、複数パターンを作らせ、自分が本音・体験・言わないことを決める。",
+      tagsSimple: "AI活用, 自己紹介, 体温, 一次情報, ブランディング",
+      summary3Lines: "AIは構造補助には強いが、人生そのものは借りられない。骨格はAIで速く作れるが、体温や一次情報は自分が入れる必要がある。AI時代ほど、自分だけの経験と意味づけが重要になる。",
+      coreIdea: "構造は借りられるが、人生は借りられない。",
+      publishingUse: "AIで効率化しながらも、自分の体験や本音を発信の核にする。",
+      useSubstack: "AI生成の下書きに、自分の一次情報と体温を加えて記事化する。",
+      useNote: "AI時代の自分らしいプロフィール作成について書く。",
+      usePodcast: "AIで作った文章と自分で直した文章の違いを話す。",
+      useLive: "AIで骨格を作り、その場で体温を入れる実演をする。",
+      useNotes: "AIには出せない自分の一文を投稿する。",
+      useX: "AIは構造、自分は体温という短文投稿にする。",
+      useAi: "AIに抜け漏れチェックをさせつつ、最終判断は自分が行う。",
+      contentIdeas: "AIプロフィール作成プロンプト、自己紹介添削、体温を入れるチェックリストにできる。",
+      practiceTomorrow: "AIで作った自己紹介に、自分の本音・一次情報・言いたくないことの線引きを追記する。",
+      knowledgeTags: "AI活用, 自己紹介, 体温, 一次情報, ブランディング, 発信",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addStoryProfileKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(STORY_PROFILE_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("自己紹介は経歴の羅列ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "自己紹介";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "自己紹介・発信を物語に変える実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...storyProfileKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "自己紹介";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "自己紹介・発信を物語に変える実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
   if (seed === "psychology") addPsychologyKnowledgeSampleCards();
   if (seed === "treasure") addTreasureKnowledgeSampleCards();
   if (seed === "idea") addIdeaKnowledgeSampleCards();
+  if (seed === "story-profile") addStoryProfileKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
