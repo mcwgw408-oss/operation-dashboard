@@ -149,6 +149,7 @@ const FIRST_KNOWLEDGE_SAMPLE_TITLE = "AI時代の1行コンセプト設計";
 const SMALL_BIZ_SAMPLE_TITLE = "AI時代の小さく始めるスモビジ実践書";
 const PSYCHOLOGY_SAMPLE_TITLE = "人生とビジネスに効く「10の心理学」実践書";
 const TREASURE_SAMPLE_TITLE = "AI時代の宝探し実践書";
+const IDEA_SAMPLE_TITLE = "令和AI時代のアイデア実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -4800,15 +4801,176 @@ function addTreasureKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function ideaKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: IDEA_SAMPLE_TITLE,
+    author: "",
+    genre: "AI / アイデア / コンテンツ制作",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "マーケティング", "ブランディング", "習慣", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "アイデアは才能ではなく、5つの工程で生まれる",
+      oneLineConclusion: "アイデアが出ない時は、才能ではなく抜けている工程を点検する。",
+      knowledgeOverview: "アイデアは突然降ってくるものではなく、集める、噛み砕く、寝かせる、ひらめく、形にするという工程で生まれる。出ない原因は能力不足ではなく工程ミスとして見直せる。",
+      todayAction: "今止まっている企画を1つ選び、5工程のどこで止まっているか丸をつける。",
+      useScene: "記事企画、Podcastテーマ、講座設計、Brain企画、X投稿、ライブ配信テーマの詰まり解消に使う。",
+      beginnerExplanation: "ひらめきは才能ではなく、材料を集めて、考えて、少し寝かせて、出てきたものを形にする流れで作れる。",
+      articleIdeas: "アイデアが出ない人は才能ではなく工程を疑おう / AI時代のアイデア5工程",
+      podcastIdeas: "ひらめきは才能ではなく工程 / いまどの工程で止まっているか",
+      aiUseSimple: "AIに企画の状態を渡し、集める・噛み砕く・寝かせる・ひらめく・形にするのどこが不足しているか診断させる。",
+      tagsSimple: "アイデア, AI, 企画, 発信, コンテンツ化",
+      summary3Lines: "アイデアは天才の特権ではなく、誰でも習得できる技術。正解主義や自己検閲で止まる人ほど、工程として扱うと動きやすい。5工程を循環させるほど、アイデアの質は高まり続ける。",
+      coreIdea: "アイデアは才能ではなく工程である。",
+      top10: "集める / 噛み砕く / 寝かせる / ひらめく / 形にする / 工程ミスを疑う / 自己検閲を止める / 量を出す / 60点で出す / 回し続ける",
+      publishingUse: "発信ネタが出ない時に、読者へ『どの工程で止まっているか』を問いかける記事にする。",
+      useSubstack: "Substackの企画づくりを5工程テンプレートとして配布する。",
+      useNote: "自分の企画が止まった工程を振り返る記事にする。",
+      usePodcast: "5工程を1つずつ話すシリーズにする。",
+      useLive: "参加者の企画を5工程で診断するライブにする。",
+      useNotes: "今日のアイデア工程メモとして投稿する。",
+      useX: "アイデアが出ない時の5工程チェックを投稿する。",
+      useAi: "AIに工程診断と次の一歩を出させる。",
+      contentIdeas: "アイデア工程チェックリスト、企画作成テンプレート、講座、Brainに展開できる。",
+      practiceTomorrow: "未完成の企画を1つ選び、5工程のうち足りない工程を1つだけ進める。",
+      knowledgeTags: "アイデア, AI, 企画, 発信, コンテンツ化, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "素材は広く浅くではなく、深く偏って集める",
+      oneLineConclusion: "いいアイデアは、日常の違和感・体験・失敗・専門外の知識を偏愛的に集めた先に生まれる。",
+      knowledgeOverview: "アイデアの材料は一次情報、体験、観察、日常の違和感、失敗談、他人の成功・失敗事例。広く浅くではなく、深く偏って集めることで独自性が出る。",
+      todayAction: "今日気になった違和感・失敗・観察を3つメモする。",
+      useScene: "Substackネタ帳、Podcast素材、Notes投稿、相談事例、商品アイデア、講座の教材づくりに使う。",
+      beginnerExplanation: "ネタは机の上で考えるだけではなく、日常で気になったことを集めると増えていく。",
+      articleIdeas: "発信ネタは日常の違和感から生まれる / アイデア素材の集め方",
+      podcastIdeas: "違和感メモが企画になる / 深く偏って集める力",
+      aiUseSimple: "日常メモをAIに渡し、テーマ別・読者の悩み別・記事化しやすさ別に整理させる。",
+      tagsSimple: "素材集め, 違和感, 発信ネタ, アイデア, 観察",
+      summary3Lines: "アイデアの質は材料の質に左右される。一次情報や体験、違和感、失敗談を集めるほど、自分にしか出せない視点になる。専門外の知識も組み合わせの火種になる。",
+      coreIdea: "素材集めは、発信の鉱脈づくりである。",
+      publishingUse: "日常の違和感を発信素材として貯める仕組みを作る。",
+      useSubstack: "週1回、違和感メモからニュースレターを作る。",
+      useNote: "失敗談や観察を記事の入口にする。",
+      usePodcast: "日常で引っかかったことを音声で深掘りする。",
+      useLive: "参加者から違和感を集めて企画に変えるライブにする。",
+      useNotes: "違和感メモを短く投稿する。",
+      useX: "今日の違和感を1投稿にする。",
+      useAi: "AIに素材メモを分類・タイトル化・シリーズ化させる。",
+      contentIdeas: "違和感メモ帳、発信ネタ収集テンプレート、企画素材DBにできる。",
+      practiceTomorrow: "今日から『違和感・観察・失敗』を3つだけKnowledge Laboかメモに残す。",
+      knowledgeTags: "素材集め, 違和感, 発信ネタ, アイデア, 観察, 知識資産",
+    },
+    {
+      ...common,
+      knowledgeName: "AIは集める・噛み砕くを加速し、人間は寝かせる・決める・形にする",
+      oneLineConclusion: "AIは発散と構造化、人間は意味付け・決断・責任を担う。",
+      knowledgeOverview: "AIは情報収集、構造化、パターン認識、大量案出しが得意。一方で人間は違和感を拾い、意味付けし、文脈を読み、決断と責任を持つ。工程1・2はAIで加速し、3・4・5は人間の領域として守る。",
+      todayAction: "1つのテーマについて、AIに別視点を10個出させた後、自分が違和感のある1案だけ選ぶ。",
+      useScene: "ChatGPT・Claudeでの企画出し、Codexへの知識整理、記事構成、Podcast案出し、商品企画に使う。",
+      beginnerExplanation: "AIに全部決めてもらうのではなく、たくさん出してもらい、最後に意味を決めるのは自分。",
+      articleIdeas: "AI時代のアイデア役割分担 / AIに任せる工程と人間が守る工程",
+      podcastIdeas: "AIは考える相棒、人間は決める人 / ひらめきをAIに奪われない使い方",
+      aiUseSimple: "AIに素材収集、比較、ずらし、組み替え、前提破壊をさせ、人間が寝かせて最終判断する。",
+      tagsSimple: "AI活用, アイデア, 役割分担, 意味付け, 決断",
+      summary3Lines: "AIは思考を加速させるが、深める・決める部分は人間の役割。プロセスの前半はAIで広げ、後半は人間が寝かせて意味付けする。AI時代ほど、違和感を拾う力が重要になる。",
+      coreIdea: "AIは加速、人間は意味付けと決断。",
+      publishingUse: "AI活用を『全部任せる』ではなく『工程分担』として教える。",
+      useSubstack: "AIで企画を広げ、人間が選ぶプロセスを記事化する。",
+      useNote: "AIと人間の役割分担の実例を書く。",
+      usePodcast: "AIに出させた案を人間がどう選ぶか話す。",
+      useLive: "AIで大量案出しし、その場で人間が選ぶライブをする。",
+      useNotes: "AIが出した案と自分の違和感をメモする。",
+      useX: "AIは加速、人間は決断という短文投稿にする。",
+      useAi: "AIを発散役・構造化役として使い、自分は選定と意味付けに集中する。",
+      contentIdeas: "AI企画出しプロンプト、役割分担テンプレート、講座、Brainにできる。",
+      practiceTomorrow: "AIに10案出させ、自分の違和感で1案だけ選んでメモする。",
+      knowledgeTags: "AI活用, アイデア, 役割分担, 意味付け, 決断, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "アイデアを殺す最大の敵は早すぎる評価と自己検閲",
+      oneLineConclusion: "最初は良い悪いを判断せず、量だけを追う。",
+      knowledgeOverview: "良い悪いの早期判定、正解探し、他人の目、自己検閲はアイデアを殺す。最初は10分で20案など、判断禁止で量を出すことが対抗策になる。",
+      todayAction: "10分タイマーをかけて、良し悪しを判断せずに20案出す。",
+      useScene: "記事タイトル、Podcastテーマ、X投稿、講座名、商品名、ライブ企画の発散に使う。",
+      beginnerExplanation: "最初から良い案を出そうとしなくていい。まずは変な案も含めてたくさん出す。",
+      articleIdeas: "アイデアが出ない原因は早く評価しすぎること / 10分で20案出す練習",
+      podcastIdeas: "自己検閲を止める / 量を出すと質が上がる理由",
+      aiUseSimple: "AIに『判断禁止で20案』を出させ、自分も追加で10案出してから選ぶ。",
+      tagsSimple: "自己検閲, 発散, アイデア, 企画, 習慣",
+      summary3Lines: "早すぎる評価はアイデアの芽を摘む。正解主義や他人の目を一度外し、最初は量だけを追う。60点でも形に出し、反応を見て磨くことが大事。",
+      coreIdea: "量を出す時間と評価する時間を分ける。",
+      publishingUse: "読者に『まず20案』という発信ワークを提供する。",
+      useSubstack: "タイトル20案ワークをニュースレターにする。",
+      useNote: "自己検閲で止まった経験を記事化する。",
+      usePodcast: "良い案を出そうとしすぎる怖さを話す。",
+      useLive: "10分20案チャレンジをライブで行う。",
+      useNotes: "未完成案をあえて投稿する。",
+      useX: "10分20案の実況や結果を投稿する。",
+      useAi: "AIに大量案を出させる時も、先に評価基準を入れず発散させる。",
+      contentIdeas: "タイトル20案テンプレート、企画発散ワーク、発信習慣講座にできる。",
+      practiceTomorrow: "次の記事タイトルを10分で20個出し、すぐには評価しない。",
+      knowledgeTags: "自己検閲, 発散, アイデア, 企画, 習慣, コンテンツ化",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addIdeaKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(IDEA_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("アイデアは才能ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "アイデア";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "令和AI時代のアイデア実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...ideaKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "アイデア";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "令和AI時代のアイデア実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
   if (seed === "psychology") addPsychologyKnowledgeSampleCards();
   if (seed === "treasure") addTreasureKnowledgeSampleCards();
+  if (seed === "idea") addIdeaKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
