@@ -4201,6 +4201,17 @@ function addFirstKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function handleKnowledgeLaboSeedFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("seed") !== "concept-book") return;
+  showPageEntry("Knowledge Labo");
+  addFirstKnowledgeSampleCards();
+  params.delete("seed");
+  const nextQuery = params.toString();
+  const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, "", nextUrl);
+}
+
 function learningMatchesSearch(learning, query) {
   if (!query) return true;
   return [
@@ -14133,6 +14144,7 @@ arrangeDashboardUxSections();
 bindEvents();
 resetXExperimentForm();
 renderAll();
+handleKnowledgeLaboSeedFromUrl();
 renderClock();
 setInterval(renderClock, 1000);
 
