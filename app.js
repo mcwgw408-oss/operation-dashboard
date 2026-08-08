@@ -151,6 +151,7 @@ const PSYCHOLOGY_SAMPLE_TITLE = "人生とビジネスに効く「10の心理学
 const TREASURE_SAMPLE_TITLE = "AI時代の宝探し実践書";
 const IDEA_SAMPLE_TITLE = "令和AI時代のアイデア実践書";
 const STORY_PROFILE_SAMPLE_TITLE = "AI時代の自己紹介・発信を物語に変える実践書";
+const CONCEPT_DESIGN_SAMPLE_TITLE = "令和版・コンセプト設計 実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -5122,10 +5123,173 @@ function addStoryProfileKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function conceptDesignKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: CONCEPT_DESIGN_SAMPLE_TITLE,
+    author: "",
+    genre: "コンセプト設計 / 企画 / マーケティング / AI活用",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "4",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: {
+      article: 0,
+      podcast: 0,
+      notes: 0,
+      x: 0,
+      kindle: 0,
+      brain: 0,
+    },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "AI", "ブランディング", "マーケティング", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "コンセプトは言葉ではなく、選ばれるための判断装置",
+      oneLineConclusion: "コンセプトは相手が考えずに選べる状態をつくる設計である。",
+      knowledgeOverview: "企画や発信が伝わらない原因は、中身の弱さよりも判断しづらさにある。コンセプトはきれいな言葉ではなく、相手が自分に必要か、他と何が違うか、今選ぶべきかを判断するための装置として設計する。",
+      todayAction: "今出したい記事・企画・サービスを1つ選び、『誰が、何を、なぜ今選ぶのか』を1文で書く。",
+      useScene: "記事タイトル、Substackの説明文、講座コンセプト、相談メニュー、Podcast企画、商品LP、提案資料に使う。",
+      beginnerExplanation: "コンセプトはかっこいいキャッチコピーではなく、相手が『これは私に必要だ』と迷わず分かるようにする道しるべ。",
+      articleIdeas: "コンセプトはキャッチコピーではない / 選ばれる発信に必要な判断装置の作り方",
+      podcastIdeas: "伝わる企画と伝わらない企画の違い / コンセプトは判断を助けるもの",
+      aiUseSimple: "AIに企画案を渡し、『誰が何を判断しやすくなるか』の観点で一言コンセプトを複数案出させる。",
+      tagsSimple: "コンセプト設計, 判断装置, マーケティング, 発信, ブランディング",
+      summary3Lines: "企画が通らない理由は、説明不足ではなく判断しづらさにある。コンセプトは一言の飾りではなく、相手が選ぶ理由を整理する判断装置。選ばれるには、即時理解、納得、今やる理由をそろえる必要がある。",
+      coreIdea: "コンセプトとは『言葉』ではなく『判断の設計』である。",
+      top10: "判断装置 / 選ばれる理由 / 即時理解 / 納得 / 今やる理由 / 比較優位 / 費用対効果 / やらないリスク / 説明なしで伝わるか / 選ばなかった理由を説明できるか",
+      publishingUse: "発信テーマを、思いつきではなく『読者が選ぶ理由』から設計する。記事やPodcastの冒頭で、誰の何の判断を助ける内容かを明確にする。",
+      useSubstack: "ニュースレターの説明文を『誰のどんな判断を助ける場所か』に書き換える。",
+      useNote: "記事の冒頭で、読者がこの記事を読む理由を先に提示する。",
+      usePodcast: "各回の冒頭に『今日は何を判断できるようになる回か』を入れる。",
+      useLive: "ライブ告知を、話す内容ではなく参加後に判断できること中心にする。",
+      useNotes: "一言コンセプト候補を短文で投稿して反応を見る。",
+      useX: "『○○とは言葉ではなく判断装置』型の投稿にする。",
+      useAi: "AIに対象読者、選ばれる理由、競合との差を整理させ、一言コンセプトに圧縮する。",
+      contentIdeas: "コンセプト診断テンプレート、発信コンセプト作成講座、Substack説明文添削、相談メニュー設計ワークにできる。",
+      practiceTomorrow: "自分のSubstackを一言で説明する文を3案作り、最も判断しやすいものを選ぶ。",
+      knowledgeTags: "コンセプト設計, 判断装置, 発信, マーケティング, ブランディング, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "コンセプトは表層・中層・深層の3層で作る",
+      oneLineConclusion: "一瞬で分かる、納得できる、今動きたくなるの3層がそろうと選ばれやすい。",
+      knowledgeOverview: "表層は何ができるかをすぐ理解させる層。中層はなぜ可能かを仕組み・データ・安全性で納得させる層。深層はなぜ今なのかをタイミング・機会損失・費用対効果で決断させる層。",
+      todayAction: "次に出す企画を『何ができる』『なぜ可能』『なぜ今』の3見出しでメモする。",
+      useScene: "講座説明、記事構成、Podcast台本、LP、提案資料、サービス紹介、ライブ告知に使う。",
+      beginnerExplanation: "伝わる説明は、最初に分かりやすく、次に信じられる理由を出し、最後に今やる理由を出す。",
+      articleIdeas: "企画が通る3層コンセプト / 発信テーマを一瞬で伝える表層・中層・深層",
+      podcastIdeas: "なぜ今やる理由まで設計するのか / 伝わるコンセプトの3階建て",
+      aiUseSimple: "AIに『表層・中層・深層で整理して』と依頼し、説明の抜けをチェックする。",
+      tagsSimple: "3層設計, 企画, マーケティング, セールス, 発信",
+      summary3Lines: "コンセプトは一言だけでは足りない。表層で即時理解、中層で納得、深層で決断を作る。発信や商品説明でも、この3層に分けると読者や顧客が迷いにくくなる。",
+      coreIdea: "理解、納得、決断の順番で設計する。",
+      top10: "表層 / 中層 / 深層 / 何ができるか / なぜ可能か / なぜ今か / 仕組み / データ / ガードレール / ROI",
+      publishingUse: "記事構成を『まず分かる、次に納得する、最後に行動する』流れにする。",
+      useSubstack: "有料記事や講座案内を3層で組み、読者が申し込む理由を作る。",
+      useNote: "ノウハウ記事を、結論、根拠、今試す理由の順で書く。",
+      usePodcast: "台本を3部構成にして、最後に行動提案を入れる。",
+      useLive: "ライブの説明を3層で話し、参加者が次に何をするかまで決める。",
+      useNotes: "『何ができる』『なぜ可能』『なぜ今』の短い連投にする。",
+      useX: "3層フレームを図解風の箇条書き投稿にする。",
+      useAi: "AIに既存文章を3層に分解させ、不足している層を補わせる。",
+      contentIdeas: "3層コンセプト設計シート、記事構成テンプレート、講座LPチェックリストにできる。",
+      practiceTomorrow: "次の投稿案を3層に分け、弱い層を1つ補強する。",
+      knowledgeTags: "コンセプト設計, 3層設計, 企画, マーケティング, セールス, 発信",
+    },
+    {
+      ...common,
+      knowledgeName: "AIは選択肢を作り、人は問い・判断・責任を持つ",
+      oneLineConclusion: "AI時代の価値は作業量ではなく、何を選ぶかを決める力に移る。",
+      knowledgeOverview: "AIは情報収集、選択肢の列挙、要約、構造化が得意。一方で目的の定義、使う・捨てる判断、制約設定、リスク管理、最終責任は人が担う。コンセプト設計ではAIを実行役にし、人が方向性を決める。",
+      todayAction: "AIに企画案を10個出させた後、自分で『使う案・捨てる案・保留案』に分け、理由を1行ずつ書く。",
+      useScene: "ChatGPTやClaudeでの企画出し、Codexへの読書整理、講座設計、商品企画、発信テーマ選定に使う。",
+      beginnerExplanation: "AIはたくさん案を出してくれるけれど、どれを使うか、なぜそれを選ぶかは自分が決める。",
+      articleIdeas: "AI時代に人間がやるべきこと / AIに任せることと自分で決めること",
+      podcastIdeas: "AIは実行、人は方向性 / 判断力が発信の差になる",
+      aiUseSimple: "AIに発散と整理を任せ、自分は目的、基準、採用判断、リスク確認を担当する。",
+      tagsSimple: "AI活用, 判断, 企画, コンセプト設計, 仕事術",
+      summary3Lines: "AIは選択肢を増やすのが得意だが、判断と責任は人に残る。問いの定義が弱いと、AIの出力も使いづらくなる。AI共存時代のコンセプト設計では、人が方向を決め、AIが整理と案出しを支える。",
+      coreIdea: "AIに作業を渡しても、判断は手放さない。",
+      top10: "情報収集 / 整理 / 選択肢生成 / 要約 / 目的定義 / 判断 / 制約設定 / リスク管理 / 説明責任 / 意思決定",
+      publishingUse: "AIで大量に出した企画を、自分の読者に必要かどうかで選別して発信する。",
+      useSubstack: "AIに記事案を出させ、読者の悩みと自分の方針に合う案だけ連載化する。",
+      useNote: "AI活用の実験記事として、採用した案と捨てた案の理由を書く。",
+      usePodcast: "AIが出した案を自分がどう判断したかを話す回にする。",
+      useLive: "AIで案出しし、その場で判断基準を説明するライブにする。",
+      useNotes: "『AIに出してもらった案から、これを選んだ理由』を投稿する。",
+      useX: "AIは選択肢、人は判断という短文投稿にする。",
+      useAi: "プロンプトに目的、読者、採用基準、NG条件を入れて、選択肢の質を上げる。",
+      contentIdeas: "AI企画判断テンプレート、プロンプト集、AI時代のコンセプト設計講座にできる。",
+      practiceTomorrow: "AIで投稿テーマを10個出し、採用基準を3つ決めて1つだけ選ぶ。",
+      knowledgeTags: "AI活用, 判断, 企画, コンセプト設計, 発信, 仕事術",
+    },
+    {
+      ...common,
+      knowledgeName: "コンセプトは説明なしで伝わるか、比較に勝てるか、選ばない理由を説明できるかで検証する",
+      oneLineConclusion: "良いコンセプトは作った瞬間ではなく、検証質問に耐えたときに強くなる。",
+      knowledgeOverview: "最後に確認すべき問いは、説明なしで伝わるか、比較された時に勝てるか、選ばなかった理由を説明できるか。曖昧なまま公開せず、読者や顧客が迷うポイントを先に潰すことで実用性が上がる。",
+      todayAction: "今あるサービス説明や記事タイトルに対して、3つの検証質問をYES/NOでチェックする。",
+      useScene: "タイトル改善、講座案内、セールスページ、プロフィール、相談メニュー、企画書、X固定投稿の見直しに使う。",
+      beginnerExplanation: "作った言葉が本当に伝わるかは、自分の満足ではなく、相手が迷わず分かるかで確認する。",
+      articleIdeas: "コンセプトを公開前にチェックする3つの質問 / 選ばれる理由を検証する方法",
+      podcastIdeas: "企画を出す前のYES/NOチェック / 比較されても残るコンセプト",
+      aiUseSimple: "AIに『この説明は3つの質問にYESと言えるか』を判定させ、改善案を出させる。",
+      tagsSimple: "検証, コンセプト設計, マーケティング, ブランディング, セールス",
+      summary3Lines: "コンセプトは作って終わりではない。説明なしで伝わるか、比較に勝てるか、選ばなかった理由を説明できるかで検証する。検証を通すと、発信や商品説明が読者の判断に近づく。",
+      coreIdea: "コンセプトは検証して初めて使える資産になる。",
+      top10: "説明なしで伝わるか / 比較に勝てるか / 選ばない理由 / YES/NO検証 / 読者視点 / 競合比較 / 判断基準 / 改善 / 公開前チェック / 資産化",
+      publishingUse: "記事や商品案を出す前に3つの質問でチェックし、弱い部分を直してから公開する。",
+      useSubstack: "About文や有料案内を、説明なしで価値が伝わるか検証する。",
+      useNote: "公開前の記事タイトルを、競合記事と比べて選ばれる理由があるか見直す。",
+      usePodcast: "番組説明と各回タイトルを、初見の人が聞く理由でチェックする。",
+      useLive: "ライブ告知文を、参加しない理由まで説明できるかで整える。",
+      useNotes: "候補タイトルを投稿し、どれが一番分かりやすいか反応を見る。",
+      useX: "コンセプト検証3質問をチェックリスト投稿にする。",
+      useAi: "AIに初見読者役、競合比較役、辛口レビュアー役をさせて改善する。",
+      contentIdeas: "コンセプト検証チェックリスト、タイトル改善テンプレート、講座案内診断、AI添削プロンプトにできる。",
+      practiceTomorrow: "Substackの説明文を3質問で見直し、1文だけ改善する。",
+      knowledgeTags: "コンセプト設計, 検証, マーケティング, ブランディング, 信頼構築, Substack",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addConceptDesignKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(CONCEPT_DESIGN_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("コンセプトは言葉ではなく")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "コンセプト設計";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "令和版・コンセプト設計 実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...conceptDesignKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "コンセプト設計";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "令和版・コンセプト設計 実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -5133,6 +5297,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "treasure") addTreasureKnowledgeSampleCards();
   if (seed === "idea") addIdeaKnowledgeSampleCards();
   if (seed === "story-profile") addStoryProfileKnowledgeSampleCards();
+  if (seed === "concept-design") addConceptDesignKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
