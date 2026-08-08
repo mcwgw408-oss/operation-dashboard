@@ -156,6 +156,7 @@ const VALUE_OS_SAMPLE_TITLE = "令和版 価値で選ばれる思考OS実践書"
 const ACTION_PROFILE_SAMPLE_TITLE = "行動を生む自己紹介 実践書";
 const COPY_TARGET_SAMPLE_TITLE = "売れる文章は接点で決まる 商品×ターゲット設計 実践書";
 const TRUST_CHARISMA_SAMPLE_TITLE = "信頼で選ばれるカリスマ設計実践書";
+const THREE_WEEK_FUNNEL_SAMPLE_TITLE = "3週間で参加者を集める発信導線実践書";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -5935,10 +5936,166 @@ function addTrustCharismaKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function threeWeekFunnelKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: THREE_WEEK_FUNNEL_SAMPLE_TITLE,
+    author: "",
+    genre: "発信導線 / 集客 / CTA / マーケティング / コミュニティ",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "ライブ配信", "X", "Notes", "Brain"],
+    connectsTo: ["発信", "マーケティング", "信頼構築", "コミュニティ", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "参加者が集まらない原因は発信量不足ではなく導線設計不足",
+      oneLineConclusion: "反応で終わる発信を、入口・途中・出口で参加につなぎ直す。",
+      knowledgeOverview: "価値提供ができていて反応もあるのに参加につながらない場合、問題は中身ではなく導線にある。入口、途中、出口がつながっていないと読者は迷子になる。今ある発信を捨てず、正しい順番に配置し直すことが重要。",
+      todayAction: "今の導線を『投稿→固定投稿→プロフィール→相談→参加』の1本線で書き出し、止まっている箇所を1つ選ぶ。",
+      useScene: "Substack購読導線、講座募集、ライブ参加、Podcast相談導線、X固定投稿、Notesからの申込導線に使う。",
+      beginnerExplanation: "もっと投稿する前に、読んだ人が次にどこへ行けばいいか分かるようにすること。",
+      articleIdeas: "参加者が集まらない原因は発信量ではない / 入口・途中・出口で発信をつなぐ",
+      podcastIdeas: "反応で終わる発信を参加につなげる / 導線設計不足の見つけ方",
+      aiUseSimple: "AIに自分のプロフィール、固定投稿、募集文を渡し、入口・途中・出口の抜けを診断させる。",
+      tagsSimple: "発信導線, 集客, 参加者募集, CTA, マーケティング",
+      summary3Lines: "良いコンテンツを出していても、導線が切れていると参加にはつながらない。読者は入口、途中、出口が見えないと迷子になる。発信量を増やす前に、今ある投稿、固定投稿、プロフィール、相談導線をつなぎ直す。",
+      coreIdea: "発信は反応を取るだけでなく、次の行動へ案内する導線である。",
+      top10: "入口 / 途中 / 出口 / 反応止まり / 記事末CTA / 固定投稿 / プロフィール / 相談導線 / 参加申込 / 導線設計",
+      publishingUse: "投稿ごとに、読者が次に何をすればいいかを明確にする。",
+      useSubstack: "記事末に固定記事や無料配布への導線を置き、購読や参加へつなぐ。",
+      useNote: "記事の最後に次に読む記事、受け取るもの、相談先を1つ置く。",
+      usePodcast: "概要欄に次の一手を1つだけ書く。",
+      useLive: "ライブ終わりに参加導線を短く案内する。",
+      useNotes: "短文投稿から固定投稿や募集ページへ自然につなぐ。",
+      useX: "投稿末にプロフィール遷移や固定投稿への一言CTAを入れる。",
+      useAi: "AIに導線マップを作らせ、読者が迷う箇所を洗い出す。",
+      contentIdeas: "発信導線診断シート、3週間導線改善チャレンジ、CTA添削、Substack導線設計講座にできる。",
+      practiceTomorrow: "固定投稿の叩き台とCTA3本の初稿を60%で作る。",
+      knowledgeTags: "発信導線, 集客, 参加者募集, CTA, マーケティング, Substack",
+    },
+    {
+      ...common,
+      knowledgeName: "改善指標はいいねやインプレッションではなく、遷移と参加数を見る",
+      oneLineConclusion: "全部直すのではなく、数字が落ちている1箇所だけ直す。",
+      knowledgeOverview: "いいねやインプレッションは見栄えの指標になりやすい。本当に見るべきは、プロフィール遷移率、固定投稿からCTAへの反応、相談や説明会の件数、参加・成約数。数字を見て詰まりを1箇所に絞ると改善しやすい。",
+      todayAction: "直近の投稿から、プロフ遷移、固定投稿反応、相談数、参加数のどこが弱いか1つ選ぶ。",
+      useScene: "X分析、Substack導線改善、note記事改善、Podcast概要欄、ライブ募集、講座販売に使う。",
+      beginnerExplanation: "たくさん見られたかより、見た人が次の場所に進んだかを見ること。",
+      articleIdeas: "いいねより見るべき発信KPI / 集客導線は1箇所ずつ直す",
+      podcastIdeas: "数字で見る発信導線 / なんとなく全部頑張るをやめる",
+      aiUseSimple: "AIに数値を渡し、どこで落ちているかと次に直す1箇所を提案させる。",
+      tagsSimple: "KPI, 導線改善, プロフ遷移, CTA反応, 成約",
+      summary3Lines: "発信改善では、いいねやインプレッションだけを追わない。プロフィール遷移、固定投稿反応、相談数、参加数を見る。全部いじらず、最も落ちている1箇所だけを直すと改善の焦点が合う。",
+      coreIdea: "反応ではなく遷移を見る。",
+      top10: "いいね / インプレッション / プロフ遷移率 / 固定CTA反応 / 相談説明会 / 参加成約数 / 詰まり / 1箇所改善 / 数字 / 検証",
+      publishingUse: "投稿を出した後、反応数ではなく次の導線に進んだ人数を確認する。",
+      useSubstack: "記事末リンクのクリック、返信、登録を観察する。",
+      useNote: "記事からプロフィールや募集ページに移動したかを見る。",
+      usePodcast: "概要欄リンクやDM数を確認する。",
+      useLive: "ライブ後のアンケート、DM、申込数を記録する。",
+      useNotes: "短文投稿から固定投稿へ移動するかテストする。",
+      useX: "プロフ遷移率と固定投稿反応を見てCTAを調整する。",
+      useAi: "AIに改善ログを読み込ませ、次の実験案を作らせる。",
+      contentIdeas: "発信KPI管理表、導線改善ログ、3週間検証シート、Xプロフ遷移改善講座にできる。",
+      practiceTomorrow: "1つの投稿にCTAを入れ、プロフ遷移やクリックを記録する。",
+      knowledgeTags: "KPI, 導線改善, 検証, マーケティング, 発信, 集客",
+    },
+    {
+      ...common,
+      knowledgeName: "発信は共感・信頼構築・判断基準・募集の4種類をそろえる",
+      oneLineConclusion: "共感だけでは参加しない。判断材料と行動要請まで揃えて人は動く。",
+      knowledgeOverview: "参加につながる発信には、悩みを代弁する共感、選び方や比較軸を示す信頼構築、Before/Afterや証拠を見せる事例、条件・手順・期限を示す募集が必要。どれかに偏ると、読まれても動かれにくい。",
+      todayAction: "今週の投稿を、共感、判断基準、事例、募集の4枠に分けて1本ずつ企画する。",
+      useScene: "Substack連載、X投稿設計、note記事、Podcastテーマ、ライブ配信、講座募集に使う。",
+      beginnerExplanation: "読者に『分かる』と思ってもらうだけでなく、『この人に頼む理由』と『今何をするか』まで出すこと。",
+      articleIdeas: "共感だけでは人は動かない / 参加につながる4種類の発信",
+      podcastIdeas: "発信が反応止まりになる理由 / 共感から募集までの流れ",
+      aiUseSimple: "AIにテーマを渡し、共感投稿、判断基準投稿、事例投稿、募集投稿へ展開させる。",
+      tagsSimple: "発信設計, 共感, 信頼構築, 判断基準, 募集",
+      summary3Lines: "発信には役割がある。共感は悩みの代弁、信頼構築は選び方、事例は可能性、募集は行動要請を担う。4種類を揃えると、読者は納得して次の行動へ進みやすくなる。",
+      coreIdea: "発信は役割別に配置すると導線になる。",
+      top10: "共感 / 悩みの言語化 / 信頼構築 / 判断基準 / 専門性 / 事例 / 証拠 / 募集 / 条件 / 期限",
+      publishingUse: "単発投稿ではなく、読者の心理を進める順番でコンテンツを並べる。",
+      useSubstack: "連載を共感回、判断基準回、事例回、募集回に分ける。",
+      useNote: "ノウハウ記事の後に事例記事と募集記事を置く。",
+      usePodcast: "悩み代弁回、選び方回、事例回、募集案内回を作る。",
+      useLive: "ライブ内で共感、判断基準、事例、行動案内を順番に話す。",
+      useNotes: "4種類の短文投稿を1週間で回す。",
+      useX: "共感投稿だけで終わらせず、事例と募集も混ぜる。",
+      useAi: "AIに投稿カレンダーを作らせ、4種類の偏りを確認させる。",
+      contentIdeas: "4種類発信カレンダー、募集前7日投稿テンプレート、Substack連載設計表にできる。",
+      practiceTomorrow: "共感投稿1本と判断基準投稿1本を作る。",
+      knowledgeTags: "発信設計, 共感, 信頼構築, 判断基準, 募集, コンテンツ化",
+    },
+    {
+      ...common,
+      knowledgeName: "CTAは提出物・期限・提出先の3点セットで迷いを消す",
+      oneLineConclusion: "人は面倒くさいと離脱する。何を、いつまでに、どこへ出すかを1つに絞る。",
+      knowledgeOverview: "記事末CTAは、何を出すか、いつまでか、どこに出すかを明確にする。30秒でできる低いハードル、48〜72時間の限定性、リンク1本への集約があると、読者は迷わず行動しやすい。",
+      todayAction: "次の投稿末に『提出物・期限・提出先』が入ったCTAを1つ作る。",
+      useScene: "記事末、X投稿、ライブ終わり、Podcast概要欄、無料配布、説明会案内、コミュニティ募集に使う。",
+      beginnerExplanation: "『興味があればどうぞ』ではなく、『これを、いつまでに、ここへ送ってください』まで書くこと。",
+      articleIdeas: "CTAが弱いと読者は動かない / 30秒で動ける行動要請の作り方",
+      podcastIdeas: "迷いを消すCTA3点セット / 参加ハードルを下げる方法",
+      aiUseSimple: "AIに投稿内容を渡し、提出物、期限、提出先が明確なCTAを3案作らせる。",
+      tagsSimple: "CTA, 行動要請, 参加導線, 募集, コミュニティ",
+      summary3Lines: "読者は小さな迷いで離脱する。CTAには提出物、期限、提出先の3点が必要。置換、最小検証、捨てる宣言など、30秒でできる小さな行動から始めると参加のハードルが下がる。",
+      coreIdea: "CTAはお願いではなく、迷いを消す設計である。",
+      top10: "提出物 / 期限 / 提出先 / 30秒 / 48〜72時間 / リンク1本 / 置換 / 最小検証 / 捨てる宣言 / 軽い参加",
+      publishingUse: "全ての投稿に重い申込ではなく、小さな参加導線を置く。",
+      useSubstack: "記事末に返信、無料配布、アンケートなどの小さな行動を1つ置く。",
+      useNote: "記事末に提出先つきのワークを入れる。",
+      usePodcast: "概要欄に期限つきの一言アクションを書く。",
+      useLive: "ライブ終わりに提出物、期限、提出先を口頭と固定コメントで出す。",
+      useNotes: "スタンプや一言返信で参加できるCTAにする。",
+      useX: "『参加希望とリプ』『固定投稿を引用』など1アクションに絞る。",
+      useAi: "AIにCTAのハードルが高すぎないか、迷う点がないかチェックさせる。",
+      contentIdeas: "CTA3点セットテンプレート、参加導線ミニ講座、ライブ締め台本、無料配布CTA集にできる。",
+      practiceTomorrow: "置換、最小検証、捨てる宣言のCTAを1本ずつ作る。",
+      knowledgeTags: "CTA, 行動要請, 参加導線, 募集, コミュニティ, マーケティング",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addThreeWeekFunnelKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(THREE_WEEK_FUNNEL_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("参加者が集まらない原因は")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  if (existing) {
+    learningAssetSearchQuery = "発信導線";
+    learningAssetStatusFilter = "all";
+    renderLearningAssets();
+    if (status) status.textContent = "3週間で参加者を集める発信導線実践書の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...threeWeekFunnelKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  learningAssetSearchQuery = "発信導線";
+  learningAssetStatusFilter = "all";
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "3週間で参加者を集める発信導線実践書を知識カードとして4件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -5951,6 +6108,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "action-profile") addActionProfileKnowledgeSampleCards();
   if (seed === "copy-target") addCopyTargetKnowledgeSampleCards();
   if (seed === "trust-charisma") addTrustCharismaKnowledgeSampleCards();
+  if (seed === "three-week-funnel") addThreeWeekFunnelKnowledgeSampleCards();
   params.delete("seed");
   const nextQuery = params.toString();
   const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
