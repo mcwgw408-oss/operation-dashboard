@@ -5,6 +5,7 @@ const PERSISTENT_MEMO_STORAGE_KEY = "operation-dashboard-persistent-memos-v1";
 const READING_QUEUE_STORAGE_KEY = "operation-dashboard-reading-queue-v2";
 const READING_NOTES_STORAGE_KEY = "operation-dashboard-reading-notes-v1";
 const LEARNING_ASSETS_STORAGE_KEY = "operation-dashboard-learning-assets-v1";
+const SUBSTA_VILLAGE_STORAGE_KEY = "operation-dashboard-substa-village-v1";
 const LEARNING_LOG_STORAGE_KEY = "sakura-learning-log-v1";
 const MEMORY_STORE_STORAGE_KEY = "sakura-memory-store-v1";
 const CONVERSATION_FEEDBACK_STORAGE_KEY = "sakura-conversation-feedback-v1";
@@ -266,6 +267,8 @@ let readingNotes = loadReadingNotes();
 let readingNoteSearchQuery = "";
 let editingReadingNoteId = "";
 let learningAssets = loadLearningAssets();
+let substaVillageStore = loadSubstaVillageStore();
+let editingSubstaVillageLogId = "";
 let learningAssetSearchQuery = "";
 let learningAssetStatusFilter = "all";
 let editingLearningAssetId = "";
@@ -1183,6 +1186,7 @@ function blankLearningAsset() {
     practiced: "",
     result: "",
     learning: "",
+    nextTrial: "",
     knowledgeTags: "",
     contentCounts: {
       article: 0,
@@ -1207,7 +1211,7 @@ function normalizeLearningAsset(raw) {
   const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const item = { ...base, ...source };
   item.id = typeof source.id === "string" && source.id ? source.id : base.id;
-  ["date", "title", "knowledgeName", "oneLineConclusion", "knowledgeOverview", "todayAction", "useScene", "beginnerExplanation", "articleIdeas", "podcastIdeas", "aiUseSimple", "tagsSimple", "author", "genre", "rating", "importanceRating", "practicalRating", "beginnerRating", "rereadRating", "impression", "rayDialogue", "myThought", "summary3Lines", "coreIdea", "top10", "publishingUse", "useSubstack", "useNote", "usePodcast", "useLive", "useNotes", "useX", "useAi", "contentIdeas", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "practiceTomorrow", "practiced", "result", "learning", "knowledgeTags", "contentLinks", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
+  ["date", "title", "knowledgeName", "oneLineConclusion", "knowledgeOverview", "todayAction", "useScene", "beginnerExplanation", "articleIdeas", "podcastIdeas", "aiUseSimple", "tagsSimple", "author", "genre", "rating", "importanceRating", "practicalRating", "beginnerRating", "rereadRating", "impression", "rayDialogue", "myThought", "summary3Lines", "coreIdea", "top10", "publishingUse", "useSubstack", "useNote", "usePodcast", "useLive", "useNotes", "useX", "useAi", "contentIdeas", "hypothesis", "experimentIdea", "articleIdea", "experimentResult", "practiceTomorrow", "practiced", "result", "learning", "nextTrial", "knowledgeTags", "contentLinks", "relatedArticleTitle", "relatedArticleUrl", "createdAt", "updatedAt"].forEach((key) => {
     item[key] = String(item[key] ?? "");
   });
   item.sourceType = LEARNING_ASSET_SOURCES.includes(source.sourceType) ? source.sourceType : base.sourceType;
@@ -1865,6 +1869,46 @@ function loadLearningAssets() {
   }
 }
 
+function blankSubstaVillageStore() {
+  return {
+    daily: {},
+    video: {},
+    pdf: {},
+    question: {},
+    theme: {
+      theme: "Substack初心者支援を形にする",
+      nextExperiment: "",
+    },
+    logs: [],
+  };
+}
+
+function normalizeSubstaVillageStore(raw) {
+  const base = blankSubstaVillageStore();
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const store = { ...base, ...source };
+  store.daily = source.daily && typeof source.daily === "object" ? { ...source.daily } : {};
+  store.video = source.video && typeof source.video === "object" ? { ...source.video } : {};
+  store.pdf = source.pdf && typeof source.pdf === "object" ? { ...source.pdf } : {};
+  store.question = source.question && typeof source.question === "object" ? { ...source.question } : {};
+  store.theme = {
+    ...base.theme,
+    ...(source.theme && typeof source.theme === "object" ? source.theme : {}),
+  };
+  store.logs = Array.isArray(source.logs)
+    ? source.logs.filter((entry) => entry && typeof entry === "object").slice(0, 50)
+    : [];
+  return store;
+}
+
+function loadSubstaVillageStore() {
+  try {
+    return normalizeSubstaVillageStore(JSON.parse(localStorage.getItem(SUBSTA_VILLAGE_STORAGE_KEY)));
+  } catch {
+    return blankSubstaVillageStore();
+  }
+}
+
 function loadLearningLog() {
   try {
     const saved = JSON.parse(localStorage.getItem(LEARNING_LOG_STORAGE_KEY));
@@ -2246,6 +2290,10 @@ function saveReadingNotes() {
 
 function saveLearningAssets() {
   localStorage.setItem(LEARNING_ASSETS_STORAGE_KEY, JSON.stringify(learningAssets));
+}
+
+function saveSubstaVillageStore() {
+  localStorage.setItem(SUBSTA_VILLAGE_STORAGE_KEY, JSON.stringify(substaVillageStore));
 }
 
 function saveLearningLog() {
@@ -3568,6 +3616,7 @@ function readLearningAssetForm() {
     practiced: $("#learningAssetPracticed")?.value.trim() || "",
     result: $("#learningAssetResult")?.value.trim() || "",
     learning: $("#learningAssetLearning")?.value.trim() || "",
+    nextTrial: $("#learningAssetNextTrial")?.value.trim() || "",
     knowledgeTags: $("#learningAssetKnowledgeTags")?.value.trim() || "",
     contentCounts: {
       article: Number.parseInt($("#learningAssetCountArticle")?.value, 10) || 0,
@@ -3631,6 +3680,7 @@ function fillLearningAssetForm(item) {
   setLearningAssetFieldValue("#learningAssetPracticed", asset.practiced || "");
   setLearningAssetFieldValue("#learningAssetResult", asset.result || asset.experimentResult || "");
   setLearningAssetFieldValue("#learningAssetLearning", asset.learning || "");
+  setLearningAssetFieldValue("#learningAssetNextTrial", asset.nextTrial || "");
   setLearningAssetFieldValue("#learningAssetKnowledgeTags", asset.knowledgeTags || "");
   setLearningAssetFieldValue("#learningAssetCountArticle", asset.contentCounts?.article || "");
   setLearningAssetFieldValue("#learningAssetCountPodcast", asset.contentCounts?.podcast || "");
@@ -3750,6 +3800,7 @@ function learningAssetSearchText(item) {
     item.practiced,
     item.result,
     item.learning,
+    item.nextTrial,
     item.knowledgeTags,
     item.contentLinks,
     item.relatedArticleTitle,
@@ -4022,9 +4073,9 @@ function createLearningAssetCard(item) {
   dailyUseHeading.textContent = "今日使えること";
   const dailyUseGrid = document.createElement("div");
   dailyUseGrid.className = "learning-asset-daily-use-grid";
-  appendLearningAssetUseItem(dailyUseGrid, "今日すぐ実践", item.todayAction || item.practiceTomorrow || item.experimentIdea);
+  appendLearningAssetUseItem(dailyUseGrid, "この教材から実践する1つ", item.practiceTomorrow || item.todayAction || item.experimentIdea);
   appendLearningAssetUseItem(dailyUseGrid, "一番重要な考え方", item.coreIdea || item.myThought);
-  appendLearningAssetUseItem(dailyUseGrid, "明日から試すこと", item.practiceTomorrow || item.experimentIdea);
+  appendLearningAssetUseItem(dailyUseGrid, "次に試すこと", item.nextTrial || item.experimentIdea);
   appendLearningAssetUseItem(dailyUseGrid, "使う場面", item.useScene || item.publishingUse);
   if (!dailyUseGrid.children.length) appendLearningAssetUseItem(dailyUseGrid, "今日すぐ実践", "実践内容は未入力です。");
   dailyUse.append(dailyUseHeading, dailyUseGrid);
@@ -4081,6 +4132,7 @@ function createLearningAssetCard(item) {
     ["実践したこと", item.practiced],
     ["結果", item.result || item.experimentResult],
     ["学び", item.learning],
+    ["次に試すこと", item.nextTrial],
     ["紐付けた成果物", item.contentLinks],
   ]);
   const savedDetails = createLearningAssetDetailSection("保存用", [
@@ -4178,6 +4230,332 @@ async function copyReadingLaboTemplate() {
   } catch (error) {
     if (status) status.textContent = "コピーできませんでした。テキストを選択してコピーしてください。";
   }
+}
+
+function getSubstaVillageValue(selector) {
+  const field = $(selector);
+  if (!field) return "";
+  return field.type === "checkbox" ? field.checked : field.value.trim();
+}
+
+function setSubstaVillageValue(selector, value) {
+  const field = $(selector);
+  if (!field) return;
+  if (field.type === "checkbox") field.checked = Boolean(value);
+  else field.value = value || "";
+}
+
+function collectSubstaVillageDaily() {
+  return {
+    date: activeDate,
+    morningGreeting: getSubstaVillageValue("#substaVillageMorningGreeting"),
+    goal: getSubstaVillageValue("#substaVillageGoal"),
+    step: getSubstaVillageValue("#substaVillageStep"),
+    result: getSubstaVillageValue("#substaVillageResult"),
+    action: getSubstaVillageValue("#substaVillageAction"),
+    insight: getSubstaVillageValue("#substaVillageInsight"),
+    next: getSubstaVillageValue("#substaVillageNext"),
+  };
+}
+
+function collectSubstaVillageVideo() {
+  return {
+    date: activeDate,
+    title: getSubstaVillageValue("#substaVillageVideoTitle"),
+    language: getSubstaVillageValue("#substaVillageVideoLanguage"),
+    oneLine: getSubstaVillageValue("#substaVillageVideoOneLine"),
+    why: getSubstaVillageValue("#substaVillageVideoWhy"),
+    myCase: getSubstaVillageValue("#substaVillageVideoMyCase"),
+    action: getSubstaVillageValue("#substaVillageVideoAction"),
+    tryThis: getSubstaVillageValue("#substaVillageVideoTry"),
+    did: getSubstaVillageValue("#substaVillageVideoDid"),
+    result: getSubstaVillageValue("#substaVillageVideoResult"),
+    next: getSubstaVillageValue("#substaVillageVideoNext"),
+  };
+}
+
+function collectSubstaVillagePdf() {
+  return {
+    date: activeDate,
+    title: getSubstaVillageValue("#substaVillagePdfTitle"),
+    need: getSubstaVillageValue("#substaVillagePdfNeed"),
+    content: getSubstaVillageValue("#substaVillagePdfContent"),
+    contentize: getSubstaVillageValue("#substaVillagePdfContentize"),
+    writing: getSubstaVillageValue("#substaVillagePdfWriting"),
+    design: getSubstaVillageValue("#substaVillagePdfDesign"),
+    read: getSubstaVillageValue("#substaVillagePdfRead"),
+  };
+}
+
+function collectSubstaVillageQuestion() {
+  return {
+    date: activeDate,
+    body: getSubstaVillageValue("#substaVillageQuestionBody"),
+    why: getSubstaVillageValue("#substaVillageQuestionWhy"),
+    tried: getSubstaVillageValue("#substaVillageQuestionTried"),
+    result: getSubstaVillageValue("#substaVillageQuestionResult"),
+    answer: getSubstaVillageValue("#substaVillageQuestionAnswer"),
+    next: getSubstaVillageValue("#substaVillageQuestionNext"),
+  };
+}
+
+function collectSubstaVillageTheme() {
+  return {
+    theme: getSubstaVillageValue("#substaVillageTheme") || "Substack初心者支援を形にする",
+    nextExperiment: getSubstaVillageValue("#substaVillageThemeNext"),
+  };
+}
+
+function substaVillageLine(label, value) {
+  return value ? `${label}：\n${value}` : "";
+}
+
+function buildSubstaVillageDailyText() {
+  const daily = collectSubstaVillageDaily();
+  return [
+    "【今日の一歩】",
+    substaVillageLine("やりたいこと", daily.goal),
+    substaVillageLine("今日の一歩", daily.step),
+    substaVillageLine("結果", daily.result),
+    substaVillageLine("実際に取った行動", daily.action),
+    substaVillageLine("気づき", daily.insight),
+    substaVillageLine("次に試すこと", daily.next),
+  ].filter(Boolean).join("\n\n");
+}
+
+function buildSubstaVillageQuestionText() {
+  const question = collectSubstaVillageQuestion();
+  return [
+    "【質問・相談】",
+    substaVillageLine("質問内容", question.body),
+    substaVillageLine("なぜ質問したい？", question.why),
+    substaVillageLine("自分で試したこと", question.tried),
+    substaVillageLine("結果", question.result),
+    substaVillageLine("次に試すこと", question.next),
+  ].filter(Boolean).join("\n\n");
+}
+
+function pushSubstaVillageLog(kind, data) {
+  const editingIndex = substaVillageStore.logs.findIndex((entry) => entry.id === editingSubstaVillageLogId && entry.kind === kind);
+  if (editingIndex >= 0) {
+    substaVillageStore.logs[editingIndex] = {
+      ...substaVillageStore.logs[editingIndex],
+      date: activeDate,
+      updatedAt: new Date().toISOString(),
+      data,
+    };
+    editingSubstaVillageLogId = "";
+    return "updated";
+  }
+  substaVillageStore.logs.unshift({
+    id: crypto.randomUUID(),
+    kind,
+    date: activeDate,
+    savedAt: new Date().toISOString(),
+    data,
+  });
+  substaVillageStore.logs = substaVillageStore.logs.slice(0, 50);
+  return "created";
+}
+
+function renderSubstaVillagePreview() {
+  const preview = $("#substaVillageDiscordPreview");
+  if (preview) preview.value = buildSubstaVillageDailyText();
+}
+
+function renderSubstaVillageRecentList() {
+  const target = $("#substaVillageRecentList");
+  const count = $("#substaVillageLogCount");
+  if (count) count.textContent = `${substaVillageStore.logs.length}件`;
+  if (!target) return;
+  target.replaceChildren();
+  const items = substaVillageStore.logs.slice(0, 8);
+  if (!items.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-note";
+    empty.textContent = "まだログはありません。今日の一歩から軽く始められます。";
+    target.append(empty);
+    return;
+  }
+  items.forEach((entry) => {
+    const item = document.createElement("article");
+    item.className = "sakura-substa-recent-item";
+    const title = document.createElement("strong");
+    const data = entry.data || {};
+    title.textContent = `${entry.date || ""} / ${entry.kind}`;
+    const body = document.createElement("p");
+    body.textContent = data.goal || data.step || data.title || data.body || data.theme || "保存済み";
+    const actions = document.createElement("div");
+    actions.className = "sakura-substa-recent-actions";
+    const edit = document.createElement("button");
+    edit.className = "ghost-button";
+    edit.type = "button";
+    edit.textContent = "このログを編集";
+    edit.addEventListener("click", () => editSubstaVillageLog(entry.id));
+    actions.append(edit);
+    item.append(title, body, actions);
+    target.append(item);
+  });
+}
+
+function updateSubstaVillageEditButtons(kind = "") {
+  const buttonMap = {
+    "今日の一歩": { selector: "#saveSubstaVillageDailyButton", save: "今日の一歩を保存", update: "今日の一歩を更新" },
+    "動画講座": { selector: "#substaVillageVideoForm button[type=\"submit\"]", save: "動画講座を保存", update: "動画講座を更新" },
+    "PDF一次分析": { selector: "#substaVillagePdfForm button[type=\"submit\"]", save: "PDF分析を保存", update: "PDF分析を更新" },
+    "質問・相談": { selector: "#substaVillageQuestionForm button[type=\"submit\"]", save: "質問ログを保存", update: "質問ログを更新" },
+    "メインテーマ": { selector: "#saveSubstaVillageTheme", save: "テーマを保存", update: "テーマを更新" },
+  };
+  Object.entries(buttonMap).forEach(([entryKind, config]) => {
+    const button = $(config.selector);
+    if (!button) return;
+    const isEditingThisKind = editingSubstaVillageLogId && entryKind === kind;
+    button.textContent = isEditingThisKind ? config.update : config.save;
+  });
+  const notice = $("#substaVillageEditNotice");
+  if (notice) notice.hidden = !(editingSubstaVillageLogId && kind === "今日の一歩");
+}
+
+function editSubstaVillageLog(id) {
+  const entry = substaVillageStore.logs.find((item) => item.id === id);
+  if (!entry) return;
+  editingSubstaVillageLogId = entry.id;
+  if (entry.kind === "今日の一歩") substaVillageStore.daily = { ...(entry.data || {}) };
+  if (entry.kind === "動画講座") substaVillageStore.video = { ...(entry.data || {}) };
+  if (entry.kind === "PDF一次分析") substaVillageStore.pdf = { ...(entry.data || {}) };
+  if (entry.kind === "質問・相談") substaVillageStore.question = { ...(entry.data || {}) };
+  if (entry.kind === "メインテーマ") substaVillageStore.theme = { ...substaVillageStore.theme, ...(entry.data || {}) };
+  fillSubstaVillagePage();
+  updateSubstaVillageEditButtons(entry.kind);
+  const statusMap = {
+    "今日の一歩": "#substaVillageDailyStatus",
+    "動画講座": "#substaVillageVideoStatus",
+    "PDF一次分析": "#substaVillagePdfStatus",
+    "質問・相談": "#substaVillageQuestionStatus",
+  };
+  const status = $(statusMap[entry.kind]);
+  if (status) status.textContent = "編集中です。内容を直して「更新」を押すと、このログを上書きします。";
+}
+
+function cancelSubstaVillageEdit() {
+  editingSubstaVillageLogId = "";
+  updateSubstaVillageEditButtons();
+  const status = $("#substaVillageDailyStatus");
+  if (status) status.textContent = "編集をやめました。次に保存すると新しいログになります。";
+}
+
+function fillSubstaVillagePage() {
+  const daily = substaVillageStore.daily || {};
+  setSubstaVillageValue("#substaVillageMorningGreeting", daily.morningGreeting);
+  setSubstaVillageValue("#substaVillageGoal", daily.goal);
+  setSubstaVillageValue("#substaVillageStep", daily.step);
+  setSubstaVillageValue("#substaVillageResult", daily.result);
+  setSubstaVillageValue("#substaVillageAction", daily.action);
+  setSubstaVillageValue("#substaVillageInsight", daily.insight);
+  setSubstaVillageValue("#substaVillageNext", daily.next);
+
+  const video = substaVillageStore.video || {};
+  setSubstaVillageValue("#substaVillageVideoTitle", video.title);
+  setSubstaVillageValue("#substaVillageVideoLanguage", video.language);
+  setSubstaVillageValue("#substaVillageVideoOneLine", video.oneLine);
+  setSubstaVillageValue("#substaVillageVideoWhy", video.why);
+  setSubstaVillageValue("#substaVillageVideoMyCase", video.myCase);
+  setSubstaVillageValue("#substaVillageVideoAction", video.action);
+  setSubstaVillageValue("#substaVillageVideoTry", video.tryThis);
+  setSubstaVillageValue("#substaVillageVideoDid", video.did);
+  setSubstaVillageValue("#substaVillageVideoResult", video.result);
+  setSubstaVillageValue("#substaVillageVideoNext", video.next);
+
+  const pdf = substaVillageStore.pdf || {};
+  setSubstaVillageValue("#substaVillagePdfTitle", pdf.title);
+  setSubstaVillageValue("#substaVillagePdfNeed", pdf.need);
+  setSubstaVillageValue("#substaVillagePdfContent", pdf.content);
+  setSubstaVillageValue("#substaVillagePdfContentize", pdf.contentize);
+  setSubstaVillageValue("#substaVillagePdfWriting", pdf.writing);
+  setSubstaVillageValue("#substaVillagePdfDesign", pdf.design);
+  setSubstaVillageValue("#substaVillagePdfRead", pdf.read);
+
+  const question = substaVillageStore.question || {};
+  setSubstaVillageValue("#substaVillageQuestionBody", question.body);
+  setSubstaVillageValue("#substaVillageQuestionWhy", question.why);
+  setSubstaVillageValue("#substaVillageQuestionTried", question.tried);
+  setSubstaVillageValue("#substaVillageQuestionResult", question.result);
+  setSubstaVillageValue("#substaVillageQuestionAnswer", question.answer);
+  setSubstaVillageValue("#substaVillageQuestionNext", question.next);
+
+  const theme = substaVillageStore.theme || {};
+  setSubstaVillageValue("#substaVillageTheme", theme.theme || "Substack初心者支援を形にする");
+  setSubstaVillageValue("#substaVillageThemeNext", theme.nextExperiment);
+  renderSubstaVillagePreview();
+  renderSubstaVillageRecentList();
+  updateSubstaVillageEditButtons();
+}
+
+function saveSubstaVillageDaily(event) {
+  event?.preventDefault();
+  substaVillageStore.daily = collectSubstaVillageDaily();
+  const action = pushSubstaVillageLog("今日の一歩", substaVillageStore.daily);
+  saveSubstaVillageStore();
+  renderSubstaVillageRecentList();
+  updateSubstaVillageEditButtons();
+  const status = $("#substaVillageDailyStatus");
+  if (status) status.textContent = action === "updated" ? "今日の一歩を更新しました。" : "今日の一歩を保存しました。うまくいかなかった結果も材料です。";
+}
+
+function saveSubstaVillageVideo(event) {
+  event?.preventDefault();
+  substaVillageStore.video = collectSubstaVillageVideo();
+  const action = pushSubstaVillageLog("動画講座", substaVillageStore.video);
+  saveSubstaVillageStore();
+  renderSubstaVillageRecentList();
+  updateSubstaVillageEditButtons();
+  const status = $("#substaVillageVideoStatus");
+  if (status) status.textContent = action === "updated" ? "動画講座メモを更新しました。" : "動画講座メモを保存しました。共通言語だけの日でも大丈夫です。";
+}
+
+function saveSubstaVillagePdf(event) {
+  event?.preventDefault();
+  substaVillageStore.pdf = collectSubstaVillagePdf();
+  const action = pushSubstaVillageLog("PDF一次分析", substaVillageStore.pdf);
+  saveSubstaVillageStore();
+  renderSubstaVillageRecentList();
+  updateSubstaVillageEditButtons();
+  const status = $("#substaVillagePdfStatus");
+  if (status) status.textContent = action === "updated" ? "PDF一次分析を更新しました。" : "PDF一次分析を保存しました。読む場所を絞るためのメモです。";
+}
+
+function saveSubstaVillageQuestion(event) {
+  event?.preventDefault();
+  substaVillageStore.question = collectSubstaVillageQuestion();
+  const action = pushSubstaVillageLog("質問・相談", substaVillageStore.question);
+  saveSubstaVillageStore();
+  renderSubstaVillageRecentList();
+  updateSubstaVillageEditButtons();
+  const status = $("#substaVillageQuestionStatus");
+  if (status) status.textContent = action === "updated" ? "質問・相談ログを更新しました。" : "質問・相談ログを保存しました。";
+}
+
+function saveSubstaVillageTheme() {
+  substaVillageStore.theme = collectSubstaVillageTheme();
+  pushSubstaVillageLog("メインテーマ", substaVillageStore.theme);
+  saveSubstaVillageStore();
+  renderSubstaVillageRecentList();
+  updateSubstaVillageEditButtons();
+}
+
+async function copySubstaVillageText(text, statusSelector) {
+  const status = $(statusSelector);
+  try {
+    await copySnapshotText(text);
+    if (status) status.textContent = "コピーしました。Discordに貼れます。";
+  } catch (error) {
+    if (status) status.textContent = "コピーできませんでした。テキストを選択してコピーしてください。";
+  }
+}
+
+function clearSubstaVillageDaily() {
+  ["#substaVillageGoal", "#substaVillageStep", "#substaVillageResult", "#substaVillageAction", "#substaVillageInsight", "#substaVillageNext"].forEach((selector) => setSubstaVillageValue(selector, ""));
+  renderSubstaVillagePreview();
 }
 
 function firstKnowledgeSampleCards() {
@@ -16277,6 +16655,7 @@ function showPageEntry(entryName = "", options = {}) {
   const memoPagePanel = $("#memo-page");
   const todayInputPagePanel = $("#todayInputPage");
   const archivePagePanel = $("#archivePage");
+  const substaVillagePagePanel = $("#sakuraSubstaVillagePage");
   const activityExperimentPagePanel = $("#activityExperimentPage");
   const articleIdeasPagePanel = $("#articleIdeasPage");
   const placeholder = $("#pageSwitchPlaceholder");
@@ -16290,6 +16669,7 @@ function showPageEntry(entryName = "", options = {}) {
   const isMemoPage = entryName === "メモ";
   const isTodayInputPage = entryName === "今日の入力";
   const isArchivePage = entryName === "Archive";
+  const isSubstaVillagePage = entryName === "サブスタ村活用";
   const isActivityExperimentPage = entryName === "活動実験";
   const isArticleIdeasPage = entryName === "記事アイデア";
   const visibleEntryPanel = isSubstack
@@ -16310,11 +16690,13 @@ function showPageEntry(entryName = "", options = {}) {
                   ? todayInputPagePanel
                   : isArchivePage
                     ? archivePagePanel
-                    : isActivityExperimentPage
-                      ? activityExperimentPagePanel
-                      : isArticleIdeasPage
-                        ? articleIdeasPagePanel
-                        : null;
+                    : isSubstaVillagePage
+                      ? substaVillagePagePanel
+                      : isActivityExperimentPage
+                        ? activityExperimentPagePanel
+                        : isArticleIdeasPage
+                          ? articleIdeasPagePanel
+                          : null;
   if (substackPanel) substackPanel.hidden = !isSubstack;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
@@ -16328,12 +16710,13 @@ function showPageEntry(entryName = "", options = {}) {
   if (memoPagePanel) memoPagePanel.hidden = !isMemoPage;
   if (todayInputPagePanel) todayInputPagePanel.hidden = !isTodayInputPage;
   if (archivePagePanel) archivePagePanel.hidden = !isArchivePage;
+  if (substaVillagePagePanel) substaVillagePagePanel.hidden = !isSubstaVillagePage;
   if (activityExperimentPagePanel) activityExperimentPagePanel.hidden = !isActivityExperimentPage;
   if (articleIdeasPagePanel) articleIdeasPagePanel.hidden = !isArticleIdeasPage;
   setTodayInputPageVisible(isTodayInputPage);
   setArchivePageVisible(isArchivePage);
   if (seedWorkbenchTabs) seedWorkbenchTabs.hidden = !(isSeedPage || isArchivePage);
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || isActivityExperimentPage || isArticleIdeasPage || !entryName;
+  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || isSubstaVillagePage || isActivityExperimentPage || isArticleIdeasPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
   if (noteConfig) renderNotePage(noteConfig);
@@ -16368,6 +16751,7 @@ function showPageEntry(entryName = "", options = {}) {
     renderMemoryLibrary();
     renderHistory();
   }
+  if (isSubstaVillagePage) fillSubstaVillagePage();
   if (options.scroll && visibleEntryPanel && !visibleEntryPanel.hidden) {
     requestAnimationFrame(() => {
       visibleEntryPanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -16741,6 +17125,19 @@ function bindEvents() {
   $("#learningAssetStatusFilter")?.addEventListener("change", (event) => {
     learningAssetStatusFilter = event.target.value;
     renderLearningAssets();
+  });
+  $("#substaVillageDailyForm")?.addEventListener("submit", saveSubstaVillageDaily);
+  $("#substaVillageVideoForm")?.addEventListener("submit", saveSubstaVillageVideo);
+  $("#substaVillagePdfForm")?.addEventListener("submit", saveSubstaVillagePdf);
+  $("#substaVillageQuestionForm")?.addEventListener("submit", saveSubstaVillageQuestion);
+  $("#saveSubstaVillageTheme")?.addEventListener("click", saveSubstaVillageTheme);
+  $("#cancelSubstaVillageEdit")?.addEventListener("click", cancelSubstaVillageEdit);
+  $("#clearSubstaVillageDaily")?.addEventListener("click", clearSubstaVillageDaily);
+  $("#copySubstaVillageDailyStep")?.addEventListener("click", () => copySubstaVillageText(buildSubstaVillageDailyText(), "#substaVillageDailyStatus"));
+  $("#copySubstaVillagePreview")?.addEventListener("click", () => copySubstaVillageText($("#substaVillageDiscordPreview")?.value || "", "#substaVillageDailyStatus"));
+  $("#copySubstaVillageQuestion")?.addEventListener("click", () => copySubstaVillageText(buildSubstaVillageQuestionText(), "#substaVillageQuestionStatus"));
+  ["#substaVillageGoal", "#substaVillageStep", "#substaVillageResult", "#substaVillageAction", "#substaVillageInsight", "#substaVillageNext"].forEach((selector) => {
+    $(selector)?.addEventListener("input", renderSubstaVillagePreview);
   });
   $("#learningSearch")?.addEventListener("input", (event) => {
     learningSearchQuery = event.target.value;

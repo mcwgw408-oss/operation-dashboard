@@ -17,6 +17,7 @@
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/observation-Labo/">発信観察</a>
         <a class="global-nav-link" href="https://mcwgw408-oss.github.io/Stock-Labo/">ストック管理</a>
         <a class="global-nav-link" href="#knowledge-labo" data-page-entry="Knowledge Labo">Knowledge Labo</a>
+        <a class="global-nav-link" href="#sakura-substa-village" data-page-entry="サブスタ村活用">サブスタ村活用</a>
       </nav>
 
       <header class="topbar">
@@ -876,6 +877,7 @@
             <button class="launch-card" type="button" data-page-entry="WordPress"><strong>WordPress</strong><span>記事</span></button>
             <button class="launch-card" type="button" data-page-entry="Seed"><strong>Seed</strong><span>思考</span></button>
             <button class="launch-card" type="button" data-page-entry="Knowledge Labo"><strong>Knowledge Labo</strong><span>知識資産</span></button>
+            <button class="launch-card" type="button" data-page-entry="サブスタ村活用"><strong>サブスタ村活用</strong><span>今日の一歩</span></button>
             <button class="launch-card" type="button" data-page-entry="メモ"><strong>メモ</strong><span>思考</span></button>
             <button class="launch-card" type="button" data-page-entry="今日の入力"><strong>今日の入力</strong><span>記録</span></button>
             <button class="launch-card" type="button" data-page-entry="Archive"><strong>Archive</strong><span>旧機能</span></button>
@@ -902,6 +904,147 @@
               <p class="section-note">Ver.2のホームから外した旧機能・補助ページをここにまとめます。</p>
             </div>
           </div>
+        </section>
+
+        <section id="sakuraSubstaVillagePage" class="panel sakura-substa-village-panel span-2" aria-label="さくら流・サブスタ村活用設計" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2>さくら流・サブスタ村活用設計 v0.1</h2>
+              <p class="section-note">教材やDiscordを全部こなす場所ではなく、今日やりたいことを前に進めるために使う軽い実験ログです。</p>
+            </div>
+            <button class="ghost-button" id="copySubstaVillageDailyStep" type="button">今日の一歩をコピー</button>
+          </div>
+
+          <div id="sakura-substa-village" class="sakura-substa-village-hero">
+            <div>
+              <span class="brain-label">基本方針</span>
+              <p>必要なら動画を見る。必要ならPDFを見る。必要なら質問・報告する。使わない日や失敗した日も、次を決める材料として残します。</p>
+            </div>
+            <ol class="sakura-substa-cycle" aria-label="運用サイクル">
+              <li>学ぶ</li>
+              <li>試す</li>
+              <li>結果を見る</li>
+              <li>次を決める</li>
+            </ol>
+          </div>
+
+          <div class="sakura-substa-village-grid">
+            <form id="substaVillageDailyForm" class="sakura-substa-card sakura-substa-form">
+              <div class="sakura-substa-card-heading">
+                <div>
+                  <h3>今日の一歩</h3>
+                  <p class="section-note">通常業務ではなく、やりたいことに向けて新しくやったことだけを書きます。</p>
+                </div>
+                <label class="sakura-substa-check"><input id="substaVillageMorningGreeting" type="checkbox" />Discord朝挨拶済み</label>
+              </div>
+              <div id="substaVillageEditNotice" class="sakura-substa-edit-notice" hidden>
+                <strong>ログを編集中</strong>
+                <span>内容を直したら更新ボタンを押してください。新しいログは増えません。</span>
+                <button class="ghost-button" id="cancelSubstaVillageEdit" type="button">編集をやめる</button>
+              </div>
+              <label>やりたいこと<textarea id="substaVillageGoal" rows="2" placeholder="例：Substack初心者の困りごとを知って、支援につなげたい"></textarea></label>
+              <label>今日の一歩<textarea id="substaVillageStep" rows="2" placeholder="例：初心者を10人探した"></textarea></label>
+              <label>結果<textarea id="substaVillageResult" rows="2" placeholder="例：3人しか見つからなかった"></textarea></label>
+              <label>実際に取った行動<textarea id="substaVillageAction" rows="2" placeholder="例：3人にDMした"></textarea></label>
+              <label>気づき<textarea id="substaVillageInsight" rows="2"></textarea></label>
+              <label>次に試すこと<textarea id="substaVillageNext" rows="2"></textarea></label>
+              <div class="sakura-substa-actions">
+                <button class="ghost-button" id="saveSubstaVillageDailyButton" type="submit">今日の一歩を保存</button>
+                <button class="ghost-button" id="clearSubstaVillageDaily" type="button">入力を軽くする</button>
+              </div>
+              <p id="substaVillageDailyStatus" class="section-note" role="status" aria-live="polite">未入力でも保存できます。1週間使って改善する前提です。</p>
+            </form>
+
+            <section class="sakura-substa-card">
+              <div class="sakura-substa-card-heading">
+                <h3>Discord貼り付け</h3>
+                <button class="ghost-button" id="copySubstaVillagePreview" type="button">コピー</button>
+              </div>
+              <textarea id="substaVillageDiscordPreview" class="sakura-substa-copy-box" rows="13" readonly></textarea>
+            </section>
+          </div>
+
+          <div class="sakura-substa-village-grid">
+            <form id="substaVillageVideoForm" class="sakura-substa-card sakura-substa-form">
+              <div class="sakura-substa-card-heading">
+                <h3>動画講座</h3>
+                <button class="ghost-button" type="submit">動画講座を保存</button>
+              </div>
+              <label>動画名・回<input id="substaVillageVideoTitle" type="text" /></label>
+              <label>今日覚えた共通言語<textarea id="substaVillageVideoLanguage" rows="2"></textarea></label>
+              <label>一言でいうと<textarea id="substaVillageVideoOneLine" rows="2"></textarea></label>
+              <label>なぜ覚える？<textarea id="substaVillageVideoWhy" rows="2"></textarea></label>
+              <label>今の私でいうと<textarea id="substaVillageVideoMyCase" rows="2"></textarea></label>
+              <label>この回で実際にやること<textarea id="substaVillageVideoAction" rows="2"></textarea></label>
+              <label>今回やってみること<textarea id="substaVillageVideoTry" rows="2"></textarea></label>
+              <label>実際にやったこと<textarea id="substaVillageVideoDid" rows="2"></textarea></label>
+              <label>結果<textarea id="substaVillageVideoResult" rows="2"></textarea></label>
+              <label>次に試すこと<textarea id="substaVillageVideoNext" rows="2"></textarea></label>
+              <p id="substaVillageVideoStatus" class="section-note" role="status" aria-live="polite">共通言語だけでも保存できます。</p>
+            </form>
+
+            <form id="substaVillageQuestionForm" class="sakura-substa-card sakura-substa-form">
+              <div class="sakura-substa-card-heading">
+                <h3>質問・相談ログ</h3>
+                <button class="ghost-button" type="submit">質問ログを保存</button>
+              </div>
+              <label>質問内容<textarea id="substaVillageQuestionBody" rows="3"></textarea></label>
+              <label>なぜ質問したい？<textarea id="substaVillageQuestionWhy" rows="2"></textarea></label>
+              <label>自分で試したこと<textarea id="substaVillageQuestionTried" rows="2"></textarea></label>
+              <label>結果<textarea id="substaVillageQuestionResult" rows="2"></textarea></label>
+              <label>もらった回答<textarea id="substaVillageQuestionAnswer" rows="2"></textarea></label>
+              <label>次に試すこと<textarea id="substaVillageQuestionNext" rows="2"></textarea></label>
+              <div class="sakura-substa-actions">
+                <button class="ghost-button" id="copySubstaVillageQuestion" type="button">質問文をコピー</button>
+              </div>
+              <p id="substaVillageQuestionStatus" class="section-note" role="status" aria-live="polite">丸投げではなく、試した上で詰まった場所を残します。</p>
+            </form>
+          </div>
+
+          <form id="substaVillagePdfForm" class="sakura-substa-card sakura-substa-form">
+            <div class="sakura-substa-card-heading">
+              <div>
+                <h3>実践書PDF 一次分析</h3>
+                <p class="section-note">順番に全部読むのではなく、今の悩みや活動に必要なPDFだけを選びます。</p>
+              </div>
+              <button class="ghost-button" type="submit">PDF分析を保存</button>
+            </div>
+            <div class="sakura-substa-two">
+              <label>PDF名<input id="substaVillagePdfTitle" type="text" /></label>
+              <label>今の悩み・活動<input id="substaVillagePdfNeed" type="text" placeholder="例：初心者支援の切り口探し" /></label>
+            </div>
+            <label>① 内容<textarea id="substaVillagePdfContent" rows="3" placeholder="重要な考え方、80:20、実践できること、現在の活動への応用"></textarea></label>
+            <label>② コンテンツ化<textarea id="substaVillagePdfContentize" rows="3" placeholder="記事、Podcast、Notes、X、初心者支援など"></textarea></label>
+            <label>③ 文章・伝え方<textarea id="substaVillagePdfWriting" rows="3" placeholder="書き出し、見出し、説明順、具体例、言葉の難易度、読ませ方"></textarea></label>
+            <label>④ デザイン・教材設計<textarea id="substaVillagePdfDesign" rows="3" placeholder="レイアウト、余白、1ページの情報量、図解、スライド構成、強調方法"></textarea></label>
+            <label>⑤ 自分が読むべき場所<textarea id="substaVillagePdfRead" rows="3" placeholder="原文を読む価値が高い章・ページを優先順位付きで保存"></textarea></label>
+            <p id="substaVillagePdfStatus" class="section-note" role="status" aria-live="polite">AIの一次分析を置いて、原文を読む場所を絞ります。</p>
+          </form>
+
+          <section class="sakura-substa-card">
+            <div class="sakura-substa-card-heading">
+              <div>
+                <h3>当面のメインテーマ</h3>
+                <p class="section-note">固定しすぎず、必要なら変えます。今は小さく試すための仮置きです。</p>
+              </div>
+              <button class="ghost-button" id="saveSubstaVillageTheme" type="button">テーマを保存</button>
+            </div>
+            <div class="sakura-substa-two">
+              <label>テーマ<textarea id="substaVillageTheme" rows="2">Substack初心者支援を形にする</textarea></label>
+              <label>次の小さな実験<textarea id="substaVillageThemeNext" rows="2" placeholder="例：3人に話を聞き、困りごとを分類する"></textarea></label>
+            </div>
+            <div class="sakura-substa-flow">
+              <span>人を探す</span><span>話を聞く</span><span>困りごとを知る</span><span>小さく支援する</span><span>反応を見る</span><span>必要なものを作る</span><span>試してもらう</span><span>改善する</span><span>必要なら価格をつける</span>
+            </div>
+          </section>
+
+          <section class="sakura-substa-card">
+            <div class="sakura-substa-card-heading">
+              <h3>最近のサブスタ村ログ</h3>
+              <span id="substaVillageLogCount" class="section-note">0件</span>
+            </div>
+            <div id="substaVillageRecentList" class="sakura-substa-recent-list"></div>
+          </section>
         </section>
 
         <section id="substackPage" class="panel substack-page-panel span-2" aria-label="Substack" hidden>
@@ -2358,10 +2501,11 @@
             <label class="learning-asset-wide-field">Xへの応用<textarea id="learningAssetUseX" rows="3"></textarea></label>
             <label class="learning-asset-wide-field">AI活用<textarea id="learningAssetUseAi" rows="4" placeholder="ChatGPT・Claude・Codexと組み合わせる使い方"></textarea></label>
             <label class="learning-asset-wide-field">コンテンツ化アイデア<textarea id="learningAssetContentIdeas" rows="5" placeholder="記事、Podcast、Notes、X、Kindle、Brain、講座、テンプレート"></textarea></label>
-            <label class="learning-asset-wide-field">明日から試すこと<textarea id="learningAssetPracticeTomorrow" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">この教材から実践する1つ<textarea id="learningAssetPracticeTomorrow" rows="3"></textarea></label>
             <label class="learning-asset-wide-field">実践したこと<textarea id="learningAssetPracticed" rows="3"></textarea></label>
             <label class="learning-asset-wide-field">結果<textarea id="learningAssetResult" rows="3"></textarea></label>
             <label class="learning-asset-wide-field">学び<textarea id="learningAssetLearning" rows="3"></textarea></label>
+            <label class="learning-asset-wide-field">次に試すこと<textarea id="learningAssetNextTrial" rows="3"></textarea></label>
             <label class="learning-asset-wide-field">知識タグ<input id="learningAssetKnowledgeTags" type="text" placeholder="マーケティング, ブランディング, AI, 発信, 心理, 習慣, 信頼構築" /></label>
             <fieldset class="learning-asset-checkboxes reading-labo-output-counts">
               <legend>この本から生まれたコンテンツ実績</legend>
