@@ -164,6 +164,7 @@ const FORBIDDEN_WORDS_SAMPLE_TITLE = "挑戦を止める7つの禁止コトバ �
 const TWELVE_QUESTIONS_SAMPLE_TITLE = "ピンチを行動に変える12の質問 実践書";
 const SOCIAL_CONTRIBUTION_SAMPLE_TITLE = "社会貢献を仕事にする実践書";
 const COMMUNITY_VILLAGE_SAMPLE_TITLE = "また来たくなる村 コミュニティづくり実践書";
+const MARKETING_EQUATION_SAMPLE_TITLE = "3つの数字で理解するマーケティングの方程式";
 const READING_LABO_TEMPLATE = `このPDFは、本の内容を理解・整理する目的で使用します。
 
 私は本の要約が欲しいわけではありません。
@@ -7412,6 +7413,83 @@ function addCommunityVillageKnowledgeSampleCards() {
   $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function marketingEquationKnowledgeSampleCards() {
+  const now = new Date().toISOString();
+  const common = {
+    date: activeDate,
+    sourceType: "PDF",
+    title: MARKETING_EQUATION_SAMPLE_TITLE,
+    author: "",
+    genre: "マーケティング / セールス / 導線設計 / Substack初心者支援",
+    rating: "",
+    importanceRating: "5",
+    practicalRating: "5",
+    beginnerRating: "5",
+    rereadRating: "5",
+    status: "Codex抽出済み",
+    contentCounts: { article: 0, podcast: 0, notes: 0, x: 0, kindle: 0, brain: 0 },
+    publishedTo: ["Substack", "note", "Podcast", "X", "Notes"],
+    connectsTo: ["マーケティング", "セールス", "発信", "信頼構築", "コンテンツ化"],
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [
+    {
+      ...common,
+      knowledgeName: "売上はリード、コンバージョン、LTVの掛け算で診断する",
+      oneLineConclusion: "売上が伸びない時は新しい手法を足す前に、3つの数字の一番弱いところを直す。",
+      knowledgeOverview: "マーケティングの施策をバラバラに追うのではなく、売上を『リード × コンバージョン × LTV』に分解して見る。リードは新しく出会った人の数、コンバージョンはそのうち買ってくれる割合、LTVは一人が生涯で払ってくれる金額。掛け算なので、強い部分をさらに伸ばすより、最も弱い数字を1点改善する方が全体への効果が大きい。",
+      todayAction: "Substack初心者支援について、今の詰まりをリード・コンバージョン・LTVのどれか1つに分類する。",
+      useScene: "Substack初心者支援の商品設計、無料相談導線、記事からDMへの流れ、PDF教材、Podcast導線、価格をつける前の診断に使う。",
+      beginnerExplanation: "売上は気合いや投稿数だけで決まらない。新しく出会う人数、買ってくれる割合、長く関わってくれる金額の3つを分けて見ると、次に直す場所が分かる。",
+      articleIdeas: "売上が伸びない時に見る3つの数字 / Substack初心者が最初に整えるべき導線 / 新しい手法より先に弱点を見つける",
+      podcastIdeas: "マーケティングを3つの数字で見る / 弱いところを1点直すだけで全体が変わる理由",
+      aiUseSimple: "AIに自分の導線を説明し、リード・コンバージョン・LTVのどこが弱いかを診断してもらう。改善案は一番弱い数字に絞って出してもらう。",
+      tagsSimple: "マーケティング, 売上の方程式, リード, コンバージョン, LTV, 導線設計, Substack初心者支援",
+      summary3Lines: "売上はリード、コンバージョン、LTVの掛け算で見られる。施策を増やす前に、今どの数字が一番弱いかを見つける。掛け算なので、弱いところを少し直す方が全体の伸びにつながりやすい。",
+      coreIdea: "強いところを伸ばすより、売上の足を引っ張っている一番弱い数字を直す。",
+      top10: "リード / コンバージョン / LTV / 売上の方程式 / 弱点診断 / 導線 / リスト資産 / セールス / 商品設計 / コンテンツ化",
+      publishingUse: "記事やPodcastで『どの数字を改善する話か』を明確にして、読者が自分の課題を診断できる内容にする。",
+      useSubstack: "読者獲得はリード、無料相談やDM返信はコンバージョン、継続支援や教材化はLTVとして分けて考える。",
+      useNote: "初心者向けに3つの数字を図解する記事を書く。",
+      usePodcast: "自分の活動を3つの数字に分解して、今どこを実験しているか話す。",
+      useLive: "参加者の活動を3つの数字で一緒に診断するミニ相談会にする。",
+      useNotes: "今日見直す数字を1つだけ投稿する。",
+      useX: "『投稿を増やす前に、どの数字が弱いかを見る』という短文にする。",
+      useAi: "AIに『リード・CV・LTVの3分類で、今週の実験案を3つ』と依頼する。",
+      contentIdeas: "初心者向け診断シート、3つの数字チェックリスト、無料相談前アンケート、導線改善テンプレートにできる。",
+      practiceTomorrow: "Substack初心者支援の現在地を、リード・コンバージョン・LTVそれぞれ10点満点で採点する。",
+      practiced: "",
+      result: "",
+      learning: "",
+      nextTrial: "一番点数が低い数字を1つ選び、明日の『今日の一歩』で小さく改善する。",
+      knowledgeTags: "売上の方程式, リード, コンバージョン, LTV, 導線診断, Substack初心者支援",
+    },
+  ].map((card) => normalizeLearningAsset({ ...blankLearningAsset(), ...card, id: crypto.randomUUID() }));
+}
+
+function addMarketingEquationKnowledgeSampleCards() {
+  const existing = learningAssets.some((item) =>
+    String(item.title || "").includes(MARKETING_EQUATION_SAMPLE_TITLE) ||
+    String(item.knowledgeName || "").includes("売上はリード")
+  );
+  const status = $("#learningAssetStatusMessage") || $("#readingLaboTemplateStatus");
+  learningAssetSearchQuery = "売上の方程式";
+  learningAssetStatusFilter = "all";
+  if (existing) {
+    renderLearningAssets();
+    if (status) status.textContent = "3つの数字で理解するマーケティングの方程式の知識カードはすでにあります。検索結果に表示しました。";
+    $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  learningAssets = [...marketingEquationKnowledgeSampleCards(), ...learningAssets];
+  saveLearningAssets();
+  closeLearningAssetForm();
+  renderLearningAssets();
+  if (status) status.textContent = "3つの数字で理解するマーケティングの方程式を知識カードとして1件追加しました。";
+  $("#learningAssetList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function learningAssetSampleKey(item) {
   return normalizeLaterText(`${item.title || ""}::${item.knowledgeName || ""}`);
 }
@@ -7436,6 +7514,7 @@ function allKnowledgeSampleCards() {
     ...twelveQuestionsKnowledgeSampleCards(),
     ...socialContributionKnowledgeSampleCards(),
     ...communityVillageKnowledgeSampleCards(),
+    ...marketingEquationKnowledgeSampleCards(),
   ];
 }
 
@@ -7500,7 +7579,7 @@ function resetKnowledgeSampleCards() {
 function handleKnowledgeLaboSeedFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const seed = params.get("seed");
-  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "social-contribution", "community-village", "all-knowledge", "reset-knowledge"].includes(seed)) return;
+  if (!["concept-book", "smallbiz", "psychology", "treasure", "idea", "story-profile", "concept-design", "value-os", "action-profile", "copy-target", "trust-charisma", "three-week-funnel", "sns-trust-asset", "selling-copywriting", "forbidden-words", "twelve-questions", "social-contribution", "community-village", "marketing-equation", "all-knowledge", "reset-knowledge"].includes(seed)) return;
   showPageEntry("Knowledge Labo");
   if (seed === "concept-book") addFirstKnowledgeSampleCards();
   if (seed === "smallbiz") addSmallBizKnowledgeSampleCards();
@@ -7520,6 +7599,7 @@ function handleKnowledgeLaboSeedFromUrl() {
   if (seed === "twelve-questions") addTwelveQuestionsKnowledgeSampleCards();
   if (seed === "social-contribution") addSocialContributionKnowledgeSampleCards();
   if (seed === "community-village") addCommunityVillageKnowledgeSampleCards();
+  if (seed === "marketing-equation") addMarketingEquationKnowledgeSampleCards();
   if (seed === "all-knowledge") addAllKnowledgeSampleCards();
   if (seed === "reset-knowledge") resetKnowledgeSampleCards();
   params.delete("seed");
