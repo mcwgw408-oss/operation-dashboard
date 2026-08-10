@@ -248,6 +248,7 @@ const xExperimentFormFields = {
 };
 
 const activityLogFields = {
+  todayStep: "#activityTodayStep",
   startSubstackSubscribers: "#activityStartSubstackSubscribers",
   startSubstackFollowers: "#activityStartSubstackFollowers",
   startNoteFollowers: "#activityStartNoteFollowers",
@@ -1455,6 +1456,7 @@ function blankDay() {
 
 function defaultActivityLog() {
   return {
+    todayStep: "",
     startSubstackSubscribers: "",
     startSubstackFollowers: "",
     startNoteFollowers: "",
@@ -2778,6 +2780,7 @@ function renderActivityLogWeekList() {
     const summary = document.createElement("p");
     summary.textContent = activityLogHasContent(log)
       ? [
+          String(log.todayStep || "").split("\n").find(Boolean),
           String(log.actions || "").split("\n").find(Boolean),
           deltas,
           String(log.insight || "").split("\n").find(Boolean),
@@ -17647,6 +17650,7 @@ function downloadCsv() {
       "daily_tasks",
       "today_tasks",
       "today_events",
+      "activity_log_today_step",
       "activity_log_actions",
       "activity_log_reactions",
       "activity_log_insight",
@@ -17680,6 +17684,7 @@ function downloadCsv() {
         day.dailyTasks.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.todayTasks.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         asArray(day.todayEvents).map(formatEventLabel).join(" / "),
+        day.activityLog.todayStep,
         day.activityLog.actions,
         day.activityLog.reactions,
         day.activityLog.insight,

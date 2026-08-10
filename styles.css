@@ -3403,6 +3403,15 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.activity-log-first-step-block {
+  border-color: var(--blue-line);
+  background: var(--blue-soft);
+}
+
+.activity-log-first-step-block textarea {
+  background: #fff;
+}
+
 .activity-log-week-panel {
   border: 1px solid var(--green-line);
   border-radius: var(--radius-item);
