@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260811-today-step" />
+    <link rel="stylesheet" href="./styles.css?v=20260811-substa-video-log" />
   </head>
   <body>
     <div class="app">
@@ -973,14 +973,21 @@
               </div>
               <label>動画名・回<input id="substaVillageVideoTitle" type="text" /></label>
               <label>今日覚えた共通言語<textarea id="substaVillageVideoLanguage" rows="2"></textarea></label>
+              <label>動画講座の中身<textarea id="substaVillageVideoContent" rows="5" placeholder="この回で話していた内容、流れ、例え話、前提など"></textarea></label>
+              <label>ここ重要メモ<textarea id="substaVillageVideoImportant" rows="6" placeholder="重要だと思ったことを何個でも。1行ごと、箇条書き、自由メモでOK"></textarea></label>
+              <label>学んで覚えておきたいこと<textarea id="substaVillageVideoRemember" rows="4" placeholder="あとで自分の共通言語にしたい考え方"></textarea></label>
               <label>一言でいうと<textarea id="substaVillageVideoOneLine" rows="2"></textarea></label>
               <label>なぜ覚える？<textarea id="substaVillageVideoWhy" rows="2"></textarea></label>
               <label>今の私でいうと<textarea id="substaVillageVideoMyCase" rows="2"></textarea></label>
+              <label>あとで使えそうな場面<textarea id="substaVillageVideoUseScene" rows="3" placeholder="note記事、Substack、Podcast、ライブ、相談、講座づくりなど"></textarea></label>
               <label>この回で実際にやること<textarea id="substaVillageVideoAction" rows="2"></textarea></label>
               <label>今回やってみること<textarea id="substaVillageVideoTry" rows="2"></textarea></label>
               <label>実際にやったこと<textarea id="substaVillageVideoDid" rows="2"></textarea></label>
               <label>結果<textarea id="substaVillageVideoResult" rows="2"></textarea></label>
               <label>次に試すこと<textarea id="substaVillageVideoNext" rows="2"></textarea></label>
+              <div class="sakura-substa-actions">
+                <button class="ghost-button" id="clearSubstaVillageVideo" type="button">動画講座メモを空にする</button>
+              </div>
               <p id="substaVillageVideoStatus" class="section-note" role="status" aria-live="polite">共通言語だけでも保存できます。</p>
             </form>
 
@@ -3117,6 +3124,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260811-today-step"></script>
+    <script src="./app.js?v=20260811-substa-video-log"></script>
   </body>
 </html>

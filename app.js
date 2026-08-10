@@ -266,6 +266,7 @@ const activityLogFields = {
 };
 
 let activeDate = toDateInputValue(new Date());
+let lastSeenLocalDate = activeDate;
 let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
 saveCustomDailyTasks();
@@ -2820,6 +2821,17 @@ function renderClock() {
     minute: "2-digit",
     second: "2-digit",
   }).format(new Date());
+  maybeAdvanceActiveDateToToday();
+}
+
+function maybeAdvanceActiveDateToToday() {
+  const todayKey = toDateInputValue(new Date());
+  if (todayKey === lastSeenLocalDate) return;
+  const wasFollowingToday = activeDate === lastSeenLocalDate;
+  lastSeenLocalDate = todayKey;
+  if (!wasFollowingToday) return;
+  activeDate = todayKey;
+  renderAll();
 }
 
 function todayAchievementItems(day) {
@@ -4417,9 +4429,13 @@ function collectSubstaVillageVideo() {
     date: activeDate,
     title: getSubstaVillageValue("#substaVillageVideoTitle"),
     language: getSubstaVillageValue("#substaVillageVideoLanguage"),
+    content: getSubstaVillageValue("#substaVillageVideoContent"),
+    important: getSubstaVillageValue("#substaVillageVideoImportant"),
+    remember: getSubstaVillageValue("#substaVillageVideoRemember"),
     oneLine: getSubstaVillageValue("#substaVillageVideoOneLine"),
     why: getSubstaVillageValue("#substaVillageVideoWhy"),
     myCase: getSubstaVillageValue("#substaVillageVideoMyCase"),
+    useScene: getSubstaVillageValue("#substaVillageVideoUseScene"),
     action: getSubstaVillageValue("#substaVillageVideoAction"),
     tryThis: getSubstaVillageValue("#substaVillageVideoTry"),
     did: getSubstaVillageValue("#substaVillageVideoDid"),
@@ -4460,6 +4476,32 @@ function collectSubstaVillageTheme() {
   };
 }
 
+const substaVillageDailySelectors = [
+  "#substaVillageGoal",
+  "#substaVillageStep",
+  "#substaVillageResult",
+  "#substaVillageAction",
+  "#substaVillageInsight",
+  "#substaVillageNext",
+];
+
+const substaVillageVideoSelectors = [
+  "#substaVillageVideoTitle",
+  "#substaVillageVideoLanguage",
+  "#substaVillageVideoContent",
+  "#substaVillageVideoImportant",
+  "#substaVillageVideoRemember",
+  "#substaVillageVideoOneLine",
+  "#substaVillageVideoWhy",
+  "#substaVillageVideoMyCase",
+  "#substaVillageVideoUseScene",
+  "#substaVillageVideoAction",
+  "#substaVillageVideoTry",
+  "#substaVillageVideoDid",
+  "#substaVillageVideoResult",
+  "#substaVillageVideoNext",
+];
+
 function substaVillageLine(label, value) {
   return value ? `${label}：\n${value}` : "";
 }
@@ -4492,12 +4534,19 @@ function buildSubstaVillageQuestionText() {
 function pushSubstaVillageLog(kind, data) {
   const editingIndex = substaVillageStore.logs.findIndex((entry) => entry.id === editingSubstaVillageLogId && entry.kind === kind);
   if (editingIndex >= 0) {
+    const existing = substaVillageStore.logs[editingIndex];
+    const entryDate = existing.date || data.date || activeDate;
     substaVillageStore.logs[editingIndex] = {
-      ...substaVillageStore.logs[editingIndex],
-      date: activeDate,
+      ...existing,
+      date: entryDate,
       updatedAt: new Date().toISOString(),
-      data,
+      data: { ...data, date: entryDate },
     };
+    if (kind === "今日の一歩") substaVillageStore.daily = { ...substaVillageStore.logs[editingIndex].data };
+    if (kind === "動画講座") substaVillageStore.video = { ...substaVillageStore.logs[editingIndex].data };
+    if (kind === "PDF一次分析") substaVillageStore.pdf = { ...substaVillageStore.logs[editingIndex].data };
+    if (kind === "質問・相談") substaVillageStore.question = { ...substaVillageStore.logs[editingIndex].data };
+    if (kind === "メインテーマ") substaVillageStore.theme = { ...substaVillageStore.theme, ...substaVillageStore.logs[editingIndex].data };
     editingSubstaVillageLogId = "";
     return "updated";
   }
@@ -4538,7 +4587,11 @@ function renderSubstaVillageRecentList() {
     const data = entry.data || {};
     title.textContent = `${entry.date || ""} / ${entry.kind}`;
     const body = document.createElement("p");
-    body.textContent = data.goal || data.step || data.title || data.body || data.theme || "保存済み";
+    body.textContent = [
+      data.title || data.goal || data.step || data.body || data.theme,
+      data.important ? `重要: ${String(data.important).split("\n").find(Boolean)}` : "",
+      data.content ? `中身: ${String(data.content).split("\n").find(Boolean)}` : "",
+    ].filter(Boolean).join(" / ") || "保存済み";
     const actions = document.createElement("div");
     actions.className = "sakura-substa-recent-actions";
     const edit = document.createElement("button");
@@ -4546,7 +4599,12 @@ function renderSubstaVillageRecentList() {
     edit.type = "button";
     edit.textContent = "このログを編集";
     edit.addEventListener("click", () => editSubstaVillageLog(entry.id));
-    actions.append(edit);
+    const remove = document.createElement("button");
+    remove.className = "ghost-button";
+    remove.type = "button";
+    remove.textContent = "削除";
+    remove.addEventListener("click", () => deleteSubstaVillageLog(entry.id));
+    actions.append(edit, remove);
     item.append(title, body, actions);
     target.append(item);
   });
@@ -4591,15 +4649,46 @@ function editSubstaVillageLog(id) {
   if (status) status.textContent = "編集中です。内容を直して「更新」を押すと、このログを上書きします。";
 }
 
+function latestSubstaVillageLogData(kind) {
+  return substaVillageStore.logs.find((item) => item.kind === kind)?.data || {};
+}
+
+function refreshSubstaVillageCachedForm(kind) {
+  if (kind === "今日の一歩") substaVillageStore.daily = { ...latestSubstaVillageLogData(kind) };
+  if (kind === "動画講座") substaVillageStore.video = { ...latestSubstaVillageLogData(kind) };
+  if (kind === "PDF一次分析") substaVillageStore.pdf = { ...latestSubstaVillageLogData(kind) };
+  if (kind === "質問・相談") substaVillageStore.question = { ...latestSubstaVillageLogData(kind) };
+}
+
+function deleteSubstaVillageLog(id) {
+  const entry = substaVillageStore.logs.find((item) => item.id === id);
+  if (!entry) return;
+  if (!confirm(`${entry.kind || "ログ"}を削除しますか？`)) return;
+  substaVillageStore.logs = substaVillageStore.logs.filter((item) => item.id !== id);
+  if (editingSubstaVillageLogId === id) editingSubstaVillageLogId = "";
+  refreshSubstaVillageCachedForm(entry.kind);
+  saveSubstaVillageStore();
+  fillSubstaVillagePage();
+  const status = $("#substaVillageDailyStatus");
+  if (status) status.textContent = "ログを削除しました。";
+}
+
 function cancelSubstaVillageEdit() {
   editingSubstaVillageLogId = "";
   updateSubstaVillageEditButtons();
+  fillSubstaVillagePage();
   const status = $("#substaVillageDailyStatus");
   if (status) status.textContent = "編集をやめました。次に保存すると新しいログになります。";
 }
 
+function substaVillageFormDataForToday(kind, fallback = {}) {
+  const editingEntry = substaVillageStore.logs.find((entry) => entry.id === editingSubstaVillageLogId && entry.kind === kind);
+  if (editingEntry) return editingEntry.data || {};
+  return fallback?.date === activeDate ? fallback : {};
+}
+
 function fillSubstaVillagePage() {
-  const daily = substaVillageStore.daily || {};
+  const daily = substaVillageFormDataForToday("今日の一歩", substaVillageStore.daily || {});
   setSubstaVillageValue("#substaVillageMorningGreeting", daily.morningGreeting);
   setSubstaVillageValue("#substaVillageGoal", daily.goal);
   setSubstaVillageValue("#substaVillageStep", daily.step);
@@ -4608,19 +4697,23 @@ function fillSubstaVillagePage() {
   setSubstaVillageValue("#substaVillageInsight", daily.insight);
   setSubstaVillageValue("#substaVillageNext", daily.next);
 
-  const video = substaVillageStore.video || {};
+  const video = substaVillageFormDataForToday("動画講座", substaVillageStore.video || {});
   setSubstaVillageValue("#substaVillageVideoTitle", video.title);
   setSubstaVillageValue("#substaVillageVideoLanguage", video.language);
+  setSubstaVillageValue("#substaVillageVideoContent", video.content);
+  setSubstaVillageValue("#substaVillageVideoImportant", video.important);
+  setSubstaVillageValue("#substaVillageVideoRemember", video.remember);
   setSubstaVillageValue("#substaVillageVideoOneLine", video.oneLine);
   setSubstaVillageValue("#substaVillageVideoWhy", video.why);
   setSubstaVillageValue("#substaVillageVideoMyCase", video.myCase);
+  setSubstaVillageValue("#substaVillageVideoUseScene", video.useScene);
   setSubstaVillageValue("#substaVillageVideoAction", video.action);
   setSubstaVillageValue("#substaVillageVideoTry", video.tryThis);
   setSubstaVillageValue("#substaVillageVideoDid", video.did);
   setSubstaVillageValue("#substaVillageVideoResult", video.result);
   setSubstaVillageValue("#substaVillageVideoNext", video.next);
 
-  const pdf = substaVillageStore.pdf || {};
+  const pdf = substaVillageFormDataForToday("PDF一次分析", substaVillageStore.pdf || {});
   setSubstaVillageValue("#substaVillagePdfTitle", pdf.title);
   setSubstaVillageValue("#substaVillagePdfNeed", pdf.need);
   setSubstaVillageValue("#substaVillagePdfContent", pdf.content);
@@ -4629,7 +4722,7 @@ function fillSubstaVillagePage() {
   setSubstaVillageValue("#substaVillagePdfDesign", pdf.design);
   setSubstaVillageValue("#substaVillagePdfRead", pdf.read);
 
-  const question = substaVillageStore.question || {};
+  const question = substaVillageFormDataForToday("質問・相談", substaVillageStore.question || {});
   setSubstaVillageValue("#substaVillageQuestionBody", question.body);
   setSubstaVillageValue("#substaVillageQuestionWhy", question.why);
   setSubstaVillageValue("#substaVillageQuestionTried", question.tried);
@@ -4650,8 +4743,7 @@ function saveSubstaVillageDaily(event) {
   substaVillageStore.daily = collectSubstaVillageDaily();
   const action = pushSubstaVillageLog("今日の一歩", substaVillageStore.daily);
   saveSubstaVillageStore();
-  renderSubstaVillageRecentList();
-  updateSubstaVillageEditButtons();
+  fillSubstaVillagePage();
   const status = $("#substaVillageDailyStatus");
   if (status) status.textContent = action === "updated" ? "今日の一歩を更新しました。" : "今日の一歩を保存しました。うまくいかなかった結果も材料です。";
 }
@@ -4661,10 +4753,9 @@ function saveSubstaVillageVideo(event) {
   substaVillageStore.video = collectSubstaVillageVideo();
   const action = pushSubstaVillageLog("動画講座", substaVillageStore.video);
   saveSubstaVillageStore();
-  renderSubstaVillageRecentList();
-  updateSubstaVillageEditButtons();
+  fillSubstaVillagePage();
   const status = $("#substaVillageVideoStatus");
-  if (status) status.textContent = action === "updated" ? "動画講座メモを更新しました。" : "動画講座メモを保存しました。共通言語だけの日でも大丈夫です。";
+  if (status) status.textContent = action === "updated" ? "動画講座メモを更新しました。" : "動画講座メモを保存しました。重要ポイントだけの日でも大丈夫です。";
 }
 
 function saveSubstaVillagePdf(event) {
@@ -4672,8 +4763,7 @@ function saveSubstaVillagePdf(event) {
   substaVillageStore.pdf = collectSubstaVillagePdf();
   const action = pushSubstaVillageLog("PDF一次分析", substaVillageStore.pdf);
   saveSubstaVillageStore();
-  renderSubstaVillageRecentList();
-  updateSubstaVillageEditButtons();
+  fillSubstaVillagePage();
   const status = $("#substaVillagePdfStatus");
   if (status) status.textContent = action === "updated" ? "PDF一次分析を更新しました。" : "PDF一次分析を保存しました。読む場所を絞るためのメモです。";
 }
@@ -4683,8 +4773,7 @@ function saveSubstaVillageQuestion(event) {
   substaVillageStore.question = collectSubstaVillageQuestion();
   const action = pushSubstaVillageLog("質問・相談", substaVillageStore.question);
   saveSubstaVillageStore();
-  renderSubstaVillageRecentList();
-  updateSubstaVillageEditButtons();
+  fillSubstaVillagePage();
   const status = $("#substaVillageQuestionStatus");
   if (status) status.textContent = action === "updated" ? "質問・相談ログを更新しました。" : "質問・相談ログを保存しました。";
 }
@@ -4708,8 +4797,14 @@ async function copySubstaVillageText(text, statusSelector) {
 }
 
 function clearSubstaVillageDaily() {
-  ["#substaVillageGoal", "#substaVillageStep", "#substaVillageResult", "#substaVillageAction", "#substaVillageInsight", "#substaVillageNext"].forEach((selector) => setSubstaVillageValue(selector, ""));
+  substaVillageDailySelectors.forEach((selector) => setSubstaVillageValue(selector, ""));
   renderSubstaVillagePreview();
+}
+
+function clearSubstaVillageVideo() {
+  substaVillageVideoSelectors.forEach((selector) => setSubstaVillageValue(selector, ""));
+  const status = $("#substaVillageVideoStatus");
+  if (status) status.textContent = "動画講座メモを空にしました。保存済みログは消えません。";
 }
 
 function firstKnowledgeSampleCards() {
@@ -17367,10 +17462,11 @@ function bindEvents() {
   $("#saveSubstaVillageTheme")?.addEventListener("click", saveSubstaVillageTheme);
   $("#cancelSubstaVillageEdit")?.addEventListener("click", cancelSubstaVillageEdit);
   $("#clearSubstaVillageDaily")?.addEventListener("click", clearSubstaVillageDaily);
+  $("#clearSubstaVillageVideo")?.addEventListener("click", clearSubstaVillageVideo);
   $("#copySubstaVillageDailyStep")?.addEventListener("click", () => copySubstaVillageText(buildSubstaVillageDailyText(), "#substaVillageDailyStatus"));
   $("#copySubstaVillagePreview")?.addEventListener("click", () => copySubstaVillageText($("#substaVillageDiscordPreview")?.value || "", "#substaVillageDailyStatus"));
   $("#copySubstaVillageQuestion")?.addEventListener("click", () => copySubstaVillageText(buildSubstaVillageQuestionText(), "#substaVillageQuestionStatus"));
-  ["#substaVillageGoal", "#substaVillageStep", "#substaVillageResult", "#substaVillageAction", "#substaVillageInsight", "#substaVillageNext"].forEach((selector) => {
+  substaVillageDailySelectors.forEach((selector) => {
     $(selector)?.addEventListener("input", renderSubstaVillagePreview);
   });
   $("#learningSearch")?.addEventListener("input", (event) => {
