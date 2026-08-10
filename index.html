@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260811-substa-video-log" />
+    <link rel="stylesheet" href="./styles.css?v=20260811-substack-beginner-page" />
   </head>
   <body>
     <div class="app">
@@ -872,6 +872,7 @@
             <button class="launch-card" type="button" data-page-entry="Substack"><strong>Substack</strong><span>発信</span></button>
             <button class="launch-card" type="button" data-page-entry="note（いつものnote）"><strong>note</strong><span>いつものnote</span></button>
             <button class="launch-card" type="button" data-page-entry="note（Substack初心者向け）"><strong>note</strong><span>Substack初心者向け</span></button>
+            <button class="launch-card" type="button" data-page-entry="Substack初心者向け｜Substack"><strong>Substack</strong><span>Substack初心者向け</span></button>
             <button class="launch-card" type="button" data-page-entry="記事アイデア"><strong>記事アイデア</strong><span>130本の候補</span></button>
             <button class="launch-card" type="button" data-page-entry="活動実験"><strong>活動実験</strong><span>相談・ライブ・Podcast</span></button>
             <button class="launch-card" type="button" data-page-entry="X"><strong>X</strong><span>投稿・観察</span></button>
@@ -1144,6 +1145,70 @@
             </section>
           </div>
           <p id="substackStatus" class="substack-status">今日のSubstackはまだ保存されていません。保存後は同じボタンで更新できます。</p>
+        </section>
+
+        <section id="substackBeginnerArticlePage" class="panel substack-page-panel span-2" aria-label="Substack初心者向け｜Substack" hidden>
+          <div class="panel-heading">
+            <div>
+              <h2>Substack初心者向け｜Substack</h2>
+              <p class="section-note">Substack側に載せる初心者向け記事を、note版とは分けて下書き・公開管理します。</p>
+            </div>
+            <button class="ghost-button" id="saveSubstackBeginnerArticle" type="button">Substack初心者向けを保存・更新する</button>
+          </div>
+          <div class="substack-page-grid">
+            <section class="substack-page-block">
+              <h3>今日のテーマ</h3>
+              <label>
+                今日のテーマ
+                <input id="substackBeginnerTheme" type="text" placeholder="例：Substackを始める前に知っておくこと" />
+              </label>
+            </section>
+
+            <section class="substack-page-block">
+              <h3>公開設定</h3>
+              <label>
+                公開予定
+                <input id="substackBeginnerPublishTime" type="text" value="9:00" placeholder="9:00" />
+              </label>
+              <label>
+                タグ
+                <input id="substackBeginnerTags" type="text" value="Substack初心者" />
+              </label>
+              <label class="check-row">
+                <input id="substackBeginnerPublished" type="checkbox" />
+                公開済みチェック
+              </label>
+            </section>
+
+            <section class="substack-page-block note-tall-block">
+              <h3>記事</h3>
+              <label>
+                Substack記事タイトル
+                <input id="substackBeginnerTitle" type="text" />
+              </label>
+              <label>
+                本文／下書き
+                <textarea id="substackBeginnerDraft" rows="14" placeholder="本文、構成、見出し、導入文など"></textarea>
+              </label>
+            </section>
+
+            <section class="substack-page-block note-tall-block">
+              <h3>公開後</h3>
+              <label>
+                記事URL
+                <input id="substackBeginnerUrl" type="url" placeholder="https://..." />
+              </label>
+              <label>
+                反応・気づき
+                <textarea id="substackBeginnerReaction" rows="5" placeholder="読まれ方、コメント、リスタック、次に直すこと"></textarea>
+              </label>
+              <label>
+                ストック
+                <textarea id="substackBeginnerStock" rows="5" placeholder="次の記事ネタ、追記したいこと、関連リンク"></textarea>
+              </label>
+            </section>
+          </div>
+          <p id="substackBeginnerArticleStatus" class="substack-status">今日のSubstack初心者向け記事はまだ保存されていません。保存後は同じボタンで更新できます。</p>
         </section>
 
         <section id="noteAiPage" class="panel substack-page-panel note-page-panel span-2" aria-label="note① AI×生活・回復" hidden>
@@ -3124,6 +3189,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260811-substa-video-log"></script>
+    <script src="./app.js?v=20260811-substack-beginner-page"></script>
   </body>
 </html>

@@ -479,6 +479,20 @@ function defaultNotePage(extraStockKey = "stockExtra") {
   };
 }
 
+function defaultSubstackBeginnerArticle() {
+  return {
+    theme: "",
+    title: "",
+    draft: "",
+    publishTime: "9:00",
+    tags: "Substack初心者",
+    published: false,
+    url: "",
+    reaction: "",
+    stock: "",
+  };
+}
+
 function defaultXPageV1() {
   return {
     yesterdayPost1: "",
@@ -1416,6 +1430,8 @@ function blankDay() {
     noteAiRecoveryUpdatedAt: "",
     noteSubstackBeginner: defaultNotePage("commonQuestions"),
     noteSubstackBeginnerUpdatedAt: "",
+    substackBeginnerArticle: defaultSubstackBeginnerArticle(),
+    substackBeginnerArticleUpdatedAt: "",
     xPageV1: defaultXPageV1(),
     xPageV1UpdatedAt: "",
     wordpressPageV1: defaultWordPressPageV1(),
@@ -1604,6 +1620,26 @@ function ensureNotePage(day, key, updatedAtKey, extraStockKey) {
   });
   if (!(updatedAtKey in day)) {
     day[updatedAtKey] = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureSubstackBeginnerArticle(day) {
+  let changed = false;
+  if (!day.substackBeginnerArticle || typeof day.substackBeginnerArticle !== "object" || Array.isArray(day.substackBeginnerArticle)) {
+    day.substackBeginnerArticle = defaultSubstackBeginnerArticle();
+    changed = true;
+  }
+  const defaults = defaultSubstackBeginnerArticle();
+  Object.entries(defaults).forEach(([key, value]) => {
+    if (!(key in day.substackBeginnerArticle)) {
+      day.substackBeginnerArticle[key] = value;
+      changed = true;
+    }
+  });
+  if (!("substackBeginnerArticleUpdatedAt" in day)) {
+    day.substackBeginnerArticleUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -2671,6 +2707,9 @@ function getDay() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureNotePage(store[activeDate], "noteSubstackBeginner", "noteSubstackBeginnerUpdatedAt", "commonQuestions")) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+  if (ensureSubstackBeginnerArticle(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
   if (ensureXPageV1(store[activeDate])) {
@@ -8144,6 +8183,18 @@ const notePageConfigs = {
   },
 };
 
+const substackBeginnerArticleFields = {
+  theme: "#substackBeginnerTheme",
+  title: "#substackBeginnerTitle",
+  draft: "#substackBeginnerDraft",
+  publishTime: "#substackBeginnerPublishTime",
+  tags: "#substackBeginnerTags",
+  published: "#substackBeginnerPublished",
+  url: "#substackBeginnerUrl",
+  reaction: "#substackBeginnerReaction",
+  stock: "#substackBeginnerStock",
+};
+
 const xPageV1Fields = {
   yesterdayPost1: "#xPageYesterdayPost1",
   yesterdayPost2: "#xPageYesterdayPost2",
@@ -8392,6 +8443,72 @@ function saveNotePageFromForm(config) {
     config,
     day,
     `${config.title}を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day[config.updatedAtKey])}`,
+  );
+  renderBrainPrototype();
+}
+
+function readSubstackBeginnerArticleForm() {
+  const defaults = defaultSubstackBeginnerArticle();
+  return Object.fromEntries(Object.entries(substackBeginnerArticleFields).map(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return [key, defaults[key]];
+    return [key, field.type === "checkbox" ? field.checked : field.value];
+  }));
+}
+
+function hasSubstackBeginnerArticleRecord(rawArticle, article) {
+  if (!rawArticle || typeof rawArticle !== "object") return false;
+  return Object.entries(article).some(([key, value]) => {
+    if (key === "publishTime" && value === defaultSubstackBeginnerArticle().publishTime) return false;
+    if (key === "tags" && value === defaultSubstackBeginnerArticle().tags) return false;
+    return typeof value === "boolean" ? value : Boolean(String(value || "").trim());
+  });
+}
+
+function renderSubstackBeginnerArticleSaveState(day, confirmation = "") {
+  const article = { ...defaultSubstackBeginnerArticle(), ...(day?.substackBeginnerArticle || {}) };
+  const saved = Boolean(day?.substackBeginnerArticleUpdatedAt) || hasSubstackBeginnerArticleRecord(day?.substackBeginnerArticle, article);
+  const button = $("#saveSubstackBeginnerArticle");
+  const status = $("#substackBeginnerArticleStatus");
+  const savedAt = formatSavedAt(day?.substackBeginnerArticleUpdatedAt);
+  if (button) button.textContent = saved ? "Substack初心者向けを更新する" : "Substack初心者向けを保存・更新する";
+  if (!status) return;
+  if (confirmation) {
+    status.textContent = confirmation;
+  } else if (savedAt) {
+    status.textContent = `保存済みです。最終更新 ${savedAt}`;
+  } else if (saved) {
+    status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
+  } else {
+    status.textContent = "今日のSubstack初心者向け記事はまだ保存されていません。保存後は同じボタンで更新できます。";
+  }
+}
+
+function renderSubstackBeginnerArticle() {
+  const day = getDay();
+  const article = { ...defaultSubstackBeginnerArticle(), ...(day.substackBeginnerArticle || {}) };
+  Object.entries(substackBeginnerArticleFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return;
+    if (field.type === "checkbox") {
+      field.checked = Boolean(article[key]);
+    } else if (field.value !== String(article[key] || "")) {
+      field.value = article[key] || "";
+    }
+  });
+  renderSubstackBeginnerArticleSaveState(day);
+}
+
+function saveSubstackBeginnerArticleFromForm() {
+  const day = getDay();
+  const existing = { ...defaultSubstackBeginnerArticle(), ...(day.substackBeginnerArticle || {}) };
+  const wasSaved = Boolean(day.substackBeginnerArticleUpdatedAt) || hasSubstackBeginnerArticleRecord(day.substackBeginnerArticle, existing);
+  day.substackBeginnerArticle = { ...defaultSubstackBeginnerArticle(), ...readSubstackBeginnerArticleForm() };
+  day.substackBeginnerArticleUpdatedAt = new Date().toISOString();
+  saveStore();
+  renderSubstackBeginnerArticleSaveState(
+    day,
+    `Substack初心者向けを${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.substackBeginnerArticleUpdatedAt)}`,
   );
   renderBrainPrototype();
 }
@@ -16871,6 +16988,7 @@ function renderAll() {
   renderLearningGlobalSearch();
   renderPublishingOps();
   renderSubstack();
+  renderSubstackBeginnerArticle();
   renderNotePages();
   renderXPageV1();
   renderWordPressPageV1();
@@ -16974,6 +17092,7 @@ function setTodayInputPageVisible(visible) {
 function showPageEntry(entryName = "", options = {}) {
   activePageEntry = entryName;
   const substackPanel = $("#substackPage");
+  const substackBeginnerArticlePanel = $("#substackBeginnerArticlePage");
   const noteConfig = notePageConfigs[entryName];
   const xPagePanel = $("#xPageV1");
   const wordpressPagePanel = $("#wordpressPageV1");
@@ -16990,6 +17109,7 @@ function showPageEntry(entryName = "", options = {}) {
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack";
+  const isSubstackBeginnerArticle = entryName === "Substack初心者向け｜Substack";
   const isNote = Boolean(noteConfig);
   const isXPage = entryName === "X";
   const isWordPressPage = entryName === "WordPress";
@@ -17003,30 +17123,33 @@ function showPageEntry(entryName = "", options = {}) {
   const isArticleIdeasPage = entryName === "記事アイデア";
   const visibleEntryPanel = isSubstack
     ? substackPanel
-    : isNote
-      ? $(noteConfig.pageId)
-      : isXPage
-        ? xPagePanel
-        : isWordPressPage
-          ? wordpressPagePanel
-          : isSeedPage
-            ? seedPagePanel
-            : isReadingPage
-              ? learningAssetPagePanel
-              : isMemoPage
-                ? memoPagePanel
-                : isTodayInputPage
-                  ? todayInputPagePanel
-                  : isArchivePage
-                    ? archivePagePanel
-                    : isSubstaVillagePage
-                      ? substaVillagePagePanel
-                      : isActivityExperimentPage
-                        ? activityExperimentPagePanel
-                        : isArticleIdeasPage
-                          ? articleIdeasPagePanel
-                          : null;
+    : isSubstackBeginnerArticle
+      ? substackBeginnerArticlePanel
+      : isNote
+        ? $(noteConfig.pageId)
+        : isXPage
+          ? xPagePanel
+          : isWordPressPage
+            ? wordpressPagePanel
+            : isSeedPage
+              ? seedPagePanel
+              : isReadingPage
+                ? learningAssetPagePanel
+                : isMemoPage
+                  ? memoPagePanel
+                  : isTodayInputPage
+                    ? todayInputPagePanel
+                    : isArchivePage
+                      ? archivePagePanel
+                      : isSubstaVillagePage
+                        ? substaVillagePagePanel
+                        : isActivityExperimentPage
+                          ? activityExperimentPagePanel
+                          : isArticleIdeasPage
+                            ? articleIdeasPagePanel
+                            : null;
   if (substackPanel) substackPanel.hidden = !isSubstack;
+  if (substackBeginnerArticlePanel) substackBeginnerArticlePanel.hidden = !isSubstackBeginnerArticle;
   Object.values(notePageConfigs).forEach((config) => {
     const panel = $(config.pageId);
     if (panel) panel.hidden = config !== noteConfig;
@@ -17045,9 +17168,10 @@ function showPageEntry(entryName = "", options = {}) {
   setTodayInputPageVisible(isTodayInputPage);
   setArchivePageVisible(isArchivePage);
   if (seedWorkbenchTabs) seedWorkbenchTabs.hidden = !(isSeedPage || isArchivePage);
-  if (placeholder) placeholder.hidden = isSubstack || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || isSubstaVillagePage || isActivityExperimentPage || isArticleIdeasPage || !entryName;
+  if (placeholder) placeholder.hidden = isSubstack || isSubstackBeginnerArticle || isNote || isXPage || isWordPressPage || isSeedPage || isReadingPage || isMemoPage || isTodayInputPage || isArchivePage || isSubstaVillagePage || isActivityExperimentPage || isArticleIdeasPage || !entryName;
   if (title) title.textContent = entryName;
   if (isSubstack) renderSubstack();
+  if (isSubstackBeginnerArticle) renderSubstackBeginnerArticle();
   if (noteConfig) renderNotePage(noteConfig);
   if (isXPage) renderXPageV1();
   if (isWordPressPage) renderWordPressPageV1();
@@ -17593,6 +17717,17 @@ function bindEvents() {
     field.addEventListener("input", markDirty);
     field.addEventListener("change", markDirty);
   });
+  $("#saveSubstackBeginnerArticle")?.addEventListener("click", saveSubstackBeginnerArticleFromForm);
+  Object.values(substackBeginnerArticleFields).forEach((selector) => {
+    const field = $(selector);
+    if (!field) return;
+    const markDirty = () => {
+      const status = $("#substackBeginnerArticleStatus");
+      if (status) status.textContent = "未保存の変更があります。";
+    };
+    field.addEventListener("input", markDirty);
+    field.addEventListener("change", markDirty);
+  });
   Object.values(notePageConfigs).forEach((config) => {
     $(config.saveButton)?.addEventListener("click", () => saveNotePageFromForm(config));
     Object.values(config.fields).forEach((selector) => {
@@ -17752,6 +17887,11 @@ function downloadCsv() {
       "activity_log_insight",
       "activity_log_tomorrow_trial",
       "activity_log_life_log",
+      "substack_beginner_theme",
+      "substack_beginner_title",
+      "substack_beginner_published",
+      "substack_beginner_url",
+      "substack_beginner_stock",
       "projects",
       "memos",
       "learnings",
@@ -17771,6 +17911,7 @@ function downloadCsv() {
     .forEach(([date, day]) => {
       ensureMetricDefaults(day);
       ensureActivityLog(day);
+      ensureSubstackBeginnerArticle(day);
       ensurePublishingOps(day);
       const { done, total } = todayCompletionStats(day);
       rows.push([
@@ -17786,6 +17927,11 @@ function downloadCsv() {
         day.activityLog.insight,
         day.activityLog.tomorrowTrial,
         day.activityLog.lifeLog,
+        day.substackBeginnerArticle.theme,
+        day.substackBeginnerArticle.title,
+        day.substackBeginnerArticle.published ? "1" : "0",
+        day.substackBeginnerArticle.url,
+        day.substackBeginnerArticle.stock,
         day.projects.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         (day.memos || []).map((memo) => memo.text).join(" / "),
         (day.learnings || [])
