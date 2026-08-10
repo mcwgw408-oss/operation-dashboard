@@ -246,6 +246,24 @@ const xExperimentFormFields = {
   profileAccesses: "#xExperimentProfileAccesses",
   linkClicks: "#xExperimentLinkClicks",
 };
+
+const activityLogFields = {
+  startSubstackSubscribers: "#activityStartSubstackSubscribers",
+  startSubstackFollowers: "#activityStartSubstackFollowers",
+  startNoteFollowers: "#activityStartNoteFollowers",
+  startExtraMetrics: "#activityStartExtraMetrics",
+  endSubstackSubscribers: "#activityEndSubstackSubscribers",
+  endSubstackFollowers: "#activityEndSubstackFollowers",
+  endNoteFollowers: "#activityEndNoteFollowers",
+  endExtraMetrics: "#activityEndExtraMetrics",
+  actions: "#activityActions",
+  intent: "#activityIntent",
+  reactions: "#activityReactions",
+  insight: "#activityInsight",
+  tomorrowTrial: "#activityTomorrowTrial",
+  lifeLog: "#activityLifeLog",
+};
+
 let activeDate = toDateInputValue(new Date());
 let store = loadStore();
 let customDailyTasks = loadCustomDailyTasks();
@@ -1410,6 +1428,8 @@ function blankDay() {
     afterTenModeUpdatedAt: "",
     todayWeather: "",
     todayWeatherUpdatedAt: "",
+    activityLog: defaultActivityLog(),
+    activityLogUpdatedAt: "",
     metrics: {
       mailUnread: "",
       mailProcessed: "",
@@ -1430,6 +1450,25 @@ function blankDay() {
     codexDailyLog: defaultCodexDailyLog(),
     codexDailyLogUpdatedAt: "",
     updatedAt: new Date().toISOString(),
+  };
+}
+
+function defaultActivityLog() {
+  return {
+    startSubstackSubscribers: "",
+    startSubstackFollowers: "",
+    startNoteFollowers: "",
+    startExtraMetrics: "",
+    endSubstackSubscribers: "",
+    endSubstackFollowers: "",
+    endNoteFollowers: "",
+    endExtraMetrics: "",
+    actions: "",
+    intent: "",
+    reactions: "",
+    insight: "",
+    tomorrowTrial: "",
+    lifeLog: "",
   };
 }
 
@@ -1475,6 +1514,25 @@ function ensureMetricDefaults(day) {
   });
   if (!("mailLastCheckedAt" in day.metrics)) {
     day.metrics.mailLastCheckedAt = "";
+    changed = true;
+  }
+  return changed;
+}
+
+function ensureActivityLog(day) {
+  let changed = false;
+  if (!day.activityLog || typeof day.activityLog !== "object") {
+    day.activityLog = defaultActivityLog();
+    changed = true;
+  }
+  Object.entries(defaultActivityLog()).forEach(([key, value]) => {
+    if (!(key in day.activityLog)) {
+      day.activityLog[key] = value;
+      changed = true;
+    }
+  });
+  if (!("activityLogUpdatedAt" in day)) {
+    day.activityLogUpdatedAt = "";
     changed = true;
   }
   return changed;
@@ -2594,6 +2652,9 @@ function getDay() {
   if (ensureMetricDefaults(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
+  if (ensureActivityLog(store[activeDate])) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
   if (ensureLearningList(store[activeDate])) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
@@ -2659,6 +2720,95 @@ function formatSavedAt(value) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+function dateKeyWithOffset(dateKey, offsetDays) {
+  const date = dateKeyToLocalDate(dateKey);
+  if (!date) return dateKey;
+  date.setDate(date.getDate() + offsetDays);
+  return toDateInputValue(date);
+}
+
+function formatActivityDelta(startValue, endValue) {
+  const start = Number(startValue);
+  const end = Number(endValue);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || startValue === "" || endValue === "") return "";
+  const delta = end - start;
+  if (delta === 0) return "±0";
+  return delta > 0 ? `+${delta}` : String(delta);
+}
+
+function activityLogHasContent(log = {}) {
+  return Object.values(log).some((value) => String(value ?? "").trim());
+}
+
+function renderActivityLogStatus(day = getDay(), message = "") {
+  const status = $("#activityLogStatus");
+  if (!status) return;
+  if (message) {
+    status.textContent = message;
+    return;
+  }
+  const savedAt = formatSavedAt(day.activityLogUpdatedAt);
+  status.textContent = savedAt
+    ? `自動保存済み ${savedAt}`
+    : "活動ログは入力すると自動保存されます。";
+}
+
+function renderActivityLogWeekList() {
+  const target = $("#activityLogWeekList");
+  if (!target) return;
+  target.replaceChildren();
+  for (let index = 6; index >= 0; index -= 1) {
+    const dateKey = dateKeyWithOffset(activeDate, -index);
+    const day = store[dateKey];
+    const log = day?.activityLog || {};
+    const row = document.createElement("article");
+    row.className = "activity-log-week-row";
+    const deltas = [
+      ["Substack購読者", formatActivityDelta(log.startSubstackSubscribers, log.endSubstackSubscribers)],
+      ["Substackフォロワー", formatActivityDelta(log.startSubstackFollowers, log.endSubstackFollowers)],
+      ["noteフォロワー", formatActivityDelta(log.startNoteFollowers, log.endNoteFollowers)],
+    ]
+      .filter(([, value]) => value)
+      .map(([label, value]) => `${label} ${value}`)
+      .join(" / ");
+    const title = document.createElement("strong");
+    title.textContent = formatDateLabel(dateKey);
+    const summary = document.createElement("p");
+    summary.textContent = activityLogHasContent(log)
+      ? [
+          String(log.actions || "").split("\n").find(Boolean),
+          deltas,
+          String(log.insight || "").split("\n").find(Boolean),
+          String(log.tomorrowTrial || "").split("\n").find(Boolean),
+        ].filter(Boolean).join(" / ")
+      : "まだ活動ログはありません。";
+    row.append(title, summary);
+    target.append(row);
+  }
+}
+
+function renderActivityLog() {
+  const day = getDay();
+  const label = $("#activityLogDateLabel");
+  if (label) label.textContent = formatDateLabel(activeDate);
+  Object.entries(activityLogFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field || document.activeElement === field) return;
+    field.value = day.activityLog?.[key] ?? "";
+  });
+  renderActivityLogStatus(day);
+  renderActivityLogWeekList();
+}
+
+function saveActivityLogFromField(key, field) {
+  const day = getDay();
+  day.activityLog[key] = field.value;
+  day.activityLogUpdatedAt = new Date().toISOString();
+  saveStore();
+  renderActivityLogStatus(day);
+  renderActivityLogWeekList();
 }
 
 function renderClock() {
@@ -10505,7 +10655,7 @@ function renderFields() {
 
 function renderTodayOnlyDateLabels() {
   const label = formatDateLabel(activeDate);
-  ["#todayTaskDateLabel", "#todayEventDateLabel"].forEach((selector) => {
+  ["#todayTaskDateLabel", "#todayEventDateLabel", "#activityLogDateLabel"].forEach((selector) => {
     const target = $(selector);
     if (target) target.textContent = label;
   });
@@ -16613,6 +16763,7 @@ function renderAll() {
   renderEventList();
   renderRecurringSchedule();
   renderMailLastChecked();
+  renderActivityLog();
   renderPersistentMemos();
   renderReadingQueue();
   renderReadingNotes();
@@ -17306,6 +17457,12 @@ function bindEvents() {
     if (!field) return;
     field.addEventListener("input", () => updateField("reflection", key, field));
   });
+  Object.entries(activityLogFields).forEach(([key, selector]) => {
+    const field = $(selector);
+    if (!field) return;
+    field.addEventListener("input", () => saveActivityLogFromField(key, field));
+    field.addEventListener("change", () => saveActivityLogFromField(key, field));
+  });
   Object.values(codexDailyLogFields).forEach((selector) => {
     const field = $(selector);
     if (!field || field.readOnly) return;
@@ -17490,6 +17647,11 @@ function downloadCsv() {
       "daily_tasks",
       "today_tasks",
       "today_events",
+      "activity_log_actions",
+      "activity_log_reactions",
+      "activity_log_insight",
+      "activity_log_tomorrow_trial",
+      "activity_log_life_log",
       "projects",
       "memos",
       "learnings",
@@ -17508,6 +17670,7 @@ function downloadCsv() {
     .sort(([a], [b]) => a.localeCompare(b))
     .forEach(([date, day]) => {
       ensureMetricDefaults(day);
+      ensureActivityLog(day);
       ensurePublishingOps(day);
       const { done, total } = todayCompletionStats(day);
       rows.push([
@@ -17517,6 +17680,11 @@ function downloadCsv() {
         day.dailyTasks.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         day.todayTasks.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         asArray(day.todayEvents).map(formatEventLabel).join(" / "),
+        day.activityLog.actions,
+        day.activityLog.reactions,
+        day.activityLog.insight,
+        day.activityLog.tomorrowTrial,
+        day.activityLog.lifeLog,
         day.projects.map((item) => `${isItemCompleted(item) ? "完了" : "未完了"}:${item.title}`).join(" / "),
         (day.memos || []).map((memo) => memo.text).join(" / "),
         (day.learnings || [])

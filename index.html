@@ -38,6 +38,7 @@
           <a href="#dashboard-start">今日のはじまり</a>
           <a href="#home-sleep-summary">睡眠</a>
           <a href="#home-capacity-check">今日できること</a>
+          <a href="#daily-activity-log">活動ログ</a>
           <a href="#home-after-ten-mode">10時以降</a>
           <a href="#home-launch">入口</a>
         </nav>
@@ -1836,6 +1837,76 @@
             </form>
           </div>
           <div id="todayTasks" class="task-list"></div>
+        </section>
+
+        <section id="daily-activity-log" class="panel daily-activity-log-panel span-2" aria-label="活動ログ">
+          <div class="panel-heading">
+            <div>
+              <h2>活動ログ</h2>
+              <p class="section-note today-only-date-note"><strong id="activityLogDateLabel"></strong>の発信活動と数字の動きを、週次noteの材料として残します。</p>
+            </div>
+            <p id="activityLogStatus" class="activity-log-status" role="status" aria-live="polite">活動ログは入力すると自動保存されます。</p>
+          </div>
+
+          <div class="activity-log-layout">
+            <section class="activity-log-block activity-log-metrics-block">
+              <h3>今日の開始時点の数字</h3>
+              <div class="activity-log-number-grid">
+                <label>Substack購読者数<input id="activityStartSubstackSubscribers" type="number" min="0" inputmode="numeric" /></label>
+                <label>Substackフォロワー数<input id="activityStartSubstackFollowers" type="number" min="0" inputmode="numeric" /></label>
+                <label>noteフォロワー数<input id="activityStartNoteFollowers" type="number" min="0" inputmode="numeric" /></label>
+              </div>
+              <label>記事PV・いいね・コメントなど<textarea id="activityStartExtraMetrics" rows="4" placeholder="例：記事PV 120 / いいね 8 / コメント 1"></textarea></label>
+            </section>
+
+            <section class="activity-log-block activity-log-metrics-block">
+              <h3>その日の終了時点の数字</h3>
+              <div class="activity-log-number-grid">
+                <label>Substack購読者数<input id="activityEndSubstackSubscribers" type="number" min="0" inputmode="numeric" /></label>
+                <label>Substackフォロワー数<input id="activityEndSubstackFollowers" type="number" min="0" inputmode="numeric" /></label>
+                <label>noteフォロワー数<input id="activityEndNoteFollowers" type="number" min="0" inputmode="numeric" /></label>
+              </div>
+              <label>記事PV・いいね・コメントなど<textarea id="activityEndExtraMetrics" rows="4" placeholder="夜に見た数字や、朝との差分"></textarea></label>
+            </section>
+
+            <section class="activity-log-block activity-log-wide-block">
+              <h3>今日やったこと</h3>
+              <textarea id="activityActions" rows="9" placeholder="時系列で自由に記録。Substack記事投稿 / 音声記事投稿 / Notes投稿 / 引用リスタック / note投稿 / ライブ配信 / Podcast / 初心者を探した / コミュニティ参加 / 予定外の出来事 など"></textarea>
+            </section>
+
+            <section class="activity-log-block">
+              <h3>なぜそれをやったか</h3>
+              <textarea id="activityIntent" rows="5" placeholder="行動の理由や意図"></textarea>
+            </section>
+
+            <section class="activity-log-block">
+              <h3>起きた反応・変化</h3>
+              <textarea id="activityReactions" rows="6" placeholder="購読者・フォロワー増減、閲覧数、いいね、コメント、DM、紹介、リスタック、ランキング掲載など"></textarea>
+            </section>
+
+            <section class="activity-log-block">
+              <h3>今日の気づき</h3>
+              <textarea id="activityInsight" rows="5" placeholder="うまくいったこと、失敗したこと、予想外だったこと"></textarea>
+            </section>
+
+            <section class="activity-log-block">
+              <h3>明日試すこと</h3>
+              <textarea id="activityTomorrowTrial" rows="4" placeholder="次の日に検証したいことを短く"></textarea>
+            </section>
+
+            <section class="activity-log-block activity-log-wide-block">
+              <h3>予定外イベント・生活ログ</h3>
+              <textarea id="activityLifeLog" rows="5" placeholder="通院、外出、寝落ち、来客など、発信活動に影響した出来事"></textarea>
+            </section>
+          </div>
+
+          <details class="activity-log-week-panel">
+            <summary>
+              <span>直近7日の活動ログ</span>
+              <small>週次noteにまとめる前の見返し用です。</small>
+            </summary>
+            <div id="activityLogWeekList" class="activity-log-week-list"></div>
+          </details>
         </section>
 
         <div class="home-schedule-stack span-2">

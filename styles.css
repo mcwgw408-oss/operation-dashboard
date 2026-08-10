@@ -3338,6 +3338,116 @@ textarea {
   padding: 4px 6px;
 }
 
+.daily-activity-log-panel {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.daily-activity-log-panel .panel-heading {
+  align-items: start;
+}
+
+.activity-log-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.activity-log-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.activity-log-block {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-item);
+  background: #fff;
+}
+
+.activity-log-block h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.activity-log-block label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.activity-log-block input,
+.activity-log-block textarea {
+  width: 100%;
+}
+
+.activity-log-block textarea {
+  min-height: 0;
+  resize: vertical;
+}
+
+.activity-log-number-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.activity-log-wide-block {
+  grid-column: 1 / -1;
+}
+
+.activity-log-week-panel {
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-item);
+  background: var(--green-soft);
+  padding: 10px 12px;
+}
+
+.activity-log-week-panel summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.activity-log-week-panel summary small {
+  margin-left: 8px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.activity-log-week-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.activity-log-week-row {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--green-line);
+  border-radius: var(--radius-input);
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px 10px;
+}
+
+.activity-log-week-row strong {
+  font-size: 13px;
+}
+
+.activity-log-week-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .metrics-panel {
   padding: 12px;
   gap: 8px;
@@ -6590,6 +6700,11 @@ button.launch-card {
   order: 8;
 }
 
+.dashboard .daily-activity-log-panel {
+  grid-column: 1 / -1;
+  order: 8;
+}
+
 .dashboard .home-schedule-stack {
   display: grid;
   grid-column: 1 / span 2;
@@ -6747,6 +6862,7 @@ button.launch-card {
 .reading-notes-panel,
 .daily-input-panel,
 .dashboard-task-panel,
+.daily-activity-log-panel,
 .dashboard-health-input-panel,
 .dashboard-memory-input-panel,
 .schedule-panel,
@@ -6792,6 +6908,7 @@ button.launch-card {
   .dashboard .sleep-summary-panel,
   .dashboard .after-ten-mode-panel,
   .dashboard .dashboard-task-panel,
+  .dashboard .daily-activity-log-panel,
   .dashboard .home-schedule-stack,
   .dashboard .schedule-panel,
   .dashboard > .panel:has(#dailyTasks),
@@ -6916,6 +7033,7 @@ button.launch-card {
   .dashboard .sleep-summary-panel,
   .dashboard .after-ten-mode-panel,
   .dashboard .dashboard-task-panel,
+  .dashboard .daily-activity-log-panel,
   .dashboard .home-schedule-stack,
   .dashboard .schedule-panel,
   .dashboard > .panel:has(#dailyTasks),
@@ -6945,6 +7063,15 @@ button.launch-card {
   .daily-input-panel textarea,
   .daily-input-actions {
     grid-column: 1;
+  }
+
+  .activity-log-layout,
+  .activity-log-number-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-log-status {
+    text-align: left;
   }
 
   .capacity-check-panel {
