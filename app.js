@@ -79,7 +79,24 @@ const defaultDailyTasks = [
   "おはスタック投稿",
   "チャット投稿",
 ];
-const DEFAULT_AFTER_TEN_MODE_OPTIONS = ["Seed", "読書", "Brain", "生活", "発信"];
+const DEFAULT_AFTER_TEN_MODE_OPTIONS = [
+  "🧪 実験する",
+  "👀 観察する",
+  "📚 学ぶ",
+  "🌱 育てる",
+  "🏠 暮らす",
+  "🎬 楽しむ",
+  "🌿 休む",
+];
+const AFTER_TEN_MODE_DESCRIPTIONS = {
+  "🧪 実験する": "仮説をもとに、新しい施策や行動を小さく試す。",
+  "👀 観察する": "数字や反応、Substack初心者の動き、他の人の実践などを観察する。",
+  "📚 学ぶ": "読書、Brain、サブスタ村の教材、実践書などから学ぶ。",
+  "🌱 育てる": "Seed、記事アイデア、企画、事業、Kindleなど、まだ完成していないものを考えて育てる。",
+  "🏠 暮らす": "家事、買い物、片付けなど生活に関することをする。",
+  "🎬 楽しむ": "ドラマ、映画、趣味の読書など、好きなことを楽しむ。",
+  "🌿 休む": "何かをすることを目的にせず、休む。",
+};
 const obsoleteDailyTasks = [
   "ボイスメッセージ（翌日公開分）",
 ];
@@ -1443,6 +1460,7 @@ function blankDay() {
     capacityCheck: {},
     capacityCheckUpdatedAt: "",
     afterTenMode: [],
+    afterTenModeStep: "",
     afterTenModeUpdatedAt: "",
     todayWeather: "",
     todayWeatherUpdatedAt: "",
@@ -1802,6 +1820,10 @@ function ensureAfterTenMode(day) {
   let changed = false;
   if (!Array.isArray(day.afterTenMode)) {
     day.afterTenMode = [];
+    changed = true;
+  }
+  if (!("afterTenModeStep" in day)) {
+    day.afterTenModeStep = "";
     changed = true;
   }
   if (!("afterTenModeUpdatedAt" in day)) {
@@ -13898,11 +13920,12 @@ function renderHomeSleepSummary() {
 }
 
 function renderAfterTenMode(day = getDay()) {
-  const selectedModes = new Set(asArray(day.afterTenMode).map(String));
+  const availableOptions = afterTenModeOptions();
+  const selectedModes = new Set(asArray(day.afterTenMode).map(String).filter((option) => availableOptions.includes(option)));
   const optionsTarget = $("#afterTenModeOptions");
   if (optionsTarget) {
     optionsTarget.replaceChildren();
-    afterTenModeOptions().forEach((option) => {
+    availableOptions.forEach((option) => {
       const label = document.createElement("label");
       const input = document.createElement("input");
       const text = document.createElement("span");
@@ -13910,7 +13933,15 @@ function renderAfterTenMode(day = getDay()) {
       input.type = "checkbox";
       input.value = option;
       input.checked = selectedModes.has(option);
-      text.textContent = option;
+      const title = document.createElement("strong");
+      title.textContent = option;
+      text.append(title);
+      const description = AFTER_TEN_MODE_DESCRIPTIONS[option];
+      if (description) {
+        const help = document.createElement("small");
+        help.textContent = description;
+        text.append(help);
+      }
       deleteButton.type = "button";
       deleteButton.className = "after-ten-mode-delete";
       deleteButton.dataset.afterTenDelete = option;
@@ -13920,14 +13951,25 @@ function renderAfterTenMode(day = getDay()) {
       optionsTarget.append(label);
     });
   }
+  const stepField = $("#afterTenModeStep");
+  if (stepField && document.activeElement !== stepField && stepField.value !== String(day.afterTenModeStep || "")) {
+    stepField.value = day.afterTenModeStep || "";
+  }
   const status = $("#afterTenModeStatus");
   if (!status) return;
   const selectedLabels = [...selectedModes].filter(Boolean);
+  const stepText = String(day.afterTenModeStep || "").trim();
   if (selectedLabels.length) {
     const savedAt = formatSavedAt(day.afterTenModeUpdatedAt);
+    const stepSuffix = stepText ? ` 今日の一歩: ${stepText}` : "";
     status.textContent = savedAt
-      ? `${selectedLabels.join("、")}で保存済みです。最終更新 ${savedAt}。`
-      : `${selectedLabels.join("、")}で保存済みです。`;
+      ? `${selectedLabels.join("、")}で保存済みです。最終更新 ${savedAt}。${stepSuffix}`
+      : `${selectedLabels.join("、")}で保存済みです。${stepSuffix}`;
+  } else if (stepText) {
+    const savedAt = formatSavedAt(day.afterTenModeUpdatedAt);
+    status.textContent = savedAt
+      ? `今日の一歩を保存済みです。最終更新 ${savedAt}。`
+      : "今日の一歩を保存済みです。";
   } else {
     status.textContent = "まだ選ばれていません。";
   }
@@ -17318,8 +17360,17 @@ function bindEvents() {
   $("#afterTenModeOptions")?.addEventListener("change", (event) => {
     if (!event.target.matches("input[type='checkbox']")) return;
     const day = getDay();
+    const availableOptions = afterTenModeOptions();
     day.afterTenMode = [...document.querySelectorAll("#afterTenModeOptions input[type='checkbox']:checked")]
-      .map((input) => input.value);
+      .map((input) => input.value)
+      .filter((option) => availableOptions.includes(option));
+    day.afterTenModeUpdatedAt = new Date().toISOString();
+    saveStore();
+    renderAfterTenMode(day);
+  });
+  $("#afterTenModeStep")?.addEventListener("input", (event) => {
+    const day = getDay();
+    day.afterTenModeStep = event.target.value;
     day.afterTenModeUpdatedAt = new Date().toISOString();
     saveStore();
     renderAfterTenMode(day);

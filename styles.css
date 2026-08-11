@@ -577,7 +577,8 @@ textarea {
 }
 
 .sleep-summary-grid span,
-.after-ten-mode-options label {
+.after-ten-mode-options label,
+.after-ten-mode-step-label span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -616,8 +617,23 @@ textarea {
 }
 
 .after-ten-mode-options span {
+  display: grid;
+  gap: 3px;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.after-ten-mode-options span strong {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.after-ten-mode-options span small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 .after-ten-mode-delete {
@@ -628,6 +644,16 @@ textarea {
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.after-ten-mode-step-label {
+  display: grid;
+  gap: 6px;
+}
+
+.after-ten-mode-step-label textarea {
+  width: 100%;
+  resize: vertical;
 }
 
 .after-ten-mode-add-form {

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>生活・発信ダッシュボード</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20260811-substack-beginner-page" />
+    <link rel="stylesheet" href="./styles.css?v=20260811-afternoon-mode" />
   </head>
   <body>
     <div class="app">
@@ -39,7 +39,7 @@
           <a href="#home-sleep-summary">睡眠</a>
           <a href="#home-capacity-check">今日できること</a>
           <a href="#daily-activity-log">活動ログ</a>
-          <a href="#home-after-ten-mode">10時以降</a>
+          <a href="#home-after-ten-mode">午後</a>
           <a href="#home-launch">入口</a>
         </nav>
 
@@ -840,22 +840,28 @@
           </div>
         </section>
 
-        <section id="home-after-ten-mode" class="panel after-ten-mode-panel span-2" aria-label="10時以降モード">
+        <section id="home-after-ten-mode" class="panel after-ten-mode-panel span-2" aria-label="午後どうする？">
           <div class="panel-heading">
             <div>
-              <h2>10時以降モード</h2>
-              <p class="section-note">朝の立ち上がり後に見るモードを選びます。複数選べます。</p>
+              <h2>午後どうする？</h2>
+              <p class="section-note">午後の過ごし方を選びます。複数選択できます。</p>
             </div>
           </div>
           <div class="after-ten-mode-options" id="afterTenModeOptions">
-            <label><input type="checkbox" value="Seed" /> Seed</label>
-            <label><input type="checkbox" value="読書" /> 読書</label>
-            <label><input type="checkbox" value="Brain" /> Brain</label>
-            <label><input type="checkbox" value="生活" /> 生活</label>
-            <label><input type="checkbox" value="発信" /> 発信</label>
+            <label><input type="checkbox" value="🧪 実験する" /> 🧪 実験する</label>
+            <label><input type="checkbox" value="👀 観察する" /> 👀 観察する</label>
+            <label><input type="checkbox" value="📚 学ぶ" /> 📚 学ぶ</label>
+            <label><input type="checkbox" value="🌱 育てる" /> 🌱 育てる</label>
+            <label><input type="checkbox" value="🏠 暮らす" /> 🏠 暮らす</label>
+            <label><input type="checkbox" value="🎬 楽しむ" /> 🎬 楽しむ</label>
+            <label><input type="checkbox" value="🌿 休む" /> 🌿 休む</label>
           </div>
+          <label class="after-ten-mode-step-label">
+            <span>今日の一歩</span>
+            <textarea id="afterTenModeStep" rows="3" placeholder="活動記録につながる日報の形を考える"></textarea>
+          </label>
           <form id="afterTenModeAddForm" class="after-ten-mode-add-form">
-            <input id="afterTenModeNewOption" type="text" placeholder="項目を追加" aria-label="10時以降モードの項目を追加" />
+            <input id="afterTenModeNewOption" type="text" placeholder="項目を追加" aria-label="午後どうする？の項目を追加" />
             <button type="submit">追加</button>
           </form>
           <p id="afterTenModeStatus" class="section-note">まだ選ばれていません。</p>
@@ -3189,6 +3195,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260811-substack-beginner-page"></script>
+    <script src="./app.js?v=20260811-afternoon-mode"></script>
   </body>
 </html>
