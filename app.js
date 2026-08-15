@@ -17151,7 +17151,7 @@ function showPageEntry(entryName = "", options = {}) {
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
   const isSubstack = entryName === "Substack" || entryName === "Substack（いつもの）";
-  const isSubstackBeginnerArticle = entryName === "Substack初心者向け｜Substack" || entryName === "Substack初心者向け";
+  const isSubstackBeginnerArticle = entryName === "Substack初心者向け｜Substack";
   const isNote = Boolean(noteConfig);
   const isXPage = entryName === "X";
   const isWordPressPage = entryName === "WordPress";
