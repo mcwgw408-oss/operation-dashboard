@@ -379,6 +379,7 @@ let currentReplyPlan = null;
 let currentRecommendation = null;
 let currentHealthAwareRecommendation = null;
 let currentFirstAgentReply = "";
+let lastRenderedAfterTenModeDate = "";
 
 function toDateInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -13993,6 +13994,7 @@ function renderHomeSleepSummary() {
 }
 
 function renderAfterTenMode(day = getDay()) {
+  const dateChanged = lastRenderedAfterTenModeDate !== activeDate;
   const availableOptions = afterTenModeOptions();
   const selectedModes = new Set(asArray(day.afterTenMode).map(String).filter((option) => availableOptions.includes(option)));
   const optionsTarget = $("#afterTenModeOptions");
@@ -14025,9 +14027,10 @@ function renderAfterTenMode(day = getDay()) {
     });
   }
   const stepField = $("#afterTenModeStep");
-  if (stepField && document.activeElement !== stepField && stepField.value !== String(day.afterTenModeStep || "")) {
+  if (stepField && (dateChanged || document.activeElement !== stepField) && stepField.value !== String(day.afterTenModeStep || "")) {
     stepField.value = day.afterTenModeStep || "";
   }
+  lastRenderedAfterTenModeDate = activeDate;
   const status = $("#afterTenModeStatus");
   if (!status) return;
   const selectedLabels = [...selectedModes].filter(Boolean);
