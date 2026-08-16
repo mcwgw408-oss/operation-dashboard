@@ -1443,6 +1443,8 @@ function blankDay() {
     publishingOpsUpdatedAt: "",
     substack: defaultSubstack(),
     substackUpdatedAt: "",
+    substackAbuse: defaultSubstack(),
+    substackAbuseUpdatedAt: "",
     noteAiRecovery: defaultNotePage("seoQueue"),
     noteAiRecoveryUpdatedAt: "",
     noteSubstackBeginner: defaultNotePage("commonQuestions"),
@@ -1603,24 +1605,30 @@ function ensurePublishingOps(day) {
   return changed;
 }
 
-function ensureSubstack(day) {
+function ensureSubstackSlot(day, storeKey, updatedAtKey) {
   let changed = false;
-  if (!day.substack || typeof day.substack !== "object" || Array.isArray(day.substack)) {
-    day.substack = defaultSubstack();
+  if (!day[storeKey] || typeof day[storeKey] !== "object" || Array.isArray(day[storeKey])) {
+    day[storeKey] = defaultSubstack();
     changed = true;
   }
   const defaults = defaultSubstack();
   Object.entries(defaults).forEach(([key, value]) => {
-    if (!(key in day.substack)) {
-      day.substack[key] = value;
+    if (!(key in day[storeKey])) {
+      day[storeKey][key] = value;
       changed = true;
     }
   });
-  if (!("substackUpdatedAt" in day)) {
-    day.substackUpdatedAt = "";
+  if (!(updatedAtKey in day)) {
+    day[updatedAtKey] = "";
     changed = true;
   }
   return changed;
+}
+
+function ensureSubstack(day) {
+  const regularChanged = ensureSubstackSlot(day, "substack", "substackUpdatedAt");
+  const abuseChanged = ensureSubstackSlot(day, "substackAbuse", "substackAbuseUpdatedAt");
+  return regularChanged || abuseChanged;
 }
 
 function ensureNotePage(day, key, updatedAtKey, extraStockKey) {
@@ -8160,6 +8168,23 @@ const substackFields = {
   stockSeed: "#substackStockSeed",
 };
 
+function getSubstackPageConfig(entryName = activePageEntry) {
+  if (entryName === "Substack（虐待）" || entryName === "Substack") {
+    return {
+      storeKey: "substackAbuse",
+      updatedAtKey: "substackAbuseUpdatedAt",
+      label: "Substack（虐待）",
+      emptyStatus: "今日のSubstack（虐待）はまだ保存されていません。",
+    };
+  }
+  return {
+    storeKey: "substack",
+    updatedAtKey: "substackUpdatedAt",
+    label: "Substack",
+    emptyStatus: "今日のSubstackはまだ保存されていません。",
+  };
+}
+
 const notePageConfigs = {
   "note（いつものnote）": {
     pageId: "#noteAiPage",
@@ -8354,13 +8379,13 @@ function hasSubstackRecord(rawSubstack, substack) {
     typeof value === "boolean" ? value : Boolean(String(value || "").trim()));
 }
 
-function renderSubstackSaveState(day, confirmation = "") {
-  const substack = { ...defaultSubstack(), ...(day?.substack || {}) };
-  const saved = Boolean(day?.substackUpdatedAt) || hasSubstackRecord(day?.substack, substack);
+function renderSubstackSaveState(day, confirmation = "", config = getSubstackPageConfig()) {
+  const substack = { ...defaultSubstack(), ...(day?.[config.storeKey] || {}) };
+  const saved = Boolean(day?.[config.updatedAtKey]) || hasSubstackRecord(day?.[config.storeKey], substack);
   const button = $("#saveSubstack");
   const status = $("#substackStatus");
-  const savedAt = formatSavedAt(day?.substackUpdatedAt);
-  if (button) button.textContent = saved ? "Substackを更新する" : "Substackを保存・更新する";
+  const savedAt = formatSavedAt(day?.[config.updatedAtKey]);
+  if (button) button.textContent = saved ? `${config.label}を更新する` : `${config.label}を保存・更新する`;
   if (!status) return;
   if (confirmation) {
     status.textContent = confirmation;
@@ -8369,13 +8394,14 @@ function renderSubstackSaveState(day, confirmation = "") {
   } else if (saved) {
     status.textContent = "保存済みです。次回の更新から最終更新時刻も表示します。";
   } else {
-    status.textContent = "今日のSubstackはまだ保存されていません。保存後は同じボタンで更新できます。";
+    status.textContent = `${config.emptyStatus} 保存後は同じボタンで更新できます。`;
   }
 }
 
 function renderSubstack() {
   const day = getDay();
-  const substack = { ...defaultSubstack(), ...(day.substack || {}) };
+  const config = getSubstackPageConfig();
+  const substack = { ...defaultSubstack(), ...(day[config.storeKey] || {}) };
   Object.entries(substackFields).forEach(([key, selector]) => {
     const field = $(selector);
     if (!field) return;
@@ -8385,18 +8411,21 @@ function renderSubstack() {
       field.value = substack[key] || "";
     }
   });
-  renderSubstackSaveState(day);
+  renderSubstackSaveState(day, "", config);
 }
 
 function saveSubstackFromForm() {
   const day = getDay();
-  const wasSaved = Boolean(day.substackUpdatedAt) || hasSubstackRecord(day.substack, { ...defaultSubstack(), ...(day.substack || {}) });
-  day.substack = { ...defaultSubstack(), ...readSubstackForm() };
-  day.substackUpdatedAt = new Date().toISOString();
+  const config = getSubstackPageConfig();
+  const existing = { ...defaultSubstack(), ...(day[config.storeKey] || {}) };
+  const wasSaved = Boolean(day[config.updatedAtKey]) || hasSubstackRecord(day[config.storeKey], existing);
+  day[config.storeKey] = { ...defaultSubstack(), ...readSubstackForm() };
+  day[config.updatedAtKey] = new Date().toISOString();
   saveStore();
   renderSubstackSaveState(
     day,
-    `Substackを${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day.substackUpdatedAt)}`,
+    `${config.label}を${wasSaved ? "更新" : "保存"}しました。最終更新 ${formatSavedAt(day[config.updatedAtKey])}`,
+    config,
   );
   renderBrainPrototype();
 }
@@ -17150,7 +17179,7 @@ function showPageEntry(entryName = "", options = {}) {
   const articleIdeasPagePanel = $("#articleIdeasPage");
   const placeholder = $("#pageSwitchPlaceholder");
   const title = $("#pageSwitchTitle");
-  const isSubstack = entryName === "Substack" || entryName === "Substack（いつもの）";
+  const isSubstack = entryName === "Substack（いつもの）" || entryName === "Substack（虐待）" || entryName === "Substack";
   const isSubstackBeginnerArticle = entryName === "Substack初心者向け｜Substack";
   const isNote = Boolean(noteConfig);
   const isXPage = entryName === "X";
