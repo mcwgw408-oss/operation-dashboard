@@ -266,10 +266,20 @@ const xExperimentFormFields = {
 
 const activityLogFields = {
   todayStep: "#activityTodayStep",
+  startSubstackRegular: "#activityStartSubstackRegular",
+  startSubstackAbuse: "#activityStartSubstackAbuse",
+  startSubstackBeginner: "#activityStartSubstackBeginner",
+  startNoteRegular: "#activityStartNoteRegular",
+  startNoteSubstackBeginner: "#activityStartNoteSubstackBeginner",
   startSubstackSubscribers: "#activityStartSubstackSubscribers",
   startSubstackFollowers: "#activityStartSubstackFollowers",
   startNoteFollowers: "#activityStartNoteFollowers",
   startExtraMetrics: "#activityStartExtraMetrics",
+  endSubstackRegular: "#activityEndSubstackRegular",
+  endSubstackAbuse: "#activityEndSubstackAbuse",
+  endSubstackBeginner: "#activityEndSubstackBeginner",
+  endNoteRegular: "#activityEndNoteRegular",
+  endNoteSubstackBeginner: "#activityEndNoteSubstackBeginner",
   endSubstackSubscribers: "#activityEndSubstackSubscribers",
   endSubstackFollowers: "#activityEndSubstackFollowers",
   endNoteFollowers: "#activityEndNoteFollowers",
@@ -1494,10 +1504,20 @@ function blankDay() {
 function defaultActivityLog() {
   return {
     todayStep: "",
+    startSubstackRegular: "",
+    startSubstackAbuse: "",
+    startSubstackBeginner: "",
+    startNoteRegular: "",
+    startNoteSubstackBeginner: "",
     startSubstackSubscribers: "",
     startSubstackFollowers: "",
     startNoteFollowers: "",
     startExtraMetrics: "",
+    endSubstackRegular: "",
+    endSubstackAbuse: "",
+    endSubstackBeginner: "",
+    endNoteRegular: "",
+    endNoteSubstackBeginner: "",
     endSubstackSubscribers: "",
     endSubstackFollowers: "",
     endNoteFollowers: "",
@@ -2810,6 +2830,10 @@ function formatActivityDelta(startValue, endValue) {
   return delta > 0 ? `+${delta}` : String(delta);
 }
 
+function firstFilledActivityValue(...values) {
+  return values.find((value) => String(value ?? "").trim() !== "") ?? "";
+}
+
 function activityLogHasContent(log = {}) {
   return Object.values(log).some((value) => String(value ?? "").trim());
 }
@@ -2838,9 +2862,29 @@ function renderActivityLogWeekList() {
     const row = document.createElement("article");
     row.className = "activity-log-week-row";
     const deltas = [
-      ["Substack購読者", formatActivityDelta(log.startSubstackSubscribers, log.endSubstackSubscribers)],
-      ["Substackフォロワー", formatActivityDelta(log.startSubstackFollowers, log.endSubstackFollowers)],
-      ["noteフォロワー", formatActivityDelta(log.startNoteFollowers, log.endNoteFollowers)],
+      [
+        "Substacckいつもの",
+        formatActivityDelta(
+          firstFilledActivityValue(log.startSubstackRegular, log.startSubstackSubscribers),
+          firstFilledActivityValue(log.endSubstackRegular, log.endSubstackSubscribers),
+        ),
+      ],
+      ["Substacck虐待", formatActivityDelta(log.startSubstackAbuse, log.endSubstackAbuse)],
+      [
+        "Substacck初心者向け",
+        formatActivityDelta(
+          firstFilledActivityValue(log.startSubstackBeginner, log.startSubstackFollowers),
+          firstFilledActivityValue(log.endSubstackBeginner, log.endSubstackFollowers),
+        ),
+      ],
+      [
+        "noteいつもの",
+        formatActivityDelta(
+          firstFilledActivityValue(log.startNoteRegular, log.startNoteFollowers),
+          firstFilledActivityValue(log.endNoteRegular, log.endNoteFollowers),
+        ),
+      ],
+      ["note Substacck初心者向け", formatActivityDelta(log.startNoteSubstackBeginner, log.endNoteSubstackBeginner)],
     ]
       .filter(([, value]) => value)
       .map(([label, value]) => `${label} ${value}`)
